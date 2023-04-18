@@ -19,6 +19,7 @@ import {
 } from "./breakout_game.mjs"
 const VOLUME_SFX_INITIAL = 0.2;
 const VOLUME_MUSIC_INITIAL = 0.2;
+const VOLUME_MUSIC_PAUSED = 0.01;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -40,8 +41,8 @@ const data = {
   audio: {
     available: false,
     context: null,
-    musicGain: null,
-    sfxGain: null,
+    gainMusic: null,
+    gainSfx: null,
     clips: [],
     sources: [],
   },
@@ -50,7 +51,11 @@ const data = {
     help: null,
     score: null,
     pause: null,
-  }
+  },
+  settings: {
+    volumeSfx: 0,
+    volumeMusic: 0,
+  },
 };
 
 export function platform_log(...args) {
@@ -115,11 +120,13 @@ export function platform_hide_score() {
 export function platform_show_pause() {
   data.renderer.canvas.classList.add("blocking")
   data.ui.pause.classList.remove("hidden");
+  data.audio.gainMusic.gain.value = VOLUME_MUSIC_PAUSED;
 }
 
 export function platform_hide_pause() {
   data.renderer.canvas.classList.remove("blocking")
   data.ui.pause.classList.add("hidden");
+  data.audio.gainMusic.gain.value = data.settings.volumeSfx;
 }
 
 export function platform_play_audio_clip(key, group = 0, loop = false) {
@@ -132,9 +139,9 @@ export function platform_play_audio_clip(key, group = 0, loop = false) {
   source.buffer = clip.buffer;
   source.loop = loop;
   if (group === 0)
-    source.connect(data.audio.sfxGain);
+    source.connect(data.audio.gainSfx);
   else
-    source.connect(data.audio.musicGain);
+    source.connect(data.audio.gainMusic);
   source.start();
   data.audio.sources[index] = source;
 }
@@ -153,9 +160,9 @@ export function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
   data.audio.sources[index].disconnect();
   data.audio.sources[index].connect(tempGain).connect(data.audio.context.destination);
   if (group === 0)
-    tempGain.gain.value = data.audio.sfxGain.gain.value;
+    tempGain.gain.value = data.audio.gainSfx.gain.value;
   else
-    tempGain.gain.value = data.audio.musicGain.gain.value;
+    tempGain.gain.value = data.audio.gainMusic.gain.value;
   tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration);
 }
 
@@ -164,6 +171,9 @@ export async function platform_start() {
   data.renderer.canvas.classList.add("breakout-canvas");
   data.renderer.context = data.renderer.canvas.getContext("2d");
   document.body.appendChild(data.renderer.canvas);
+
+  data.settings.volumeSfx = VOLUME_SFX_INITIAL;
+  data.settings.volumeMusic = VOLUME_MUSIC_INITIAL;
 
   if (data.ui.help === null)
   {
@@ -220,18 +230,18 @@ export async function platform_start() {
   if (canPlayAudio) {
     data.audio.available = true;
     data.audio.context = new AudioContext();
-    data.audio.musicGain = data.audio.context.createGain();
-    data.audio.musicGain.connect(data.audio.context.destination);
-    data.audio.musicGain.gain.value = VOLUME_MUSIC_INITIAL;
-    data.audio.sfxGain = data.audio.context.createGain();
-    data.audio.sfxGain.connect(data.audio.context.destination);
-    data.audio.sfxGain.gain.value = VOLUME_SFX_INITIAL;
+    data.audio.gainMusic = data.audio.context.createGain();
+    data.audio.gainMusic.connect(data.audio.context.destination);
+    data.audio.gainMusic.gain.value = VOLUME_MUSIC_INITIAL;
+    data.audio.gainSfx = data.audio.context.createGain();
+    data.audio.gainSfx.connect(data.audio.context.destination);
+    data.audio.gainSfx.gain.value = VOLUME_SFX_INITIAL;
 
     // Debug stuff
     if (window.location.search.includes("no_music"))
-      data.audio.musicGain.gain.value = 0;
+      data.audio.gainMusic.gain.value = 0;
     if (window.location.search.includes("no_sfx"))
-      data.audio.sfxGain.gain.value = 0;
+      data.audio.gainSfx.gain.value = 0;
 
     // Load audio clips
     data.audio.clips = AUDIO_CLIPS.map(key => ({
@@ -298,8 +308,8 @@ function clean_up() {
   data.renderer.context = null;
   data.audio.context.close();
   data.audio.context = null;
-  data.audio.musicGain = null;
-  data.audio.sfxGain = null;
+  data.audio.gainMusic = null;
+  data.audio.gainSfx = null;
   data.audio.clips = [];
   data.audio.sources = [];
   data.ui.help.remove();
@@ -356,8 +366,8 @@ function keyup(e) {
 }
 
 function set_sfx_volume(volume) {
-  data.audio.sfxGain.gain.value = clamp(volume, 0, 1);
-  platform_log("SFX volume:", data.audio.sfxGain.gain.value);
+  data.audio.gainSfx.gain.value = clamp(volume, 0, 1);
+  platform_log("SFX volume:", data.audio.gainSfx.gain.value);
 }
 
 function resize() {
