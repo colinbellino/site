@@ -56,34 +56,37 @@ const SCORE_PER_BLOCK = 10;
 const SCORE_MULTIPLIER = 1;
 const SCORE_MULTIPLIER_PER_BLOCK = 0.1;
 
-const data = {
-  platform: {
-    clear_rect: null,
-    draw_rect: null,
-    draw_trail: null,
-    get_blocks: null,
-    destroy_block: null,
-    show_help: null,
-    hide_help: null,
-    show_score: null,
-    hide_score: null,
-    show_pause: null,
-    hide_pause: null,
-    show_lives: null,
-    hide_lives: null,
-    play_audio_clip: null,
-    stop_audio_clip: null,
-    log: null,
-    error: null,
-    state: {
-      quit: false,
-      mouse: null,
-      mouse_keys: null,
-      keys: null,
-      window: null,
-    },
-  },
+let renderer = {
+  init: null,
+  clear_rect: null,
+  draw_rect: null,
+  draw_trail: null,
+};
 
+let platform = {
+  get_blocks: null,
+  destroy_block: null,
+  show_help: null,
+  hide_help: null,
+  show_score: null,
+  hide_score: null,
+  show_pause: null,
+  hide_pause: null,
+  show_lives: null,
+  hide_lives: null,
+  play_audio_clip: null,
+  stop_audio_clip: null,
+  log: null,
+  error: null,
+  state: {
+    quit: false,
+    mouse: null,
+    mouse_keys: null,
+    keys: null,
+    window: null,
+  },
+};
+const data = {
   mode: MODE_INIT,
   state: STATE_RUNNING,
 
@@ -150,57 +153,58 @@ const data = {
   },
 };
 
-export function game_init(platform) {
-  data.platform = platform;
+export async function game_init(_platform, _renderer) {
+  platform = _platform;
+  renderer = _renderer;
   data.mode = MODE_INIT;
 
-  return Promise.all(AUDIO_CLIPS.map((audio_clip) => {
-    return data.platform.load_audio_clip(audio_clip);
-  })).then(() => {
-    data.platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
-  });
+  await Promise.all(AUDIO_CLIPS.map((audio_clip) => {
+    return platform.load_audio_clip(audio_clip);
+  }))
+
+  platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
 }
 
 export function game_update(currentTime) {
   data.delta = currentTime - data.currentTime;
   data.currentTime = currentTime;
 
-  if (data.platform.state.window.resized) {
+  if (platform.state.window.resized) {
     if (data.mode === MODE_PLAY) {
-      const blocks = data.platform.get_blocks();
+      const blocks = platform.get_blocks();
       for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
         const rect = blocks[blockIndex].getClientRects()[0];
         set_block_rect(data.blocks[blockIndex], rect);
       }
 
-      data.paddle.position.y = data.platform.state.window.height - data.paddle.height - PADDLE_Y;
+      data.paddle.position.y = platform.state.window.height - data.paddle.height - PADDLE_Y;
     }
   }
 
-  if (data.platform.state.quit) {
+  if (platform.state.quit) {
     data.state = STATE_QUIT;
     return [data.state, 0];
   }
 
   // Debug inputs
-  if (data.platform.state.keys[data.platform.keyCodes.F1].released) {
+  if (platform.state.keys[platform.keyCodes.F1].released) {
     data.debug.showBlocks = !data.debug.showBlocks;
-    data.platform.log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
+    platform.log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
   }
-  if (data.platform.state.keys[data.platform.keyCodes.F2].released) {
+  if (platform.state.keys[platform.keyCodes.F2].released) {
     data.debug.cheats = !data.debug.cheats;
     if (data.debug.cheats)
       data.paddle.width = PADDLE_WIDTH * 3;
     else
       data.paddle.width = PADDLE_WIDTH;
-    data.platform.log("Cheats:", data.debug.cheats ? "ON" : "OFF");
+    platform.log("Cheats:", data.debug.cheats ? "ON" : "OFF");
   }
 
   // Update
   switch (data.mode) {
     case MODE_INIT: {
-      data.paddle.position.x = data.platform.state.window.width / 2 - data.paddle.width / 2;
-      data.paddle.position.y = data.platform.state.window.height;
+      data.paddle.position.x = platform.state.window.width / 2 - data.paddle.width / 2;
+      data.paddle.position.y = platform.state.window.height;
       data.balls = [];
       data.blocks = [];
       data.particles = [];
@@ -219,7 +223,7 @@ export function game_update(currentTime) {
 
     case MODE_INTRO: {
       {
-        data.paddle.position.y = math.lerp(data.paddle.position.y, data.platform.state.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, platform.state.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
       }
 
@@ -233,7 +237,7 @@ export function game_update(currentTime) {
 
       if (data.intro.ball.progress >= 1 + data.intro.help.delay) {
         if (data.intro.help.progress === 0) {
-          data.platform.show_help();
+          platform.show_help();
         }
         data.intro.help.progress += data.delta / data.intro.help.duration;
       }
@@ -244,7 +248,7 @@ export function game_update(currentTime) {
 
       if (done) {
         // Get the blocks after we show the help since this is one of the element we use to generate blocks.
-        const blocks = data.platform.get_blocks();
+        const blocks = platform.get_blocks();
         for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
           const rect = blocks[blockIndex].getClientRects()[0];
           spawn_block(blockIndex, rect);
@@ -257,14 +261,14 @@ export function game_update(currentTime) {
     case MODE_PLAY: {
       // Player inputs
       {
-        if (data.platform.state.mouse.changed) {
-          data.paddle.moveDirection = (data.platform.state.mouse.x - data.paddle.position.x) >= 0 ? 1 : -1;
-          data.paddle.position.x = data.platform.state.mouse.x - data.paddle.width / 2;
+        if (platform.state.mouse.changed) {
+          data.paddle.moveDirection = (platform.state.mouse.x - data.paddle.position.x) >= 0 ? 1 : -1;
+          data.paddle.position.x = platform.state.mouse.x - data.paddle.width / 2;
         } else {
-          if (data.platform.state.keys[data.platform.keyCodes.ARROW_LEFT].down) {
+          if (platform.state.keys[platform.keyCodes.ARROW_LEFT].down) {
             data.paddle.velocity.x = -1;
           }
-          else if (data.platform.state.keys[data.platform.keyCodes.ARROW_RIGHT].down) {
+          else if (platform.state.keys[platform.keyCodes.ARROW_RIGHT].down) {
             data.paddle.velocity.x = +1;
           }
           else {
@@ -275,25 +279,25 @@ export function game_update(currentTime) {
           data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
         }
 
-        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, data.platform.state.window.width - data.paddle.width);
+        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, platform.state.window.width - data.paddle.width);
 
-        if (data.platform.state.keys[data.platform.keyCodes.ESCAPE].released || data.platform.state.mouse_keys[data.platform.mouseCodes.RIGHT].released) {
-          data.platform.show_pause();
+        if (platform.state.keys[platform.keyCodes.ESCAPE].released || platform.state.mouse_keys[platform.mouseCodes.RIGHT].released) {
+          platform.show_pause();
           data.mode = MODE_PAUSE;
         }
 
-        if (data.platform.state.keys[data.platform.keyCodes.SPACE].released || data.platform.state.mouse_keys[data.platform.mouseCodes.LEFT].released) {
+        if (platform.state.keys[platform.keyCodes.SPACE].released || platform.state.mouse_keys[platform.mouseCodes.LEFT].released) {
           const firstBall = data.balls.find(ball => ball.attachedToPaddle);
           if (firstBall) {
             firstBall.velocity.x = data.paddle.moveDirection;
             firstBall.velocity.y = -1;
             firstBall.attachedToPaddle = false;
-            data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
+            platform.play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
           } else {
             if (data.balls.length <= data.lives || data.debug.cheats) {
-              data.platform.show_lives(data.lives);
+              platform.show_lives(data.lives);
               spawn_ball(false);
-              data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
+              platform.play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
             }
           }
         }
@@ -308,7 +312,7 @@ export function game_update(currentTime) {
 
           if (data.debug.cheats === false) {
             data.lives -= 1;
-            data.platform.show_lives(data.lives);
+            platform.show_lives(data.lives);
 
             // Check for lose condition
             if (data.lives < 0) {
@@ -320,7 +324,7 @@ export function game_update(currentTime) {
             // Reset multiplier
             if (data.debug.cheats === false) {
               data.multiplier = SCORE_MULTIPLIER;
-              data.platform.show_score(data.score, data.multiplier);
+              platform.show_score(data.score, data.multiplier);
             }
           }
 
@@ -342,9 +346,9 @@ export function game_update(currentTime) {
           }
 
           // Bounce on side wall
-          if (ball.position.x + ball.width > data.platform.state.window.width) {
+          if (ball.position.x + ball.width > platform.state.window.width) {
             ball.velocity.x = -ball.velocity.x;
-            ball.position.x = data.platform.state.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
+            ball.position.x = platform.state.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
             play_random_audio_clip([AUDIO_CLIP_BOUNCE_1, AUDIO_CLIP_BOUNCE_2]);
           } else if (ball.position.x < 0) {
             ball.velocity.x = -ball.velocity.x;
@@ -353,9 +357,9 @@ export function game_update(currentTime) {
           }
 
           // Hit bottom limit
-          if (ball.position.y > data.platform.state.window.height) {
+          if (ball.position.y > platform.state.window.height) {
             ball.destroyed = true;
-            data.platform.play_audio_clip(AUDIO_CLIP_LOSE_1);
+            platform.play_audio_clip(AUDIO_CLIP_LOSE_1);
           }
 
           // Bounce on paddle
@@ -372,7 +376,7 @@ export function game_update(currentTime) {
             ball.position.y = data.paddle.position.y;
             // TODO: check what other breakout games do so the bounces don't feel so janky
 
-            data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_2);
+            platform.play_audio_clip(AUDIO_CLIP_BOUNCE_2);
           }
 
           ball.velocity = math.normalize_vector(ball.velocity);
@@ -398,13 +402,13 @@ export function game_update(currentTime) {
                 ball.velocity.y = -ball.velocity.y;
               }
               block.destroyed = true;
-              data.platform.destroy_block(block.id);
+              platform.destroy_block(block.id);
               play_random_audio_clip([AUDIO_CLIP_HIT_1, AUDIO_CLIP_HIT_2, AUDIO_CLIP_HIT_3, AUDIO_CLIP_HIT_4]);
 
               data.score += SCORE_PER_BLOCK * data.multiplier;
               data.multiplier += SCORE_MULTIPLIER_PER_BLOCK;
               ball.speed += BALL_SCORE_MULTIPLIER;
-              data.platform.show_score(data.score, data.multiplier);
+              platform.show_score(data.score, data.multiplier);
 
               const ratio = Math.min(PARTICLE_AREA_MAX, (block.width + block.height)) / PARTICLE_AREA_MAX;
               for (let particleIndex = 0; particleIndex < math.lerp(PARTICLE_PER_HIT_MIN, PARTICLE_PER_HIT_MAX, ratio); particleIndex++) {
@@ -458,8 +462,8 @@ export function game_update(currentTime) {
     } break;
 
     case MODE_PAUSE: {
-      if (data.platform.state.keys[data.platform.keyCodes.ESCAPE].released) {
-        data.platform.hide_pause();
+      if (platform.state.keys[platform.keyCodes.ESCAPE].released) {
+        platform.hide_pause();
         data.mode = MODE_PLAY;
       }
     } break;
@@ -467,21 +471,21 @@ export function game_update(currentTime) {
     case MODE_END: {
       {
         if (data.outro.help.progress === 0) {
-          data.platform.stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
-          data.platform.hide_help();
-          data.platform.hide_pause();
+          platform.stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
+          platform.hide_help();
+          platform.hide_pause();
         }
         data.outro.help.progress += data.delta / data.outro.help.duration;
       }
 
       {
-        data.paddle.position.y = math.lerp(data.paddle.position.y, data.platform.state.window.height, data.outro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, platform.state.window.height, data.outro.paddle.progress);
         data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
       }
 
       {
         if (data.outro.score.progress === 0) {
-          data.platform.hide_score();
+          platform.hide_score();
         }
         data.outro.score.progress += data.delta / data.outro.score.duration;
       }
@@ -499,7 +503,7 @@ export function game_update(currentTime) {
 
   // Render
   {
-    data.platform.clear_rect({ x: 0, y: 0, width: data.platform.state.window.width, height: data.platform.state.window.height });
+    renderer.clear_rect({ x: 0, y: 0, width: platform.state.window.width, height: platform.state.window.height });
 
     for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
       const ball = data.balls[ballIndex];
@@ -515,22 +519,22 @@ export function game_update(currentTime) {
         position.x -= size / 2;
         position.y -= size / 2;
         const color = { ...BALL_COLOR, a: progress };
-        data.platform.draw_trail(position, size, color_to_string(color));
+        renderer.draw_trail(position, size, color_to_string(color));
       }
 
       const rect = { width: ball.width, height: ball.height, x: ball.position.x, y: ball.position.y };
-      data.platform.draw_rect(rect, color_to_string(ball.color));
+      renderer.draw_rect(rect, color_to_string(ball.color));
     }
 
     for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
       const particle = data.particles[particleIndex];
       const rect = { width: particle.width, height: particle.height, x: particle.position.x, y: particle.position.y };
-      data.platform.draw_rect(rect, color_to_string(particle.color));
+      renderer.draw_rect(rect, color_to_string(particle.color));
     }
 
     {
       const rect = { x: data.paddle.position.x, y: data.paddle.position.y, width: data.paddle.width, height: data.paddle.height };
-      data.platform.draw_rect(rect, PADDLE_COLOR);
+      renderer.draw_rect(rect, PADDLE_COLOR);
     }
 
     if (data.debug.showBlocks) {
@@ -540,7 +544,7 @@ export function game_update(currentTime) {
         const color = { r: 0, g: 0, b: 255, a: 1 };
         if (block.destroyed)
           color.a = 0.2;
-        data.platform.draw_rect(rect, color_to_string(color));
+        renderer.draw_rect(rect, color_to_string(color));
       }
     }
   }
@@ -554,7 +558,7 @@ function color_to_string({ r, g, b, a }) {
 
 function play_random_audio_clip(clips) {
   const clip = clips[Math.floor(Math.random() * clips.length)];
-  data.platform.play_audio_clip(clip);
+  platform.play_audio_clip(clip);
 }
 
 function spawn_ball(attachedToPaddle) {

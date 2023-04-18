@@ -5,6 +5,7 @@ const jsFiles = [
   "./public/js/breakout_loader",
   "./public/js/breakout_game",
   "./public/js/breakout_platform_browser",
+  "./public/js/breakout_renderer_canvas",
   "./public/js/math",
 ];
 const htmlFiles = [

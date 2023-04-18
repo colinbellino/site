@@ -1,4 +1,3 @@
-
 const VOLUME_SFX_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.05;
@@ -17,11 +16,8 @@ const keyCodes = {
 };
 
 const data = {
-  renderer: {
-    requestId: 0,
-    canvas: null,
-    context: null,
-  },
+  animationFrameId: 0,
+  canvas: null,
   audio: {
     available: false,
     context: null,
@@ -83,22 +79,6 @@ function platform_error(...args) {
   console.error(...args);
 }
 
-function platform_clear_rect({ x, y, width, height }) {
-  data.renderer.context.clearRect(x, y, width, height);
-}
-
-function platform_draw_rect({ x, y, width, height }, color) {
-  data.renderer.context.fillStyle = color;
-  data.renderer.context.fillRect(x, y, width, height);
-}
-
-function platform_draw_trail({ x, y }, size, color) {
-  data.renderer.context.beginPath();
-  data.renderer.context.fillStyle = color;
-  data.renderer.context.moveTo(x, y);
-  data.renderer.context.fillRect(x, y, size, size);
-}
-
 function platform_destroy_block(blockIndex) {
   const block = data.blocks[blockIndex];
   block.classList.add("destroyed");
@@ -139,7 +119,7 @@ function platform_hide_score() {
 }
 
 function platform_show_pause() {
-  data.renderer.canvas.classList.add("blocking")
+  data.canvas.classList.add("blocking")
   data.ui.pause.classList.remove("hidden");
   data.ui.musicSlider.setAttribute("value", data.settings.volumeMusic);
   data.ui.sfxSlider.setAttribute("value", data.settings.volumeSfx);
@@ -149,7 +129,7 @@ function platform_show_pause() {
 
 function platform_hide_pause() {
   data.paused = false;
-  data.renderer.canvas.classList.remove("blocking");
+  data.canvas.classList.remove("blocking");
   data.ui.pause.classList.add("hidden");
   set_volume_music(data.settings.volumeMusic);
   set_volume_sfx(data.settings.volumeSfx);
@@ -213,12 +193,11 @@ function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
     tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration)
 }
 
-export async function platform_start(game_init, game_update) {
+export async function platform_init() {
   data.state.quit = false;
-  data.renderer.canvas = document.createElement("canvas");
-  data.renderer.canvas.classList.add("breakout-canvas");
-  data.renderer.context = data.renderer.canvas.getContext("2d");
-  document.body.appendChild(data.renderer.canvas);
+  data.canvas = document.createElement("canvas");
+  data.canvas.classList.add("breakout-canvas");
+  document.body.appendChild(data.canvas);
 
   {
     for (let keycode = 0; keycode < 256; keycode++) {
@@ -358,6 +337,8 @@ export async function platform_start(game_init, game_update) {
       const block = data.blocks[blockIndex];
       block.classList.add("breakout-block");
     }
+
+    platform_log("Blocks found on the page:", data.blocks.length);
   }
 
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -399,12 +380,7 @@ export async function platform_start(game_init, game_update) {
   document.addEventListener("keyup", keyup);
   window.addEventListener("resize", resize);
 
-  platform_log("Starting game with blocks:", data.blocks.length);
-
-  await game_init({
-    clear_rect: platform_clear_rect,
-    draw_rect: platform_draw_rect,
-    draw_trail: platform_draw_trail,
+  return {
     get_blocks: platform_get_blocks,
     destroy_block: platform_destroy_block,
     show_help: platform_show_help,
@@ -422,9 +398,12 @@ export async function platform_start(game_init, game_update) {
     error: platform_error,
     mouseCodes: mouseCodes,
     keyCodes: keyCodes,
-    state: data.state
-  });
+    state: data.state,
+    canvas: data.canvas,
+  };
+}
 
+export function platform_start(game_update) {
   return new Promise((resolve, reject) => {
     const fps = 120;
     const then = window.performance.now();
@@ -441,11 +420,12 @@ export async function platform_start(game_init, game_update) {
       const [result, score] = game_update(elapsed / 1000);
       if (result > 0) {
         clean_up();
-        window.cancelAnimationFrame(data.renderer.requestId);
+
+        window.cancelAnimationFrame(data.animationFrameId);
         return resolve([result, score]);
       }
 
-      data.renderer.requestId = window.requestAnimationFrame(update);
+      data.animationFrameId = window.requestAnimationFrame(update);
       data.state.window.resized = false;
       // Reset input state at the end of the frame
       data.state.mouse.changed = 0;
@@ -473,9 +453,8 @@ function clean_up() {
     element.classList.remove("destroyed");
   });
   data.blocks = [];
-  data.renderer.canvas.remove();
-  data.renderer.canvas = null;
-  data.renderer.context = null;
+  data.canvas.remove();
+  data.canvas = null;
   if (data.audio.context)
     data.audio.context.close();
   data.audio.context = null;
@@ -535,10 +514,10 @@ function keyup(e) {
 
 function resize() {
   platform_log("Window resized:", window.innerWidth, window.innerHeight);
-  data.renderer.canvas.width = window.innerWidth;
-  data.renderer.canvas.height = window.innerHeight;
-  data.state.window.width = data.renderer.canvas.width;
-  data.state.window.height = data.renderer.canvas.height;
+  data.canvas.width = window.innerWidth;
+  data.canvas.height = window.innerHeight;
+  data.state.window.width = data.canvas.width;
+  data.state.window.height = data.canvas.height;
   data.state.window.resized = true;
 }
 

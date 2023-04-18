@@ -4,6 +4,7 @@
   let gameIsRunning = false;
   let style = null;
   let platform = null;
+  let renderer = null;
   let game = null;
   let startButtonIsOn = false;
 
@@ -66,19 +67,24 @@
 
       if (game === null) {
         console.log("Loading game files.");
-        [style, platform, game] = await Promise.all([
+        [style, platform, renderer, game] = await Promise.all([
           import_style("/public/breakout.css"),
           import("/public/js/breakout_platform_browser.mjs"),
+          import("/public/js/breakout_renderer_canvas.mjs"),
           import("/public/js/breakout_game.mjs"),
         ]);
       }
 
       gameIsRunning = true;
 
-      const [result, score] = await platform.platform_start(game.game_init, game.game_update);
+      const platform_options = await platform.platform_init();
+      const renderer_options = renderer.renderer_init(platform_options.canvas);
+      await game.game_init(platform_options, renderer_options);
+      const [result, score] = await platform.platform_start(game.game_update);
       gameIsRunning = false;
 
       if (result === game.STATE_QUIT) {
+        renderer.renderer_quit();
         return;
       }
 
