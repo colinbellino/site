@@ -45,7 +45,11 @@ const BALL_SPEED = 8;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
 
+const PARTICLE_PER_HIT = 20.
+
 const SCORE_BLOCK = 10;
+
+const MAX_TRAIL = 300;
 
 const data = {
   mode: MODE_INIT,
@@ -106,6 +110,7 @@ const data = {
   },
   balls: [],
   blocks: [],
+  particles: [],
   score: 0,
   multiplier: 1,
 
@@ -191,6 +196,7 @@ export function game_update(currentTime) {
       data.paddle.position.y = data.window.height;
       data.balls = [];
       data.blocks = [];
+      data.particles = [];
       data.intro.paddle.progress = 0;
       data.intro.ball.progress = 0;
       data.outro.paddle.progress = 0;
@@ -285,10 +291,10 @@ export function game_update(currentTime) {
         break;
       }
 
+      // Balls
       for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
         const ball = data.balls[ballIndex];
 
-        // TODO: Free destroyed balls from memory at some point
         if (ball.destroyed)
           continue;
 
@@ -329,6 +335,7 @@ export function game_update(currentTime) {
 
           ball.velocity = normalize_vector(ball.velocity);
 
+          // Blocks collision
           for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
             const block = data.blocks[blockIndex];
 
@@ -350,6 +357,10 @@ export function game_update(currentTime) {
               }
               block.destroyed = true;
               platform_destroy_block(block.id);
+              for (let particleIndex = 0; particleIndex < PARTICLE_PER_HIT; particleIndex++) {
+                const velocity = { x: random(-1, 1), y: random(-1, 1) };
+                spawn_particle({ ...ball.position }, velocity, 3, 3, { r: 255, g: 0, b: 0, a: 1 });
+              }
 
               data.score += SCORE_BLOCK * data.multiplier;
               platform_show_score(data.score);
@@ -357,9 +368,28 @@ export function game_update(currentTime) {
           }
         }
 
-        if (data.debug.cheats)
+        if (data.debug.cheats) {
           data.debug.trail.push([ball.position.x, ball.position.y]);
+          if (data.debug.trail.length > MAX_TRAIL) {
+            data.debug.trail.splice(0, 50);
+          }
+        }
       } // for data.balls
+
+      // Particles
+      for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
+        const particle = data.particles[particleIndex];
+
+        if (data.currentTime >= particle.timestamp + particle.duration) {
+          data.particles.splice(particleIndex, 1);
+          continue;
+        }
+
+        const progress = 1 - ((particle.timestamp + particle.duration - data.currentTime) / particle.duration);
+        particle.color.a = lerp(particle.color.a, 0, progress);
+        particle.position.y += particle.velocity.y * particle.speed;
+        particle.position.x += particle.velocity.x * particle.speed;
+      }
 
       // Check for win condition
       let blockDestroyed = 0;
@@ -436,6 +466,12 @@ export function game_update(currentTime) {
       platform_render_rect(rect, ball.color);
     }
 
+    for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
+      const particle = data.particles[particleIndex];
+      const rect = { width: particle.width, height: particle.height, x: particle.position.x, y: particle.position.y };
+      platform_render_rect(rect, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${particle.color.a})`);
+    }
+
     {
       const rect = { x: data.paddle.position.x, y: data.paddle.position.y, width: data.paddle.width, height: data.paddle.height };
       platform_render_rect(rect, PADDLE_COLOR);
@@ -495,6 +531,10 @@ function normalize_vector(vector) {
     return 0;
 }
 
+function random(min, max) {
+  return Math.random() * (max - min) + min;
+}
+
 function spawn_ball(attachedToPaddle) {
   const velocity = { x: 0, y: 0 };
   if (attachedToPaddle === false) {
@@ -519,7 +559,7 @@ function spawn_ball(attachedToPaddle) {
 }
 
 function spawn_block(blockIndex, rect) {
-  data.blocks.push({
+  const block = {
     id: blockIndex,
     width: rect.width + 2,
     height: rect.height + 2,
@@ -528,5 +568,22 @@ function spawn_block(blockIndex, rect) {
       y: rect.y - 1,
     },
     destroyed: false,
-  });
+  };
+
+  data.blocks.push(block);
+}
+
+function spawn_particle(position, velocity, duration, speed, color) {
+  const particle = {
+    width: 5,
+    height: 5,
+    position,
+    velocity,
+    color,
+    speed,
+    duration,
+    timestamp: data.currentTime,
+  };
+
+  data.particles.push(particle);
 }
