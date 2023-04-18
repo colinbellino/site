@@ -452,7 +452,7 @@ function mousedown(e) {
     return game_keydown(KEY_MOUSE_LEFT);
   if (e.which === 3)
     return game_keydown(KEY_MOUSE_RIGHT);
-  // console.log(e.which);
+  // platform_log(e.which);
 }
 
 function mouseup(e) {
@@ -460,7 +460,7 @@ function mouseup(e) {
     return game_keyup(KEY_MOUSE_LEFT);
   if (e.which === 3)
     return game_keyup(KEY_MOUSE_RIGHT);
-  // console.log(e.which);
+  // platform_log(e.which);
 }
 
 function mousemove(e) {
@@ -470,7 +470,7 @@ function mousemove(e) {
 function keydown(e) {
   const key = codeToKey[e.keyCode];
   if (key === undefined) {
-    // console.log("e.keyCode", e.keyCode);
+    // platform_log("e.keyCode", e.keyCode);
     return;
   }
   game_keydown(key);
@@ -479,7 +479,7 @@ function keydown(e) {
 function keyup(e) {
   const key = codeToKey[e.keyCode];
   if (key === undefined) {
-    // console.log("e.keyCode", e.keyCode);
+    // platform_log("e.keyCode", e.keyCode);
     return;
   }
   game_keyup(key);
