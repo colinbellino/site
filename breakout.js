@@ -1,10 +1,12 @@
 // Game
 
-const KEY_ARROW_LEFT = 0;
-const KEY_ARROW_RIGHT = 1;
+const KEY_MOVE_LEFT = 0;
+const KEY_MOVE_RIGHT = 1;
+const KEY_CONFIRM = 2;
 
 const PADDLE_SPEED = 20;
-const BALL_SPEED = 5;
+const BALL_SPEED = 10;
+const BALL_SIZE = 20;
 
 const data = {
   mode: 0, // 0: init, 1: playing
@@ -21,24 +23,20 @@ const data = {
     height: 20,
   },
 
-  balls: [
-    {
-      x: 0,
-      y: 0,
-      width: 20,
-      height: 20,
-      velocityX: 1,
-      velocityY: 1,
-      destroyed: false,
-    },
-  ],
+  balls: [],
 
   keys: {
-    [KEY_ARROW_LEFT]: {
+    [KEY_MOVE_LEFT]: {
       down: false,
+      released: false,
     },
-    [KEY_ARROW_RIGHT]: {
+    [KEY_MOVE_RIGHT]: {
       down: false,
+      released: false,
+    },
+    [KEY_CONFIRM]: {
+      down: false,
+      released: false,
     },
   }
 };
@@ -49,32 +47,67 @@ function game_keydown(key) {
 
 function game_keyup(key) {
   data.keys[key].down = false;
+  data.keys[key].released = true;
+}
+
+function game_is_point_inside(point, box) {
+  return (point.x >= box.x && point.x <= box.x + box.width) &&
+         (point.y >= box.y && point.y <= box.y + box.height);
+}
+
+function game_spawn_ball() {
+  data.balls.push({
+    x: data.paddle.x + data.paddle.width/2,
+    y: data.paddle.y - data.paddle.height,
+    width: BALL_SIZE,
+    height: BALL_SIZE,
+    velocityX: 1,
+    velocityY: -1,
+    destroyed: false,
+  });
 }
 
 function game_update(currentTime) {
   // Initialize game state
   if (data.mode === 0) {
+    data.paddle.x = 100;
     data.paddle.y = data.window.height - data.paddle.height;
+
+    game_spawn_ball();
+
     data.mode = 1;
   }
 
-  // Updte
-  if (data.keys[KEY_ARROW_LEFT].down)
+  // Update
+  if (data.keys[KEY_MOVE_LEFT].down) {
     data.paddle.x = Math.max(0, data.paddle.x - PADDLE_SPEED);
-  else if (data.keys[KEY_ARROW_RIGHT].down)
+  }
+  else if (data.keys[KEY_MOVE_RIGHT].down) {
     data.paddle.x = Math.min(data.window.width - data.paddle.width, data.paddle.x + PADDLE_SPEED);
+  }
 
-    for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
-      const ball = data.balls[ballIndex];
+  if (data.keys[KEY_CONFIRM].released) {
+    game_spawn_ball();
+  }
 
-      ball.x += ball.velocityX * BALL_SPEED;
-      if (ball.x + ball.width > data.window.width || ball.x < 0)
-        ball.velocityX = -ball.velocityX;
+  for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
+    const ball = data.balls[ballIndex];
 
-      ball.y += ball.velocityY * BALL_SPEED;
-      if (ball.y > data.window.height)
-        ball.destroyed = true;
+    ball.x += ball.velocityX * BALL_SPEED;
+    if (ball.x + ball.width > data.window.width || ball.x < 0)
+      ball.velocityX = -ball.velocityX;
+
+    ball.y += ball.velocityY * BALL_SPEED;
+    if (ball.y < 0)
+      ball.velocityY = -ball.velocityY;
+    if (ball.y > data.window.height)
+      ball.destroyed = true;
+
+    if (game_is_point_inside(ball, data.paddle)) {
+      ball.velocityY = -ball.velocityY;
+      ball.y = data.paddle.y - data.paddle.height;
     }
+  }
 
   // Render
   {
@@ -94,9 +127,9 @@ function game_update(currentTime) {
     platform_render_rect(rect, "red");
   }
 
-  // for (const [key, value] of Object.entries(data.keys)) {
-  //   data.keys[key].down = false;
-  // }
+  for (const [key, value] of Object.entries(data.keys)) {
+    data.keys[key].released = false;
+  }
 }
 
 // Platform
@@ -107,8 +140,9 @@ const renderer = {
 };
 
 const platformKeys = {
-  37: KEY_ARROW_LEFT,
-  39: KEY_ARROW_RIGHT,
+  37: KEY_MOVE_LEFT,
+  39: KEY_MOVE_RIGHT,
+  32: KEY_CONFIRM,
 };
 
 function platform_keydown(e) {
