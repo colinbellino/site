@@ -330,10 +330,10 @@
         const rect = avatar.getBoundingClientRect();
         const rectCenterX = rect.x + rect.width / 2;
 
-        if (e.clientX > rectCenterX) {
-          avatar.classList.remove("flipped");
-        } else {
+        if (e.clientX < rect.x) {
           avatar.classList.add("flipped");
+        } else if (e.clientX > rect.x + rect.width) {
+          avatar.classList.remove("flipped");
         }
       }
 
