@@ -35,13 +35,15 @@ const PADDLE_SPEED = 20;
 const PADDLE_WIDTH = 200;
 const PADDLE_HEIGHT = 20;
 const PADDLE_Y = 10;
-const PADDLE_COLOR = "#000000";
+const PADDLE_COLOR = { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
+
+const CLEAR_COLOR = { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
 
 const BALL_MAX = 1;
 const BALL_SPEED = 6;
 const BALL_SCORE_MULTIPLIER = 0.2;
 const BALL_SIZE = 20;
-const BALL_COLOR = { r: 255, g: 0, b: 0, a: 1 };
+const BALL_COLOR = { r: 1.0, g: 0.0, b: 0.0, a: 1.0 };
 const BALL_TRAIL_MAX = 20;
 
 const PARTICLE_SPEED = 4;
@@ -58,6 +60,7 @@ const SCORE_MULTIPLIER_PER_BLOCK = 0.1;
 
 let renderer = {
   init: null,
+  clear: null,
   clear_rect: null,
   draw_rect: null,
   draw_trail: null,
@@ -503,7 +506,7 @@ export function game_update(currentTime) {
 
   // Render
   {
-    renderer.clear_rect({ x: 0, y: 0, width: platform.state.window.width, height: platform.state.window.height });
+    renderer.clear(CLEAR_COLOR);
 
     for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
       const ball = data.balls[ballIndex];
@@ -519,17 +522,17 @@ export function game_update(currentTime) {
         position.x -= size / 2;
         position.y -= size / 2;
         const color = { ...BALL_COLOR, a: progress };
-        renderer.draw_trail(position, size, color_to_string(color));
+        renderer.draw_trail(position, size, color);
       }
 
       const rect = { width: ball.width, height: ball.height, x: ball.position.x, y: ball.position.y };
-      renderer.draw_rect(rect, color_to_string(ball.color));
+      renderer.draw_rect(rect, ball.color);
     }
 
     for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
       const particle = data.particles[particleIndex];
       const rect = { width: particle.width, height: particle.height, x: particle.position.x, y: particle.position.y };
-      renderer.draw_rect(rect, color_to_string(particle.color));
+      renderer.draw_rect(rect, particle.color);
     }
 
     {
@@ -541,19 +544,15 @@ export function game_update(currentTime) {
       for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
         const block = data.blocks[blockIndex];
         const rect = { x: block.position.x, y: block.position.y, width: block.width, height: block.height };
-        const color = { r: 0, g: 0, b: 255, a: 1 };
+        const color = { r: 0.0, g: 0.0, b: 1.0, a: 1.0 };
         if (block.destroyed)
           color.a = 0.2;
-        renderer.draw_rect(rect, color_to_string(color));
+        renderer.draw_rect(rect, color);
       }
     }
   }
 
   return [STATE_RUNNING, data.score];
-}
-
-function color_to_string({ r, g, b, a }) {
-  return `rgba(${r}, ${g}, ${b}, ${a})`;
 }
 
 function play_random_audio_clip(clips) {
