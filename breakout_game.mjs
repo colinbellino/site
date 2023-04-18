@@ -27,7 +27,6 @@ const BACKGROUND_COLOR = "#ffffff";
 const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.5)";
 const PAUSE_TEXT_COLOR = "#ffffff";
 
-
 const PADDLE_SPEED = 20;
 const PADDLE_WIDTH = 150;
 const PADDLE_HEIGHT = 20;
@@ -38,8 +37,6 @@ const BALL_MAX = 1;
 const BALL_SPEED = 5;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
-
-const BLOCK_COLOR_ON = "transparent";
 
 const data = {
   mode: MODE_INIT,
@@ -180,7 +177,6 @@ export function game_update(currentTime) {
           height: rect.height + 2,
           x: rect.x - 1,
           y: rect.y - 1,
-          color: BLOCK_COLOR_ON,
           destroyed: false,
         });
       }
@@ -340,13 +336,6 @@ export function game_update(currentTime) {
       const [x,y] = data.debug.trail[trailIndex];
       const rect = { x, y, width: 1, height: 1 };
       platform_render_rect(rect, "red");
-    }
-
-    for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
-      const block = data.blocks[blockIndex];
-
-      const rect = { x: block.x, y: block.y, width: block.width, height: block.height };
-      platform_render_rect(rect, block.color);
     }
 
     for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
