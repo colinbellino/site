@@ -66,6 +66,22 @@
   pointer-events: none;
   opacity: 0;
 }
+.breakout-score.bounce-1 { animation: 200ms ease-in-out bounce-1; }
+.breakout-score.bounce-2 { animation: 200ms ease-in-out bounce-2; }
+.breakout-score.bounce-3 { animation: 200ms ease-in-out bounce-3; }
+
+@keyframes bounce-1 {
+  from { transform: scale(1.05) }
+  to { transform: scale(1) }
+}
+@keyframes bounce-2 {
+  from { transform: scale(1.1) }
+  to { transform: scale(1) }
+}
+@keyframes bounce-3 {
+  from { transform: scale(1.2) }
+  to { transform: scale(1) }
+}
 
 .breakout-pause {
   position: absolute;

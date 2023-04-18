@@ -116,9 +116,18 @@ export function platform_hide_help() {
   data.ui.help.classList.add("hidden");
 }
 
-export function platform_show_score(score, multiplier) {
+export async function platform_show_score(score, multiplier) {
   data.ui.score.classList.remove("hidden");
+  if (multiplier > 3)
+    data.ui.score.classList.add("bounce-2");
+  else if (multiplier > 5)
+    data.ui.score.classList.add("bounce-3");
+  else
+    data.ui.score.classList.add("bounce-1");
   data.ui.score.innerHTML = `Score: ${score} (x${multiplier.toFixed(1)})`;
+
+  await wait_for_milliseconds(300);
+  data.ui.score.classList.remove("bounce-1", "bounce-2", "bounce-3");
 }
 
 export function platform_hide_score() {
