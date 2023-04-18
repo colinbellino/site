@@ -18,7 +18,7 @@
   display: inline-block;
   opacity: 1;
   transform: scale(1);
-  transition: opacity ease-in 100ms, transform ease-in 100ms;
+  transition: opacity ease-in 100ms, transform ease-in 100ms !important;
 }
 
 .breakout-block.destroyed {
