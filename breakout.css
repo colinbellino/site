@@ -39,7 +39,7 @@
 }
 .breakout-help.hidden {
   opacity: 0;
-  transform: translateX(100%);
+  transform: translateY(-100%);
 }
 
 .breakout-score {
@@ -54,11 +54,10 @@
   background: rgba(0, 0, 0, 0.03);
   color: rgba(0, 0, 0, 0.85);
   opacity: 1;
-  transition: opacity ease-out 300ms, transform ease-in 200ms;
+  transition: opacity ease-out 300ms;
 }
 .breakout-score.hidden {
   opacity: 0;
-  transform: translateX(-100%);
 }
 
 .game-running {

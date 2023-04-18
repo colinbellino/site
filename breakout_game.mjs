@@ -6,7 +6,8 @@ import {
   platform_destroy_block,
   platform_show_help,
   platform_hide_help,
-  platform_update_score,
+  platform_show_score,
+  platform_hide_score,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -86,6 +87,11 @@ const data = {
       progress: 0,
     },
     help: {
+      duration: 0.3,
+      delay: 0,
+      progress: 0,
+    },
+    score: {
       duration: 0.3,
       delay: 0,
       progress: 0,
@@ -192,6 +198,7 @@ export function game_update(currentTime) {
       data.intro.ball.progress = 0;
       data.outro.paddle.progress = 0;
       data.outro.help.progress = 0;
+      data.outro.score.progress = 0;
       data.debug.trail = [];
       data.score = 0;
       data.multiplier = 1;
@@ -347,7 +354,7 @@ export function game_update(currentTime) {
               platform_destroy_block(block.id);
 
               data.score += SCORE_BLOCK * data.multiplier;
-              platform_update_score(data.score);
+              platform_show_score(data.score);
             }
           }
         }
@@ -391,8 +398,16 @@ export function game_update(currentTime) {
         data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
       }
 
+      {
+        if (data.outro.score.progress === 0) {
+          platform_hide_score();
+        }
+        data.outro.score.progress += data.delta / data.outro.score.duration;
+      }
+
       const done = data.outro.help.progress >= 1
-        && data.outro.paddle.progress >= 1;
+        && data.outro.paddle.progress >= 1
+        && data.outro.score.progress >= 1;
 
       if (done) {
         data.mode = MODE_INIT;

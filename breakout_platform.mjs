@@ -64,10 +64,13 @@ export function platform_get_blocks() {
   return data.blocks;
 }
 
-export function platform_update_score(score) {
-  console.log("platform_update_score", score);
+export function platform_show_score(score) {
   data.score.classList.remove("hidden");
   data.score.innerHTML = `Score: ${score}`;
+}
+
+export function platform_hide_score() {
+  data.score.classList.add("hidden");
 }
 
 export function platform_show_help() {
