@@ -6,6 +6,7 @@ import {
   platform_destroy_block,
   platform_show_help,
   platform_hide_help,
+  platform_update_score,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -45,6 +46,8 @@ const BALL_MAX = 1;
 const BALL_SPEED = 8;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
+
+const SCORE_BLOCK = 10;
 
 const data = {
   mode: MODE_INIT,
@@ -100,6 +103,8 @@ const data = {
   },
   balls: [],
   blocks: [],
+  score: 0,
+  multiplier: 1,
 
   debug: {
     showBlocks: false,
@@ -188,6 +193,8 @@ export function game_update(currentTime) {
       data.outro.paddle.progress = 0;
       data.outro.help.progress = 0;
       data.debug.trail = [];
+      data.score = 0;
+      data.multiplier = 1;
 
       data.mode = MODE_INTRO;
     } break;
@@ -338,6 +345,9 @@ export function game_update(currentTime) {
               }
               block.destroyed = true;
               platform_destroy_block(block.id);
+
+              data.score += SCORE_BLOCK * data.multiplier;
+              platform_update_score(data.score);
             }
           }
         }
