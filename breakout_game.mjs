@@ -1,8 +1,14 @@
-// Game
+import {
+  platform_clear_rect,
+  platform_render_rect,
+  platform_get_blocks,
+  platform_log,
+  platform_error,
+} from "./breakout_platform.mjs"
 
-const KEY_MOVE_LEFT = 0;
-const KEY_MOVE_RIGHT = 1;
-const KEY_CONFIRM = 2;
+export const KEY_MOVE_LEFT = 0;
+export const KEY_MOVE_RIGHT = 1;
+export const KEY_CONFIRM = 2;
 
 const BACKGROUND_COLOR = "#ffffff"
 const PADDLE_SPEED = 20;
@@ -46,13 +52,18 @@ const data = {
   }
 };
 
-function game_keydown(key) {
+export function game_keydown(key) {
   data.keys[key].down = true;
 }
 
-function game_keyup(key) {
+export function game_keyup(key) {
   data.keys[key].down = false;
   data.keys[key].released = true;
+}
+
+export function game_resize(width, height) {
+  data.window.width = width;
+  data.window.height = height;
 }
 
 function game_is_point_inside(point, box) {
@@ -73,11 +84,27 @@ function game_spawn_ball() {
   });
 }
 
-function game_update(currentTime) {
+export function game_update(currentTime) {
   // Initialize game state
   if (data.mode === 0) {
     data.paddle.x = 100;
     data.paddle.y = data.window.height - data.paddle.height;
+
+
+    const blocks = platform_get_blocks();
+    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+      const block = blocks[blockIndex];
+      const rect = block.getClientRects()[0];
+
+      data.blocks.push({
+        width: rect.width + 2,
+        height: rect.height + 2,
+        x: rect.x - 1,
+        y: rect.y - 1,
+        color: BLOCK_COLOR_ON,
+        destroyed: false,
+      });
+    }
 
     game_spawn_ball();
 
@@ -131,10 +158,7 @@ function game_update(currentTime) {
 
   // Render
 
-  // {
-  //   const rect = { x: 0, y: 0, width: data.window.width, height: data.window.height };
-  //   platform_render_rect(rect, BACKGROUND_COLOR);
-  // }
+  platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: gitdata.window.height });
 
   for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
     const block = data.blocks[blockIndex];
@@ -164,90 +188,4 @@ function game_update(currentTime) {
   for (const [key, value] of Object.entries(data.keys)) {
     data.keys[key].released = false;
   }
-}
-
-// Platform
-
-const renderer = {
-  canvas: null,
-  ctx: null,
-};
-
-const platformKeys = {
-  37: KEY_MOVE_LEFT,
-  39: KEY_MOVE_RIGHT,
-  32: KEY_CONFIRM,
-};
-
-function platform_keydown(e) {
-  const key = platformKeys[e.keyCode];
-  if (key === undefined) {
-    // console.log("e.keyCode", e.keyCode);
-    return;
-  }
-  game_keydown(key);
-}
-
-function platform_keyup(e) {
-  const key = platformKeys[e.keyCode];
-  if (key === undefined) {
-    // console.log("e.keyCode", e.keyCode);
-    return;
-  }
-  game_keyup(key);
-}
-
-function platform_resize() {
-  console.log("platform_resize", window.innerWidth, window.innerHeight);
-  data.window.width = window.innerWidth;
-  data.window.height = window.innerHeight;
-}
-
-function platform_update(currentTime) {
-  renderer.canvas.width = data.window.width;
-  renderer.canvas.height = data.window.height;
-
-  game_update(currentTime);
-  window.requestAnimationFrame(platform_update);
-}
-
-function platform_log(...args) {
-  console.log(JSON.stringify(args, null, 2));
-  // document.writeln(args.join(" "));
-}
-
-function platform_render_rect({ x, y, width, height }, color) {
-  renderer.ctx.fillStyle = color;
-  renderer.ctx.fillRect(x, y, width, height);
-}
-
-export function platform_init(blocks) {
-  renderer.canvas = document.createElement("canvas");
-  renderer.canvas.style = "position: absolute; inset: 0; display: block; width: 100%; height: 100%;";
-  renderer.ctx = renderer.canvas.getContext("2d");
-  document.body.appendChild(renderer.canvas);
-
-  data.window.width = window.innerWidth;
-  data.window.height = window.innerHeight;
-
-  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-    const block = blocks[blockIndex];
-    const rect = block.getClientRects()[0];
-
-    data.blocks.push({
-      width: rect.width + 2,
-      height: rect.height + 2,
-      x: rect.x - 1,
-      y: rect.y - 1,
-      color: BLOCK_COLOR_ON,
-      destroyed: false,
-    });
-  }
-
-  window.requestAnimationFrame(platform_update);
-  document.addEventListener("keydown", platform_keydown);
-  document.addEventListener("keyup", platform_keyup);
-  window.addEventListener("resize", platform_resize);
-
-  platform_update();
 }
