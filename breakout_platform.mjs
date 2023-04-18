@@ -64,7 +64,7 @@ function platform_split_in_blocks(selector) {
           return;
 
         const span = document.createElement("span");
-        span.classList.add("breakout-block");
+        span.classList.add("breakout-preblock");
         span.innerHTML = word;
         replacement.appendChild(span);
         const space = document.createElement("span");
@@ -82,7 +82,7 @@ export function platform_log(...args) {
 }
 
 export function platform_error(...args) {
-  console.log(args);
+  console.error(args);
 }
 
 export function platform_clear_rect({ x, y, width, height }) {
@@ -115,9 +115,10 @@ export function breakout_start() {
   renderer.context = renderer.canvas.getContext("2d");
   document.body.appendChild(renderer.canvas);
 
-  platform_split_in_blocks("section > p");
+  platform_split_in_blocks("section > h1");
   platform_split_in_blocks("section > h2");
-  blocks = Array.from(document.querySelectorAll(".avatar, li > a, h1, .hire-me, .breakout-block"));
+  platform_split_in_blocks("section > p");
+  blocks = Array.from(document.querySelectorAll(".avatar, li > a, .hire-me, .breakout-preblock"));
   for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
     const block = blocks[blockIndex];
     block.classList.add("breakout-block");

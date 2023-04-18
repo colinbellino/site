@@ -304,6 +304,8 @@
     const isDesktopWidth = matchMedia("(min-width: 640px)").matches;
 
     addAvatarListeners();
+    if (window.location.hostname === "localhost")
+      start_game();
 
     function addAvatarListeners() {
       if (isDesktopWidth)
@@ -357,8 +359,6 @@
         document.body.appendChild(link);
       });
     }
-
-    // start_game();
   </script>
 </body>
 

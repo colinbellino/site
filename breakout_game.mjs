@@ -124,6 +124,8 @@ export function game_update(currentTime) {
     case MODE_INIT: {
       data.paddle.x = 100;
       data.paddle.y = data.window.height - data.paddle.height;
+      data.balls = [];
+      data.blocks = [];
 
       const blocks = platform_get_blocks();
       for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
@@ -184,7 +186,11 @@ export function game_update(currentTime) {
         // Bottom limit hit
         if (ball.y > data.window.height) {
           ball.destroyed = true;
-          return GAME_STATE_LOSE;
+
+          if (data.balls.filter(b => b.destroyed === false).length === 0) {
+            data.mode = MODE_INIT;
+            return GAME_STATE_LOSE;
+          }
         }
 
         if (game_is_point_inside(ball, data.paddle)) {
@@ -228,8 +234,10 @@ export function game_update(currentTime) {
           }
         }
 
-        if (blockDestroyed == data.blocks.length)
+        if (blockDestroyed == data.blocks.length) {
+          data.mode = MODE_INIT;
           return GAME_STATE_WIN;
+        }
       }
     } break;
   }
