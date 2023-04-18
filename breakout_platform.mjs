@@ -168,7 +168,9 @@ export function platform_start() {
   {
     split_in_blocks("h1 a");
     split_in_blocks("h2");
-    split_in_blocks("p");
+    split_in_blocks("nav > p > b");
+    split_in_blocks("section > p");
+    split_in_blocks("footer > p");
     const selectors = [
       ".avatar",
       ".hire-me",

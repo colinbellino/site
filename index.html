@@ -60,10 +60,9 @@
       border-radius: 50%;
       background: #5fcde4;
       transition: transform ease-in-out 0.2s;
-      cursor: pointer;
     }
-    .no-animation .avatar {
-      cursor: default;
+    :not(.no-animation) .avatar.clickable {
+      cursor: pointer;
     }
     :not(.no-animation) .avatar.flipped {
       transform: scaleX(-1);
@@ -156,7 +155,7 @@
       position: relative;
       display: inline-block;
       box-sizing: border-box;
-      width: 88px;
+      width: 90px;
       padding: 8px 16px;
       margin: 0.5em 0 0 0.5em;
       border-radius: 3px;
@@ -314,18 +313,25 @@
     {
       const avatar = document.getElementById("avatar");
       const canHover = matchMedia("(hover: hover)").matches;
-      const isDesktopWidth = matchMedia("(min-width: 640px)").matches;
+      const isGameWidth = matchMedia("(min-width: 740px)").matches;
+      const isGameHeight = matchMedia("(min-height: 740px)").matches;
       let gameIsRunning = false;
 
       // if (window.location.hostname === "localhost")
       //   start_game();
 
-      if (isDesktopWidth)
+      // TODO: Do this on resize
+      if (isGameWidth && isGameHeight) {
+        avatar.setAttribute("title", "How about a nice game of breakout?");
+        avatar.classList.add("clickable");
         avatar.addEventListener("click", start_game);
+      }
       if (canHover)
         document.addEventListener("mousemove", flip_avatar);
 
       function flip_avatar(e) {
+        if (gameIsRunning)
+          return;
         const rect = avatar.getBoundingClientRect();
         const rectCenterX = rect.x + rect.width / 2;
 

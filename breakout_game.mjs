@@ -202,7 +202,7 @@ export function game_update(currentTime) {
         if (data.intro.ball.progress === 0) {
           spawn_ball(true);
         }
-        data.balls[0].y = lerp(data.paddle.position.y, data.paddle.position.y - BALL_SIZE, data.intro.ball.progress);
+        data.balls[0].position.y = lerp(data.paddle.position.y, data.paddle.position.y - BALL_SIZE, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
       }
 
