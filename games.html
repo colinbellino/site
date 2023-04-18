@@ -5,8 +5,8 @@
   <meta charset="utf-8">
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <title>Colin Bellino | Projects</title>
-  <meta name="Description" content="Projects i worked on for clients or myself.">
+  <title>Colin Bellino | My games & prototypes</title>
+  <meta name="Description" content="Games and prototypes i worked on.">
   <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png">
@@ -107,6 +107,7 @@
 
     ul.screenshots li:not(:first-of-type) img {
       width: 128px;
+      height: 72px;
     }
 
     ul.screenshots:after {
@@ -136,56 +137,9 @@
   <main>
     <header>
       <a href="/"><img class="avatar" src="/public/me.png" alt="My avatar"></a>
-      <h1>Projects i worked on:</h1>
+      <h1>Games i made:</h1>
     </header>
     <section>
-      <h2>Web projects for clients</h2>
-      <ul class="projects">
-        <li>
-          <h3><a href="https://photos.hubside.com" target="_blank" rel="noopener">Photos web app</a></h3>
-          <p>A Web App to regroup all your photos in one place and easily/safely share them online.</p>
-          <p>I was on the project from the first line of code to the MVP release, we worked hand in hand with the
-            product owner, designers and developers to create something we could be proud of.
-            A lot of work went into the architecture of the app, to make sure it runs ans scales smoothly on GCP and is
-            easy to maintain.</p>
-          <p>The backend revolves around a GraphQL schema that is shared with the frontend and iOS app to facilitate
-            communications.</p>
-          <p>The frontend is a React app written in TypeScript that uses Apollo to manage data and caching. Components
-            were written in Storybook by following the Atomic Design guidelines as much as possible.</p>
-          <ul>
-            <li>React / TypeScript / Apollo client / CSS Modules</li>
-            <li>Node / TypeScript / Apollo server / Express</li>
-            <li>Google Cloud Platform : datastore, storage, app engine, functions, pub/sub</li>
-            <li>Jest / Cypress / Gitlab CI / Storybook / Chromatic</li>
-          </ul>
-        </li>
-        <li>
-          <h3>Supply chain project for <a href="https://www.renaultgroup.com/en/talent/our-career-areas/digital"
-              target="_blank" rel="noopener">Renault Digital</a></h3>
-          <p>A large single page application used by the supply chain team at Renault.</p>
-          <p>We created the UI components, code the logic to connect them to the backend (a JSON API that we also
-            developed), discuss potential UX problems with the team among other things.</p>
-          <p>
-            Mainly working on the frontend, i was involved in most technical decisions with the other developers, code
-            review, code quality control and made multiple improvements to our tooling to avoid regressions and quality
-            of our frontend.
-            Formation of the new developers and transfert of knowledge to the new team that will continue the project.
-          </p>
-          <ul>
-            <li>React / Redux / Styled components</li>
-            <li>NodeJS / FeathersJS / Docker</li>
-            <li>Jest / Cypress / Storybook</li>
-            <li>Tests (unit and integration) / Performance tuning / Style guide / Docs</li>
-          </ul>
-        </li>
-        <li>
-          <h3>Older projects can be found on my <a href="https://www.linkedin.com/in/colin%E2%80%8F-bellino-b9237473"
-              target="_blank">LinkedIn profile</a>.</h3>
-        </li>
-      </ul>
-    </section>
-    <section>
-      <h2>Personal games and prototypes</h2>
       <ul class="projects">
         <li>
           <!-- TODO: Self host these images -->
@@ -194,10 +148,17 @@
           <p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach
             perfect balance, symbolized by the goal of each level. <br />
             But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>
+          <ul>
+            <li>Engine: Unity</li>
+            <li>Language: C#</li>
+            <li>Duration: 72h (+ a couple of days after the jam)</li>
+            <li><a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source
+                code</a><br /><br /></li>
+          </ul>
           <ul class="screenshots">
             <li>
               <a href="https://colinbellino.itch.io/alteration" target="_blank" rel="noopener">
-                <img src="https://img.itch.zone/aW1nLzcxMzYzMTYucG5n/315x250%23c/Xrc7Pj.png"
+                <img src="https://img.itch.zone/aW1hZ2UvMTIxMzI1OS84MTQzNzAwLmpwZw==/250x600/Y3mrgb.jpg"
                   alt="Banner of the game." />
               </a>
             </li>
@@ -244,6 +205,13 @@
             challenge for myself.</p>
           <p>I wanted to make a game about kids playing outside and throwing snowballs around and also wondered how a
             battle system like this would work in a side view game. So, i've combined the two to make Snowball ⛄!</p>
+          <ul>
+            <li>Engine: Unity</li>
+            <li>Language: C#</li>
+            <li>Duration: Around a month (4h / day)</li>
+            <li><a href="https://github.com/colinbellino/snowball" target="_blank" rel="noopener">Source
+                code</a><br /><br /></li>
+          </ul>
           <ul class="screenshots">
             <li>
               <a href="https://colinbellino.itch.io/snowball" target="_blank" rel="noopener">
@@ -255,14 +223,28 @@
               <a href="https://img.itch.zone/aW1hZ2UvODgwMzc4LzUxMDkxMDgucG5n/original/NOs3AR.png" target="_blank"
                 rel="noopener">
                 <img src="https://img.itch.zone/aW1hZ2UvODgwMzc4LzUxMDkxMDgucG5n/250x600/tK77Ju.png"
-                  alt="A Screenshot of the game (1 of 2)." />
+                  alt="A Screenshot of the game (1 of 4)." />
               </a>
             </li>
             <li>
               <a href="https://img.itch.zone/aW1hZ2UvODgwMzc4LzUxMDkxMDYucG5n/original/FrTIVy.png" target="_blank"
                 rel="noopener">
                 <img src="https://img.itch.zone/aW1hZ2UvODgwMzc4LzUxMDkxMDYucG5n/250x600/yiZ0h0.png"
-                  alt="A Screenshot of the game (2 of 2)." />
+                  alt="A Screenshot of the game (2 of 4)." />
+              </a>
+            </li>
+            <li>
+              <a href="https://img.itch.zone/aW1hZ2UvODgwMzc4LzgyODk3MjcucG5n/original/%2BEXYlH.png" target="_blank"
+                rel="noopener">
+                <img src="https://img.itch.zone/aW1hZ2UvODgwMzc4LzgyODk3MjcucG5n/250x600/MDkAt3.png"
+                  alt="A Screenshot of the game (3 of 4)." />
+              </a>
+            </li>
+            <li>
+              <a href="https://img.itch.zone/aW1hZ2UvODgwMzc4LzgyODk3NjAucG5n/original/Z2C2Mo.png" target="_blank"
+                rel="noopener">
+                <img src="https://img.itch.zone/aW1hZ2UvODgwMzc4LzgyODk3NjAucG5n/250x600/E5XL5%2F.png"
+                  alt="A Screenshot of the game (4 of 4)." />
               </a>
             </li>
           </ul>
@@ -270,6 +252,13 @@
         <li>
           <h3><a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">Flight</a></h3>
           <p>A platformer game created in 72 hours with a team of 2 (art, & code) for the Indie Tales 2021 game jam.</p>
+          <ul>
+            <li>Engine: Unity</li>
+            <li>Language: C#</li>
+            <li>Duration: 72h</li>
+            <li><a href="https://github.com/colinbellino/indie-tales-2021" target="_blank" rel="noopener">Source
+                code</a><br /><br /></li>
+          </ul>
           <ul class="screenshots">
             <li>
               <a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">
@@ -298,6 +287,13 @@
           </h3>
           <p>A platformer game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 48 game jam.
           </p>
+          <ul>
+            <li>Engine: Unity</li>
+            <li>Language: C#</li>
+            <li>Duration: 72h</li>
+            <li><a href="https://github.com/colinbellino/ludum-dare-48" target="_blank" rel="noopener">Source
+                code</a><br /><br /></li>
+          </ul>
           <ul class="screenshots">
             <li>
               <a href="https://colinbellino.itch.io/bonbon" target="_blank" rel="noopener">
@@ -329,7 +325,8 @@
           </ul>
         </li>
         <li>
-          <h3>More projects can be found on my <a href="https://colinbellino.itch.io" target="_blank">Itch profile</a>.
+          <h3>More games & prototypes can be found on my <a href="https://colinbellino.itch.io" target="_blank">Itch
+              profile</a>.
           </h3>
         </li>
       </ul>
