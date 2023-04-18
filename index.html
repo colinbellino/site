@@ -265,9 +265,9 @@
     const avatar = document.getElementById("avatar");
     const canHover = matchMedia('(hover: hover)').matches;
     if (avatar && canHover) {
-      const rect = avatar.getBoundingClientRect();
-      const rectCenterX = rect.x + rect.width / 2;
       document.addEventListener("mousemove", e => {
+        const rect = avatar.getBoundingClientRect();
+        const rectCenterX = rect.x + rect.width / 2;
         if (e.clientX > rectCenterX) {
           avatar.classList.remove("flipped");
         } else {
