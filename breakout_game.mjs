@@ -144,6 +144,7 @@ const data = {
       x: 0,
       y: 0,
     },
+    moveDirection: 0,
     width: PADDLE_WIDTH,
     height: PADDLE_HEIGHT,
     velocity: { x: 0, y: 0 },
@@ -329,6 +330,7 @@ export function game_update(currentTime) {
       // Player inputs
       {
         if (data.mouse.changed) {
+          data.paddle.moveDirection = (data.mouse.x - data.paddle.position.x) >= 0 ? 1 : -1;
           data.paddle.position.x = data.mouse.x;
         } else {
           if (data.keys[KEY_MOVE_LEFT].down) {
@@ -341,6 +343,7 @@ export function game_update(currentTime) {
             data.paddle.velocity.x = 0;
           }
 
+          data.paddle.moveDirection = data.paddle.velocity.x >= 0 ? 1 : -1;
           data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
         }
 
@@ -354,7 +357,7 @@ export function game_update(currentTime) {
         if (data.keys[KEY_CONFIRM].released || data.keys[KEY_MOUSE_LEFT].released) {
           const firstBall = data.balls.find(ball => ball.attachedToPaddle);
           if (firstBall) {
-            firstBall.velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
+            firstBall.velocity.x = data.paddle.moveDirection;
             firstBall.velocity.y = -1;
             firstBall.attachedToPaddle = false;
           } else {
@@ -623,7 +626,7 @@ function play_random_audio_clip(clips) {
 function spawn_ball(attachedToPaddle) {
   const velocity = { x: 0, y: 0 };
   if (attachedToPaddle === false) {
-    velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
+    velocity.x = data.paddle.moveDirection;
     velocity.y = -1;
   }
 
