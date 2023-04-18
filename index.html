@@ -378,16 +378,6 @@
       if (canHover)
         document.addEventListener("mousemove", flip_avatar);
 
-      // Prepare some config for breakout
-      {
-        document.body.setAttribute("data-breakout-min-width", 1000);
-        document.body.setAttribute("data-breakout-min-height", 700);
-        const blocks = [".avatar img", ".hire-me", "li > a"];
-        document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
-        const toSplit = ["h1 a", "h2", "main > nav > p > b", "main > section > p", "main > footer > p"];
-        document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
-      }
-
       function flip_avatar(e) {
         const avatar = document.getElementById("avatar");
 
@@ -400,6 +390,16 @@
           avatar.classList.remove("flipped");
         }
       }
+    }
+
+    // Prepare some config for breakout
+    function prepare_page_for_breakout() {
+      document.body.setAttribute("data-breakout-min-width", 1000);
+      document.body.setAttribute("data-breakout-min-height", 700);
+      const blocks = [".avatar img", ".hire-me", "li > a"];
+      document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
+      const toSplit = ["h1 a", "h2", "main > nav > p > b", "main > section > p", "main > footer > p"];
+      document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
     }
   </script>
   <script src="/public/breakout_loader.mjs" type="module" async defer></script>
