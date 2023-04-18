@@ -14,12 +14,12 @@
 .breakout-canvas.blocking {
   pointer-events: all;
 }
+
 .breakout-block {
   opacity: 1;
   transform: scale(1);
   transition: opacity ease-in 100ms, transform ease-in 100ms !important;
 }
-
 .breakout-block.destroyed {
   opacity: 0;
   transform: scale(1.2);
@@ -29,7 +29,7 @@
   display: block;
   position: absolute;
   top: 20px;
-  left: auto;
+  left: 20px;
   right: 20px;
   opacity: 1;
   transition: opacity ease-out 300ms, transform ease-in 200ms;
@@ -39,6 +39,7 @@
   margin: 0;
   padding: 20px;
   width: 400px;
+  margin: 0 auto;
   border-radius: 3px;
   background: rgba(0, 0, 0, 0.9);
   color: rgba(255, 255, 255, 0.9);
@@ -53,34 +54,18 @@
   position: absolute;
   display: block;
   top: 20px;
-  left: 20px;
+  right: 20px;
   margin: 0;
-  padding: 10px 20px;
+  padding: 10px 25px;
   border-radius: 3px;
   font-size: 1.6rem;
   background: rgba(0, 0, 0, 0.03);
   opacity: 1;
-  transition: opacity ease-out 300ms;
+  transition: opacity linear 400ms;
 }
 .breakout-score.hidden {
   pointer-events: none;
   opacity: 0;
-}
-.breakout-score.bounce-1 { animation: 200ms ease-in-out bounce-1; }
-.breakout-score.bounce-2 { animation: 200ms ease-in-out bounce-2; }
-.breakout-score.bounce-3 { animation: 200ms ease-in-out bounce-3; }
-
-@keyframes bounce-1 {
-  from { transform: scale(1.05) }
-  to { transform: scale(1) }
-}
-@keyframes bounce-2 {
-  from { transform: scale(1.1) }
-  to { transform: scale(1) }
-}
-@keyframes bounce-3 {
-  from { transform: scale(1.2) }
-  to { transform: scale(1) }
 }
 
 .breakout-pause {
@@ -128,6 +113,24 @@
   opacity: 0;
 }
 
+.breakout-lives {
+  position: absolute;
+  display: block;
+  top: 20px;
+  left: 20px;
+  margin: 0;
+  padding: 10px 25px;
+  border-radius: 3px;
+  font-size: 1.6rem;
+  background: rgba(0, 0, 0, 0.03);
+  opacity: 1;
+  transition: opacity linear 400ms;
+}
+.breakout-lives.hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
 .slider {
   font-size: 1.2rem;
   color: rgba(255, 255, 255, 0.95);
@@ -135,4 +138,21 @@
 .slider input {
   display: block;
   width: 100%;
+}
+
+.bounce-1 { animation: 200ms ease-in-out bounce-1; }
+.bounce-2 { animation: 200ms ease-in-out bounce-2; }
+.bounce-3 { animation: 200ms ease-in-out bounce-3; }
+
+@keyframes bounce-1 {
+  from { transform: scale(1.05) }
+  to { transform: scale(1) }
+}
+@keyframes bounce-2 {
+  from { transform: scale(1.1) }
+  to { transform: scale(1) }
+}
+@keyframes bounce-3 {
+  from { transform: scale(1.2) }
+  to { transform: scale(1) }
 }

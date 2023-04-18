@@ -20,6 +20,8 @@ import {
   platform_hide_score,
   platform_show_pause,
   platform_hide_pause,
+  platform_show_lives,
+  platform_hide_lives,
   platform_play_audio_clip,
   platform_stop_audio_clip,
   platform_log,
@@ -89,7 +91,7 @@ const PARTICLE_AREA_MAX = 300;
 
 const SCORE_PER_BLOCK = 10;
 const SCORE_MULTIPLIER = 1;
-const SCORE_MULTIPLIER_PER_BLOCK = 0.2;
+const SCORE_MULTIPLIER_PER_BLOCK = 0.1;
 
 const data = {
   mode: MODE_INIT,
@@ -153,6 +155,7 @@ const data = {
   blocks: [],
   particles: [],
   trail: [],
+  lives: 2,
   score: 0,
   multiplier: SCORE_MULTIPLIER,
 
@@ -370,10 +373,25 @@ export function game_update(currentTime) {
 
       // Check for lose condition
       const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
-      if (ballsRemaining === 0 && data.debug.cheats === false) {
-        data.state = STATE_LOSE;
-        data.mode = MODE_END;
-        break;
+      if (data.balls.length > 0 && ballsRemaining === 0 && data.debug.cheats === false) {
+        data.lives -= 1;
+
+        if (data.lives < 0) {
+          data.state = STATE_LOSE;
+          data.mode = MODE_END;
+          break;
+        }
+
+        for (let ballIndex = data.balls.length - 1; ballIndex >= 0; ballIndex--)
+          data.balls.splice(ballIndex, 1);
+        spawn_ball(true);
+        platform_show_lives(data.lives);
+
+        // Reset multiplier
+        if (data.debug.cheats === false) {
+          data.multiplier = SCORE_MULTIPLIER;
+          platform_show_score(data.score, data.multiplier);
+        }
       }
 
       // Balls
@@ -427,12 +445,6 @@ export function game_update(currentTime) {
             }
             ball.position.y = data.paddle.position.y;
             // TODO: check what other breakout games do so the bounces don't feel so janky
-
-            // Reset multiplier
-            if (data.debug.cheats === false) {
-              data.multiplier = SCORE_MULTIPLIER;
-              platform_show_score(data.score, data.multiplier);
-            }
 
             platform_play_audio_clip(AUDIO_CLIP_BOUNCE_2);
           }

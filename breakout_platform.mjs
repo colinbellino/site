@@ -20,7 +20,7 @@ import {
 
 const VOLUME_SFX_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_MULTIPLIER = 0.2;
-const VOLUME_MUSIC_PAUSED_DIVIDER = 0.05;
+const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.05;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -53,6 +53,7 @@ const data = {
     help: null,
     score: null,
     pause: null,
+    lives: null,
     musicSlider: null,
     sfxSlider: null,
   },
@@ -148,6 +149,19 @@ export function platform_hide_pause() {
   data.renderer.canvas.classList.remove("blocking");
   data.ui.pause.classList.add("hidden");
   set_volume_music(data.settings.volumeMusic);
+}
+
+export async function platform_show_lives(lives) {
+  data.ui.lives.classList.remove("hidden");
+  data.ui.lives.classList.add("bounce-3");
+  data.ui.lives.innerHTML = `Lives: ${lives + 1}`;
+
+  await wait_for_milliseconds(300);
+  data.ui.lives.classList.remove("bounce-3");
+}
+
+export function platform_hide_lives() {
+  data.ui.lives.classList.add("hidden");
 }
 
 export function platform_play_audio_clip(key, group = 0, loop = false) {
@@ -281,6 +295,15 @@ export async function platform_start() {
       root.appendChild(parent);
     }
 
+    if (data.ui.lives === null)
+    {
+      data.ui.lives = document.createElement("aside");
+      data.ui.lives.classList.add("breakout-lives");
+      data.ui.lives.classList.add("hidden");
+      data.ui.lives.innerHTML = 0;
+      document.body.appendChild(data.ui.lives);
+    }
+
     const quitButton = document.createElement("button");
     quitButton.innerHTML = "Quit";
     quitButton.classList.add("link");
@@ -411,6 +434,8 @@ function clean_up() {
   data.ui.score = null;
   data.ui.pause.remove();
   data.ui.pause = null;
+  data.ui.lives.remove();
+  data.ui.lives = null;
   data.ui.musicSlider = null;
   data.ui.sfxSlider = null;
 
@@ -521,7 +546,7 @@ function set_volume_music(value) {
     return;
 
   if (data.paused)
-    value *= VOLUME_MUSIC_PAUSED_DIVIDER;
+    value *= VOLUME_MUSIC_PAUSED_MULTIPLIER;
 
   value *= VOLUME_MUSIC_MULTIPLIER;
 
