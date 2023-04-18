@@ -371,13 +371,14 @@ export function game_update(currentTime) {
             firstBall.velocity.x = data.paddle.moveDirection;
             firstBall.velocity.y = -1;
             firstBall.attachedToPaddle = false;
+            platform_play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
           } else {
             if (data.balls.length <= data.lives || data.debug.cheats) {
               platform_show_lives(data.lives);
               spawn_ball(false);
+              platform_play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
             }
           }
-          platform_play_audio_clip(AUDIO_CLIP_BOUNCE_2, 0);
         }
       }
 

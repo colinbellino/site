@@ -209,7 +209,7 @@ export async function platform_start() {
   document.body.appendChild(data.renderer.canvas);
 
   data.settings.volumeSfx = 1;
-  data.settings.volumeMusic = 1;
+  data.settings.volumeMusic = 0;
 
   if (data.ui.help === null)
   {
