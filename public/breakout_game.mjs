@@ -251,6 +251,10 @@ export function game_resize(width, height) {
   }
 }
 
+export function game_quit() {
+  data.mode = MODE_END;
+}
+
 export function game_update(currentTime) {
   data.delta = currentTime - data.currentTime;
   data.currentTime = currentTime;
@@ -378,22 +382,23 @@ export function game_update(currentTime) {
       if (data.balls.length > 0 && ballsRemaining === 0 && data.debug.cheats === false) {
         data.lives -= 1;
 
+        platform_show_lives(data.lives);
+
         if (data.lives < 0) {
           data.state = STATE_LOSE;
           data.mode = MODE_END;
           break;
         }
 
-        for (let ballIndex = data.balls.length - 1; ballIndex >= 0; ballIndex--)
-          data.balls.splice(ballIndex, 1);
-        spawn_ball(true);
-        platform_show_lives(data.lives);
-
         // Reset multiplier
         if (data.debug.cheats === false) {
           data.multiplier = SCORE_MULTIPLIER;
           platform_show_score(data.score, data.multiplier);
         }
+
+        for (let ballIndex = data.balls.length - 1; ballIndex >= 0; ballIndex--)
+          data.balls.splice(ballIndex, 1);
+        spawn_ball(true);
       }
 
       // Balls
@@ -544,6 +549,7 @@ export function game_update(currentTime) {
         if (data.outro.help.progress === 0) {
           platform_stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
           platform_hide_help();
+          platform_hide_pause();
         }
         data.outro.help.progress += data.delta / data.outro.help.duration;
       }

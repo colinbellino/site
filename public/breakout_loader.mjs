@@ -51,9 +51,6 @@
       console.log("All game files loaded.");
     }
 
-    if (window.prepare_page_for_breakout !== undefined)
-      prepare_page_for_breakout();
-
     gameIsRunning = true;
     return game.platform_start().then(([result, score]) => {
       console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);

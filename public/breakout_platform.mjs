@@ -16,6 +16,7 @@ import {
   game_keyup,
   game_mousemove,
   game_resize,
+  game_quit,
 } from "./breakout_game.mjs"
 
 const VOLUME_SFX_MULTIPLIER = 0.2;
@@ -313,15 +314,21 @@ export async function platform_start() {
     document.body.appendChild(data.ui.pause);
   }
 
-  const toSplit = document.querySelectorAll(".breakout-to-split");
-  split_in_blocks(document.querySelectorAll(".breakout-to-split"));
-  const nodes = document.querySelectorAll(".breakout-preblock");
-  document.querySelectorAll(".breakout-to-hide").forEach((element) => {
-    element.classList.add("breakout-hidden");
-  });
+  if (data.blocks.length === 0) {
+    if (window.prepare_page_for_breakout !== undefined)
+      window.prepare_page_for_breakout();
+
+    const toSplit = document.querySelectorAll(".breakout-to-split");
+    split_in_blocks(document.querySelectorAll(".breakout-to-split"));
+    const nodes = document.querySelectorAll(".breakout-preblock");
+    document.querySelectorAll(".breakout-to-hide").forEach((element) => {
+      element.classList.add("breakout-hidden");
+    });
+
+    data.blocks = Array.from(nodes);
+  }
 
   {
-    data.blocks = Array.from(nodes);
     if (data.blocks.length === 0) {
       return Promise.reject(new Error("No valid blocks were found on the page, refusing to start the game like this."));
     }
@@ -408,8 +415,7 @@ export async function platform_start() {
 
 export function platform_stop() {
   platform_log("Stopping the game");
-  window.cancelAnimationFrame(data.renderer.requestId);
-  clean_up();
+  game_quit();
 }
 
 function clean_up() {
