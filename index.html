@@ -132,6 +132,7 @@
     }
 
     p {
+      display: inline-block;
       line-height: 150%;
     }
 
@@ -305,16 +306,18 @@
     const canHover = matchMedia('(hover: hover)').matches;
 
     if (avatar && canHover) {
-      document.addEventListener("mousemove", e => {
-        const rect = avatar.getBoundingClientRect();
-        const rectCenterX = rect.x + rect.width / 2;
+      document.addEventListener("mousemove", flipAvatar);
+    }
 
-        if (e.clientX > rectCenterX) {
-          avatar.classList.remove("flipped");
-        } else {
-          avatar.classList.add("flipped");
-        }
-      });
+    function flipAvatar(e) {
+      const rect = avatar.getBoundingClientRect();
+      const rectCenterX = rect.x + rect.width / 2;
+
+      if (e.clientX > rectCenterX) {
+        avatar.classList.remove("flipped");
+      } else {
+        avatar.classList.add("flipped");
+      }
     }
   </script>
   <!-- <script>
@@ -327,6 +330,7 @@
     .breakout-block {
       transition: all ease-in 100ms;
       opacity: 1;
+      /* outline: 1px solid red; */
     }
 
     .breakout-destroyed {
@@ -339,6 +343,12 @@
   <script type="module">
     import { platform_init } from "./breakout_platform.mjs";
     platform_init();
+    document.removeEventListener("mousemove", flipAvatar);
+    // TODO: Clean up when the game is over
+    // - remove event listeners
+    // - restore dom/css
+    // - unload js
+    // - free memory
   </script>
 </body>
 

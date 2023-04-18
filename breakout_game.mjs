@@ -1,6 +1,7 @@
 import {
   platform_clear_rect,
   platform_render_rect,
+  platform_render_text,
   platform_get_blocks,
   platform_destroy_block,
   platform_log,
@@ -10,18 +11,24 @@ import {
 export const KEY_MOVE_LEFT = 0;
 export const KEY_MOVE_RIGHT = 1;
 export const KEY_CONFIRM = 2;
+export const KEY_CANCEL = 3;
+export const KEY_PAUSE = 3;
 
 const MODE_INIT = 0;
 const MODE_PLAY = 1;
+const MODE_PAUSE = 2;
 
 const BACKGROUND_COLOR = "#ffffff"
-const PADDLE_SPEED = 20;
+const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.3)"
+const PAUSE_TEXT_COLOR = "#000000"
+const PADDLE_WIDTH = 150;
+const PADDLE_HEIGHT = 20;
+const PADDLE_SPEED = 10;
 const PADDLE_COLOR = "#000000";
 const BALL_SPEED = 3;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
 const BLOCK_COLOR_ON = "transparent";
-const BLOCK_COLOR_OFF = "white";
 
 const data = {
   mode: MODE_INIT,
@@ -34,11 +41,15 @@ const data = {
   paddle: {
     x: 0,
     y: 0,
-    width: 100,
-    height: 20,
+    width: PADDLE_WIDTH,
+    height: PADDLE_HEIGHT,
   },
   balls: [],
   blocks: [],
+
+  debug: {
+    trail: [],
+  },
 
   keys: {
     [KEY_MOVE_LEFT]: {
@@ -50,6 +61,14 @@ const data = {
       released: false,
     },
     [KEY_CONFIRM]: {
+      down: false,
+      released: false,
+    },
+    [KEY_CANCEL]: {
+      down: false,
+      released: false,
+    },
+    [KEY_PAUSE]: {
       down: false,
       released: false,
     },
@@ -75,10 +94,14 @@ function game_is_point_inside(point, box) {
          (point.y >= box.y && point.y <= box.y + box.height);
 }
 
+function normalize(value, min = 0, max = 1) {
+  return (value - min) / (max - min);
+}
+
 function game_spawn_ball() {
   data.balls.push({
     x: data.paddle.x + data.paddle.width/2,
-    y: data.paddle.y - data.paddle.height,
+    y: data.paddle.y,
     width: BALL_SIZE,
     height: BALL_SIZE,
     velocityX: 1,
@@ -89,79 +112,122 @@ function game_spawn_ball() {
 }
 
 export function game_update(currentTime) {
-  // Initialize game state
-  if (data.mode === MODE_INIT) {
-    data.paddle.x = 100;
-    data.paddle.y = data.window.height - data.paddle.height;
-
-    const blocks = platform_get_blocks();
-    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-      const block = blocks[blockIndex];
-      const rect = block.getClientRects()[0];
-
-      data.blocks.push({
-        id: blockIndex,
-        width: rect.width + 2,
-        height: rect.height + 2,
-        x: rect.x - 1,
-        y: rect.y - 1,
-        color: BLOCK_COLOR_ON,
-        destroyed: false,
-      });
-    }
-
-    data.mode = MODE_PLAY;
-  }
-
   // Update
-  if (data.keys[KEY_MOVE_LEFT].down) {
-    data.paddle.x = Math.max(0, data.paddle.x - PADDLE_SPEED);
-  }
-  else if (data.keys[KEY_MOVE_RIGHT].down) {
-    data.paddle.x = Math.min(data.window.width - data.paddle.width, data.paddle.x + PADDLE_SPEED);
-  }
+  switch (data.mode) {
+    case MODE_INIT: {
+      data.paddle.x = 100;
+      data.paddle.y = data.window.height - data.paddle.height;
 
-  if (data.keys[KEY_CONFIRM].released) {
-    game_spawn_ball();
-  }
+      const blocks = platform_get_blocks();
+      for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+        const block = blocks[blockIndex];
+        const rect = block.getClientRects()[0];
 
-  for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
-    const ball = data.balls[ballIndex];
-
-    if (ball.destroyed)
-      continue;
-
-    ball.x += ball.velocityX * BALL_SPEED;
-    if (ball.x + ball.width > data.window.width || ball.x < 0)
-      ball.velocityX = -ball.velocityX;
-
-    ball.y += ball.velocityY * BALL_SPEED;
-    if (ball.y < 0)
-      ball.velocityY = -ball.velocityY;
-    if (ball.y > data.window.height)
-      ball.destroyed = true;
-
-    if (game_is_point_inside(ball, data.paddle)) {
-      // TODO: Handle collision from the left/right
-      ball.velocityY = -ball.velocityY;
-      ball.y = data.paddle.y - data.paddle.height;
-    }
-
-    for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
-      const block = data.blocks[blockIndex];
-      if (block.destroyed === false && game_is_point_inside(ball, block)) {
-        // TODO: Handle collision from the left/right
-        ball.velocityY = -ball.velocityY;
-        block.destroyed = true;
-        // block.color = BLOCK_COLOR_OFF;
-        platform_destroy_block(block.id);
+        data.blocks.push({
+          id: blockIndex,
+          width: rect.width + 2,
+          height: rect.height + 2,
+          x: rect.x - 1,
+          y: rect.y - 1,
+          color: BLOCK_COLOR_ON,
+          destroyed: false,
+        });
       }
-    }
+
+      data.mode = MODE_PLAY;
+    } break;
+
+    case MODE_PAUSE: {
+      if (data.keys[KEY_PAUSE].released) {
+        data.mode = MODE_PLAY;
+      }
+    } break;
+
+    case MODE_PLAY: {
+      if (data.keys[KEY_PAUSE].released) {
+        data.mode = MODE_PAUSE;
+      }
+
+      if (data.keys[KEY_MOVE_LEFT].down) {
+        data.paddle.x = Math.max(0, data.paddle.x - PADDLE_SPEED);
+      }
+      else if (data.keys[KEY_MOVE_RIGHT].down) {
+        data.paddle.x = Math.min(data.window.width - data.paddle.width, data.paddle.x + PADDLE_SPEED);
+      }
+
+      if (data.keys[KEY_CONFIRM].released) {
+        game_spawn_ball();
+      }
+
+      for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
+        const ball = data.balls[ballIndex];
+
+        if (ball.destroyed)
+          continue;
+
+        ball.x += ball.velocityX * BALL_SPEED;
+        if (ball.x + ball.width > data.window.width || ball.x < 0)
+          ball.velocityX = -ball.velocityX;
+
+        ball.y += ball.velocityY * BALL_SPEED;
+        if (ball.y < 0)
+          ball.velocityY = -ball.velocityY;
+        if (ball.y > data.window.height)
+          ball.destroyed = true;
+
+        if (game_is_point_inside(ball, data.paddle)) {
+          const distLeft = Math.abs((ball.x + ball.width / 2) - (data.paddle.x));
+          const distRight = Math.abs((ball.x + ball.width / 2) - (data.paddle.x + data.paddle.width));
+          const distTop = Math.abs((ball.y + ball.height / 2) - (data.paddle.y));
+          const distBottom = Math.abs((ball.y + ball.height / 2) - (data.paddle.y + data.paddle.height));
+
+          ball.velocityY = -ball.velocityY;
+
+          if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
+            ball.velocityX = -ball.velocityX;
+            ball.y = data.paddle.y;
+          }
+        }
+
+        // data.debug.trail.push([ball.x, ball.y]);
+
+        for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+          const block = data.blocks[blockIndex];
+          if (block.destroyed === false && game_is_point_inside(ball, block)) {
+            const distLeft = Math.abs((ball.x + ball.width / 2) - (block.x));
+            const distRight = Math.abs((ball.x + ball.width / 2) - (block.x + block.width));
+            const distTop = Math.abs((ball.y + ball.height / 2) - (block.y));
+            const distBottom = Math.abs((ball.y + ball.height / 2) - (block.y + block.height));
+
+            if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
+              ball.velocityX = -ball.velocityX;
+            } else {
+              ball.velocityY = -ball.velocityY;
+            }
+            block.destroyed = true;
+            platform_destroy_block(block.id);
+          }
+        }
+      }
+    } break;
   }
+
 
   // Render
 
   platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
+
+  if (data.mode == MODE_PAUSE) {
+    const rect = { x: 0, y: 0, width: data.window.width, height: data.window.height };
+    platform_render_rect(rect, PAUSE_BACKGROUND_COLOR);
+    platform_render_text(data.window.width / 2, 50, "PAUSED", 30, PAUSE_TEXT_COLOR);
+  }
+
+  for (let trailIndex = 0; trailIndex < data.debug.trail.length; trailIndex++) {
+    const [x,y] = data.debug.trail[trailIndex];
+    const rect = { x, y, width: 1, height: 1 };
+    platform_render_rect(rect, "red");
+  }
 
   for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
     const block = data.blocks[blockIndex];
@@ -173,7 +239,6 @@ export function game_update(currentTime) {
   for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
     const ball = data.balls[ballIndex];
 
-    // TODO: Free memory at some point
     if (ball.destroyed) {
       continue;
     }
