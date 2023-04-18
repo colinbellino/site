@@ -99,6 +99,7 @@ const data = {
   debug: {
     showBlocks: false,
     trail: [],
+    cheats: false,
   },
 
   keys: {
@@ -200,6 +201,11 @@ export function game_update(currentTime) {
   // Debug inputs
   if (data.keys[KEY_DEBUG_1].released) {
     data.debug.showBlocks = !data.debug.showBlocks;
+    console.log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
+  }
+  if (data.keys[KEY_DEBUG_2].released) {
+    data.debug.cheats = !data.debug.cheats;
+    console.log("Cheats:", data.debug.cheats ? "ON" : "OFF");
   }
 
   // Update
@@ -291,7 +297,7 @@ export function game_update(currentTime) {
           firstBall.velocityY = -1;
           firstBall.launched = true;
         } else {
-          if (data.balls.length < BALL_MAX) {
+          if (data.balls.length < BALL_MAX || data.debug.cheats) {
             game_spawn_ball(true);
           }
         }
@@ -321,7 +327,8 @@ export function game_update(currentTime) {
         if (ball.y > data.window.height) {
           ball.destroyed = true;
 
-          if (data.balls.filter(b => b.destroyed === false).length === 0) {
+          const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
+          if (ballsRemaining === 0 && data.debug.cheats === false) {
             data.state = STATE_LOSE;
             data.mode = MODE_END;
             break;
