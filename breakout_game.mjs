@@ -315,17 +315,17 @@ export function game_update(currentTime) {
           platform_show_pause();
           data.mode = MODE_PAUSE;
         }
-      }
 
-      if (data.keys[KEY_CONFIRM].released || data.keys[KEY_MOUSE_LEFT].released) {
-        const firstBall = data.balls.find(ball => ball.attachedToPaddle);
-        if (firstBall) {
-          firstBall.velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
-          firstBall.velocity.y = -1;
-          firstBall.attachedToPaddle = false;
-        } else {
-          if (data.balls.length < BALL_MAX || data.debug.cheats) {
-            spawn_ball(false);
+        if (data.keys[KEY_CONFIRM].released || data.keys[KEY_MOUSE_LEFT].released) {
+          const firstBall = data.balls.find(ball => ball.attachedToPaddle);
+          if (firstBall) {
+            firstBall.velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
+            firstBall.velocity.y = -1;
+            firstBall.attachedToPaddle = false;
+          } else {
+            if (data.balls.length < BALL_MAX || data.debug.cheats) {
+              spawn_ball(false);
+            }
           }
         }
       }
