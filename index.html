@@ -244,11 +244,12 @@
 
     @media (min-width: 700px) {
       body {
-        padding: 15vh 0 0;
+        padding: 100px 0 0 0;
       }
 
       main {
         margin: 0 auto;
+        padding-top: 30px;
         max-width: 660px;
         grid-template-columns: 200px auto;
         grid-template-rows: 200px auto;
@@ -288,7 +289,7 @@
 <body>
   <main>
     <aside>
-      <div id="avatar" class="avatar pixel-art">
+      <div id="avatar" class="avatar pixel-art start-game">
         <img src="/public/me.gif" aria-hidden="true" width="128" />
       </div>
     </aside>
@@ -364,33 +365,24 @@
   </main>
   <script>
     {
-      const avatar = document.getElementById("avatar");
       const canHover = matchMedia("(hover: hover)").matches;
-      const isGameWidth = matchMedia("(min-width: 740px)").matches;
-      const isGameHeight = matchMedia("(min-height: 740px)").matches;
-      let gameIsRunning = false;
 
-      if (window.location.search.includes("start_game"))
-        start_game();
-
-      // TODO: Do this on resize
-      if (isGameWidth && isGameHeight) {
-        const dialog = document.createElement("p");
-        dialog.setAttribute("role", "tooltip");
-        dialog.innerHTML = "How about a nice game of breakout?";
-        dialog.classList.add("dialog");
-        avatar.appendChild(dialog);
-
-        avatar.classList.add("clickable");
-
-        avatar.addEventListener("click", start_game);
-      }
       if (canHover)
         document.addEventListener("mousemove", flip_avatar);
 
+      // Prepare some config for breakout
+      {
+        document.body.setAttribute("data-breakout-min-width", 1000);
+        document.body.setAttribute("data-breakout-min-height", 700);
+        const blocks = [".avatar img", ".hire-me", "li > a"];
+        document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
+        const toSplit = ["h1 a", "h2", "main > nav > p > b", "main > section > p", "main > footer > p"];
+        document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
+      }
+
       function flip_avatar(e) {
-        if (gameIsRunning)
-          return;
+        const avatar = document.getElementById("avatar");
+
         const rect = avatar.getBoundingClientRect();
         const rectCenterX = rect.x + rect.width / 2;
 
@@ -400,55 +392,9 @@
           avatar.classList.remove("flipped");
         }
       }
-
-      function load_game() {
-        return new Promise((resolve) => {
-          let loaded = 0;
-          let toLoad = 2;
-
-          function onLoad() {
-            loaded += 1;
-            if (loaded >= toLoad)
-              resolve();
-          };
-
-          const script = document.createElement("script");
-          script.setAttribute("type", "text/javascript");
-          script.setAttribute("type", "module");
-          script.setAttribute("src", "breakout_loader.mjs");
-          document.body.appendChild(script);
-          script.onload = onLoad;
-
-          const link = document.createElement("link");
-          link.setAttribute("rel", "stylesheet");
-          link.setAttribute("href", "breakout.css");
-          link.onload = onLoad;
-          document.body.appendChild(link);
-        });
-      }
-
-      async function start_game() {
-        if (gameIsRunning)
-          return;
-
-        if (window.breakout === undefined) {
-          await load_game();
-          console.log("All game files loaded.");
-        }
-
-        console.log("Starting game.");
-        document.body.classList.add("game-running");
-        gameIsRunning = true;
-
-        // TODO: stop the game when "pause > quit" button clicked
-        window.breakout.start().then(([result, score]) => {
-          console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);
-          document.body.classList.remove("game-running");
-          gameIsRunning = false;
-        });
-      }
     }
-</script>
+  </script>
+  <script src="/public/breakout_loader.mjs" type="module" async defer></script>
 </body>
 
 </html>

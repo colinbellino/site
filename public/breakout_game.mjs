@@ -246,6 +246,8 @@ export function game_resize(width, height) {
       const rect = blocks[blockIndex].getClientRects()[0];
       set_block_rect(data.blocks[blockIndex], rect);
     }
+
+    data.paddle.position.y = data.window.height - data.paddle.height - PADDLE_Y;
   }
 }
 

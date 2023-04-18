@@ -1,5 +1,7 @@
 .game-running {
   overflow: hidden;
+  padding-top: 100px;
+  transition: padding linear 200ms;
 }
 
 .breakout-canvas {
@@ -129,6 +131,11 @@
 .breakout-lives.hidden {
   pointer-events: none;
   opacity: 0;
+}
+
+.breakout-hidden {
+  opacity: 0 !important;
+  transition: opacity linear 100ms !important;
 }
 
 .slider {

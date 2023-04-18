@@ -313,22 +313,17 @@ export async function platform_start() {
     document.body.appendChild(data.ui.pause);
   }
 
+  const toSplit = document.querySelectorAll(".breakout-to-split");
+  split_in_blocks(document.querySelectorAll(".breakout-to-split"));
+  const nodes = document.querySelectorAll(".breakout-preblock");
+  document.querySelectorAll(".breakout-to-hide").forEach((element) => {
+    element.classList.add("breakout-hidden");
+  });
+
   {
-    split_in_blocks("h1 a");
-    split_in_blocks("h2");
-    split_in_blocks("main > nav > p > b");
-    split_in_blocks("main > section > p");
-    split_in_blocks("main > footer > p");
-    const selectors = [
-      ".breakout-preblock",
-      ".avatar img",
-      ".hire-me",
-      "li > a",
-    ];
-    data.blocks = Array.from(document.querySelectorAll(selectors.join(", ")));
+    data.blocks = Array.from(nodes);
     if (data.blocks.length === 0) {
-      platform_error("No valid blocks were found on the page, refusing to start the game like this.");
-      return;
+      return Promise.reject(new Error("No valid blocks were found on the page, refusing to start the game like this."));
     }
 
     for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
@@ -374,6 +369,10 @@ export async function platform_start() {
       data.audio.gainSfx.gain.value = 0;
   }
 
+  resize();
+
+  document.body.classList.add("game-running");
+
   document.addEventListener("mouseup", mouseup);
   document.addEventListener("mousedown", mousedown);
   document.addEventListener("mousemove", mousemove);
@@ -381,7 +380,7 @@ export async function platform_start() {
   document.addEventListener("keyup", keyup);
   window.addEventListener("resize", resize);
 
-  resize();
+  console.log("Starting game with blocks:", data.blocks.length);
 
   return new Promise((resolve, reject) => {
     const fps = 120;
@@ -414,9 +413,12 @@ export function platform_stop() {
 }
 
 function clean_up() {
-  data.blocks.forEach((block) => {
-    block.classList.remove("breakout-block");
-    block.classList.remove("destroyed");
+  document.querySelectorAll(".breakout-hidden").forEach((element) => {
+    element.classList.remove("breakout-hidden");
+  });
+  data.blocks.forEach((element) => {
+    element.classList.remove("breakout-block");
+    element.classList.remove("destroyed");
   });
   data.blocks = [];
   data.renderer.canvas.remove();
@@ -438,6 +440,8 @@ function clean_up() {
   data.ui.lives = null;
   data.ui.musicSlider = null;
   data.ui.sfxSlider = null;
+
+  document.body.classList.remove("game-running");
 
   document.removeEventListener("mouseup", mouseup);
   document.removeEventListener("mousedown", mousedown);
@@ -492,8 +496,8 @@ function resize() {
   game_resize(data.renderer.canvas.width, data.renderer.canvas.height);
 }
 
-function split_in_blocks(selector) {
-  document.querySelectorAll(selector).forEach((root) => {
+function split_in_blocks(nodes) {
+  nodes.forEach((root) => {
     root.childNodes.forEach((node) => {
       if (node.tagName !== undefined)
         return;

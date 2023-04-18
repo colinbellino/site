@@ -45,8 +45,13 @@
       color: var(--main-color-hover);
     }
 
+    main > header {
+      padding: 0.8rem 0 1rem;
+    }
+
     h1 {
-      margin: 0.8rem 0 1rem;
+      display: inline-block;
+      margin: 0;
       font-size: 1.4rem;
       line-height: 1.5em;
       color: rgba(0, 0, 0, 0.85);
@@ -294,6 +299,19 @@
       </ul>
     </section>
   </main>
+  <script>
+    {
+      document.body.setAttribute("data-breakout-min-width", 1000);
+      document.body.setAttribute("data-breakout-min-height", 700);
+      const toHide = [".projects > li:not(:first-child)"];
+      document.querySelectorAll(toHide).forEach((node) => node.classList.add("breakout-to-hide"));
+      const blocks = [".avatar", "h1", ".projects > li:first-child h3", ".projects > li:first-child ul > li"];
+      document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
+      const toSplit = [".projects > li:first-child > p"];
+      document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
+    }
+  </script>
+  <script src="/public/breakout_loader.mjs" type="module" async defer></script>
 </body>
 
 </html>
