@@ -317,7 +317,7 @@
       const isGameHeight = matchMedia("(min-height: 740px)").matches;
       let gameIsRunning = false;
 
-      if (window.location.hostname === "localhost")
+      if (window.location.search.includes("start_game"))
         start_game();
 
       // TODO: Do this on resize
