@@ -76,7 +76,7 @@
     ul.projects > li {
       padding: 2vh;
       margin-bottom: 2vh;
-      background: rgba(0, 0, 0, 0.05);
+      background: rgba(0, 0, 0, 0.03);
     }
 
     ul.screenshots {
@@ -115,6 +115,15 @@
     @media (max-width: 640px) {
       body {
         padding: 3vh;
+      }
+
+      ul.screenshots li:first-of-type {
+        float: none;
+        margin: 0 0 0.6vh 0;
+      }
+
+      ul.screenshots li:first-of-type img {
+        width: 100%;
       }
     }
   </style>
