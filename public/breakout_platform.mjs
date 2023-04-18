@@ -178,7 +178,7 @@ export function platform_play_audio_clip(key, group = 0, loop = false) {
     source.connect(data.audio.gainSfx);
   else
     source.connect(data.audio.gainMusic);
-  source.start(0, clip.buffer.duration);
+  source.start();
   data.audio.sources[index] = source;
 }
 

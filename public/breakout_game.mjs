@@ -377,6 +377,7 @@ export function game_update(currentTime) {
               spawn_ball(false);
             }
           }
+          platform_play_audio_clip(AUDIO_CLIP_BOUNCE_2, 0);
         }
       }
 
