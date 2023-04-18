@@ -4,7 +4,7 @@ const uglify = require("uglify-js");
 const jsFiles = [
   "./public/js/breakout_loader",
   "./public/js/breakout_game",
-  "./public/js/breakout_platform",
+  "./public/js/breakout_platform_browser",
   "./public/js/math",
 ];
 const htmlFiles = [

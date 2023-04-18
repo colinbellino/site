@@ -61,7 +61,7 @@
     if (game === null) {
       const [style, breakout] = await Promise.all([
         import_style("/public/breakout.css"),
-        import("/public/js/breakout_platform.mjs"),
+        import("/public/js/breakout_platform_browser.mjs"),
       ]);
       game = breakout;
       console.log("All game files loaded.");

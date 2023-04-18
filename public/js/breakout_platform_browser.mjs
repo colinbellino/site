@@ -1,4 +1,3 @@
-import { clamp } from "./math.mjs";
 import {
   KEY_MOUSE_LEFT,
   KEY_MOUSE_RIGHT,
@@ -11,13 +10,14 @@ import {
   KEY_DEBUG_2,
   KEY_DEBUG_3,
   AUDIO_CLIPS,
+  game_init,
   game_update,
   game_keydown,
   game_keyup,
   game_mousemove,
   game_resize,
   game_quit,
-} from "./breakout_game.mjs"
+} from "./breakout_game.mjs";
 
 const VOLUME_SFX_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_MULTIPLIER = 0.2;
@@ -68,28 +68,28 @@ const data = {
   },
 };
 
-export function platform_log(...args) {
+function platform_log(...args) {
   console.log(...args);
 }
 
-export function platform_warn(...args) {
+function platform_warn(...args) {
   console.warn(...args);
 }
 
-export function platform_error(...args) {
+function platform_error(...args) {
   console.error(...args);
 }
 
-export function platform_clear_rect({ x, y, width, height }) {
+function platform_clear_rect({ x, y, width, height }) {
   data.renderer.context.clearRect(x, y, width, height);
 }
 
-export function platform_draw_rect({ x, y, width, height }, color) {
+function platform_draw_rect({ x, y, width, height }, color) {
   data.renderer.context.fillStyle = color;
   data.renderer.context.fillRect(x, y, width, height);
 }
 
-export function platform_draw_trail({ x, y }, size, color) {
+function platform_draw_trail({ x, y }, size, color) {
   data.renderer.context.beginPath();
   data.renderer.context.fillStyle = color;
   data.renderer.context.moveTo(x, y);
@@ -97,16 +97,16 @@ export function platform_draw_trail({ x, y }, size, color) {
 
 }
 
-export function platform_destroy_block(blockIndex) {
+function platform_destroy_block(blockIndex) {
   const block = data.blocks[blockIndex];
   block.classList.add("destroyed");
 }
 
-export function platform_get_blocks() {
+function platform_get_blocks() {
   return data.blocks;
 }
 
-export function platform_show_help() {
+function platform_show_help() {
   data.ui.help.classList.remove("hidden");
 
   const block = data.ui.help.firstChild;
@@ -114,11 +114,11 @@ export function platform_show_help() {
   data.blocks.push(block);
 }
 
-export function platform_hide_help() {
+function platform_hide_help() {
   data.ui.help.classList.add("hidden");
 }
 
-export async function platform_show_score(score, multiplier) {
+async function platform_show_score(score, multiplier) {
   data.ui.score.classList.remove("hidden");
   if (multiplier > 3)
     data.ui.score.classList.add("bounce-2");
@@ -132,11 +132,11 @@ export async function platform_show_score(score, multiplier) {
   data.ui.score.classList.remove("bounce-1", "bounce-2", "bounce-3");
 }
 
-export function platform_hide_score() {
+function platform_hide_score() {
   data.ui.score.classList.add("hidden");
 }
 
-export function platform_show_pause() {
+function platform_show_pause() {
   data.renderer.canvas.classList.add("blocking")
   data.ui.pause.classList.remove("hidden");
   data.ui.musicSlider.setAttribute("value", data.settings.volumeMusic);
@@ -145,14 +145,14 @@ export function platform_show_pause() {
   set_volume_music(data.settings.volumeMusic);
 }
 
-export function platform_hide_pause() {
+function platform_hide_pause() {
   data.paused = false;
   data.renderer.canvas.classList.remove("blocking");
   data.ui.pause.classList.add("hidden");
   set_volume_music(data.settings.volumeMusic);
 }
 
-export async function platform_show_lives(lives) {
+async function platform_show_lives(lives) {
   data.ui.lives.classList.remove("hidden");
   data.ui.lives.classList.add("bounce-3");
   data.ui.lives.innerHTML = `Lives: ${lives + 1}`;
@@ -161,11 +161,11 @@ export async function platform_show_lives(lives) {
   data.ui.lives.classList.remove("bounce-3");
 }
 
-export function platform_hide_lives() {
+function platform_hide_lives() {
   data.ui.lives.classList.add("hidden");
 }
 
-export function platform_play_audio_clip(key, group = 0, loop = false) {
+function platform_play_audio_clip(key, group = 0, loop = false) {
   if (data.audio.available === false)
     return;
 
@@ -182,7 +182,7 @@ export function platform_play_audio_clip(key, group = 0, loop = false) {
   data.audio.sources[index] = source;
 }
 
-export function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
+function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
   if (data.audio.available === false)
     return;
 
@@ -388,6 +388,25 @@ export async function platform_start() {
   window.addEventListener("resize", resize);
 
   platform_log("Starting game with blocks:", data.blocks.length);
+  game_init({
+    clear_rect: platform_clear_rect,
+    draw_rect: platform_draw_rect,
+    draw_trail: platform_draw_trail,
+    get_blocks: platform_get_blocks,
+    destroy_block: platform_destroy_block,
+    show_help: platform_show_help,
+    hide_help: platform_hide_help,
+    show_score: platform_show_score,
+    hide_score: platform_hide_score,
+    show_pause: platform_show_pause,
+    hide_pause: platform_hide_pause,
+    show_lives: platform_show_lives,
+    hide_lives: platform_hide_lives,
+    play_audio_clip: platform_play_audio_clip,
+    stop_audio_clip: platform_stop_audio_clip,
+    log: platform_log,
+    error: platform_error,
+  });
 
   return new Promise((resolve, reject) => {
     const fps = 120;

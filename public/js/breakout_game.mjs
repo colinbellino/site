@@ -8,25 +8,6 @@ import {
   normalize_vector,
   random,
 } from "./math.mjs";
-import {
-  platform_clear_rect,
-  platform_draw_rect,
-  platform_draw_trail,
-  platform_get_blocks,
-  platform_destroy_block,
-  platform_show_help,
-  platform_hide_help,
-  platform_show_score,
-  platform_hide_score,
-  platform_show_pause,
-  platform_hide_pause,
-  platform_show_lives,
-  platform_hide_lives,
-  platform_play_audio_clip,
-  platform_stop_audio_clip,
-  platform_log,
-  platform_error,
-} from "./breakout_platform.mjs"
 
 export const KEY_MOVE_LEFT = 0;
 export const KEY_MOVE_RIGHT = 1;
@@ -95,6 +76,26 @@ const SCORE_MULTIPLIER = 1;
 const SCORE_MULTIPLIER_PER_BLOCK = 0.1;
 
 const data = {
+  platform: {
+    clear_rect: null,
+    draw_rect: null,
+    draw_trail: null,
+    get_blocks: null,
+    destroy_block: null,
+    show_help: null,
+    hide_help: null,
+    show_score: null,
+    hide_score: null,
+    show_pause: null,
+    hide_pause: null,
+    show_lives: null,
+    hide_lives: null,
+    play_audio_clip: null,
+    stop_audio_clip: null,
+    log: null,
+    error: null,
+  },
+
   mode: MODE_INIT,
   state: STATE_RUNNING,
 
@@ -222,7 +223,7 @@ export function game_mousemove(x, y) {
 
 export function game_keydown(key) {
   if ((key in data.keys) === false) {
-    platform_error("Unknown key:", key);
+    data.platform.error("Unknown key:", key);
     return;
   }
   data.keys[key].down = true;
@@ -230,7 +231,7 @@ export function game_keydown(key) {
 
 export function game_keyup(key) {
   if ((key in data.keys) === false) {
-    platform_error("Unknown key:", key);
+    data.platform.error("Unknown key:", key);
     return;
   }
   data.keys[key].down = false;
@@ -242,7 +243,7 @@ export function game_resize(width, height) {
   data.window.height = height;
 
   if (data.mode === MODE_PLAY) {
-    const blocks = platform_get_blocks();
+    const blocks = data.platform.get_blocks();
     for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
       const rect = blocks[blockIndex].getClientRects()[0];
       set_block_rect(data.blocks[blockIndex], rect);
@@ -257,6 +258,10 @@ export function game_quit() {
   data.state = STATE_LOSE;
 }
 
+export function game_init(platform) {
+  data.platform = platform;
+}
+
 export function game_update(currentTime) {
   data.delta = currentTime - data.currentTime;
   data.currentTime = currentTime;
@@ -264,7 +269,7 @@ export function game_update(currentTime) {
   // Debug inputs
   if (data.keys[KEY_DEBUG_1].released) {
     data.debug.showBlocks = !data.debug.showBlocks;
-    platform_log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
+    data.platform.log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
   }
   if (data.keys[KEY_DEBUG_2].released) {
     data.debug.cheats = !data.debug.cheats;
@@ -272,7 +277,7 @@ export function game_update(currentTime) {
       data.paddle.width = PADDLE_WIDTH * 3;
     else
       data.paddle.width = PADDLE_WIDTH;
-    platform_log("Cheats:", data.debug.cheats ? "ON" : "OFF");
+    data.platform.log("Cheats:", data.debug.cheats ? "ON" : "OFF");
   }
 
   // Update
@@ -299,7 +304,7 @@ export function game_update(currentTime) {
     case MODE_INTRO: {
       if (data.intro.paddle.progress === 0) {
         // TODO: Use different volume for music
-        platform_play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
+        data.platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
       }
 
       {
@@ -317,7 +322,7 @@ export function game_update(currentTime) {
 
       if (data.intro.ball.progress >= 1 + data.intro.help.delay) {
         if (data.intro.help.progress === 0) {
-          platform_show_help();
+          data.platform.show_help();
         }
         data.intro.help.progress += data.delta / data.intro.help.duration;
       }
@@ -328,7 +333,7 @@ export function game_update(currentTime) {
 
       if (done) {
         // Get the blocks after we show the help since this is one of the element we use to generate blocks.
-        const blocks = platform_get_blocks();
+        const blocks = data.platform.get_blocks();
         for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
           const rect = blocks[blockIndex].getClientRects()[0];
           spawn_block(blockIndex, rect);
@@ -362,7 +367,7 @@ export function game_update(currentTime) {
         data.paddle.position.x = clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
 
         if (data.keys[KEY_PAUSE].released || data.keys[KEY_MOUSE_RIGHT].released) {
-          platform_show_pause();
+          data.platform.show_pause();
           data.mode = MODE_PAUSE;
         }
 
@@ -372,12 +377,12 @@ export function game_update(currentTime) {
             firstBall.velocity.x = data.paddle.moveDirection;
             firstBall.velocity.y = -1;
             firstBall.attachedToPaddle = false;
-            platform_play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
+            data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
           } else {
             if (data.balls.length <= data.lives || data.debug.cheats) {
-              platform_show_lives(data.lives);
+              data.platform.show_lives(data.lives);
               spawn_ball(false);
-              platform_play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
+              data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_1, 0);
             }
           }
         }
@@ -392,7 +397,7 @@ export function game_update(currentTime) {
 
           if (data.debug.cheats === false) {
             data.lives -= 1;
-            platform_show_lives(data.lives);
+            data.platform.show_lives(data.lives);
 
             // Check for lose condition
             if (data.lives < 0) {
@@ -404,7 +409,7 @@ export function game_update(currentTime) {
             // Reset multiplier
             if (data.debug.cheats === false) {
               data.multiplier = SCORE_MULTIPLIER;
-              platform_show_score(data.score, data.multiplier);
+              data.platform.show_score(data.score, data.multiplier);
             }
           }
 
@@ -439,7 +444,7 @@ export function game_update(currentTime) {
           // Hit bottom limit
           if (ball.position.y > data.window.height) {
             ball.destroyed = true;
-            platform_play_audio_clip(AUDIO_CLIP_LOSE_1);
+            data.platform.play_audio_clip(AUDIO_CLIP_LOSE_1);
           }
 
           // Bounce on paddle
@@ -456,7 +461,7 @@ export function game_update(currentTime) {
             ball.position.y = data.paddle.position.y;
             // TODO: check what other breakout games do so the bounces don't feel so janky
 
-            platform_play_audio_clip(AUDIO_CLIP_BOUNCE_2);
+            data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_2);
           }
 
           ball.velocity = normalize_vector(ball.velocity);
@@ -482,13 +487,13 @@ export function game_update(currentTime) {
                 ball.velocity.y = -ball.velocity.y;
               }
               block.destroyed = true;
-              platform_destroy_block(block.id);
+              data.platform.destroy_block(block.id);
               play_random_audio_clip([AUDIO_CLIP_HIT_1, AUDIO_CLIP_HIT_2, AUDIO_CLIP_HIT_3, AUDIO_CLIP_HIT_4]);
 
               data.score += SCORE_PER_BLOCK * data.multiplier;
               data.multiplier += SCORE_MULTIPLIER_PER_BLOCK;
               ball.speed += BALL_SCORE_MULTIPLIER;
-              platform_show_score(data.score, data.multiplier);
+              data.platform.show_score(data.score, data.multiplier);
 
               const ratio = Math.min(PARTICLE_AREA_MAX, (block.width + block.height)) / PARTICLE_AREA_MAX;
               for (let particleIndex = 0; particleIndex < lerp(PARTICLE_PER_HIT_MIN, PARTICLE_PER_HIT_MAX, ratio); particleIndex++) {
@@ -543,7 +548,7 @@ export function game_update(currentTime) {
 
     case MODE_PAUSE: {
       if (data.keys[KEY_PAUSE].released) {
-        platform_hide_pause();
+        data.platform.hide_pause();
         data.mode = MODE_PLAY;
       }
     } break;
@@ -551,9 +556,9 @@ export function game_update(currentTime) {
     case MODE_END: {
       {
         if (data.outro.help.progress === 0) {
-          platform_stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
-          platform_hide_help();
-          platform_hide_pause();
+          data.platform.stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
+          data.platform.hide_help();
+          data.platform.hide_pause();
         }
         data.outro.help.progress += data.delta / data.outro.help.duration;
       }
@@ -565,7 +570,7 @@ export function game_update(currentTime) {
 
       {
         if (data.outro.score.progress === 0) {
-          platform_hide_score();
+          data.platform.hide_score();
         }
         data.outro.score.progress += data.delta / data.outro.score.duration;
       }
@@ -583,7 +588,7 @@ export function game_update(currentTime) {
 
   // Render
   {
-    platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
+    data.platform.clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
 
     for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
       const ball = data.balls[ballIndex];
@@ -599,22 +604,22 @@ export function game_update(currentTime) {
         position.x -= size / 2;
         position.y -= size / 2;
         const color = { ...BALL_COLOR, a: progress };
-        platform_draw_trail(position, size, color_to_string(color));
+        data.platform.draw_trail(position, size, color_to_string(color));
       }
 
       const rect = { width: ball.width, height: ball.height, x: ball.position.x, y: ball.position.y };
-      platform_draw_rect(rect, color_to_string(ball.color));
+      data.platform.draw_rect(rect, color_to_string(ball.color));
     }
 
     for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
       const particle = data.particles[particleIndex];
       const rect = { width: particle.width, height: particle.height, x: particle.position.x, y: particle.position.y };
-      platform_draw_rect(rect, color_to_string(particle.color));
+      data.platform.draw_rect(rect, color_to_string(particle.color));
     }
 
     {
       const rect = { x: data.paddle.position.x, y: data.paddle.position.y, width: data.paddle.width, height: data.paddle.height };
-      platform_draw_rect(rect, PADDLE_COLOR);
+      data.platform.draw_rect(rect, PADDLE_COLOR);
     }
 
     if (data.debug.showBlocks) {
@@ -624,7 +629,7 @@ export function game_update(currentTime) {
         const color = { r: 0, g: 0, b: 255, a: 1 };
         if (block.destroyed)
           color.a = 0.2;
-        platform_draw_rect(rect, color_to_string(color));
+        data.platform.draw_rect(rect, color_to_string(color));
       }
     }
   }
@@ -644,7 +649,7 @@ function color_to_string({ r, g, b, a }) {
 
 function play_random_audio_clip(clips) {
   const clip = clips[Math.floor(Math.random() * clips.length)];
-  platform_play_audio_clip(clip);
+  data.platform.play_audio_clip(clip);
 }
 
 function spawn_ball(attachedToPaddle) {
