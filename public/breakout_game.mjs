@@ -290,6 +290,7 @@ export function game_update(currentTime) {
       data.outro.help.progress = 0;
       data.outro.score.progress = 0;
       data.score = 0;
+      data.lives = 2;
       data.multiplier = SCORE_MULTIPLIER;
 
       data.mode = MODE_INTRO;
