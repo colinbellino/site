@@ -1,4 +1,6 @@
 import {
+  KEY_MOUSE_LEFT,
+  KEY_MOUSE_RIGHT,
   KEY_MOVE_LEFT,
   KEY_MOVE_RIGHT,
   KEY_CONFIRM,
@@ -10,10 +12,11 @@ import {
   game_update,
   game_keydown,
   game_keyup,
+  game_mousemove,
   game_resize,
 } from "./breakout_game.mjs"
 
-const platformKeys = {
+const codeToKey = {
   37: KEY_MOVE_LEFT,
   39: KEY_MOVE_RIGHT,
   32: KEY_CONFIRM,
@@ -100,10 +103,12 @@ export function platform_hide_score() {
 }
 
 export function platform_show_pause() {
+  data.renderer.canvas.classList.add("blocking")
   data.ui.pause.classList.remove("hidden");
 }
 
 export function platform_hide_pause() {
+  data.renderer.canvas.classList.remove("blocking")
   data.ui.pause.classList.add("hidden");
 }
 
@@ -185,6 +190,9 @@ export function platform_start() {
     platform_warn("Web Audio API not available, continuing without audio.");
   }
 
+  document.addEventListener("mouseup", mouseup);
+  document.addEventListener("mousedown", mousedown);
+  document.addEventListener("mousemove", mousemove);
   document.addEventListener("keydown", keydown);
   document.addEventListener("keyup", keyup);
   window.addEventListener("resize", resize);
@@ -236,13 +244,36 @@ function clean_up() {
   data.ui.score.remove();
   data.ui.score = null;
 
+  document.removeEventListener("mouseup", mouseup);
+  document.removeEventListener("mousedown", mousedown);
+  document.removeEventListener("mousemove", mousemove);
   document.removeEventListener("keydown", keydown);
   document.removeEventListener("keyup", keyup);
   window.removeEventListener("resize", resize);
 }
 
+function mousedown(e) {
+  if (e.which === 1)
+    return game_keydown(KEY_MOUSE_LEFT);
+  if (e.which === 3)
+    return game_keydown(KEY_MOUSE_RIGHT);
+  console.log(e.which);
+}
+
+function mouseup(e) {
+  if (e.which === 1)
+    return game_keyup(KEY_MOUSE_LEFT);
+  if (e.which === 3)
+    return game_keyup(KEY_MOUSE_RIGHT);
+  // console.log(e.which);
+}
+
+function mousemove(e) {
+  game_mousemove(e.clientX, e.clientY);
+}
+
 function keydown(e) {
-  const key = platformKeys[e.keyCode];
+  const key = codeToKey[e.keyCode];
   if (key === undefined) {
     // console.log("e.keyCode", e.keyCode);
     return;
@@ -251,7 +282,7 @@ function keydown(e) {
 }
 
 function keyup(e) {
-  const key = platformKeys[e.keyCode];
+  const key = codeToKey[e.keyCode];
   if (key === undefined) {
     // console.log("e.keyCode", e.keyCode);
     return;

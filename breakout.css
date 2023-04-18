@@ -11,6 +11,9 @@
   pointer-events: none;
   z-index: 1;
 }
+.breakout-canvas.blocking {
+  pointer-events: all;
+}
 .breakout-block {
   display: inline-block;
   opacity: 1;

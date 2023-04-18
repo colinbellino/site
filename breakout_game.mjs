@@ -19,6 +19,8 @@ export const KEY_MOVE_RIGHT = 1;
 export const KEY_CONFIRM = 2;
 export const KEY_CANCEL = 3;
 export const KEY_PAUSE = 4;
+export const KEY_MOUSE_LEFT = 20;
+export const KEY_MOUSE_RIGHT = 21;
 export const KEY_DEBUG_1 = 50;
 export const KEY_DEBUG_2 = 51;
 export const KEY_DEBUG_3 = 52;
@@ -122,6 +124,11 @@ const data = {
     cheats: false,
   },
 
+  mouse: {
+    x: 0,
+    y: 0,
+    changed: false,
+  },
   keys: {
     [KEY_MOVE_LEFT]: {
       down: false,
@@ -143,6 +150,14 @@ const data = {
       down: false,
       released: false,
     },
+    [KEY_MOUSE_LEFT]: {
+      down: false,
+      released: false,
+    },
+    [KEY_MOUSE_RIGHT]: {
+      down: false,
+      released: false,
+    },
     [KEY_DEBUG_1]: {
       down: false,
       released: false,
@@ -158,11 +173,25 @@ const data = {
   }
 };
 
+export function game_mousemove(x, y) {
+  data.mouse.x = x;
+  data.mouse.y = y;
+  data.mouse.changed = true;
+}
+
 export function game_keydown(key) {
+  if ((key in data.keys) === false) {
+    platform_error("Unknown key:", key);
+    return;
+  }
   data.keys[key].down = true;
 }
 
 export function game_keyup(key) {
+  if ((key in data.keys) === false) {
+    platform_error("Unknown key:", key);
+    return;
+  }
   data.keys[key].down = false;
   data.keys[key].released = true;
 }
@@ -249,28 +278,31 @@ export function game_update(currentTime) {
     case MODE_PLAY: {
       // Player inputs
       {
-        if (data.keys[KEY_PAUSE].released) {
+        if (data.mouse.changed) {
+          data.paddle.position.x = data.mouse.x;
+        } else {
+          if (data.keys[KEY_MOVE_LEFT].down) {
+            data.paddle.velocity.x = -1;
+          }
+          else if (data.keys[KEY_MOVE_RIGHT].down) {
+            data.paddle.velocity.x = +1;
+          }
+          else {
+            data.paddle.velocity.x = 0;
+          }
+
+          data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
+        }
+
+        data.paddle.position.x = clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
+
+        if (data.keys[KEY_PAUSE].released || data.keys[KEY_MOUSE_RIGHT].released) {
           platform_show_pause();
           data.mode = MODE_PAUSE;
         }
-
-        if (data.keys[KEY_MOVE_LEFT].down) {
-          data.paddle.velocity.x = -1;
-        }
-        else if (data.keys[KEY_MOVE_RIGHT].down) {
-          data.paddle.velocity.x = +1;
-        }
-        else {
-          data.paddle.velocity.x = 0;
-        }
       }
 
-      {
-        data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
-        data.paddle.position.x = clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
-      }
-
-      if (data.keys[KEY_CONFIRM].released) {
+      if (data.keys[KEY_CONFIRM].released || data.keys[KEY_MOUSE_LEFT].released) {
         const firstBall = data.balls.find(ball => ball.attachedToPaddle);
         if (firstBall) {
           firstBall.velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
@@ -499,6 +531,7 @@ export function game_update(currentTime) {
   }
 
   // Reset input state at the end of the frame
+  data.mouse.changed = 0;
   for (const [key, value] of Object.entries(data.keys)) {
     data.keys[key].released = false;
   }
