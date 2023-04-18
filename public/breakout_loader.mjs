@@ -9,7 +9,6 @@
     minWidth = parseInt(document.body.getAttribute("data-breakout-min-width"));
   if (document.body.hasAttribute("data-breakout-min-height"))
     minHeight = parseInt(document.body.getAttribute("data-breakout-min-height"));
-  console.log(minWidth, minHeight);
 
   // TODO: Do this on resize
   if (startButton && window.innerWidth >= minWidth && window.innerHeight >= minHeight) {
