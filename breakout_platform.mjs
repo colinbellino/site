@@ -19,8 +19,8 @@ const platformKeys = {
   37: KEY_MOVE_LEFT,
   39: KEY_MOVE_RIGHT,
   32: KEY_CONFIRM,
-  27: KEY_CANCEL,
-  80: KEY_PAUSE,
+  // 27: KEY_CANCEL,
+  27: KEY_PAUSE,
 };
 
 let blocks = [];

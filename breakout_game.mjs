@@ -12,7 +12,7 @@ export const KEY_MOVE_LEFT = 0;
 export const KEY_MOVE_RIGHT = 1;
 export const KEY_CONFIRM = 2;
 export const KEY_CANCEL = 3;
-export const KEY_PAUSE = 3;
+export const KEY_PAUSE = 4;
 
 const GAME_STATE_RUNNING = 0;
 const GAME_STATE_WIN = 1;
@@ -24,8 +24,8 @@ const MODE_PLAY = 2;
 const MODE_PAUSE = 3;
 
 const BACKGROUND_COLOR = "#ffffff";
-const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.3)";
-const PAUSE_TEXT_COLOR = "#000000";
+const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.5)";
+const PAUSE_TEXT_COLOR = "#ffffff";
 
 
 const PADDLE_SPEED = 20;
@@ -336,12 +336,6 @@ export function game_update(currentTime) {
   {
     platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
 
-    if (data.mode == MODE_PAUSE) {
-      const rect = { x: 0, y: 0, width: data.window.width, height: data.window.height };
-      platform_render_rect(rect, PAUSE_BACKGROUND_COLOR);
-      platform_render_text(data.window.width / 2, 50, "PAUSED", 30, PAUSE_TEXT_COLOR);
-    }
-
     for (let trailIndex = 0; trailIndex < data.debug.trail.length; trailIndex++) {
       const [x,y] = data.debug.trail[trailIndex];
       const rect = { x, y, width: 1, height: 1 };
@@ -369,6 +363,12 @@ export function game_update(currentTime) {
     {
       const rect = { x: data.paddle.x, y: data.paddle.y, width: data.paddle.width, height: data.paddle.height };
       platform_render_rect(rect, PADDLE_COLOR);
+    }
+
+    if (data.mode == MODE_PAUSE) {
+      platform_render_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height }, PAUSE_BACKGROUND_COLOR);
+      platform_render_rect({ x: data.window.width / 2 - 300/2, y: data.window.height / 2 - 100/2, width: 300, height: 100 }, PAUSE_BACKGROUND_COLOR);
+      platform_render_text(data.window.width / 2 - 60, data.window.height / 2 - 20, "PAUSED", 32, PAUSE_TEXT_COLOR);
     }
   }
 
