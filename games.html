@@ -90,8 +90,7 @@
       line-height: 1.4em;
       list-style: none;
     }
-
-    ul.projects>li {
+    ul.projects > li {
       padding: 20px;
       margin-bottom: 20px;
       border-radius: 3px;
@@ -101,13 +100,11 @@
     ul.screenshots {
       padding: 0;
     }
-
     ul.screenshots li {
       float: left;
       display: block;
       margin: 0 0.6vh 0.6vh 0;
     }
-
     ul.screenshots li img {
       display: block;
       width: 256px;
@@ -118,29 +115,62 @@
       outline: 0 solid var(--main-color);
       transition: outline linear 100ms;
     }
-
     ul.screenshots a:hover {
       outline-width: 2px;
       border-radius: 1px;
     }
-
     ul.screenshots li:first-of-type {
       float: left;
     }
-
     ul.screenshots li:not(:first-of-type) {
       vertical-align: top;
     }
-
     ul.screenshots li:not(:first-of-type) img {
       width: 128px;
       height: 72px;
     }
-
     ul.screenshots:after {
       display: block;
       clear: both;
       content: "";
+    }
+
+    ul.links {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0;
+      margin: 0 0 1em 0;
+    }
+    ul.links li {
+      display: block;
+      width: 47%;
+      padding: 0 0.5em 0.5em 0;
+      margin: 0;
+    }
+
+    .link {
+      display: flex;
+      flex-grow: 1;
+      box-sizing: border-box;
+      padding: 0.6em 1.5em;
+      align-items: center;
+      min-height: 44px;
+      border-radius: 3px;
+      font-size: 0.9em;
+      font-weight: 600;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.03);
+      transition: all linear 0.2s;
+    }
+    .link > img,
+    .link > svg {
+      display: inline-block;
+      width: 26px;
+      margin-right: 12px;
+    }
+    .link:hover {
+      background: rgba(0, 0, 0, 0.09);
+      text-decoration: none;
     }
 
     @media (max-width: 640px) {

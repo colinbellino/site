@@ -58,9 +58,11 @@
       padding: 0 0 0 16px;
       line-height: 1.4em;
     }
-
     li {
       margin-bottom: 10px;
+    }
+    li a {
+      display: inline-block;
     }
 
     a {
@@ -87,6 +89,31 @@
       color: rgba(0, 0, 0, 0.85);
     }
 
+    .link {
+      display: flex;
+      flex-grow: 1;
+      box-sizing: border-box;
+      padding: 0.6em 1.5em;
+      align-items: center;
+      min-height: 44px;
+      border-radius: 3px;
+      font-size: 0.9em;
+      font-weight: 600;
+      border-radius: 3px;
+      background: rgba(0, 0, 0, 0.03);
+      transition: all linear 0.2s;
+    }
+    .link > img,
+    .link > svg {
+      display: inline-block;
+      width: 26px;
+      margin-right: 12px;
+    }
+    .link:hover {
+      background: rgba(0, 0, 0, 0.09);
+      text-decoration: none;
+    }
+
     @media (max-width: 640px) {
       body {
         padding: 3vh;
@@ -110,8 +137,7 @@
           projects).</li>
         <li>Created 6 new games during the year (available on <a href="https://itch.io/c/2066136/my-games-2021-edition"
             target="_blank">itch.io</a>).</li>
-        <li>Removed 50% hope in the software industry being able to make actual working software (<a
-            href="https://imgur.com/gallery/PGGrrjo" target="_blank">see more</a>).</li>
+        <li>Removed 50% hope in the software industry being able to make actual working software (<a href="https://imgur.com/gallery/PGGrrjo" target="_blank">see more</a>).</li>
         <li>Increased morale in the house by 30% by buying a lot of new plants 🌱.</li>
         <li>Killed some plants by forgetting to water them 😭...</li>
         <li>Reduced weight by 30Kg</li>
@@ -147,6 +173,20 @@
       </ul>
     </section>
   </main>
+  <script nonce="script">
+    // Prepare some config for breakout
+    function prepare_page_for_breakout() {
+      document.body.setAttribute("data-breakout-min-width", 1000);
+      document.body.setAttribute("data-breakout-min-height", 700);
+      const toHide = ["main > section > ul:not(:first-of-type)", "main > section > h2:not(:first-of-type)"];
+      document.querySelectorAll(toHide).forEach((node) => node.classList.add("breakout-to-hide"));
+      const blocks = [".avatar", "h2"];
+      document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
+      const toSplit = ["h1", "main > section > ul:first-of-type h2", "main > section > ul:first-of-type li"];
+      document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
+    }
+  </script>
+  <script src="/public/breakout_loader.mjs" type="module" async defer></script>
 </body>
 
 </html>

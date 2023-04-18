@@ -21,7 +21,7 @@ import {
 
 const VOLUME_SFX_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_MULTIPLIER = 0.2;
-const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.05;
+const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.1;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -216,7 +216,7 @@ export async function platform_start() {
     data.ui.help = document.createElement("aside");
     data.ui.help.classList.add("breakout-help");
     data.ui.help.classList.add("hidden");
-    data.ui.help.innerHTML = `<p>Use <b>${"LEFT"}</b> and <b>${"RIGHT"}</b> arrows to move your paddle.<br>Press <b>${"SPACE"}</b> to shoot a ball.</p>`;
+    data.ui.help.innerHTML = `<p>Use <b>LEFT</b> and <b>RIGHT</b> arrows to move your paddle.<br>Press <b>SPACE</b> to shoot a ball, <b>ESCAPE</b> to pause / open the settings.</p>`;
     document.body.appendChild(data.ui.help);
   }
 
@@ -235,7 +235,7 @@ export async function platform_start() {
     data.ui.pause.classList.add("breakout-pause");
     data.ui.pause.classList.add("hidden");
 
-    const root = document.createElement("div");
+    const root = document.createElement("section");
     data.ui.pause.appendChild(root);
 
     const title = document.createElement("h3");
@@ -318,7 +318,6 @@ export async function platform_start() {
     if (window.prepare_page_for_breakout !== undefined)
       window.prepare_page_for_breakout();
 
-    const toSplit = document.querySelectorAll(".breakout-to-split");
     split_in_blocks(document.querySelectorAll(".breakout-to-split"));
     const nodes = document.querySelectorAll(".breakout-preblock");
     document.querySelectorAll(".breakout-to-hide").forEach((element) => {
@@ -505,31 +504,40 @@ function resize() {
 
 function split_in_blocks(nodes) {
   nodes.forEach((root) => {
+    let prependSpace = false;
     root.childNodes.forEach((node) => {
+      if (node.tagName === "A") {
+        node.classList.add("breakout-preblock");
+        return;
+      }
+
       if (node.tagName !== undefined)
         return;
 
       const replacement = document.createElement("span");
       const words = node.textContent.split(" ");
       let i = 0;
-      words.forEach((word) => {
-        if (word === "")
+      words.forEach((word, index) => {
+        if (word === "") {
+          prependSpace = true;
           return;
+        }
 
         const span = document.createElement("span");
         span.classList.add("breakout-preblock");
-        if (i % 2 !== 0)
-          span.classList.add("odd");
         span.innerHTML = word;
+        if (prependSpace)
+          span.innerHTML = " " + span.innerHTML;
+
+        if (index < words.length - 1)
+          span.innerHTML += " "
         replacement.appendChild(span);
-        const space = document.createElement("span");
-        space.innerHTML = " ";
-        replacement.appendChild(space);
 
         i += 1;
       });
       node.innerHTML = replacement.innerHTML;
       root.replaceChild(replacement, node);
+      prependSpace = false;
     });
   });
 }
