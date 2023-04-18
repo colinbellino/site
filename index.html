@@ -53,26 +53,43 @@
 
     ul.socials {
       margin: 0;
-      padding: 0;
+      padding: 0 0 1em 0;
       display: flex;
       flex-wrap: wrap;
     }
 
     ul.socials li {
-      height: 32px;
       display: flex;
+      box-sizing: border-box;
       align-items: center;
-      margin-right: 10px;
+      padding: 0 0.5em 0.5em 0;
+    }
+
+    ul.socials li a {
+      display: flex;
+      flex-grow: 1;
+      align-items: center;
+      padding: 0.6em 1.5em;
+      border-radius: 3px;
+      min-width: 100px;
+      font-size: 0.9em;
+      font-weight: 600;
+      background: rgba(0, 0, 0, 0.03);
+      transition: all linear 0.2s;
+    }
+
+    ul.socials li a:hover {
+      background: rgba(0, 0, 0, 0.09);
+    }
+
+    ul.socials li a:hover {
+      text-decoration: none;
     }
 
     ul.socials li img {
       display: inline-block;
       width: 26px;
-    }
-
-    ul.socials li a {
-      display: inline-block;
-      padding: 6px;
+      margin-right: 12px;
     }
 
     h1 {
@@ -108,7 +125,7 @@
     }
 
     p {
-      line-height: 140%;
+      line-height: 150%;
     }
 
     a:hover {
@@ -117,24 +134,29 @@
 
     ul.navigation {
       padding: 0;
-      margin: 0 0 2vh 0;
+      margin: 0;
     }
 
     ul.navigation li {
       display: inline-block;
-      margin: 0 0.2em 0 0;
+      margin: 0 0.2em 0.4em 0;
     }
 
     ul.navigation li a {
       display: inline-block;
-      padding: 1vh 2vh 1.2vh;
-      font-weight: bold;
+      padding: 0.8em 1.5em;
       font-size: 0.9em;
+      font-weight: 600;
       border-radius: 3px;
+      background: rgba(0, 0, 0, 0.03);
+      transition: all linear 0.2s;
     }
 
     ul.navigation li a:hover {
-      background: rgba(0, 0, 0, 0.03);
+      background: rgba(0, 0, 0, 0.09);
+    }
+
+    ul.navigation li a:hover {
       text-decoration: none;
     }
 
@@ -155,32 +177,23 @@
 
     @media (max-width: 640px) {
       body {
-        padding-top: 10vh;
+        padding-top: 5vh;
       }
 
       main {
         flex-direction: column;
         align-items: center;
-        text-align: center;
+        /* text-align: center; */
         padding-left: 2rem;
         padding-right: 2rem;
-      }
-
-      ul.navigation li a {
-        padding-left: 2vh;
       }
 
       .avatar {
         margin: 0 0 1.5rem;
       }
 
-      ul.socials {
-        margin-left: 1rem;
-      }
-
       ul.socials li {
         width: 50%;
-        margin: 0;
       }
     }
   </style>
@@ -192,43 +205,52 @@
     <section>
       <h1>Colin Bellino</h1> <a class="hire-me" href="mailto:work@colinbellino.com" target="_blank">Hire me</a>
       <h2>I'm a freelance programmer who loves building cool applications and video games.</h2>
-      <p>I've been coding, tinkering and prototyping for more than 10 years in various languages varying from
-        C to
-        JavaScript, from video games to web apps.</p>
-      <p>Below are some stuff i made recently:</p>
+      <p>I've been coding, tinkering and prototyping for more than 10 years in various languages varying from C to
+        JavaScript, from video games to web apps.
+        <br>
+        Below are some of the latest projects i worked on:
+      </p>
       <ul class="navigation">
         <li><a href="/games">Games</a></li>
         <li><a href="/web">Web</a></li>
         <li><a href="/changelog">Changelog</a></li>
       </ul>
+      <p>Where to find me on social media:</p>
       <ul class="socials">
         <li>
-          <img src="/public/twitter.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener">Twitter</a>
+          <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener">
+            <img src="/public/twitter.svg" aria-hidden="true" width="26" /> <span>Twitter</span>
+          </a>
         </li>
         <li>
-          <img src="/public/itch.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-itch" target="_blank" rel="noopener">Itch</a>
+          <a href="https://bit.ly/colin-itch" target="_blank" rel="noopener">
+            <img src="/public/itch.svg" aria-hidden="true" width="26" /> <span>Itch</span>
+          </a>
         </li>
         <li>
-          <img src="/public/github.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-code" target="_blank" rel="noopener">Github</a>
+          <a href="https://bit.ly/colin-code" target="_blank" rel="noopener">
+            <img src="/public/github.svg" aria-hidden="true" width="26" /> <span>Github</span>
+          </a>
         </li>
         <li>
-          <img src="/public/twitch.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-twitch" target="_blank" rel="noopener">Twitch</a>
+          <a href="https://bit.ly/colin-twitch" target="_blank" rel="noopener">
+            <img src="/public/twitch.svg" aria-hidden="true" width="26" /> <span>Twitch</span>
+          </a>
         </li>
         <li>
-          <img src="/public/youtube.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-yt" target="_blank" rel="noopener">YouTube</a>
+          <a href="https://bit.ly/colin-yt" target="_blank" rel="noopener">
+            <img src="/public/youtube.svg" aria-hidden="true" width="26" /> <span>YouTube</span>
+          </a>
         </li>
         <li>
-          <img src="/public/medium.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-medium" target="_blank" rel="noopener">Medium</a>
+          <a href="https://bit.ly/colin-medium" target="_blank" rel="noopener">
+            <img src="/public/medium.svg" aria-hidden="true" width="26" /> <span>Medium</span>
+          </a>
         </li>
         <li>
-          <img src="/public/discord.svg" aria-hidden="true" width="26" />
-          <a href="https://bit.ly/colin-discord" target="_blank" rel="noopener">Discord</a>
+          <a href="https://bit.ly/colin-discord" target="_blank" rel="noopener">
+            <img src="/public/discord.svg" aria-hidden="true" width="26" /> <span>Discord</span>
+          </a>
         </li>
       </ul>
     </section>
