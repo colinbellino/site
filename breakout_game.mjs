@@ -59,17 +59,31 @@ const data = {
   intro: {
     paddle: {
       duration: 0.5,
+      delay: 0,
       progress: 0,
     },
     ball: {
       duration: 0.2,
-      progress: 0,
       delay: 0.2,
+      progress: 0,
     },
     help: {
       duration: 0.3,
-      progress: 0,
       delay: 0.2,
+      progress: 0,
+    },
+  },
+
+  outro: {
+    paddle: {
+      duration: 0.5,
+      delay: 0,
+      progress: 0,
+    },
+    help: {
+      duration: 0.3,
+      delay: 0,
+      progress: 0,
     },
   },
 
@@ -203,8 +217,6 @@ export function game_update(currentTime) {
     } break;
 
     case MODE_INTRO: {
-      let done = false;
-
       {
         data.paddle.y = lerp(data.paddle.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
@@ -225,7 +237,7 @@ export function game_update(currentTime) {
         data.intro.help.progress += data.delta / data.intro.help.duration;
       }
 
-      done = data.intro.paddle.progress >= 1
+      const done = data.intro.paddle.progress >= 1
         && data.intro.ball.progress >= 1
         && data.intro.help.progress >= 1;
 
@@ -373,8 +385,26 @@ export function game_update(currentTime) {
 
     case MODE_END: {
       platform_hide_help();
-      data.mode = MODE_INIT;
-      return data.state;
+
+      {
+        if (data.outro.help.progress === 0) {
+          platform_hide_help();
+        }
+        data.outro.help.progress += data.delta / data.outro.help.duration;
+      }
+
+      {
+        data.paddle.y = lerp(data.paddle.y, data.window.height, data.outro.paddle.progress);
+        data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
+      }
+
+      const done = data.outro.help.progress >= 1
+        && data.outro.paddle.progress >= 1;
+
+      if (done) {
+        data.mode = MODE_INIT;
+        return data.state;
+      }
     }
   }
 
