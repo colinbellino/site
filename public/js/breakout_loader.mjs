@@ -53,7 +53,8 @@
   }
 
   async function start_game(e) {
-    e.preventDefault();
+    if (e)
+      e.preventDefault();
 
     if (gameIsRunning)
       return;

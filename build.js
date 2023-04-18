@@ -12,6 +12,7 @@ const htmlFiles = [
   "./games",
   "./web",
   "./changelog",
+  "./breakout",
 ];
 
 jsFiles.forEach((file) => {
