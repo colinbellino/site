@@ -343,7 +343,7 @@ export function game_update(currentTime) {
       {
         if (data.mouse.changed) {
           data.paddle.moveDirection = (data.mouse.x - data.paddle.position.x) >= 0 ? 1 : -1;
-          data.paddle.position.x = data.mouse.x;
+          data.paddle.position.x = data.mouse.x - data.paddle.width / 2;
         } else {
           if (data.keys[KEY_MOVE_LEFT].down) {
             data.paddle.velocity.x = -1;
