@@ -1,6 +1,25 @@
 [[redirects]]
-  from = "/*"
-  to = "/index.html"
+  from = "/"
+  to = "/index.min.html"
+  force = true
+  status = 200
+
+[[redirects]]
+  from = "/games"
+  to = "/games.min.html"
+  force = true
+  status = 200
+
+[[redirects]]
+  from = "/web"
+  to = "/web.min.html"
+  force = true
+  status = 200
+
+[[redirects]]
+  from = "/changelog"
+  to = "/changelog.min.html"
+  force = true
   status = 200
 
 [[headers]]
@@ -27,3 +46,6 @@
     removeEmptyAttributes = true
     removeOptionalTags = true
     removeRedundantAttributes = true
+
+[build]
+  command = "npm run build"

@@ -26,3 +26,6 @@ yarn-error.log*
 
 .history
 .vscode
+
+*.min.mjs
+*.min.html
