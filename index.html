@@ -43,20 +43,27 @@
     }
 
     ul {
-      display: flex;
-      list-style: none;
-      align-items: center;
       margin: 0;
       padding: 0;
+      display: flex;
+      flex-wrap: wrap;
     }
 
-    li a {
-      display: block;
-      padding: 0 6px;
+    li {
+      height: 32px;
+      display: flex;
+      align-items: center;
+      margin-right: 10px;
     }
 
     li img {
-      width: 32px;
+      display: inline-block;
+      width: 26px;
+    }
+
+    li a {
+      display: inline-block;
+      padding: 6px;
     }
 
     h1 {
@@ -67,8 +74,15 @@
 
     h1 a {
       font-size: 0.8em;
+    }
+
+    a {
       color: #6ea2ff;
       text-decoration: none;
+    }
+
+    a:hover {
+      text-decoration: underline;
     }
 
     h2 {
@@ -81,7 +95,7 @@
 
     @media (max-width: 640px) {
       body {
-        padding-top: 15vh;
+        padding-top: 13vh;
       }
 
       main {
@@ -97,7 +111,12 @@
       }
 
       ul {
-        justify-content: center;
+        margin-left: 1rem;
+      }
+
+      li {
+        width: 50%;
+        margin: 0;
       }
     }
 
@@ -106,41 +125,39 @@
 
 <body>
   <main>
-    <img class="avatar" src="/public/me.png" alt="My avatar">
+    <img class="avatar" src="/public/me.png" aria-hidden="true">
     <section>
-      <h1>Colin Bellino <a href="/changelog.html">v33</a></h1>
+      <h1>Colin Bellino <a href="/changelog.html">(changelog)</a></h1>
       <h2>I'm an indie game developer. I build cool stuff and i stream
         sometimes.</h2>
       <ul>
         <li>
-          <a href="https://bit.ly/colin-twitter" title="Twitter" target="_blank" rel="noopener">
-            <img src="/public/twitter.svg" alt="Twitter" style="margin-left: -3px; margin-right: 5px;" />
-          </a>
+          <img src="/public/twitter.svg" aria-hidden="true" />
+          <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener">Twitter</a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-itch" title="itch.io" target="_blank" rel="noopener">
-            <img src="/public/itch.svg" alt="itch.io" />
-          </a>
+          <img src="/public/itch.svg" aria-hidden="true" />
+          <a href="https://bit.ly/colin-itch" target="_blank" rel="noopener">Itch</a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-twitch" title="Twitch" target="_blank" rel="noopener">
-            <img src="/public/twitch.svg" alt="Twitch" style="width: 45px; padding: 0;" />
-          </a>
+          <img src="/public/github.svg" aria-hidden="true"  />
+          <a href="https://bit.ly/colin-code" target="_blank" rel="noopener">Github</a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-yt" title="YouTube" target="_blank" rel="noopener">
-            <img src="/public/youtube.svg" alt="YouTube" style="width: 40px; padding-right: 10px;" />
-          </a>
+          <img src="/public/twitch.svg" aria-hidden="true" />
+          <a href="https://bit.ly/colin-twitch" target="_blank" rel="noopener">Twitch</a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-medium" title="Medium" target="_blank" rel="noopener">
-            <img src="/public/medium.svg" alt="Medium" style="width: 28px;" />
-          </a>
+          <img src="/public/youtube.svg" aria-hidden="true" />
+          <a href="https://bit.ly/colin-yt" target="_blank" rel="noopener">YouTube</a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-discord" title="Discord" target="_blank" rel="noopener">
-            <img src="/public/discord.svg" alt="Discord" style="width: 28px; padding-left: 7px;" />
-          </a>
+          <img src="/public/medium.svg" aria-hidden="true" />
+          <a href="https://bit.ly/colin-medium" target="_blank" rel="noopener">Medium</a>
+        </li>
+        <li>
+          <img src="/public/discord.svg" aria-hidden="true" />
+          <a href="https://bit.ly/colin-discord" target="_blank" rel="noopener">Discord</a>
         </li>
       </ul>
     </section>
