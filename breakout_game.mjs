@@ -51,6 +51,7 @@ const PARTICLE_PER_HIT = 20.
 
 const SCORE_PER_BLOCK = 10;
 const SCORE_MULTIPLIER = 1;
+const SCORE_MULTIPLIER_PER_BLOCK = 0.2;
 
 const data = {
   mode: MODE_INIT,
@@ -330,6 +331,12 @@ export function game_update(currentTime) {
             }
             ball.position.y = data.paddle.position.y;
             // TODO: check what other breakout games do so the bounces don't feel so janky
+
+            // Reset multiplier
+            if (data.debug.cheats === false) {
+              data.multiplier = SCORE_MULTIPLIER;
+              platform_show_score(data.score, data.multiplier);
+            }
           }
 
           ball.velocity = normalize_vector(ball.velocity);
@@ -356,13 +363,15 @@ export function game_update(currentTime) {
               }
               block.destroyed = true;
               platform_destroy_block(block.id);
+
+              data.score += SCORE_PER_BLOCK * data.multiplier;
+              data.multiplier += SCORE_MULTIPLIER_PER_BLOCK;
+              platform_show_score(data.score, data.multiplier);
+
               for (let particleIndex = 0; particleIndex < PARTICLE_PER_HIT; particleIndex++) {
                 const velocity = { x: random(-1, 1), y: random(-1, 1) };
                 spawn_particle({ ...ball.position }, velocity, 3, 3, { ...BALL_COLOR });
               }
-
-              data.score += SCORE_PER_BLOCK * data.multiplier;
-              platform_show_score(data.score);
             }
           }
         }

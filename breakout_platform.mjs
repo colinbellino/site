@@ -81,9 +81,9 @@ export function platform_hide_help() {
   data.ui.help.classList.add("hidden");
 }
 
-export function platform_show_score(score) {
+export function platform_show_score(score, multiplier) {
   data.ui.score.classList.remove("hidden");
-  data.ui.score.innerHTML = `Score: ${score}`;
+  data.ui.score.innerHTML = `Score: ${score} (x${multiplier.toFixed(1)})`;
 }
 
 export function platform_hide_score() {
