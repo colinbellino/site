@@ -131,7 +131,7 @@ export function platform_start() {
     split_in_blocks("main > footer > p");
     const selectors = [
       ".breakout-preblock",
-      ".avatar",
+      ".avatar img",
       ".hire-me",
       "li > a",
     ];

@@ -41,6 +41,7 @@
     }
     main > aside {
       grid-area: aside;
+      position: relative;
     }
     main > nav {
       grid-area: nav;
@@ -53,6 +54,9 @@
     }
 
     .avatar {
+
+    }
+    .avatar img {
       display: block;
       margin: 0 auto 1.5rem auto;
       width: 128px;
@@ -61,11 +65,59 @@
       background: #5fcde4;
       transition: transform ease-in-out 0.2s;
     }
+    body:not(.game-running) .avatar.clickable:hover .dialog {
+      opacity: 1;
+    }
     body:not(.game-running) .avatar.clickable {
       cursor: pointer;
     }
-    body:not(.game-running) .avatar.flipped {
+    body:not(.game-running) .avatar.flipped img {
       transform: scaleX(-1);
+    }
+
+    .dialog {
+      position: absolute;
+      display: block;
+      top: -80px;
+      width: 340px;
+      margin: 0 0 20px 0;
+      padding: 15px 20px;
+      border: 2px solid rgba(0, 0, 0, 0.85);
+      border-radius: 3px;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 600;
+      background: rgba(255, 255, 255, 1);
+      color: rgba(0, 0, 0, 0.85);
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity linear 0.2s, transform ease-in-out 0.2s;
+    }
+    .dialog::before {
+      position: absolute;
+      content: "";
+      bottom: -14px;
+      left: 70px;
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 14px solid rgba(0, 0, 0, 0.85);
+    }
+    .dialog::after {
+      position: absolute;
+      content: "";
+      bottom: -11px;
+      left: 73px;
+      width: 0;
+      height: 0;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 11px solid #ffffff;
+      z-index: 2;
+    }
+
+    .avatar:hover .dialog {
+      transform: translateY(0);
     }
 
     .pixel-art {
@@ -219,14 +271,13 @@
         display: block;
         width: auto;
         padding-right: 0;
-        /* margin: 0 0 0.4em 0; */
       }
 
       ul.socials li {
         width: 31%;
       }
 
-      .avatar {
+      .avatar img {
         width: 100%;
         height: auto;
       }
@@ -237,7 +288,9 @@
 <body>
   <main>
     <aside>
-      <img id="avatar" class="avatar pixel-art" src="/public/me.gif" aria-hidden="true" width="128" />
+      <div id="avatar" class="avatar pixel-art">
+        <img src="/public/me.gif" aria-hidden="true" width="128" />
+      </div>
     </aside>
     <nav>
       <p><b>My portfolio:</b></p>
@@ -322,8 +375,14 @@
 
       // TODO: Do this on resize
       if (isGameWidth && isGameHeight) {
-        avatar.setAttribute("title", "How about a nice game of breakout?");
+        const dialog = document.createElement("p");
+        dialog.setAttribute("role", "tooltip");
+        dialog.innerHTML = "How about a nice game of breakout?";
+        dialog.classList.add("dialog");
+        avatar.appendChild(dialog);
+
         avatar.classList.add("clickable");
+
         avatar.addEventListener("click", start_game);
       }
       if (canHover)
