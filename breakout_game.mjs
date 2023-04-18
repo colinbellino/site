@@ -243,6 +243,7 @@ export function game_update(currentTime) {
       data.particles = [];
       data.intro.paddle.progress = 0;
       data.intro.ball.progress = 0;
+      data.intro.help.progress = 0;
       data.outro.paddle.progress = 0;
       data.outro.help.progress = 0;
       data.outro.score.progress = 0;

@@ -244,6 +244,8 @@ function clean_up() {
   data.ui.help = null;
   data.ui.score.remove();
   data.ui.score = null;
+  data.ui.pause.remove();
+  data.ui.pause = null;
 
   document.removeEventListener("mouseup", mouseup);
   document.removeEventListener("mousedown", mousedown);
