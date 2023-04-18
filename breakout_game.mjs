@@ -1,13 +1,14 @@
 import {
   platform_clear_rect,
   platform_render_rect,
-  platform_render_text,
   platform_get_blocks,
   platform_destroy_block,
   platform_show_help,
   platform_hide_help,
   platform_show_score,
   platform_hide_score,
+  platform_show_pause,
+  platform_hide_pause,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -32,10 +33,6 @@ const MODE_INTRO = 1;
 const MODE_PLAY = 2;
 const MODE_PAUSE = 3;
 const MODE_END = 4;
-
-const BACKGROUND_COLOR = "#ffffff";
-const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.5)";
-const PAUSE_TEXT_COLOR = "#ffffff";
 
 const PADDLE_SPEED = 20;
 const PADDLE_WIDTH = 200;
@@ -247,6 +244,7 @@ export function game_update(currentTime) {
       // Player inputs
       {
         if (data.keys[KEY_PAUSE].released) {
+          platform_show_pause();
           data.mode = MODE_PAUSE;
         }
 
@@ -379,6 +377,7 @@ export function game_update(currentTime) {
 
     case MODE_PAUSE: {
       if (data.keys[KEY_PAUSE].released) {
+        platform_hide_pause();
         data.mode = MODE_PLAY;
       }
     } break;
@@ -448,13 +447,6 @@ export function game_update(currentTime) {
         const rect = { x: block.position.x, y: block.position.y, width: block.width, height: block.height };
         platform_render_rect(rect, "blue");
       }
-    }
-
-    // TODO: Move this to DOM+CSS for better text + animate
-    if (data.mode == MODE_PAUSE) {
-      platform_render_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height }, PAUSE_BACKGROUND_COLOR);
-      platform_render_rect({ x: data.window.width / 2 - 300/2, y: data.window.height / 2 - 100/2, width: 300, height: 100 }, PAUSE_BACKGROUND_COLOR);
-      platform_render_text(data.window.width / 2 - 60, data.window.height / 2 - 20, "PAUSED", 32, PAUSE_TEXT_COLOR);
     }
   }
 

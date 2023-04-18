@@ -28,8 +28,11 @@ const data = {
   canvas: null,
   context: null,
   blocks: [],
-  help: null,
-  score: null,
+  ui: {
+    help: null,
+    score: null,
+    pause: null,
+  }
 };
 
 export function platform_log(...args) {
@@ -49,12 +52,6 @@ export function platform_render_rect({ x, y, width, height }, color) {
   data.context.fillRect(x, y, width, height);
 }
 
-export function platform_render_text(x, y, text, size, color) {
-  data.context.font = `${size}px sans-serif`;
-  data.context.fillStyle = color;
-  data.context.fillText(text, x, y + size);
-}
-
 export function platform_destroy_block(blockIndex) {
   const block = data.blocks[blockIndex];
   block.classList.add("destroyed");
@@ -64,25 +61,33 @@ export function platform_get_blocks() {
   return data.blocks;
 }
 
-export function platform_show_score(score) {
-  data.score.classList.remove("hidden");
-  data.score.innerHTML = `Score: ${score}`;
-}
-
-export function platform_hide_score() {
-  data.score.classList.add("hidden");
-}
-
 export function platform_show_help() {
-  data.help.classList.remove("hidden");
+  data.ui.help.classList.remove("hidden");
 
-  const block = data.help.firstChild;
+  const block = data.ui.help.firstChild;
   block.classList.add("breakout-block");
   data.blocks.push(block);
 }
 
 export function platform_hide_help() {
-  data.help.classList.add("hidden");
+  data.ui.help.classList.add("hidden");
+}
+
+export function platform_show_score(score) {
+  data.ui.score.classList.remove("hidden");
+  data.ui.score.innerHTML = `Score: ${score}`;
+}
+
+export function platform_hide_score() {
+  data.ui.score.classList.add("hidden");
+}
+
+export function platform_show_pause() {
+  data.ui.pause.classList.remove("hidden");
+}
+
+export function platform_hide_pause() {
+  data.ui.pause.classList.add("hidden");
 }
 
 export function platform_start() {
@@ -91,30 +96,39 @@ export function platform_start() {
   data.context = data.canvas.getContext("2d");
   document.body.appendChild(data.canvas);
 
-  if (data.help === null)
+  if (data.ui.help === null)
   {
-    data.help = document.createElement("aside");
-    data.help.classList.add("breakout-help");
-    data.help.classList.add("hidden");
-    data.help.innerHTML = `<p>Use <b>${"LEFT"}</b> and <b>${"RIGHT"}</b> arrows to move your paddle.<br>Press <b>${"SPACE"}</b> to shoot a ball.</p>`;
-    document.body.appendChild(data.help);
+    data.ui.help = document.createElement("aside");
+    data.ui.help.classList.add("breakout-help");
+    data.ui.help.classList.add("hidden");
+    data.ui.help.innerHTML = `<p>Use <b>${"LEFT"}</b> and <b>${"RIGHT"}</b> arrows to move your paddle.<br>Press <b>${"SPACE"}</b> to shoot a ball.</p>`;
+    document.body.appendChild(data.ui.help);
   }
 
-  if (data.score === null)
+  if (data.ui.score === null)
   {
-    data.score = document.createElement("aside");
-    data.score.classList.add("breakout-score");
-    data.score.classList.add("hidden");
-    data.score.innerHTML = 0;
-    document.body.appendChild(data.score);
+    data.ui.score = document.createElement("aside");
+    data.ui.score.classList.add("breakout-score");
+    data.ui.score.classList.add("hidden");
+    data.ui.score.innerHTML = 0;
+    document.body.appendChild(data.ui.score);
+  }
+
+  if (data.ui.pause === null)
+  {
+    data.ui.pause = document.createElement("section");
+    data.ui.pause.classList.add("breakout-pause");
+    data.ui.pause.classList.add("hidden");
+    data.ui.pause.innerHTML = "<p>PAUSED</p>";
+    document.body.appendChild(data.ui.pause);
   }
 
   {
     split_in_blocks("h1 a");
     split_in_blocks("h2");
-    split_in_blocks("nav > p > b");
-    split_in_blocks("section > p");
-    split_in_blocks("footer > p");
+    split_in_blocks("main > nav > p > b");
+    split_in_blocks("main > section > p");
+    split_in_blocks("main > footer > p");
     const selectors = [
       ".breakout-preblock",
       ".avatar",
@@ -166,10 +180,10 @@ function clean_up() {
   data.canvas.remove();
   data.canvas = null;
   data.context = null;
-  data.help.remove();
-  data.help = null;
-  data.score.remove();
-  data.score = null;
+  data.ui.help.remove();
+  data.ui.help = null;
+  data.ui.score.remove();
+  data.ui.score = null;
 
   document.removeEventListener("keydown", keydown);
   document.removeEventListener("keyup", keyup);
