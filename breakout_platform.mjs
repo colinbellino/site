@@ -163,10 +163,10 @@ export function platform_start() {
 
   return new Promise((resolve, reject) => {
     window.requestAnimationFrame(function update(currentTime) {
-      const result = game_update(currentTime / 1000);
+      const [result, score] = game_update(currentTime / 1000);
       if (result > 0) {
         clean_up();
-        return resolve(result);
+        return resolve([result, score]);
       }
       window.requestAnimationFrame(update);
     });

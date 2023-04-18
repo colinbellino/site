@@ -452,7 +452,7 @@ export function game_update(currentTime) {
 
       if (done) {
         data.mode = MODE_INIT;
-        return data.state;
+        return [data.state, data.score];
       }
     }
   }
@@ -503,7 +503,7 @@ export function game_update(currentTime) {
     data.keys[key].released = false;
   }
 
-  return STATE_RUNNING;
+  return [STATE_RUNNING, data.score];
 }
 
 function is_point_inside(point, box) {

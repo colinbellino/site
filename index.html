@@ -441,8 +441,8 @@
         gameIsRunning = true;
 
         // TODO: stop the game when "pause > quit" button clicked
-        window.breakout.start().then((result) => {
-          console.log("Game over:", result === 1 ? "win" : "lose");
+        window.breakout.start().then(([result, score]) => {
+          console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);
           document.body.classList.remove("game-running");
           gameIsRunning = false;
         });
