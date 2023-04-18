@@ -23,9 +23,10 @@ const MODE_INTRO = 1;
 const MODE_PLAY = 2;
 const MODE_PAUSE = 3;
 
-const BACKGROUND_COLOR = "#ffffff"
-const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.3)"
-const PAUSE_TEXT_COLOR = "#000000"
+const BACKGROUND_COLOR = "#ffffff";
+const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.3)";
+const PAUSE_TEXT_COLOR = "#000000";
+
 
 const PADDLE_SPEED = 20;
 const PADDLE_WIDTH = 150;
@@ -33,6 +34,7 @@ const PADDLE_HEIGHT = 20;
 const PADDLE_Y = 10;
 const PADDLE_COLOR = "#000000";
 
+const BALL_MAX = 1;
 const BALL_SPEED = 5;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
@@ -239,7 +241,9 @@ export function game_update(currentTime) {
           firstBall.velocityY = -1;
           firstBall.launched = true;
         } else {
-          game_spawn_ball(true);
+          if (data.balls.length < BALL_MAX) {
+            game_spawn_ball(true);
+          }
         }
       }
 
