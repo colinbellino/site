@@ -3,13 +3,12 @@ const renderer = {
   context: null,
 };
 
-export function renderer_init(canvas) {
+export async function renderer_init(canvas) {
   renderer.canvas = canvas;
   renderer.context = canvas.getContext("2d");
 
   return {
     clear: renderer_clear,
-    clear_rect: renderer_clear_rect,
     draw_rect: renderer_draw_rect,
     draw_trail : renderer_draw_trail,
   };
@@ -21,10 +20,6 @@ export function renderer_quit() {
 
 export function renderer_clear(color) {
   renderer.context.clearRect(0, 0, renderer.canvas.width, renderer.canvas.height);
-}
-
-export function renderer_clear_rect({ x, y, width, height }) {
-  renderer.context.clearRect(x, y, width, height);
 }
 
 export function renderer_draw_rect({ x, y, width, height }, color) {

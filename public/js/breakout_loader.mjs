@@ -10,16 +10,19 @@
 
   let minWidth = 700;
   let minHeight = 700;
-  if (document.body.hasAttribute("data-breakout-min-width"))
+  if (document.body.hasAttribute("data-breakout-min-width")) {
     minWidth = parseInt(document.body.getAttribute("data-breakout-min-width"));
-  if (document.body.hasAttribute("data-breakout-min-height"))
+  }
+  if (document.body.hasAttribute("data-breakout-min-height")) {
     minHeight = parseInt(document.body.getAttribute("data-breakout-min-height"));
+  }
 
   bindStartButton();
   window.addEventListener("resize", bindStartButton);
 
-  if (window.location.search.includes("start_game"))
+  if (window.location.search.includes("start_game")) {
     start_game();
+  }
 
   function bindStartButton() {
     const canStartGame = startButton && window.innerWidth >= minWidth && window.innerHeight >= minHeight;
@@ -78,7 +81,7 @@
       gameIsRunning = true;
 
       const platform_options = await platform.platform_init();
-      const renderer_options = renderer.renderer_init(platform_options.canvas);
+      const renderer_options = await renderer.renderer_init(platform_options.canvas);
       await game.game_init(platform_options, renderer_options);
       const [result, score] = await platform.platform_start(game.game_update);
       gameIsRunning = false;
