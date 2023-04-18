@@ -132,7 +132,7 @@ export function breakout_start() {
 
   return new Promise((resolve, reject) => {
     window.requestAnimationFrame(function platform_update(currentTime) {
-      const result = game_update(currentTime);
+      const result = game_update(currentTime / 1000);
       if (result > 0)
         return resolve(result);
       window.requestAnimationFrame(platform_update);
