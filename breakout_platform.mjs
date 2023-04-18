@@ -192,7 +192,7 @@ export function platform_start() {
   resize();
 
   return new Promise((resolve, reject) => {
-    const fps = 60;
+    const fps = 120;
     const then = window.performance.now();
     const startTime = then;
     let now = 0;
