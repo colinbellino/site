@@ -4,9 +4,13 @@ const KEY_MOVE_LEFT = 0;
 const KEY_MOVE_RIGHT = 1;
 const KEY_CONFIRM = 2;
 
+const BACKGROUND_COLOR = "#ffffff"
 const PADDLE_SPEED = 20;
+const PADDLE_COLOR = "#000000";
 const BALL_SPEED = 10;
 const BALL_SIZE = 20;
+const BALL_COLOR = "red";
+const BLOCK_COLOR = "blue";
 
 const data = {
   mode: 0, // 0: init, 1: playing
@@ -22,8 +26,8 @@ const data = {
     width: 100,
     height: 20,
   },
-
   balls: [],
+  blocks: [],
 
   keys: {
     [KEY_MOVE_LEFT]: {
@@ -63,6 +67,7 @@ function game_spawn_ball() {
     height: BALL_SIZE,
     velocityX: 1,
     velocityY: -1,
+    color: BALL_COLOR,
     destroyed: false,
   });
 }
@@ -93,6 +98,9 @@ function game_update(currentTime) {
   for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
     const ball = data.balls[ballIndex];
 
+    if (ball.destroyed)
+      continue;
+
     ball.x += ball.velocityX * BALL_SPEED;
     if (ball.x + ball.width > data.window.width || ball.x < 0)
       ball.velocityX = -ball.velocityX;
@@ -104,15 +112,37 @@ function game_update(currentTime) {
       ball.destroyed = true;
 
     if (game_is_point_inside(ball, data.paddle)) {
+      // TODO: Handle collision from the left/right
       ball.velocityY = -ball.velocityY;
       ball.y = data.paddle.y - data.paddle.height;
+    }
+
+    for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+      const block = data.blocks[blockIndex];
+      if (block.destroyed === false && game_is_point_inside(ball, block)) {
+        // TODO: Handle collision from the left/right
+        ball.velocityY = -ball.velocityY;
+        block.destroyed = true;
+      }
     }
   }
 
   // Render
   {
-    const rect = { width: data.paddle.width, height: data.paddle.height, x: data.paddle.x, y: data.paddle.y };
-    platform_render_rect(rect, "black");
+    const rect = { x: 0, y: 0, width: data.window.width, height: data.window.height };
+    platform_render_rect(rect, BACKGROUND_COLOR);
+  }
+
+  for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+    const block = data.blocks[blockIndex];
+
+    // TODO: Free memory at some point
+    if (block.destroyed) {
+      continue;
+    }
+
+    const rect = { x: block.x, y: block.y, width: block.width, height: block.height };
+    platform_render_rect(rect, block.color);
   }
 
   for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
@@ -124,9 +154,15 @@ function game_update(currentTime) {
     }
 
     const rect = { width: ball.width, height: ball.height, x: ball.x, y: ball.y };
-    platform_render_rect(rect, "red");
+    platform_render_rect(rect, ball.color);
   }
 
+  {
+    const rect = { x: data.paddle.x, y: data.paddle.y, width: data.paddle.width, height: data.paddle.height };
+    platform_render_rect(rect, PADDLE_COLOR);
+  }
+
+  // Reset input state at the end of the frame
   for (const [key, value] of Object.entries(data.keys)) {
     data.keys[key].released = false;
   }
@@ -182,12 +218,12 @@ function platform_log(...args) {
   // document.writeln(args.join(" "));
 }
 
-function platform_render_rect({ width, height, x, y }, color) {
+function platform_render_rect({ x, y, width, height }, color) {
   renderer.ctx.fillStyle = color;
   renderer.ctx.fillRect(x, y, width, height);
 }
 
-function platform_init() {
+export function platform_init(blocks) {
   renderer.canvas = document.createElement("canvas");
   renderer.ctx = renderer.canvas.getContext("2d");
 
@@ -196,11 +232,24 @@ function platform_init() {
 
   data.window.width = window.innerWidth;
   data.window.height = window.innerHeight;
+
+  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+    const block = blocks[blockIndex];
+    const rect = block.getClientRects()[0];
+
+    data.blocks.push({
+      width: rect.width,
+      height: rect.height,
+      x: rect.x,
+      y: rect.y,
+      color: BLOCK_COLOR,
+      destroyed: false,
+    });
+    console.log(data.blocks[data.blocks.length-1]);
+  }
+
+  window.requestAnimationFrame(platform_update);
+  document.addEventListener("keydown", platform_keydown);
+  document.addEventListener("keyup", platform_keyup);
+  window.addEventListener("resize", platform_resize);
 }
-
-platform_init();
-window.requestAnimationFrame(platform_update);
-
-document.addEventListener("keydown", platform_keydown);
-document.addEventListener("keyup", platform_keyup);
-window.addEventListener("resize", platform_resize);

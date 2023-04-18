@@ -325,7 +325,10 @@
   </script> -->
   <!-- TODO: Load this only when clicking the breakout button -->
   <!-- TODO: Disable avatar rotation during playmode? -->
-  <script src="./breakout.js"></script>
+  <script type="module">
+    import { platform_init } from "./breakout.mjs";
+    platform_init(Array.from(document.querySelectorAll(".avatar, section > *")));
+  </script>
 </body>
 
 </html>
