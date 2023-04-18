@@ -1,19 +1,9 @@
 import * as math from "./math.mjs";
 
-export const KEY_MOVE_LEFT = 0;
-export const KEY_MOVE_RIGHT = 1;
-export const KEY_CONFIRM = 2;
-export const KEY_CANCEL = 3;
-export const KEY_PAUSE = 4;
-export const KEY_MOUSE_LEFT = 20;
-export const KEY_MOUSE_RIGHT = 21;
-export const KEY_DEBUG_1 = 50;
-export const KEY_DEBUG_2 = 51;
-export const KEY_DEBUG_3 = 52;
-
 export const STATE_RUNNING = 0;
 export const STATE_WIN = 1;
 export const STATE_LOSE = 2;
+export const STATE_QUIT = 3;
 
 const AUDIO_CLIP_BOUNCE_1 = "bounce1";
 const AUDIO_CLIP_BOUNCE_2 = "bounce2";
@@ -24,7 +14,7 @@ const AUDIO_CLIP_HIT_4 = "hit4";
 const AUDIO_CLIP_LOSE_1 = "lose1";
 const AUDIO_CLIP_MUSIC_1 = "music1";
 
-export const AUDIO_CLIPS = [
+const AUDIO_CLIPS = [
   AUDIO_CLIP_BOUNCE_1,
   AUDIO_CLIP_BOUNCE_2,
   AUDIO_CLIP_HIT_1,
@@ -85,6 +75,13 @@ const data = {
     stop_audio_clip: null,
     log: null,
     error: null,
+    state: {
+      quit: false,
+      mouse: null,
+      mouse_keys: null,
+      keys: null,
+      window: null,
+    },
   },
 
   mode: MODE_INIT,
@@ -92,11 +89,6 @@ const data = {
 
   delta: 0,
   currentTime: 0,
-
-  window: {
-    width: 800,
-    height: 600,
-  },
 
   intro: {
     paddle: {
@@ -152,123 +144,50 @@ const data = {
   score: 0,
   multiplier: SCORE_MULTIPLIER,
 
-  mouse: {
-    x: 0,
-    y: 0,
-    changed: false,
-  },
-  keys: {
-    [KEY_MOVE_LEFT]: {
-      down: false,
-      released: false,
-    },
-    [KEY_MOVE_RIGHT]: {
-      down: false,
-      released: false,
-    },
-    [KEY_CONFIRM]: {
-      down: false,
-      released: false,
-    },
-    [KEY_CANCEL]: {
-      down: false,
-      released: false,
-    },
-    [KEY_PAUSE]: {
-      down: false,
-      released: false,
-    },
-    [KEY_MOUSE_LEFT]: {
-      down: false,
-      released: false,
-    },
-    [KEY_MOUSE_RIGHT]: {
-      down: false,
-      released: false,
-    },
-    [KEY_DEBUG_1]: {
-      down: false,
-      released: false,
-    },
-    [KEY_DEBUG_2]: {
-      down: false,
-      released: false,
-    },
-    [KEY_DEBUG_3]: {
-      down: false,
-      released: false,
-    },
-  },
-
   debug: {
     showBlocks: false,
     cheats: false,
   },
 };
 
-export function game_mousemove(x, y) {
-  data.mouse.x = x;
-  data.mouse.y = y;
-  data.mouse.changed = true;
-}
-
-export function game_keydown(key) {
-  if ((key in data.keys) === false) {
-    data.platform.error("Unknown key:", key);
-    return;
-  }
-  data.keys[key].down = true;
-}
-
-export function game_keyup(key) {
-  if ((key in data.keys) === false) {
-    data.platform.error("Unknown key:", key);
-    return;
-  }
-  data.keys[key].down = false;
-  data.keys[key].released = true;
-}
-
-export function game_resize(width, height) {
-  data.window.width = width;
-  data.window.height = height;
-
-  if (data.mode === MODE_PLAY) {
-    const blocks = data.platform.get_blocks();
-    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-      const rect = blocks[blockIndex].getClientRects()[0];
-      set_block_rect(data.blocks[blockIndex], rect);
-    }
-
-    data.paddle.position.y = data.window.height - data.paddle.height - PADDLE_Y;
-  }
-}
-
-export function game_audio_loaded(key) {
-  if (key === AUDIO_CLIP_MUSIC_1) {
-    data.platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
-  }
-}
-
-export function game_quit() {
-  data.mode = MODE_END;
-  data.state = STATE_LOSE;
-}
-
 export function game_init(platform) {
   data.platform = platform;
+  data.mode = MODE_INIT;
+
+  return Promise.all(AUDIO_CLIPS.map((audio_clip) => {
+    return data.platform.load_audio_clip(audio_clip);
+  })).then(() => {
+    data.platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
+  });
 }
 
 export function game_update(currentTime) {
   data.delta = currentTime - data.currentTime;
   data.currentTime = currentTime;
 
+  if (data.platform.state.window.resized) {
+    if (data.mode === MODE_PLAY) {
+      const blocks = data.platform.get_blocks();
+      for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+        const rect = blocks[blockIndex].getClientRects()[0];
+        set_block_rect(data.blocks[blockIndex], rect);
+      }
+
+      data.paddle.position.y = data.platform.state.window.height - data.paddle.height - PADDLE_Y;
+    }
+  }
+
+  if (data.platform.state.quit) {
+    data.state = STATE_QUIT;
+    return [data.state, 0];
+  }
+
   // Debug inputs
-  if (data.keys[KEY_DEBUG_1].released) {
+  if (data.platform.state.keys[data.platform.keyCodes.F1].released) {
     data.debug.showBlocks = !data.debug.showBlocks;
     data.platform.log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
   }
-  if (data.keys[KEY_DEBUG_2].released) {
+  if (data.platform.state.keys[data.platform.keyCodes.F2].released) {
     data.debug.cheats = !data.debug.cheats;
     if (data.debug.cheats)
       data.paddle.width = PADDLE_WIDTH * 3;
@@ -280,8 +199,8 @@ export function game_update(currentTime) {
   // Update
   switch (data.mode) {
     case MODE_INIT: {
-      data.paddle.position.x = data.window.width / 2 - data.paddle.width / 2;
-      data.paddle.position.y = data.window.height;
+      data.paddle.position.x = data.platform.state.window.width / 2 - data.paddle.width / 2;
+      data.paddle.position.y = data.platform.state.window.height;
       data.balls = [];
       data.blocks = [];
       data.particles = [];
@@ -300,7 +219,7 @@ export function game_update(currentTime) {
 
     case MODE_INTRO: {
       {
-        data.paddle.position.y = math.lerp(data.paddle.position.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, data.platform.state.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
       }
 
@@ -338,14 +257,14 @@ export function game_update(currentTime) {
     case MODE_PLAY: {
       // Player inputs
       {
-        if (data.mouse.changed) {
-          data.paddle.moveDirection = (data.mouse.x - data.paddle.position.x) >= 0 ? 1 : -1;
-          data.paddle.position.x = data.mouse.x - data.paddle.width / 2;
+        if (data.platform.state.mouse.changed) {
+          data.paddle.moveDirection = (data.platform.state.mouse.x - data.paddle.position.x) >= 0 ? 1 : -1;
+          data.paddle.position.x = data.platform.state.mouse.x - data.paddle.width / 2;
         } else {
-          if (data.keys[KEY_MOVE_LEFT].down) {
+          if (data.platform.state.keys[data.platform.keyCodes.ARROW_LEFT].down) {
             data.paddle.velocity.x = -1;
           }
-          else if (data.keys[KEY_MOVE_RIGHT].down) {
+          else if (data.platform.state.keys[data.platform.keyCodes.ARROW_RIGHT].down) {
             data.paddle.velocity.x = +1;
           }
           else {
@@ -356,14 +275,14 @@ export function game_update(currentTime) {
           data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
         }
 
-        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
+        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, data.platform.state.window.width - data.paddle.width);
 
-        if (data.keys[KEY_PAUSE].released || data.keys[KEY_MOUSE_RIGHT].released) {
+        if (data.platform.state.keys[data.platform.keyCodes.ESCAPE].released || data.platform.state.mouse_keys[data.platform.mouseCodes.RIGHT].released) {
           data.platform.show_pause();
           data.mode = MODE_PAUSE;
         }
 
-        if (data.keys[KEY_CONFIRM].released || data.keys[KEY_MOUSE_LEFT].released) {
+        if (data.platform.state.keys[data.platform.keyCodes.SPACE].released || data.platform.state.mouse_keys[data.platform.mouseCodes.LEFT].released) {
           const firstBall = data.balls.find(ball => ball.attachedToPaddle);
           if (firstBall) {
             firstBall.velocity.x = data.paddle.moveDirection;
@@ -423,9 +342,9 @@ export function game_update(currentTime) {
           }
 
           // Bounce on side wall
-          if (ball.position.x + ball.width > data.window.width) {
+          if (ball.position.x + ball.width > data.platform.state.window.width) {
             ball.velocity.x = -ball.velocity.x;
-            ball.position.x = data.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
+            ball.position.x = data.platform.state.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
             play_random_audio_clip([AUDIO_CLIP_BOUNCE_1, AUDIO_CLIP_BOUNCE_2]);
           } else if (ball.position.x < 0) {
             ball.velocity.x = -ball.velocity.x;
@@ -434,7 +353,7 @@ export function game_update(currentTime) {
           }
 
           // Hit bottom limit
-          if (ball.position.y > data.window.height) {
+          if (ball.position.y > data.platform.state.window.height) {
             ball.destroyed = true;
             data.platform.play_audio_clip(AUDIO_CLIP_LOSE_1);
           }
@@ -539,7 +458,7 @@ export function game_update(currentTime) {
     } break;
 
     case MODE_PAUSE: {
-      if (data.keys[KEY_PAUSE].released) {
+      if (data.platform.state.keys[data.platform.keyCodes.ESCAPE].released) {
         data.platform.hide_pause();
         data.mode = MODE_PLAY;
       }
@@ -556,7 +475,7 @@ export function game_update(currentTime) {
       }
 
       {
-        data.paddle.position.y = math.lerp(data.paddle.position.y, data.window.height, data.outro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, data.platform.state.window.height, data.outro.paddle.progress);
         data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
       }
 
@@ -580,7 +499,7 @@ export function game_update(currentTime) {
 
   // Render
   {
-    data.platform.clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
+    data.platform.clear_rect({ x: 0, y: 0, width: data.platform.state.window.width, height: data.platform.state.window.height });
 
     for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
       const ball = data.balls[ballIndex];
@@ -624,12 +543,6 @@ export function game_update(currentTime) {
         data.platform.draw_rect(rect, color_to_string(color));
       }
     }
-  }
-
-  // Reset input state at the end of the frame
-  data.mouse.changed = 0;
-  for (const [key, value] of Object.entries(data.keys)) {
-    data.keys[key].released = false;
   }
 
   return [STATE_RUNNING, data.score];

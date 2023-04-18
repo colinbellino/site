@@ -2,6 +2,8 @@
   const startButton = document.querySelector(".start-game");
   let dialog = null;
   let gameIsRunning = false;
+  let style = null;
+  let platform = null;
   let game = null;
   let startButtonIsOn = false;
 
@@ -53,27 +55,37 @@
   }
 
   async function start_game(e) {
-    if (e)
-      e.preventDefault();
+    try {
+      if (e) {
+        e.preventDefault();
+      }
 
-    if (gameIsRunning)
-      return;
+      if (gameIsRunning) {
+        return;
+      }
 
-    if (game === null) {
-      const [style, breakout] = await Promise.all([
-        import_style("/public/breakout.css"),
-        import("/public/js/breakout_platform_browser.mjs"),
-      ]);
-      game = breakout;
-      console.log("All game files loaded.");
-    }
+      if (game === null) {
+        console.log("Loading game files.");
+        [style, platform, game] = await Promise.all([
+          import_style("/public/breakout.css"),
+          import("/public/js/breakout_platform_browser.mjs"),
+          import("/public/js/breakout_game.mjs"),
+        ]);
+      }
 
-    gameIsRunning = true;
-    return game.platform_start().then(([result, score]) => {
-      console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);
+      gameIsRunning = true;
+
+      const [result, score] = await platform.platform_start(game.game_init, game.game_update);
       gameIsRunning = false;
-    }).catch((error) => {
+
+      if (result === game.STATE_QUIT) {
+        return;
+      }
+
+      console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);
+      start_game();
+    } catch (error) {
       console.error(error);
-    });
+    }
   }
 }

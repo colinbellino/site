@@ -1,39 +1,19 @@
-import {
-  KEY_MOUSE_LEFT,
-  KEY_MOUSE_RIGHT,
-  KEY_MOVE_LEFT,
-  KEY_MOVE_RIGHT,
-  KEY_CONFIRM,
-  KEY_CANCEL,
-  KEY_PAUSE,
-  KEY_DEBUG_1,
-  KEY_DEBUG_2,
-  KEY_DEBUG_3,
-  AUDIO_CLIPS,
-  game_init,
-  game_update,
-  game_keydown,
-  game_keyup,
-  game_mousemove,
-  game_resize,
-  game_quit,
-  game_audio_loaded,
-} from "./breakout_game.mjs";
 
 const VOLUME_SFX_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.05;
 
-const codeToKey = {
-  37: KEY_MOVE_LEFT, // Left arrow
-  39: KEY_MOVE_RIGHT, // Right arrow
-  32: KEY_CONFIRM, // Space
-  // 27: KEY_CANCEL,
-  27: KEY_PAUSE, // Escape
-  112: KEY_DEBUG_1, // F1
-  84: KEY_DEBUG_1, // F1
-  113: KEY_DEBUG_2, // F2
-  114: KEY_DEBUG_3, // F3
+const mouseCodes = {
+  LEFT: 1,
+  RIGHT: 3,
+}
+const keyCodes = {
+  ARROW_LEFT: 37,
+  ARROW_RIGHT: 39,
+  SPACE: 32,
+  ESCAPE: 27,
+  F1: 112,
+  F2: 113,
 };
 
 const data = {
@@ -47,8 +27,8 @@ const data = {
     context: null,
     gainMusic: null,
     gainSfx: null,
-    clips: [],
-    sources: [],
+    clips: {},
+    sources: {},
   },
   blocks: [],
   ui: {
@@ -67,6 +47,28 @@ const data = {
     noMusic: false,
     noSfx: false,
   },
+
+  state: {
+    quit: false,
+    mouse: {
+      x: 0,
+      y: 0,
+      changed: false,
+    },
+    /*
+    [key]: {
+      down: false,
+      released: false,
+    }
+    */
+    mouse_keys: {},
+    keys: {},
+    window: {
+      width: 800,
+      height: 600,
+      resized: false,
+    },
+  }
 };
 
 function platform_log(...args) {
@@ -166,12 +168,21 @@ function platform_hide_lives() {
   data.ui.lives.classList.add("hidden");
 }
 
+async function platform_load_audio_clip(key) {
+  const clip = {
+    key,
+    url: `/public/audio/${key}.mp3`,
+    buffer: null,
+  };
+  clip.buffer = await load_audio(clip.url);
+  data.audio.clips[key] = clip;
+}
+
 function platform_play_audio_clip(key, group = 0, loop = false) {
   if (data.audio.available === false)
     return;
 
-  const index = AUDIO_CLIPS.indexOf(key);
-  const clip = data.audio.clips[index];
+  const clip = data.audio.clips[key];
   const source = data.audio.context.createBufferSource();
   source.buffer = clip.buffer;
   source.loop = loop;
@@ -180,34 +191,49 @@ function platform_play_audio_clip(key, group = 0, loop = false) {
   else
     source.connect(data.audio.gainMusic);
   source.start();
-  data.audio.sources[index] = source;
+  data.audio.sources[key] = source;
 }
 
 function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
   if (data.audio.available === false)
     return;
 
-  const index = AUDIO_CLIPS.indexOf(key);
   if (fadeDuration === 0) {
-    data.audio.sources[index].stop();
+    data.audio.sources[key].stop();
     return;
   }
 
   const tempGain = data.audio.context.createGain();
-  data.audio.sources[index].disconnect();
-  data.audio.sources[index].connect(tempGain).connect(data.audio.context.destination);
-  if (group === 0)
-    tempGain.gain.value = data.audio.gainSfx.gain.value * VOLUME_SFX_MULTIPLIER;
-  else
-    tempGain.gain.value = data.audio.gainMusic.gain.value * VOLUME_MUSIC_MULTIPLIER;
-  tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration)
+    data.audio.sources[key].disconnect();
+    data.audio.sources[key].connect(tempGain).connect(data.audio.context.destination);
+    if (group === 0)
+      tempGain.gain.value = data.audio.gainSfx.gain.value * VOLUME_SFX_MULTIPLIER;
+    else
+      tempGain.gain.value = data.audio.gainMusic.gain.value * VOLUME_MUSIC_MULTIPLIER;
+    tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration)
 }
 
-export async function platform_start() {
+export async function platform_start(game_init, game_update) {
+  data.state.quit = false;
   data.renderer.canvas = document.createElement("canvas");
   data.renderer.canvas.classList.add("breakout-canvas");
   data.renderer.context = data.renderer.canvas.getContext("2d");
   document.body.appendChild(data.renderer.canvas);
+
+  {
+    for (let keycode = 0; keycode < 256; keycode++) {
+      data.state.keys[keycode] = {
+        down: false,
+        released: false,
+      };
+    }
+    for (let keycode = 0; keycode <= 3; keycode++) {
+      data.state.mouse_keys[keycode] = {
+        down: false,
+        released: false,
+      };
+    }
+  }
 
   if (data.ui.help === null)
   {
@@ -334,7 +360,7 @@ export async function platform_start() {
     }
   }
 
-  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
   const canPlayAudio = AudioContext !== undefined;
   if (canPlayAudio) {
     data.audio.available = true;
@@ -345,21 +371,6 @@ export async function platform_start() {
     data.audio.gainSfx = data.audio.context.createGain();
     data.audio.gainSfx.connect(data.audio.context.destination);
     set_volume_sfx(data.settings.volumeSfx);
-
-    // Load audio clips
-    data.audio.clips = AUDIO_CLIPS.map(key => ({
-      key,
-      url: `/public/audio/${key}.mp3`,
-      buffer: null,
-    }));
-    const loadPromises = data.audio.clips.map((clip) => load_audio(clip.url));
-    Promise.all(loadPromises).then((buffers) => {
-      for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++) {
-        data.audio.clips[clipIndex].buffer = buffers[clipIndex];
-        game_audio_loaded(data.audio.clips[clipIndex].key);
-      }
-      platform_log("Audio clips loaded:", data.audio.clips.length);
-    });
   } else {
     data.audio.available = false;
     platform_warn("Web Audio API not available, continuing without audio.");
@@ -380,6 +391,7 @@ export async function platform_start() {
 
   document.body.classList.add("game-running");
 
+  document.addEventListener("contextmenu", contextmenu);
   document.addEventListener("mouseup", mouseup);
   document.addEventListener("mousedown", mousedown);
   document.addEventListener("mousemove", mousemove);
@@ -388,7 +400,8 @@ export async function platform_start() {
   window.addEventListener("resize", resize);
 
   platform_log("Starting game with blocks:", data.blocks.length);
-  game_init({
+
+  await game_init({
     clear_rect: platform_clear_rect,
     draw_rect: platform_draw_rect,
     draw_trail: platform_draw_trail,
@@ -402,13 +415,17 @@ export async function platform_start() {
     hide_pause: platform_hide_pause,
     show_lives: platform_show_lives,
     hide_lives: platform_hide_lives,
+    load_audio_clip: platform_load_audio_clip,
     play_audio_clip: platform_play_audio_clip,
     stop_audio_clip: platform_stop_audio_clip,
     log: platform_log,
     error: platform_error,
+    mouseCodes: mouseCodes,
+    keyCodes: keyCodes,
+    state: data.state
   });
 
-  return new Promise((resolve, reject) => {
+  return new Promise((resolve, reject) => {
     const fps = 120;
     const then = window.performance.now();
     const startTime = then;
@@ -429,20 +446,29 @@ export async function platform_start() {
       }
 
       data.renderer.requestId = window.requestAnimationFrame(update);
+      data.state.window.resized = false;
+      // Reset input state at the end of the frame
+      data.state.mouse.changed = 0;
+      for (const [key, value] of Object.entries(data.state.keys)) {
+        data.state.keys[key].released = false;
+      }
+      for (const [key, value] of Object.entries(data.state.mouse_keys)) {
+        data.state.mouse_keys[key].released = false;
+      }
     }
   });
 }
 
 export function platform_stop() {
   platform_log("Stopping the game");
-  game_quit();
+  data.state.quit = true;
 }
 
 function clean_up() {
   document.querySelectorAll(".breakout-hidden").forEach((element) => {
     element.classList.remove("breakout-hidden");
   });
-  data.blocks.forEach((element) => {
+  data.blocks.forEach((element) => {
     element.classList.remove("breakout-block");
     element.classList.remove("destroyed");
   });
@@ -470,6 +496,7 @@ function clean_up() {
 
   document.body.classList.remove("game-running");
 
+  document.removeEventListener("contextmenu", contextmenu);
   document.removeEventListener("mouseup", mouseup);
   document.removeEventListener("mousedown", mousedown);
   document.removeEventListener("mousemove", mousemove);
@@ -478,49 +505,41 @@ function clean_up() {
   window.removeEventListener("resize", resize);
 }
 
+function contextmenu(e) {
+  e.preventDefault();
+}
+
 function mousedown(e) {
-  if (e.which === 1)
-    return game_keydown(KEY_MOUSE_LEFT);
-  if (e.which === 3)
-    return game_keydown(KEY_MOUSE_RIGHT);
-  // platform_log(e.which);
+  data.state.mouse_keys[e.which].down = true;
 }
 
 function mouseup(e) {
-  if (e.which === 1)
-    return game_keyup(KEY_MOUSE_LEFT);
-  if (e.which === 3)
-    return game_keyup(KEY_MOUSE_RIGHT);
-  // platform_log(e.which);
+  data.state.mouse_keys[e.which].down = false;
+  data.state.mouse_keys[e.which].released = true;
 }
 
 function mousemove(e) {
-  game_mousemove(e.clientX, e.clientY);
+  data.state.mouse.x = e.clientX;
+  data.state.mouse.y = e.clientY;
+  data.state.mouse.changed = true;
 }
 
 function keydown(e) {
-  const key = codeToKey[e.keyCode];
-  if (key === undefined) {
-    // platform_log("e.keyCode", e.keyCode);
-    return;
-  }
-  game_keydown(key);
+  data.state.keys[e.keyCode].down = true;
 }
 
 function keyup(e) {
-  const key = codeToKey[e.keyCode];
-  if (key === undefined) {
-    // platform_log("e.keyCode", e.keyCode);
-    return;
-  }
-  game_keyup(key);
+  data.state.keys[e.keyCode].down = false;
+  data.state.keys[e.keyCode].released = true;
 }
 
 function resize() {
   platform_log("Window resized:", window.innerWidth, window.innerHeight);
   data.renderer.canvas.width = window.innerWidth;
   data.renderer.canvas.height = window.innerHeight;
-  game_resize(data.renderer.canvas.width, data.renderer.canvas.height);
+  data.state.window.width = data.renderer.canvas.width;
+  data.state.window.height = data.renderer.canvas.height;
+  data.state.window.resized = true;
 }
 
 function split_in_blocks(nodes) {
@@ -582,7 +601,7 @@ function wait_for_milliseconds(duration) {
 }
 
 function set_volume_music(value) {
-  if (data.debug.noMusic || data.audio.available === false)
+  if (data.debug.noMusic || data.audio.available === false)
     return;
 
   platform_log("Music volume:", value);
@@ -595,7 +614,7 @@ function set_volume_music(value) {
 }
 
 function set_volume_sfx(value) {
-  if (data.debug.noSfx || data.audio.available === false)
+  if (data.debug.noSfx || data.audio.available === false)
     return;
 
   platform_log("SFX volume:", value);

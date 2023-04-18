@@ -158,21 +158,28 @@
       }
 
       async function start_game() {
-        console.log("Loading game files.");
-        const [style, game] = await Promise.all([
-          import_style("/public/breakout.css"),
-          import("/public/js/breakout_platform_browser.mjs"),
-          import("/public/js/breakout_game.mjs"),
-          import("/public/js/math.mjs"),
-        ]);
+        try {
+          console.log("Loading game files.");
+          const [style, platform, game] = await Promise.all([
+            import_style("/public/breakout.css"),
+            import("/public/js/breakout_platform_browser.mjs"),
+            import("/public/js/breakout_game.mjs"),
+          ]);
 
-        return game.platform_start().then(([result, score]) => {
+          const [result, score] = await platform.platform_start(game.game_init, game.game_update);
+
+          if (result === game.STATE_QUIT) {
+            document.querySelectorAll(".block").forEach(block => {
+              block.remove();
+            });
+            return;
+          }
+
           console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);
-          gameIsRunning = false;
           start_game();
-        }).catch((error) => {
+        } catch (error) {
           console.error(error);
-        });
+        }
       }
 
       // Prepare some config for breakout
