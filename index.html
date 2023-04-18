@@ -42,31 +42,32 @@
       background: #5fcde4;
     }
 
-    ul {
+    ul.socials {
       margin: 0;
       padding: 0;
       display: flex;
       flex-wrap: wrap;
     }
 
-    li {
+    ul.socials li {
       height: 32px;
       display: flex;
       align-items: center;
       margin-right: 10px;
     }
 
-    li img {
+    ul.socials li img {
       display: inline-block;
       width: 26px;
     }
 
-    li a {
+    ul.socials li a {
       display: inline-block;
       padding: 6px;
     }
 
     h1 {
+      display: inline-block;
       margin: 0.8rem 0 1rem;
       font-size: 1.4rem;
       color: rgba(0, 0, 0, 0.85);
@@ -101,6 +102,21 @@
       text-decoration: underline;
     }
 
+    ul.navigation {
+      padding: 0;
+      margin: 0 0 2vh 0;
+    }
+
+    ul.navigation li {
+      display: inline-block;
+    }
+
+    ul.navigation li a {
+      display: inline-block;
+      padding: 1vh 2vh 1vh 0;
+      font-weight: bold;
+    }
+
     @media (max-width: 640px) {
       body {
         padding-top: 13vh;
@@ -114,15 +130,19 @@
         padding-right: 2rem;
       }
 
+      ul.navigation li a {
+        padding-left: 2vh;
+      }
+
       .avatar {
         margin: 0 0 1.5rem;
       }
 
-      ul {
+      ul.socials {
         margin-left: 1rem;
       }
 
-      li {
+      ul.socials li {
         width: 50%;
         margin: 0;
       }
@@ -135,10 +155,14 @@
   <main>
     <img class="avatar" src="/public/me.png" aria-hidden="true">
     <section>
-      <h1>Colin Bellino <a href="/changelog">(changelog)</a></h1>
+      <h1>Colin Bellino</h1>
       <h2>I'm a programmer who loves building cool applications and video games.</h2>
-      <h3>Available for <a href="mailto:work@colinbellino.com" target="_blank">freelance work</a>.</h3>
-      <ul>
+      <ul class="navigation">
+        <li><a href="/projects">My projects</a></li>
+        <li><a href="/changelog">My changelog</a></li>
+      </ul>
+      <h3>I'm available for freelance work again, <br>feel free to shoot me <a href="mailto:work@colinbellino.com" target="_blank">an email</a>.</h3>
+      <ul class="socials">
         <li>
           <img src="/public/twitter.svg" aria-hidden="true" />
           <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener">Twitter</a>
