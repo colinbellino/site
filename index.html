@@ -46,6 +46,10 @@
       background: #5fcde4;
     }
 
+    .avatar.flipped {
+      transform: scaleX(-1);
+    }
+
     ul.socials {
       margin: 0;
       padding: 0;
@@ -156,7 +160,7 @@
 
 <body>
   <main>
-    <img class="avatar" src="/public/me.gif" aria-hidden="true" width="175" />
+    <img id="avatar" class="avatar" src="/public/me.gif" aria-hidden="true" width="175" />
     <section>
       <h1>Colin Bellino</h1>
       <h2>I'm a programmer who loves building cool applications and video games:</h2>
@@ -199,6 +203,20 @@
       </ul>
     </section>
   </main>
+  <script>
+    const avatar = document.getElementById("avatar");
+    if (avatar) {
+      const rect = avatar.getBoundingClientRect();
+      const rectCenterX = rect.x + rect.width / 2;
+      document.addEventListener("mousemove", e => {
+        if (e.clientX > rectCenterX) {
+          avatar.classList.remove("flipped");
+        } else {
+          avatar.classList.add("flipped");
+        }
+      });
+    }
+  </script>
 </body>
 
 </html>
