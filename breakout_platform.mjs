@@ -18,6 +18,7 @@ import {
   game_resize,
 } from "./breakout_game.mjs"
 const VOLUME_SFX_INITIAL = 0.2;
+const VOLUME_MUSIC_INITIAL = 0.2;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -39,8 +40,10 @@ const data = {
   audio: {
     available: false,
     context: null,
+    musicGain: null,
     sfxGain: null,
     clips: [],
+    sources: [],
   },
   blocks: [],
   ui: {
@@ -119,18 +122,44 @@ export function platform_hide_pause() {
   data.ui.pause.classList.add("hidden");
 }
 
-export function platform_play_audio_clip(key) {
+export function platform_play_audio_clip(key, group = 0, loop = false) {
   if (data.audio.available === false)
     return;
 
-  const clip = data.audio.clips[AUDIO_CLIPS.indexOf(key)];
+  const index = AUDIO_CLIPS.indexOf(key);
+  const clip = data.audio.clips[index];
   const source = data.audio.context.createBufferSource();
   source.buffer = clip.buffer;
-  source.connect(data.audio.sfxGain);
+  source.loop = loop;
+  if (group === 0)
+    source.connect(data.audio.sfxGain);
+  else
+    source.connect(data.audio.musicGain);
   source.start();
+  data.audio.sources[index] = source;
 }
 
-export function platform_start() {
+export function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
+  if (data.audio.available === false)
+    return;
+
+  const index = AUDIO_CLIPS.indexOf(key);
+  if (fadeDuration === 0) {
+    data.audio.sources[index].stop();
+    return;
+  }
+
+  const tempGain = data.audio.context.createGain();
+  data.audio.sources[index].disconnect();
+  data.audio.sources[index].connect(tempGain).connect(data.audio.context.destination);
+  if (group === 0)
+    tempGain.gain.value = data.audio.sfxGain.gain.value;
+  else
+    tempGain.gain.value = data.audio.musicGain.gain.value;
+  tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration);
+}
+
+export async function platform_start() {
   data.renderer.canvas = document.createElement("canvas");
   data.renderer.canvas.classList.add("breakout-canvas");
   data.renderer.context = data.renderer.canvas.getContext("2d");
@@ -191,25 +220,29 @@ export function platform_start() {
   if (canPlayAudio) {
     data.audio.available = true;
     data.audio.context = new AudioContext();
+    data.audio.musicGain = data.audio.context.createGain();
+    data.audio.musicGain.connect(data.audio.context.destination);
+    data.audio.musicGain.gain.value = VOLUME_MUSIC_INITIAL;
     data.audio.sfxGain = data.audio.context.createGain();
     data.audio.sfxGain.connect(data.audio.context.destination);
-    data.audio.sfxGain.gain.setValueAtTime(VOLUME_SFX_INITIAL, data.audio.context.currentTime);
+    data.audio.sfxGain.gain.value = VOLUME_SFX_INITIAL;
+
+    // Debug stuff
+    if (window.location.search.includes("no_music"))
+      data.audio.musicGain.gain.value = 0;
+    if (window.location.search.includes("no_sfx"))
+      data.audio.sfxGain.gain.value = 0;
+
+    // Load audio clips
     data.audio.clips = AUDIO_CLIPS.map(key => ({
       url: `/public/audio/${key}.mp3`,
       buffer: null,
     }));
-
     const loadPromises = data.audio.clips.map((clip) => load_audio(clip.url));
-    Promise.all(loadPromises)
-      .then((buffers) => {
-        for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
-          data.audio.clips[clipIndex].buffer = buffers[clipIndex];
-
-        return Promise.resolve();
-      })
-      .then(() => {
-        platform_log("Audio clips loaded:", data.audio.clips.length);
-      });
+    const buffers = await Promise.all(loadPromises);
+    for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
+      data.audio.clips[clipIndex].buffer = buffers[clipIndex];
+      platform_log("Audio clips loaded:", data.audio.clips.length);
   } else {
     data.audio.available = false;
     platform_warn("Web Audio API not available, continuing without audio.");
@@ -263,9 +296,12 @@ function clean_up() {
   data.renderer.canvas.remove();
   data.renderer.canvas = null;
   data.renderer.context = null;
+  data.audio.context.close();
   data.audio.context = null;
+  data.audio.musicGain = null;
   data.audio.sfxGain = null;
-  data.audio.clips = {};
+  data.audio.clips = [];
+  data.audio.sources = [];
   data.ui.help.remove();
   data.ui.help = null;
   data.ui.score.remove();

@@ -21,6 +21,7 @@ import {
   platform_show_pause,
   platform_hide_pause,
   platform_play_audio_clip,
+  platform_stop_audio_clip,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -283,6 +284,11 @@ export function game_update(currentTime) {
     } break;
 
     case MODE_INTRO: {
+      if (data.intro.paddle.progress === 0) {
+        // TODO: Use different volume for music
+        platform_play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
+      }
+
       {
         data.paddle.position.y = lerp(data.paddle.position.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
@@ -517,10 +523,9 @@ export function game_update(currentTime) {
     } break;
 
     case MODE_END: {
-      platform_hide_help();
-
       {
         if (data.outro.help.progress === 0) {
+          platform_stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
           platform_hide_help();
         }
         data.outro.help.progress += data.delta / data.outro.help.duration;
