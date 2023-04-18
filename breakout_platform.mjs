@@ -148,8 +148,6 @@ function clean_up() {
   document.removeEventListener("keydown", keydown);
   document.removeEventListener("keyup", keyup);
   window.removeEventListener("resize", resize);
-
-  console.log(JSON.stringify(data, null, 2));
 }
 
 export function platform_start() {

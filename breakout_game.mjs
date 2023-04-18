@@ -19,6 +19,8 @@ export const KEY_DEBUG_1 = 50;
 export const KEY_DEBUG_2 = 51;
 export const KEY_DEBUG_3 = 52;
 
+const kEpsilon = 0.00001;
+
 const STATE_RUNNING = 0;
 const STATE_WIN = 1;
 const STATE_LOSE = 2;
@@ -34,13 +36,13 @@ const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.5)";
 const PAUSE_TEXT_COLOR = "#ffffff";
 
 const PADDLE_SPEED = 20;
-const PADDLE_WIDTH = 150;
+const PADDLE_WIDTH = 200;
 const PADDLE_HEIGHT = 20;
 const PADDLE_Y = 10;
 const PADDLE_COLOR = "#000000";
 
 const BALL_MAX = 1;
-const BALL_SPEED = 5;
+const BALL_SPEED = 8;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
 
@@ -159,11 +161,15 @@ export function game_update(currentTime) {
   // Debug inputs
   if (data.keys[KEY_DEBUG_1].released) {
     data.debug.showBlocks = !data.debug.showBlocks;
-    console.log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
+    platform_log("Show blocks:", data.debug.showBlocks ? "ON" : "OFF");
   }
   if (data.keys[KEY_DEBUG_2].released) {
     data.debug.cheats = !data.debug.cheats;
-    console.log("Cheats:", data.debug.cheats ? "ON" : "OFF");
+    if (data.debug.cheats)
+      data.paddle.width = PADDLE_WIDTH * 3;
+    else
+      data.paddle.width = PADDLE_WIDTH;
+    platform_log("Cheats:", data.debug.cheats ? "ON" : "OFF");
   }
 
   // Update
@@ -177,6 +183,9 @@ export function game_update(currentTime) {
       data.intro.paddle.progress = 0;
       data.intro.ball.progress = 0;
 
+      data.outro.paddle.progress = 0;
+      data.outro.help.progress = 0;
+
       data.mode = MODE_INTRO;
     } break;
 
@@ -188,7 +197,7 @@ export function game_update(currentTime) {
 
       if (data.intro.paddle.progress >= 1 + data.intro.ball.delay) {
         if (data.intro.ball.progress === 0) {
-          spawn_ball(false);
+          spawn_ball(true);
         }
         data.balls[0].y = lerp(data.paddle.y, data.paddle.y - BALL_SIZE, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
@@ -234,111 +243,121 @@ export function game_update(currentTime) {
         }
 
         if (data.keys[KEY_MOVE_LEFT].down) {
-          data.paddle.velocityX = -PADDLE_SPEED;
+          data.paddle.velocityX = -1;
         }
         else if (data.keys[KEY_MOVE_RIGHT].down) {
-          data.paddle.velocityX = +PADDLE_SPEED;
+          data.paddle.velocityX = +1;
         }
         else {
           data.paddle.velocityX = 0;
         }
       }
 
-      data.paddle.x += data.paddle.velocityX;
-      data.paddle.x = Math.max(0, data.paddle.x);
-      data.paddle.x = Math.min(data.window.width - data.paddle.width, data.paddle.x);
+      {
+        data.paddle.x = data.paddle.x + data.paddle.velocityX * PADDLE_SPEED;
+        data.paddle.x = clamp(data.paddle.x, 0, data.window.width - data.paddle.width);
+      }
 
       if (data.keys[KEY_CONFIRM].released) {
-        const firstBall = data.balls.find(ball => ball.launched === false);
+        const firstBall = data.balls.find(ball => ball.attachedToPaddle);
         if (firstBall) {
           firstBall.velocityX = data.paddle.velocityX < 0 ? -1 : 1;
           firstBall.velocityY = -1;
-          firstBall.launched = true;
+          firstBall.attachedToPaddle = false;
         } else {
           if (data.balls.length < BALL_MAX || data.debug.cheats) {
-            spawn_ball(true);
+            spawn_ball(false);
           }
         }
       }
 
+      let blockDestroyed = 0;
+
       for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
         const ball = data.balls[ballIndex];
 
-        if (ball.launched === false) {
-          ball.x = data.paddle.x + data.paddle.width / 2 - ball.width / 2;
-          ball.y = data.paddle.y - BALL_SIZE;
-        }
-
+        // TODO: Free destroyed balls from memory at some point
         if (ball.destroyed)
           continue;
 
-        ball.x += ball.velocityX * BALL_SPEED;
-        if (ball.x + ball.width > data.window.width || ball.x < 0)
-          ball.velocityX = -ball.velocityX;
+        if (ball.attachedToPaddle) {
+          ball.x = data.paddle.x + data.paddle.width / 2 - ball.width / 2;
+          ball.y = data.paddle.y - BALL_SIZE;
+        } else {
+          ball.y += ball.velocityY * BALL_SPEED;
+          ball.x += ball.velocityX * BALL_SPEED;
 
-        ball.y += ball.velocityY * BALL_SPEED;
-        // Top limit hit
-        if (ball.y < 0)
-          ball.velocityY = -ball.velocityY;
+          // Bounce on top wall
+          if (ball.y < 0)
+            ball.velocityY = -ball.velocityY;
 
-        // Bottom limit hit
-        if (ball.y > data.window.height) {
-          ball.destroyed = true;
-
-          const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
-          if (ballsRemaining === 0 && data.debug.cheats === false) {
-            data.state = STATE_LOSE;
-            data.mode = MODE_END;
-            break;
-          }
-        }
-
-        if (is_point_inside(ball, data.paddle)) {
-          const distLeft = Math.abs((ball.x + ball.width / 2) - (data.paddle.x));
-          const distRight = Math.abs((ball.x + ball.width / 2) - (data.paddle.x + data.paddle.width));
-          const distTop = Math.abs((ball.y + ball.height / 2) - (data.paddle.y));
-          const distBottom = Math.abs((ball.y + ball.height / 2) - (data.paddle.y + data.paddle.height));
-
-          ball.velocityY = -ball.velocityY;
-
-          if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
+          // Bounce on side wall
+          if (ball.x + ball.width > data.window.width || ball.x < 0)
             ball.velocityX = -ball.velocityX;
-            ball.y = data.paddle.y;
-          }
-        }
 
-        // data.debug.trail.push([ball.x, ball.y]);
+          // Hit bottom limit
+          if (ball.y > data.window.height) {
+            ball.destroyed = true;
 
-        let blockDestroyed = 0;
-        for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
-          const block = data.blocks[blockIndex];
-
-          if (block.destroyed) {
-            blockDestroyed += 1;
-            continue;
-          }
-
-          if (is_point_inside(ball, block)) {
-            const distLeft = Math.abs((ball.x + ball.width / 2) - (block.x));
-            const distRight = Math.abs((ball.x + ball.width / 2) - (block.x + block.width));
-            const distTop = Math.abs((ball.y + ball.height / 2) - (block.y));
-            const distBottom = Math.abs((ball.y + ball.height / 2) - (block.y + block.height));
-
-            if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
-              ball.velocityX = -ball.velocityX;
-            } else {
-              ball.velocityY = -ball.velocityY;
+            const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
+            if (ballsRemaining === 0 && data.debug.cheats === false) {
+              data.state = STATE_LOSE;
+              data.mode = MODE_END;
+              break;
             }
-            block.destroyed = true;
-            platform_destroy_block(block.id);
+          }
+
+          // Bounce on paddle
+          if (is_point_inside(ball, data.paddle)) {
+            const distLeft = Math.abs((ball.x + ball.width / 2) - (data.paddle.x));
+            const distRight = Math.abs((ball.x + ball.width / 2) - (data.paddle.x + data.paddle.width));
+            const distTop = Math.abs((ball.y + ball.height / 2) - (data.paddle.y));
+            const distBottom = Math.abs((ball.y + ball.height / 2) - (data.paddle.y + data.paddle.height));
+
+            ball.velocityY = -ball.velocityY;
+            if (data.paddle.velocityX != 0) {
+              ball.velocityX = data.paddle.velocityX * 1.5;
+            }
+            ball.y = data.paddle.y;
+            // TODO: check what other breakout games do so the bounces don't feel so janky
+          }
+
+          normalize_velocity(ball);
+
+          for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+            const block = data.blocks[blockIndex];
+
+            if (block.destroyed) {
+              blockDestroyed += 1;
+              continue;
+            }
+
+            // Hit a block
+            if (is_point_inside(ball, block)) {
+              const distLeft = Math.abs((ball.x + ball.width / 2) - (block.x));
+              const distRight = Math.abs((ball.x + ball.width / 2) - (block.x + block.width));
+              const distTop = Math.abs((ball.y + ball.height / 2) - (block.y));
+              const distBottom = Math.abs((ball.y + ball.height / 2) - (block.y + block.height));
+
+              if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
+                ball.velocityX = -ball.velocityX;
+              } else {
+                ball.velocityY = -ball.velocityY;
+              }
+              block.destroyed = true;
+              platform_destroy_block(block.id);
+            }
           }
         }
 
-        if (blockDestroyed == data.blocks.length) {
-          data.state = STATE_WIN;
-          data.mode = MODE_END;
-          break;
-        }
+        if (data.debug.cheats)
+          data.debug.trail.push([ball.x, ball.y]);
+      } // for data.balls
+
+      if (blockDestroyed == data.blocks.length) {
+        data.state = STATE_WIN;
+        data.mode = MODE_END;
+        break;
       }
     } break;
 
@@ -445,15 +464,31 @@ function clamp(value, min, max) {
   return value;
 }
 
-function spawn_ball(launched = true) {
+function magnitude(vector) {
+  return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
+}
+
+function divide_vector(vector, value) {
+  return { x: vector.x / value, y: vector.y /value };
+}
+
+function normalize_vector(vector) {
+  const mag = magnitude(vector);
+  if (mag > kEpsilon)
+    return divide_vector(vector, mag);
+  else
+    return 0;
+}
+
+function spawn_ball(attachedToPaddle) {
   let velocityX = 0;
   let velocityY = 0;
-  if (launched) {
+  if (attachedToPaddle === false) {
     velocityX = data.paddle.velocityX < 0 ? -1 : 1;
     velocityY = -1;
   }
 
-  data.balls.push({
+  const ball = {
     x: data.paddle.x + data.paddle.width/2 - BALL_SIZE/2,
     y: data.paddle.y - BALL_SIZE,
     width: BALL_SIZE,
@@ -462,6 +497,16 @@ function spawn_ball(launched = true) {
     velocityY,
     color: BALL_COLOR,
     destroyed: false,
-    launched,
-  });
+    attachedToPaddle,
+  };
+
+  data.balls.push(ball);
+}
+
+function normalize_velocity(ball) {
+  // TODO: Ideally we would want something like that instead:
+  // ball.velocity = normalize_vector(ball.velocity);
+  const normalizedVelocity = normalize_vector({ x: ball.velocityX, y: ball.velocityY });
+  ball.velocityX = normalizedVelocity.x;
+  ball.velocityY = normalizedVelocity.y;
 }
