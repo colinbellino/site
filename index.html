@@ -61,10 +61,10 @@
       background: #5fcde4;
       transition: transform ease-in-out 0.2s;
     }
-    :not(.game-running) .avatar.clickable {
+    body:not(.game-running) .avatar.clickable {
       cursor: pointer;
     }
-    :not(.game-running) .avatar.flipped {
+    body:not(.game-running) .avatar.flipped {
       transform: scaleX(-1);
     }
 
@@ -174,17 +174,17 @@
       text-decoration: none;
       background: var(--main-color-hover);
     }
-    :not(.game-running) .hire-me.animated {
+    body:not(.game-running) .hire-me.animated {
       transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
     }
-    :not(.game-running) .hire-me.animated svg {
+    body:not(.game-running) .hire-me.animated svg {
       transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
     }
-    :not(.game-running) .hire-me.animated:hover {
+    body:not(.game-running) .hire-me.animated:hover {
       width: 110px;
       transition-delay: 0ms, 0ms;
     }
-    :not(.game-running) .hire-me.animated:hover svg {
+    body:not(.game-running) .hire-me.animated:hover svg {
       opacity: 1;
       transform: scale(1);
       transition-delay: 0ms, 0ms;
