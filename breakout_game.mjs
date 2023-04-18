@@ -433,15 +433,15 @@ function normalize(value, min = 0, max = 1) {
   return (value - min) / (max - min);
 }
 
-function lerp(a, b, t){
-  return a + (b - a) * clamp_0_1(t);
+function lerp(start, end, t) {
+  return start + (end - start) * clamp(t, 0, 1);
 }
 
-function clamp_0_1(value) {
-  if (value < 0)
-    return 0;
-  else if (value > 1)
-    return 1;
+function clamp(value, min, max) {
+  if (value < min)
+    return min;
+  else if (value > max)
+    return max;
   return value;
 }
 
