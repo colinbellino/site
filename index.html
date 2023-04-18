@@ -330,14 +330,17 @@
     async function start_game() {
       if (window.breakout === undefined) {
         await load_game();
+        console.log("All game files loaded.");
       }
 
       avatar.removeEventListener("click", start_game);
       document.removeEventListener("mousemove", flip_avatar);
       avatar.classList.remove("flipped");
 
+      console.log("Starting game.");
+
       window.breakout.start().then((result) => {
-        console.log("game over:", result);
+        console.log("Game over:", result === 1 ? "win" : "lose");
         window.breakout.stop();
         addAvatarListeners();
       });
@@ -345,18 +348,26 @@
 
     function load_game() {
       return new Promise((resolve) => {
+        let loaded = 0;
+        let toLoad = 2;
+
+        function onLoad() {
+          loaded += 1;
+          if (loaded >= toLoad)
+            resolve();
+        };
+
         const script = document.createElement("script");
         script.setAttribute("type", "text/javascript");
         script.setAttribute("type", "module");
         script.setAttribute("src", "breakout_loader.mjs");
         document.body.appendChild(script);
-        script.onload = () => {
-          resolve();
-        };
+        script.onload = onLoad;
 
         const link = document.createElement("link");
         link.setAttribute("rel", "stylesheet");
         link.setAttribute("href", "breakout.css");
+        link.onload = onLoad;
         document.body.appendChild(link);
       });
     }

@@ -4,6 +4,9 @@ import {
   KEY_CONFIRM,
   KEY_CANCEL,
   KEY_PAUSE,
+  KEY_DEBUG_1,
+  KEY_DEBUG_2,
+  KEY_DEBUG_3,
   game_update,
   game_keydown,
   game_keyup,
@@ -21,9 +24,13 @@ const platformKeys = {
   32: KEY_CONFIRM,
   // 27: KEY_CANCEL,
   27: KEY_PAUSE,
+  112: KEY_DEBUG_1,
+  113: KEY_DEBUG_2,
+  114: KEY_DEBUG_3,
 };
 
 let blocks = [];
+let help = null;
 
 function platform_keydown(e) {
   const key = platformKeys[e.keyCode];
@@ -83,11 +90,11 @@ function platform_split_in_blocks(selector) {
 }
 
 export function platform_log(...args) {
-  console.log(args);
+  console.log(...args);
 }
 
 export function platform_error(...args) {
-  console.error(args);
+  console.error(...args);
 }
 
 export function platform_clear_rect({ x, y, width, height }) {
@@ -114,19 +121,53 @@ export function platform_get_blocks() {
   return blocks;
 }
 
+export function platform_show_help() {
+  help.classList.remove("hidden");
+
+  const block = help.firstChild;
+  block.classList.add("breakout-block");
+  blocks.push(block);
+}
+
+export function platform_hide_help() {
+  help.classList.add("hidden");
+}
+
 export function breakout_start() {
   renderer.canvas = document.createElement("canvas");
-  renderer.canvas.style = "position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none;";
+  renderer.canvas.classList.add("breakout-canvas");
   renderer.context = renderer.canvas.getContext("2d");
   document.body.appendChild(renderer.canvas);
 
-  platform_split_in_blocks("section > h1");
-  platform_split_in_blocks("section > h2");
-  platform_split_in_blocks("section > p");
-  blocks = Array.from(document.querySelectorAll(".avatar, li > a, .hire-me, .breakout-preblock"));
-  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-    const block = blocks[blockIndex];
-    block.classList.add("breakout-block");
+  if (help === null)
+  {
+    help = document.createElement("aside");
+    help.classList.add("breakout-help");
+    help.classList.add("hidden");
+    help.innerHTML = `<p>Use <b>${"LEFT"}</b> and <b>${"RIGHT"}</b> arrows to move your paddle.<br>Press <b>${"SPACE"}</b> to shoot a ball.</p>`;
+    document.body.appendChild(help);
+  }
+
+  {
+    platform_split_in_blocks("section > h1");
+    platform_split_in_blocks("section > h2");
+    platform_split_in_blocks("section > p");
+    const selectors = [
+      ".avatar",
+      ".hire-me",
+      "li > a",
+      ".breakout-preblock",
+    ];
+    blocks = Array.from(document.querySelectorAll(selectors.join(", ")));
+    if (blocks.length === 0) {
+      platform_error("No valid blocks were found on the page, refusing to start the game like this.");
+      return;
+    }
+
+    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+      const block = blocks[blockIndex];
+      block.classList.add("breakout-block");
+    }
   }
 
   document.addEventListener("keydown", platform_keydown);
@@ -138,8 +179,11 @@ export function breakout_start() {
   return new Promise((resolve, reject) => {
     window.requestAnimationFrame(function platform_update(currentTime) {
       const result = game_update(currentTime / 1000);
-      if (result > 0)
+      if (result > 0) {
+        // Clean up
+        help.remove();
         return resolve(result);
+      }
       window.requestAnimationFrame(platform_update);
     });
   });

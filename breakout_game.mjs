@@ -4,6 +4,8 @@ import {
   platform_render_text,
   platform_get_blocks,
   platform_destroy_block,
+  platform_show_help,
+  platform_hide_help,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -13,15 +15,19 @@ export const KEY_MOVE_RIGHT = 1;
 export const KEY_CONFIRM = 2;
 export const KEY_CANCEL = 3;
 export const KEY_PAUSE = 4;
+export const KEY_DEBUG_1 = 50;
+export const KEY_DEBUG_2 = 51;
+export const KEY_DEBUG_3 = 52;
 
-const GAME_STATE_RUNNING = 0;
-const GAME_STATE_WIN = 1;
-const GAME_STATE_LOSE = 2;
+const STATE_RUNNING = 0;
+const STATE_WIN = 1;
+const STATE_LOSE = 2;
 
 const MODE_INIT = 0;
 const MODE_INTRO = 1;
 const MODE_PLAY = 2;
 const MODE_PAUSE = 3;
+const MODE_END = 4;
 
 const BACKGROUND_COLOR = "#ffffff";
 const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.5)";
@@ -40,6 +46,7 @@ const BALL_COLOR = "red";
 
 const data = {
   mode: MODE_INIT,
+  state: STATE_RUNNING,
 
   delta: 0,
   currentTime: 0,
@@ -59,6 +66,11 @@ const data = {
       progress: 0,
       delay: 0.2,
     },
+    help: {
+      duration: 0.3,
+      progress: 0,
+      delay: 0.2,
+    },
   },
 
   paddle: {
@@ -71,6 +83,7 @@ const data = {
   blocks: [],
 
   debug: {
+    showBlocks: false,
     trail: [],
   },
 
@@ -92,6 +105,18 @@ const data = {
       released: false,
     },
     [KEY_PAUSE]: {
+      down: false,
+      released: false,
+    },
+    [KEY_DEBUG_1]: {
+      down: false,
+      released: false,
+    },
+    [KEY_DEBUG_2]: {
+      down: false,
+      released: false,
+    },
+    [KEY_DEBUG_3]: {
       down: false,
       released: false,
     },
@@ -158,6 +183,11 @@ export function game_update(currentTime) {
   data.delta = currentTime - data.currentTime;
   data.currentTime = currentTime;
 
+  // Debug inputs
+  if (data.keys[KEY_DEBUG_1].released) {
+    data.debug.showBlocks = !data.debug.showBlocks;
+  }
+
   // Update
   switch (data.mode) {
     case MODE_INIT: {
@@ -165,21 +195,6 @@ export function game_update(currentTime) {
       data.paddle.y = data.window.height;
       data.balls = [];
       data.blocks = [];
-
-      const blocks = platform_get_blocks();
-      for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-        const block = blocks[blockIndex];
-        const rect = block.getClientRects()[0];
-
-        data.blocks.push({
-          id: blockIndex,
-          width: rect.width + 2,
-          height: rect.height + 2,
-          x: rect.x - 1,
-          y: rect.y - 1,
-          destroyed: false,
-        });
-      }
 
       data.intro.paddle.progress = 0;
       data.intro.ball.progress = 0;
@@ -196,34 +211,61 @@ export function game_update(currentTime) {
       }
 
       if (data.intro.paddle.progress >= 1 + data.intro.ball.delay) {
-        if (data.balls.length === 0) {
+        if (data.intro.ball.progress === 0) {
           game_spawn_ball(false);
         }
         data.balls[0].y = lerp(data.paddle.y, data.paddle.y - BALL_SIZE, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
       }
 
-      done = data.intro.paddle.progress >= 1 && data.intro.ball.progress >= 1;
+      if (data.intro.ball.progress >= 1 + data.intro.help.delay) {
+        if (data.intro.help.progress === 0) {
+          platform_show_help();
+        }
+        data.intro.help.progress += data.delta / data.intro.help.duration;
+      }
+
+      done = data.intro.paddle.progress >= 1
+        && data.intro.ball.progress >= 1
+        && data.intro.help.progress >= 1;
 
       if (done) {
+        // Get the blocks after we show the help, so the help element is in the blocks list.
+        const blocks = platform_get_blocks();
+        for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+          const block = blocks[blockIndex];
+          const rect = block.getClientRects()[0];
+
+          data.blocks.push({
+            id: blockIndex,
+            width: rect.width + 2,
+            height: rect.height + 2,
+            x: rect.x - 1,
+            y: rect.y - 1,
+            destroyed: false,
+          });
+        }
+
         data.mode = MODE_PLAY;
-        console.log("intro done");
       }
     } break;
 
     case MODE_PLAY: {
-      if (data.keys[KEY_PAUSE].released) {
-        data.mode = MODE_PAUSE;
-      }
+      // Player inputs
+      {
+        if (data.keys[KEY_PAUSE].released) {
+          data.mode = MODE_PAUSE;
+        }
 
-      if (data.keys[KEY_MOVE_LEFT].down) {
-        data.paddle.velocityX = -PADDLE_SPEED;
-      }
-      else if (data.keys[KEY_MOVE_RIGHT].down) {
-        data.paddle.velocityX = +PADDLE_SPEED;
-      }
-      else {
-        data.paddle.velocityX = 0;
+        if (data.keys[KEY_MOVE_LEFT].down) {
+          data.paddle.velocityX = -PADDLE_SPEED;
+        }
+        else if (data.keys[KEY_MOVE_RIGHT].down) {
+          data.paddle.velocityX = +PADDLE_SPEED;
+        }
+        else {
+          data.paddle.velocityX = 0;
+        }
       }
 
       data.paddle.x += data.paddle.velocityX;
@@ -268,8 +310,9 @@ export function game_update(currentTime) {
           ball.destroyed = true;
 
           if (data.balls.filter(b => b.destroyed === false).length === 0) {
-            data.mode = MODE_INIT;
-            return GAME_STATE_LOSE;
+            data.state = STATE_LOSE;
+            data.mode = MODE_END;
+            break;
           }
         }
 
@@ -315,8 +358,9 @@ export function game_update(currentTime) {
         }
 
         if (blockDestroyed == data.blocks.length) {
-          data.mode = MODE_INIT;
-          return GAME_STATE_WIN;
+          data.state = STATE_WIN;
+          data.mode = MODE_END;
+          break;
         }
       }
     } break;
@@ -326,6 +370,12 @@ export function game_update(currentTime) {
         data.mode = MODE_PLAY;
       }
     } break;
+
+    case MODE_END: {
+      platform_hide_help();
+      data.mode = MODE_INIT;
+      return data.state;
+    }
   }
 
   // Render
@@ -354,6 +404,16 @@ export function game_update(currentTime) {
       platform_render_rect(rect, PADDLE_COLOR);
     }
 
+    if (data.debug.showBlocks) {
+      for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+        const block = data.blocks[blockIndex];
+
+        const rect = { x: block.x, y: block.y, width: block.width, height: block.height };
+        platform_render_rect(rect, "red");
+      }
+    }
+
+    // TODO: Move this to DOM+CSS for better text + animate
     if (data.mode == MODE_PAUSE) {
       platform_render_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height }, PAUSE_BACKGROUND_COLOR);
       platform_render_rect({ x: data.window.width / 2 - 300/2, y: data.window.height / 2 - 100/2, width: 300, height: 100 }, PAUSE_BACKGROUND_COLOR);
@@ -366,5 +426,5 @@ export function game_update(currentTime) {
     data.keys[key].released = false;
   }
 
-  return GAME_STATE_RUNNING;
+  return STATE_RUNNING;
 }
