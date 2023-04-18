@@ -47,6 +47,10 @@
       background: #5fcde4;
     }
 
+    .pixel-art {
+      image-rendering: pixelated;
+    }
+
     .avatar.flipped {
       transform: scaleX(-1);
     }
@@ -185,7 +189,6 @@
       main {
         flex-direction: column;
         align-items: center;
-        /* text-align: center; */
         padding-left: 2rem;
         padding-right: 2rem;
       }
@@ -203,7 +206,7 @@
 
 <body>
   <main>
-    <img id="avatar" class="avatar" src="/public/me.gif" aria-hidden="true" width="175" />
+    <img id="avatar" class="avatar pixel-art" src="/public/me.gif" aria-hidden="true" width="175" />
     <section>
       <h1>Colin Bellino</h1> <a class="hire-me" href="mailto:work@colinbellino.com" target="_blank">Hire me</a>
       <h2>I'm a freelance programmer and designer who loves to create cool applications and video games.</h2>
