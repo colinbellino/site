@@ -14,6 +14,10 @@ export const KEY_CONFIRM = 2;
 export const KEY_CANCEL = 3;
 export const KEY_PAUSE = 3;
 
+const GAME_STATE_RUNNING = 0;
+const GAME_STATE_WIN = 1;
+const GAME_STATE_LOSE = 2;
+
 const MODE_INIT = 0;
 const MODE_PLAY = 1;
 const MODE_PAUSE = 2;
@@ -21,13 +25,16 @@ const MODE_PAUSE = 2;
 const BACKGROUND_COLOR = "#ffffff"
 const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.3)"
 const PAUSE_TEXT_COLOR = "#000000"
-const PADDLE_WIDTH = 150;
+
+const PADDLE_SPEED = 20;
+const PADDLE_WIDTH = 1500;
 const PADDLE_HEIGHT = 20;
-const PADDLE_SPEED = 10;
 const PADDLE_COLOR = "#000000";
-const BALL_SPEED = 3;
+
+const BALL_SPEED = 5;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
+
 const BLOCK_COLOR_ON = "transparent";
 
 const data = {
@@ -170,10 +177,15 @@ export function game_update(currentTime) {
           ball.velocityX = -ball.velocityX;
 
         ball.y += ball.velocityY * BALL_SPEED;
+        // Top limit hit
         if (ball.y < 0)
           ball.velocityY = -ball.velocityY;
-        if (ball.y > data.window.height)
+
+        // Bottom limit hit
+        if (ball.y > data.window.height) {
           ball.destroyed = true;
+          return GAME_STATE_LOSE;
+        }
 
         if (game_is_point_inside(ball, data.paddle)) {
           const distLeft = Math.abs((ball.x + ball.width / 2) - (data.paddle.x));
@@ -191,9 +203,16 @@ export function game_update(currentTime) {
 
         // data.debug.trail.push([ball.x, ball.y]);
 
+        let blockDestroyed = 0;
         for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
           const block = data.blocks[blockIndex];
-          if (block.destroyed === false && game_is_point_inside(ball, block)) {
+
+          if (block.destroyed) {
+            blockDestroyed += 1;
+            continue;
+          }
+
+          if (game_is_point_inside(ball, block)) {
             const distLeft = Math.abs((ball.x + ball.width / 2) - (block.x));
             const distRight = Math.abs((ball.x + ball.width / 2) - (block.x + block.width));
             const distTop = Math.abs((ball.y + ball.height / 2) - (block.y));
@@ -208,10 +227,12 @@ export function game_update(currentTime) {
             platform_destroy_block(block.id);
           }
         }
+
+        if (blockDestroyed == data.blocks.length)
+          return GAME_STATE_WIN;
       }
     } break;
   }
-
 
   // Render
 
@@ -256,4 +277,6 @@ export function game_update(currentTime) {
   for (const [key, value] of Object.entries(data.keys)) {
     data.keys[key].released = false;
   }
+
+  return GAME_STATE_RUNNING;
 }

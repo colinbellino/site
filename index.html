@@ -303,10 +303,10 @@
     const canHover = matchMedia('(hover: hover)').matches;
 
     if (avatar && canHover) {
-      document.addEventListener("mousemove", flipAvatar);
+      document.addEventListener("mousemove", flip_avatar);
     }
 
-    function flipAvatar(e) {
+    function flip_avatar(e) {
       const rect = avatar.getBoundingClientRect();
       const rectCenterX = rect.x + rect.width / 2;
 
@@ -338,10 +338,11 @@
       transform: scale(1.2);
     }
   </style>
-  <!-- TODO: Load this only when clicking the breakout button -->
   <script type="module">
-    import { platform_init } from "./breakout_platform.mjs";
+    import { platform_init, platform_deinit } from "./breakout_platform.mjs";
 
+    // TODO: Load this only when clicking the breakout button
+    // TODO: Update blocks position on resize ?
     // TODO: Clean up when the game is over
     // - remove event listeners
     // - restore dom/css
@@ -350,12 +351,18 @@
     function init(e) {
       if (e.keyCode !== 32)
         return;
-      platform_init();
-      document.removeEventListener("mousemove", flipAvatar);
+
+      document.removeEventListener("mousemove", flip_avatar);
       document.removeEventListener("keyup", init);
+
+      platform_init().then((result) => {
+        console.log("game over:", result);
+        platform_deinit();
+      });
     }
 
-    document.addEventListener("keyup", init);
+    // document.addEventListener("keyup", init);
+    init({ keyCode: 32 });
   </script>
 </body>
 

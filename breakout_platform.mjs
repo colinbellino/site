@@ -50,11 +50,6 @@ function platform_resize() {
   game_resize(renderer.canvas.width, renderer.canvas.height);
 }
 
-function platform_update(currentTime) {
-  game_update(currentTime);
-  window.requestAnimationFrame(platform_update);
-}
-
 export function platform_log(...args) {
   console.log(args);
 }
@@ -113,7 +108,6 @@ function platform_split_in_blocks(selector) {
   });
 }
 
-// TODO: Update blocks position on resize ?
 export function platform_init() {
   renderer.canvas = document.createElement("canvas");
   renderer.canvas.style = "position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none;";
@@ -128,11 +122,26 @@ export function platform_init() {
     block.classList.add("breakout-block");
   }
 
-  window.requestAnimationFrame(platform_update);
   document.addEventListener("keydown", platform_keydown);
   document.addEventListener("keyup", platform_keyup);
   window.addEventListener("resize", platform_resize);
 
   platform_resize();
-  platform_update();
+
+  return new Promise((resolve, reject) => {
+    window.requestAnimationFrame(function platform_update(currentTime) {
+      const result = game_update(currentTime);
+      if (result > 0)
+        return resolve(result);
+      window.requestAnimationFrame(platform_update);
+    });
+  });
+}
+
+export function platform_deinit() {
+  blocks.forEach((block) => {
+    block.classList.remove("breakout-block");
+    block.classList.remove("breakout-destroyed");
+  });
+  renderer.canvas.remove();
 }
