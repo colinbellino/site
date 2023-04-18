@@ -191,15 +191,27 @@ export function platform_start() {
 
   resize();
 
-  return new Promise((resolve, reject) => {
-    window.requestAnimationFrame(function update(currentTime) {
-      const [result, score] = game_update(currentTime / 1000);
+  return new Promise((resolve, reject) => {
+    const fps = 60;
+    const then = window.performance.now();
+    const startTime = then;
+    let now = 0;
+    let elapsed = 0;
+
+    update(window.performance.now());
+
+    function update(newTime) {
+      now = newTime;
+      elapsed = now - then;
+
+      const [result, score] = game_update(elapsed / 1000);
       if (result > 0) {
         clean_up();
         return resolve([result, score]);
       }
-      window.requestAnimationFrame(update);
-    });
+
+      requestAnimationFrame(update);
+    }
   });
 }
 
@@ -291,11 +303,11 @@ function load_audio(url) {
     const request = new XMLHttpRequest();
     request.open("GET", url);
     request.responseType = "arraybuffer";
-    request.onload = function() {
-      let undecodedAudio = request.response;
+    request.onload = function () {
+      const undecodedAudio = request.response;
       data.audio.context.decodeAudioData(undecodedAudio, resolve);
-
     };
+    request.onerror = reject;
     request.send();
   });
 }

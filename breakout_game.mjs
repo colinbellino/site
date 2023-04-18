@@ -23,11 +23,11 @@ export const KEY_DEBUG_1 = 50;
 export const KEY_DEBUG_2 = 51;
 export const KEY_DEBUG_3 = 52;
 
-const kEpsilon = 0.00001;
+export const STATE_RUNNING = 0;
+export const STATE_WIN = 1;
+export const STATE_LOSE = 2;
 
-const STATE_RUNNING = 0;
-const STATE_WIN = 1;
-const STATE_LOSE = 2;
+const EPSILON = 0.00001;
 
 const MODE_INIT = 0;
 const MODE_INTRO = 1;
@@ -376,12 +376,12 @@ export function game_update(currentTime) {
           }
         }
 
-        const ballCenter = {
-          x: ball.position.x + BALL_SIZE/2,
-          y: ball.position.y + BALL_SIZE/2,
-        };
-        {
-          ball.trail.push(ballCenter);
+        if (ball.attachedToPaddle === false) {
+          const center = {
+            x: ball.position.x + BALL_SIZE/2,
+            y: ball.position.y + BALL_SIZE/2,
+          };
+          ball.trail.push(center);
           if (ball.trail.length > BALL_TRAIL_MAX) {
             ball.trail.splice(0, 1);
           }
@@ -537,7 +537,7 @@ function divide_vector(vector, value) {
 
 function normalize_vector(vector) {
   const mag = magnitude(vector);
-  if (mag > kEpsilon)
+  if (mag > EPSILON)
     return divide_vector(vector, mag);
   else
     return 0;
