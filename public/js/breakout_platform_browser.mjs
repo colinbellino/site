@@ -17,11 +17,12 @@ import {
   game_mousemove,
   game_resize,
   game_quit,
+  game_audio_loaded,
 } from "./breakout_game.mjs";
 
 const VOLUME_SFX_MULTIPLIER = 0.2;
 const VOLUME_MUSIC_MULTIPLIER = 0.2;
-const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.1;
+const VOLUME_MUSIC_PAUSED_MULTIPLIER = 0.05;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -59,8 +60,8 @@ const data = {
     sfxSlider: null,
   },
   settings: {
-    volumeSfx: 0,
-    volumeMusic: 0,
+    volumeSfx: 1,
+    volumeMusic: 1,
   },
   debug: {
     noMusic: false,
@@ -149,6 +150,7 @@ function platform_hide_pause() {
   data.renderer.canvas.classList.remove("blocking");
   data.ui.pause.classList.add("hidden");
   set_volume_music(data.settings.volumeMusic);
+  set_volume_sfx(data.settings.volumeSfx);
 }
 
 async function platform_show_lives(lives) {
@@ -207,9 +209,6 @@ export async function platform_start() {
   data.renderer.context = data.renderer.canvas.getContext("2d");
   document.body.appendChild(data.renderer.canvas);
 
-  data.settings.volumeSfx = 1;
-  data.settings.volumeMusic = 0;
-
   if (data.ui.help === null)
   {
     data.ui.help = document.createElement("aside");
@@ -250,9 +249,8 @@ export async function platform_start() {
       slider.setAttribute("step", 0.1);
       slider.addEventListener("change", (e) => {
         const rawValue = parseFloat(e.target.value);
-        const volume = rawValue * VOLUME_MUSIC_MULTIPLIER;
-        data.settings.volumeMusic = volume;
-        set_volume_music(volume);
+        data.settings.volumeMusic = rawValue;
+        set_volume_music(rawValue);
       });
       data.ui.musicSlider = slider;
 
@@ -277,9 +275,8 @@ export async function platform_start() {
       slider.setAttribute("step", 0.1);
       slider.addEventListener("change", (e) => {
         const rawValue = parseFloat(e.target.value);
-        const volume = rawValue * VOLUME_SFX_MULTIPLIER;
-        data.settings.volumeSfx = volume;
-        set_volume_sfx(volume);
+        data.settings.volumeSfx = rawValue;
+        set_volume_sfx(rawValue);
       });
       data.ui.sfxSlider = slider;
 
@@ -351,13 +348,16 @@ export async function platform_start() {
 
     // Load audio clips
     data.audio.clips = AUDIO_CLIPS.map(key => ({
+      key,
       url: `/public/audio/${key}.mp3`,
       buffer: null,
     }));
     const loadPromises = data.audio.clips.map((clip) => load_audio(clip.url));
     Promise.all(loadPromises).then((buffers) => {
-      for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
+      for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++) {
         data.audio.clips[clipIndex].buffer = buffers[clipIndex];
+        game_audio_loaded(data.audio.clips[clipIndex].key);
+      }
       platform_log("Audio clips loaded:", data.audio.clips.length);
     });
   } else {
@@ -587,8 +587,8 @@ function set_volume_music(value) {
 
   if (data.paused)
     value *= VOLUME_MUSIC_PAUSED_MULTIPLIER;
-
-  value *= VOLUME_MUSIC_MULTIPLIER;
+  else
+    value *= VOLUME_MUSIC_MULTIPLIER;
 
   data.audio.gainMusic.gain.value = value;
   platform_log("Music volume:", data.audio.gainMusic.gain.value);

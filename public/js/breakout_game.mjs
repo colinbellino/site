@@ -244,6 +244,12 @@ export function game_resize(width, height) {
   }
 }
 
+export function game_audio_loaded(key) {
+  if (key === AUDIO_CLIP_MUSIC_1) {
+    data.platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
+  }
+}
+
 export function game_quit() {
   data.mode = MODE_END;
   data.state = STATE_LOSE;
@@ -293,11 +299,6 @@ export function game_update(currentTime) {
     } break;
 
     case MODE_INTRO: {
-      if (data.intro.paddle.progress === 0) {
-        // TODO: Use different volume for music
-        data.platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
-      }
-
       {
         data.paddle.position.y = math.lerp(data.paddle.position.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
