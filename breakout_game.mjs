@@ -27,7 +27,7 @@ const PAUSE_BACKGROUND_COLOR = "rgba(0, 0, 0, 0.3)"
 const PAUSE_TEXT_COLOR = "#000000"
 
 const PADDLE_SPEED = 20;
-const PADDLE_WIDTH = 1500;
+const PADDLE_WIDTH = 150;
 const PADDLE_HEIGHT = 20;
 const PADDLE_COLOR = "#000000";
 

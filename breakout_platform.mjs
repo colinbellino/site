@@ -43,11 +43,38 @@ function platform_keyup(e) {
   game_keyup(key);
 }
 
+// TODO: Update blocks position on resize ?
 function platform_resize() {
-  console.log("platform_resize", window.innerWidth, window.innerHeight);
+  // console.log("platform_resize", window.innerWidth, window.innerHeight);
   renderer.canvas.width = window.innerWidth;
   renderer.canvas.height = window.innerHeight;
   game_resize(renderer.canvas.width, renderer.canvas.height);
+}
+
+function platform_split_in_blocks(selector) {
+  document.querySelectorAll(selector).forEach((root) => {
+    root.childNodes.forEach((node) => {
+      if (node.tagName !== undefined)
+        return;
+
+      const replacement = document.createElement("span");
+      const words = node.textContent.split(" ");
+      words.forEach((word) => {
+        if (word === "")
+          return;
+
+        const span = document.createElement("span");
+        span.classList.add("breakout-block");
+        span.innerHTML = word;
+        replacement.appendChild(span);
+        const space = document.createElement("span");
+        space.innerHTML = " ";
+        replacement.appendChild(space);
+      });
+      node.innerHTML = replacement.innerHTML;
+      root.replaceChild(replacement, node);
+    });
+  });
 }
 
 export function platform_log(...args) {
@@ -82,33 +109,7 @@ export function platform_get_blocks() {
   return blocks;
 }
 
-function platform_split_in_blocks(selector) {
-  document.querySelectorAll(selector).forEach((root) => {
-    root.childNodes.forEach((node) => {
-      if (node.tagName !== undefined)
-        return;
-
-      const replacement = document.createElement("span");
-      const words = node.textContent.split(" ");
-      words.forEach((word) => {
-        if (word === "")
-          return;
-
-        const span = document.createElement("span");
-        span.classList.add("breakout-block");
-        span.innerHTML = word;
-        replacement.appendChild(span);
-        const space = document.createElement("span");
-        space.innerHTML = " ";
-        replacement.appendChild(space);
-      });
-      node.innerHTML = replacement.innerHTML;
-      root.replaceChild(replacement, node);
-    });
-  });
-}
-
-export function platform_init() {
+export function breakout_start() {
   renderer.canvas = document.createElement("canvas");
   renderer.canvas.style = "position: absolute; inset: 0; display: block; width: 100%; height: 100%; pointer-events: none;";
   renderer.context = renderer.canvas.getContext("2d");
@@ -138,7 +139,7 @@ export function platform_init() {
   });
 }
 
-export function platform_deinit() {
+export function breakout_stop() {
   blocks.forEach((block) => {
     block.classList.remove("breakout-block");
     block.classList.remove("breakout-destroyed");

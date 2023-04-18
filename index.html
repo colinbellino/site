@@ -46,6 +46,7 @@
       border-radius: 50%;
       background: #5fcde4;
       transition: transform ease-in-out 0.2s;
+      cursor: pointer;
     }
 
     .pixel-art {
@@ -302,8 +303,12 @@
     const avatar = document.getElementById("avatar");
     const canHover = matchMedia('(hover: hover)').matches;
 
-    if (avatar && canHover) {
-      document.addEventListener("mousemove", flip_avatar);
+    addAvatarListeners();
+
+    function addAvatarListeners() {
+      avatar.addEventListener("click", start_game);
+      if (canHover)
+        document.addEventListener("mousemove", flip_avatar);
     }
 
     function flip_avatar(e) {
@@ -316,53 +321,48 @@
         avatar.classList.add("flipped");
       }
     }
-  </script>
-  <!-- <script>
-    const script = document.createElement("script");
-    script.setAttribute("type", "text/javascript");
-    script.setAttribute("src", "breakout.js");
-    document.head.appendChild(script);
-  </script> -->
-  <style>
-    .breakout-block {
-      display: inline-block;
-      opacity: 1;
-      transform: scale(1);
-      transition: opacity ease-in 100ms, transform ease-in 100ms;
 
-      /* outline: 1px solid red; */
-    }
-
-    .breakout-destroyed {
-      opacity: 0;
-      transform: scale(1.2);
-    }
-  </style>
-  <script type="module">
-    import { platform_init, platform_deinit } from "./breakout_platform.mjs";
-
-    // TODO: Load this only when clicking the breakout button
-    // TODO: Update blocks position on resize ?
+    // TODO: Animate the start of the game so we know what is happening
     // TODO: Clean up when the game is over
-    // - remove event listeners
-    // - restore dom/css
-    // - unload js
-    // - free memory
-    function init(e) {
-      if (e.keyCode !== 32)
-        return;
+    // - [ ] remove event listeners
+    // - [ ] restore dom/css
+    // - [ ] unload js
+    // - [ ] free memory
+    async function start_game() {
+      if (window.breakout === undefined) {
+        await load_game();
+      }
 
+      avatar.removeEventListener("click", start_game);
       document.removeEventListener("mousemove", flip_avatar);
-      document.removeEventListener("keyup", init);
+      avatar.classList.remove("flipped");
 
-      platform_init().then((result) => {
+      window.breakout.start().then((result) => {
         console.log("game over:", result);
-        platform_deinit();
+        window.breakout.stop();
+        addAvatarListeners();
       });
     }
 
-    // document.addEventListener("keyup", init);
-    init({ keyCode: 32 });
+    function load_game() {
+      return new Promise((resolve) => {
+        const script = document.createElement("script");
+        script.setAttribute("type", "text/javascript");
+        script.setAttribute("type", "module");
+        script.setAttribute("src", "breakout_loader.mjs");
+        document.body.appendChild(script);
+        script.onload = () => {
+          resolve();
+        };
+
+        const link = document.createElement("link");
+        link.setAttribute("rel", "stylesheet");
+        link.setAttribute("href", "breakout.css");
+        document.body.appendChild(link);
+      });
+    }
+
+    // start_game();
   </script>
 </body>
 
