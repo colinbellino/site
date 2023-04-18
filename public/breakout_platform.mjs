@@ -178,7 +178,7 @@ export function platform_play_audio_clip(key, group = 0, loop = false) {
     source.connect(data.audio.gainSfx);
   else
     source.connect(data.audio.gainMusic);
-  source.start();
+  source.start(0, clip.buffer.duration);
   data.audio.sources[index] = source;
 }
 
@@ -338,7 +338,8 @@ export async function platform_start() {
     }
   }
 
-  const canPlayAudio = window.AudioContext !== undefined;
+  const AudioContext = window.AudioContext || window.webkitAudioContext;
+  const canPlayAudio = AudioContext !== undefined;
   if (canPlayAudio) {
     data.audio.available = true;
     data.audio.context = new AudioContext();
