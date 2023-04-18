@@ -1,3 +1,4 @@
+import { clamp } from "./math.mjs";
 import {
   KEY_MOUSE_LEFT,
   KEY_MOUSE_RIGHT,
@@ -9,12 +10,14 @@ import {
   KEY_DEBUG_1,
   KEY_DEBUG_2,
   KEY_DEBUG_3,
+  AUDIO_CLIPS,
   game_update,
   game_keydown,
   game_keyup,
   game_mousemove,
   game_resize,
 } from "./breakout_game.mjs"
+const VOLUME_SFX_INITIAL = 0.2;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -35,6 +38,8 @@ const data = {
   },
   audio: {
     context: null,
+    sfxGain: null,
+    clips: [],
   },
   blocks: [],
   ui: {
@@ -113,6 +118,14 @@ export function platform_hide_pause() {
   data.ui.pause.classList.add("hidden");
 }
 
+export function platform_play_audio_clip(key) {
+  const clip = data.audio.clips[AUDIO_CLIPS.indexOf(key)];
+  const source = data.audio.context.createBufferSource();
+  source.buffer = clip.buffer;
+  source.connect(data.audio.sfxGain);
+  source.start();
+}
+
 export function platform_start() {
   data.renderer.canvas = document.createElement("canvas");
   data.renderer.canvas.classList.add("breakout-canvas");
@@ -172,21 +185,25 @@ export function platform_start() {
 
   if (window.AudioContext !== undefined) {
     data.audio.context = new AudioContext();
+    data.audio.sfxGain = data.audio.context.createGain();
+    data.audio.sfxGain.connect(data.audio.context.destination);
+    data.audio.sfxGain.gain.setValueAtTime(VOLUME_SFX_INITIAL, data.audio.context.currentTime);
+    data.audio.clips = AUDIO_CLIPS.map(key => ({
+      url: `/public/audio/${key}.mp3`,
+      buffer: null,
+    }));
 
-    // Promise.all([
-    //   load_audio("https://cdn.freesound.org/previews/523/523088_11537497-lq.ogg"),
-    //   load_audio("https://cdn.freesound.org/previews/74/74879_877451-lq.ogg"),
-    //   load_audio("https://cdn.freesound.org/previews/611/611789_13564385-lq.ogg"),
-    // ]).then(async (sounds) => {
-    //   for (let soundIndex = 0; soundIndex < sounds.length; soundIndex++) {
-    //     const sound = sounds[soundIndex];
-    //     const source = data.audio.context.createBufferSource();
-    //     source.buffer = sound;
-    //     source.connect(data.audio.context.destination);
-    //     source.start();
-    //     await wait_for_milliseconds(2000);
-    //   }
-    // });
+    const loadPromises = data.audio.clips.map((clip) => load_audio(clip.url));
+    Promise.all(loadPromises)
+      .then((buffers) => {
+        for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
+          data.audio.clips[clipIndex].buffer = buffers[clipIndex];
+
+        return Promise.resolve();
+      })
+      .then(() => {
+        platform_log("Audio clips loaded:", data.audio.clips.length);
+      });
   } else {
     platform_warn("Web Audio API not available, continuing without audio.");
   }
@@ -240,6 +257,8 @@ function clean_up() {
   data.renderer.canvas = null;
   data.renderer.context = null;
   data.audio.context = null;
+  data.audio.sfxGain = null;
+  data.audio.clips = {};
   data.ui.help.remove();
   data.ui.help = null;
   data.ui.score.remove();
@@ -293,8 +312,13 @@ function keyup(e) {
   game_keyup(key);
 }
 
+function set_sfx_volume(volume) {
+  data.audio.sfxGain.gain.value = clamp(volume, 0, 1);
+  platform_log("SFX volume:", data.audio.sfxGain.gain.value);
+}
+
 function resize() {
-  // console.log("resize", window.innerWidth, window.innerHeight);
+  platform_log("Window resized:", window.innerWidth, window.innerHeight);
   data.renderer.canvas.width = window.innerWidth;
   data.renderer.canvas.height = window.innerHeight;
   game_resize(data.renderer.canvas.width, data.renderer.canvas.height);

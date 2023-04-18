@@ -1,4 +1,14 @@
 import {
+  is_point_inside,
+  normalize,
+  lerp,
+  clamp,
+  magnitude,
+  divide_vector,
+  normalize_vector,
+  random,
+} from "./math.mjs";
+import {
   platform_clear_rect,
   platform_draw_rect,
   platform_draw_trail,
@@ -10,6 +20,7 @@ import {
   platform_hide_score,
   platform_show_pause,
   platform_hide_pause,
+  platform_play_audio_clip,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -29,7 +40,25 @@ export const STATE_RUNNING = 0;
 export const STATE_WIN = 1;
 export const STATE_LOSE = 2;
 
-const EPSILON = 0.00001;
+const AUDIO_CLIP_BOUNCE_1 = "bounce1";
+const AUDIO_CLIP_BOUNCE_2 = "bounce2";
+const AUDIO_CLIP_HIT_1 = "hit1";
+const AUDIO_CLIP_HIT_2 = "hit2";
+const AUDIO_CLIP_HIT_3 = "hit3";
+const AUDIO_CLIP_HIT_4 = "hit4";
+const AUDIO_CLIP_LOSE_1 = "lose1";
+const AUDIO_CLIP_MUSIC_1 = "music1";
+
+export const AUDIO_CLIPS = [
+  AUDIO_CLIP_BOUNCE_1,
+  AUDIO_CLIP_BOUNCE_2,
+  AUDIO_CLIP_HIT_1,
+  AUDIO_CLIP_HIT_2,
+  AUDIO_CLIP_HIT_3,
+  AUDIO_CLIP_HIT_4,
+  AUDIO_CLIP_LOSE_1,
+  AUDIO_CLIP_MUSIC_1,
+];
 
 const MODE_INIT = 0;
 const MODE_INTRO = 1;
@@ -125,11 +154,6 @@ const data = {
   score: 0,
   multiplier: SCORE_MULTIPLIER,
 
-  debug: {
-    showBlocks: false,
-    cheats: false,
-  },
-
   mouse: {
     x: 0,
     y: 0,
@@ -176,7 +200,12 @@ const data = {
       down: false,
       released: false,
     },
-  }
+  },
+
+  debug: {
+    showBlocks: false,
+    cheats: false,
+  },
 };
 
 export function game_mousemove(x, y) {
@@ -356,20 +385,24 @@ export function game_update(currentTime) {
           if (ball.position.y < 0) {
             ball.velocity.y = -ball.velocity.y;
             ball.position.y = 0; // Reset the Y position just in case we resized the window and the ball is stuck outside
+            play_random_audio_clip([AUDIO_CLIP_BOUNCE_1, AUDIO_CLIP_BOUNCE_2]);
           }
 
           // Bounce on side wall
           if (ball.position.x + ball.width > data.window.width) {
             ball.velocity.x = -ball.velocity.x;
             ball.position.x = data.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
+            play_random_audio_clip([AUDIO_CLIP_BOUNCE_1, AUDIO_CLIP_BOUNCE_2]);
           } else if (ball.position.x < 0) {
             ball.velocity.x = -ball.velocity.x;
             ball.position.x = 0; // Reset the X position just in case we resized the window and the ball is stuck outside
+            play_random_audio_clip([AUDIO_CLIP_BOUNCE_1, AUDIO_CLIP_BOUNCE_2]);
           }
 
           // Hit bottom limit
           if (ball.position.y > data.window.height) {
             ball.destroyed = true;
+            platform_play_audio_clip(AUDIO_CLIP_LOSE_1);
           }
 
           // Bounce on paddle
@@ -391,6 +424,8 @@ export function game_update(currentTime) {
               data.multiplier = SCORE_MULTIPLIER;
               platform_show_score(data.score, data.multiplier);
             }
+
+            platform_play_audio_clip(AUDIO_CLIP_BOUNCE_2);
           }
 
           ball.velocity = normalize_vector(ball.velocity);
@@ -417,6 +452,7 @@ export function game_update(currentTime) {
               }
               block.destroyed = true;
               platform_destroy_block(block.id);
+              play_random_audio_clip([AUDIO_CLIP_HIT_1, AUDIO_CLIP_HIT_2, AUDIO_CLIP_HIT_3, AUDIO_CLIP_HIT_4]);
 
               data.score += SCORE_PER_BLOCK * data.multiplier;
               data.multiplier += SCORE_MULTIPLIER_PER_BLOCK;
@@ -570,49 +606,13 @@ export function game_update(currentTime) {
   return [STATE_RUNNING, data.score];
 }
 
-function is_point_inside(point, box) {
-  return (point.position.x >= box.position.x && point.position.x <= box.position.x + box.width) &&
-         (point.position.y >= box.position.y && point.position.y <= box.position.y + box.height);
-}
-
-function normalize(value, min = 0, max = 1) {
-  return (value - min) / (max - min);
-}
-
-function lerp(start, end, t) {
-  return start + (end - start) * clamp(t, 0, 1);
-}
-
-function clamp(value, min, max) {
-  if (value < min)
-    return min;
-  else if (value > max)
-    return max;
-  return value;
-}
-
-function magnitude(vector) {
-  return Math.sqrt(vector.x * vector.x + vector.y * vector.y);
-}
-
-function divide_vector(vector, value) {
-  return { x: vector.x / value, y: vector.y /value };
-}
-
-function normalize_vector(vector) {
-  const mag = magnitude(vector);
-  if (mag > EPSILON)
-    return divide_vector(vector, mag);
-  else
-    return 0;
-}
-
-function random(min, max) {
-  return Math.random() * (max - min) + min;
-}
-
 function color_to_string({ r, g, b, a }) {
   return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
+function play_random_audio_clip(clips) {
+  const clip = clips[Math.floor(Math.random() * clips.length)];
+  platform_play_audio_clip(clip);
 }
 
 function spawn_ball(attachedToPaddle) {
