@@ -94,6 +94,7 @@ const data = {
     y: 0,
     width: PADDLE_WIDTH,
     height: PADDLE_HEIGHT,
+    velocity: { x: 0, y: 0 },
   },
   balls: [],
   blocks: [],
@@ -165,6 +166,7 @@ export function game_update(currentTime) {
   }
   if (data.keys[KEY_DEBUG_2].released) {
     data.debug.cheats = !data.debug.cheats;
+    data.debug.trail = [];
     if (data.debug.cheats)
       data.paddle.width = PADDLE_WIDTH * 3;
     else
@@ -243,26 +245,26 @@ export function game_update(currentTime) {
         }
 
         if (data.keys[KEY_MOVE_LEFT].down) {
-          data.paddle.velocityX = -1;
+          data.paddle.velocity.x = -1;
         }
         else if (data.keys[KEY_MOVE_RIGHT].down) {
-          data.paddle.velocityX = +1;
+          data.paddle.velocity.x = +1;
         }
         else {
-          data.paddle.velocityX = 0;
+          data.paddle.velocity.x = 0;
         }
       }
 
       {
-        data.paddle.x = data.paddle.x + data.paddle.velocityX * PADDLE_SPEED;
+        data.paddle.x = data.paddle.x + data.paddle.velocity.x * PADDLE_SPEED;
         data.paddle.x = clamp(data.paddle.x, 0, data.window.width - data.paddle.width);
       }
 
       if (data.keys[KEY_CONFIRM].released) {
         const firstBall = data.balls.find(ball => ball.attachedToPaddle);
         if (firstBall) {
-          firstBall.velocityX = data.paddle.velocityX < 0 ? -1 : 1;
-          firstBall.velocityY = -1;
+          firstBall.velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
+          firstBall.velocity.y = -1;
           firstBall.attachedToPaddle = false;
         } else {
           if (data.balls.length < BALL_MAX || data.debug.cheats) {
@@ -270,8 +272,6 @@ export function game_update(currentTime) {
           }
         }
       }
-
-      let blockDestroyed = 0;
 
       for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
         const ball = data.balls[ballIndex];
@@ -284,21 +284,22 @@ export function game_update(currentTime) {
           ball.x = data.paddle.x + data.paddle.width / 2 - ball.width / 2;
           ball.y = data.paddle.y - BALL_SIZE;
         } else {
-          ball.y += ball.velocityY * BALL_SPEED;
-          ball.x += ball.velocityX * BALL_SPEED;
+          ball.y += ball.velocity.y * BALL_SPEED;
+          ball.x += ball.velocity.x * BALL_SPEED;
 
           // Bounce on top wall
           if (ball.y < 0)
-            ball.velocityY = -ball.velocityY;
+            ball.velocity.y = -ball.velocity.y;
 
           // Bounce on side wall
           if (ball.x + ball.width > data.window.width || ball.x < 0)
-            ball.velocityX = -ball.velocityX;
+            ball.velocity.x = -ball.velocity.x;
 
           // Hit bottom limit
           if (ball.y > data.window.height) {
             ball.destroyed = true;
 
+            // Check for lose condition
             const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
             if (ballsRemaining === 0 && data.debug.cheats === false) {
               data.state = STATE_LOSE;
@@ -314,21 +315,20 @@ export function game_update(currentTime) {
             const distTop = Math.abs((ball.y + ball.height / 2) - (data.paddle.y));
             const distBottom = Math.abs((ball.y + ball.height / 2) - (data.paddle.y + data.paddle.height));
 
-            ball.velocityY = -ball.velocityY;
-            if (data.paddle.velocityX != 0) {
-              ball.velocityX = data.paddle.velocityX * 1.5;
+            ball.velocity.y = -ball.velocity.y;
+            if (data.paddle.velocity.x != 0) {
+              ball.velocity.x = data.paddle.velocity.x * 1.5;
             }
             ball.y = data.paddle.y;
             // TODO: check what other breakout games do so the bounces don't feel so janky
           }
 
-          normalize_velocity(ball);
+          ball.velocity = normalize_vector(ball.velocity);
 
           for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
             const block = data.blocks[blockIndex];
 
             if (block.destroyed) {
-              blockDestroyed += 1;
               continue;
             }
 
@@ -340,9 +340,9 @@ export function game_update(currentTime) {
               const distBottom = Math.abs((ball.y + ball.height / 2) - (block.y + block.height));
 
               if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
-                ball.velocityX = -ball.velocityX;
+                ball.velocity.x = -ball.velocity.x;
               } else {
-                ball.velocityY = -ball.velocityY;
+                ball.velocity.y = -ball.velocity.y;
               }
               block.destroyed = true;
               platform_destroy_block(block.id);
@@ -354,7 +354,14 @@ export function game_update(currentTime) {
           data.debug.trail.push([ball.x, ball.y]);
       } // for data.balls
 
-      if (blockDestroyed == data.blocks.length) {
+      // Check for win condition
+      let blockDestroyed = 0;
+      for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+        if (data.blocks[blockIndex].destroyed) {
+          blockDestroyed += 1;
+        }
+      }
+      if (blockDestroyed === data.blocks.length) {
         data.state = STATE_WIN;
         data.mode = MODE_END;
         break;
@@ -481,11 +488,10 @@ function normalize_vector(vector) {
 }
 
 function spawn_ball(attachedToPaddle) {
-  let velocityX = 0;
-  let velocityY = 0;
+  const velocity = { x: 0, y: 0 };
   if (attachedToPaddle === false) {
-    velocityX = data.paddle.velocityX < 0 ? -1 : 1;
-    velocityY = -1;
+    velocity.x = data.paddle.velocity.x < 0 ? -1 : 1;
+    velocity.y = -1;
   }
 
   const ball = {
@@ -493,20 +499,11 @@ function spawn_ball(attachedToPaddle) {
     y: data.paddle.y - BALL_SIZE,
     width: BALL_SIZE,
     height: BALL_SIZE,
-    velocityX,
-    velocityY,
+    velocity,
     color: BALL_COLOR,
     destroyed: false,
     attachedToPaddle,
   };
 
   data.balls.push(ball);
-}
-
-function normalize_velocity(ball) {
-  // TODO: Ideally we would want something like that instead:
-  // ball.velocity = normalize_vector(ball.velocity);
-  const normalizedVelocity = normalize_vector({ x: ball.velocityX, y: ball.velocityY });
-  ball.velocityX = normalizedVelocity.x;
-  ball.velocityY = normalizedVelocity.y;
 }
