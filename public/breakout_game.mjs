@@ -76,7 +76,8 @@ const PADDLE_Y = 10;
 const PADDLE_COLOR = "#000000";
 
 const BALL_MAX = 1;
-const BALL_SPEED = 8;
+const BALL_SPEED = 6;
+const BALL_SCORE_MULTIPLIER = 0.2;
 const BALL_SIZE = 20;
 const BALL_COLOR = { r: 255, g: 0, b: 0, a: 1 };
 const BALL_TRAIL_MAX = 20;
@@ -371,50 +372,48 @@ export function game_update(currentTime) {
             firstBall.velocity.y = -1;
             firstBall.attachedToPaddle = false;
           } else {
-            if (data.balls.length < BALL_MAX || data.debug.cheats) {
+            if (data.balls.length <= data.lives || data.debug.cheats) {
+              platform_show_lives(data.lives);
               spawn_ball(false);
             }
           }
         }
       }
 
-      // Check for lose condition
-      const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
-      if (data.balls.length > 0 && ballsRemaining === 0 && data.debug.cheats === false) {
-        data.lives -= 1;
-
-        platform_show_lives(data.lives);
-
-        if (data.lives < 0) {
-          data.state = STATE_LOSE;
-          data.mode = MODE_END;
-          break;
-        }
-
-        // Reset multiplier
-        if (data.debug.cheats === false) {
-          data.multiplier = SCORE_MULTIPLIER;
-          platform_show_score(data.score, data.multiplier);
-        }
-
-        for (let ballIndex = data.balls.length - 1; ballIndex >= 0; ballIndex--)
-          data.balls.splice(ballIndex, 1);
-        spawn_ball(true);
-      }
-
       // Balls
-      for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
+      for (let ballIndex = data.balls.length - 1; ballIndex >= 0; ballIndex--) {
         const ball = data.balls[ballIndex];
 
-        if (ball.destroyed)
+        if (ball.destroyed) {
+          data.balls.splice(ballIndex, 1);
+
+          if (data.debug.cheats === false) {
+            data.lives -= 1;
+            platform_show_lives(data.lives);
+
+            // Check for lose condition
+            if (data.lives < 0) {
+              data.state = STATE_LOSE;
+              data.mode = MODE_END;
+              break;
+            }
+
+            // Reset multiplier
+            if (data.debug.cheats === false) {
+              data.multiplier = SCORE_MULTIPLIER;
+              platform_show_score(data.score, data.multiplier);
+            }
+          }
+
           continue;
+        }
 
         if (ball.attachedToPaddle) {
           ball.position.x = data.paddle.position.x + data.paddle.width / 2 - ball.width / 2;
           ball.position.y = data.paddle.position.y - ball.width;
         } else {
-          ball.position.y += ball.velocity.y * BALL_SPEED;
-          ball.position.x += ball.velocity.x * BALL_SPEED;
+          ball.position.y += ball.velocity.y * ball.speed;
+          ball.position.x += ball.velocity.x * ball.speed;
 
           // Bounce on top wall
           if (ball.position.y < 0) {
@@ -485,6 +484,7 @@ export function game_update(currentTime) {
 
               data.score += SCORE_PER_BLOCK * data.multiplier;
               data.multiplier += SCORE_MULTIPLIER_PER_BLOCK;
+              ball.speed += BALL_SCORE_MULTIPLIER;
               platform_show_score(data.score, data.multiplier);
 
               const ratio = Math.min(PARTICLE_AREA_MAX, (block.width + block.height)) / PARTICLE_AREA_MAX;
@@ -659,6 +659,7 @@ function spawn_ball(attachedToPaddle) {
     width: BALL_SIZE,
     height: BALL_SIZE,
     velocity,
+    speed: BALL_SPEED,
     color: { ...BALL_COLOR },
     destroyed: false,
     attachedToPaddle,
