@@ -1,6 +1,7 @@
 import {
   platform_clear_rect,
-  platform_render_rect,
+  platform_draw_rect,
+  platform_draw_trail,
   platform_get_blocks,
   platform_destroy_block,
   platform_show_help,
@@ -43,13 +44,13 @@ const PADDLE_COLOR = "#000000";
 const BALL_MAX = 1;
 const BALL_SPEED = 8;
 const BALL_SIZE = 20;
-const BALL_COLOR = "red";
+const BALL_COLOR = { r: 255, g: 0, b: 0, a: 1 };
+const BALL_TRAIL_MAX = 20;
 
 const PARTICLE_PER_HIT = 20.
 
-const SCORE_BLOCK = 10;
-
-const MAX_TRAIL = 300;
+const SCORE_PER_BLOCK = 10;
+const SCORE_MULTIPLIER = 1;
 
 const data = {
   mode: MODE_INIT,
@@ -111,13 +112,13 @@ const data = {
   balls: [],
   blocks: [],
   particles: [],
+  trail: [],
   score: 0,
-  multiplier: 1,
+  multiplier: SCORE_MULTIPLIER,
 
   debug: {
     showBlocks: false,
     cheats: false,
-    trail: [],
   },
 
   keys: {
@@ -181,7 +182,6 @@ export function game_update(currentTime) {
   }
   if (data.keys[KEY_DEBUG_2].released) {
     data.debug.cheats = !data.debug.cheats;
-    data.debug.trail = [];
     if (data.debug.cheats)
       data.paddle.width = PADDLE_WIDTH * 3;
     else
@@ -202,9 +202,8 @@ export function game_update(currentTime) {
       data.outro.paddle.progress = 0;
       data.outro.help.progress = 0;
       data.outro.score.progress = 0;
-      data.debug.trail = [];
       data.score = 0;
-      data.multiplier = 1;
+      data.multiplier = SCORE_MULTIPLIER;
 
       data.mode = MODE_INTRO;
     } break;
@@ -235,7 +234,7 @@ export function game_update(currentTime) {
         && data.intro.help.progress >= 1;
 
       if (done) {
-        // Get the blocks after we show the help, so the help element is in the blocks list.
+        // Get the blocks after we show the help since this is one of the element we use to generate blocks.
         const blocks = platform_get_blocks();
         for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
           const rect = blocks[blockIndex].getClientRects()[0];
@@ -359,19 +358,23 @@ export function game_update(currentTime) {
               platform_destroy_block(block.id);
               for (let particleIndex = 0; particleIndex < PARTICLE_PER_HIT; particleIndex++) {
                 const velocity = { x: random(-1, 1), y: random(-1, 1) };
-                spawn_particle({ ...ball.position }, velocity, 3, 3, { r: 255, g: 0, b: 0, a: 1 });
+                spawn_particle({ ...ball.position }, velocity, 3, 3, { ...BALL_COLOR });
               }
 
-              data.score += SCORE_BLOCK * data.multiplier;
+              data.score += SCORE_PER_BLOCK * data.multiplier;
               platform_show_score(data.score);
             }
           }
         }
 
-        if (data.debug.cheats) {
-          data.debug.trail.push([ball.position.x, ball.position.y]);
-          if (data.debug.trail.length > MAX_TRAIL) {
-            data.debug.trail.splice(0, 50);
+        const ballCenter = {
+          x: ball.position.x + BALL_SIZE/2,
+          y: ball.position.y + BALL_SIZE/2,
+        };
+        {
+          ball.trail.push(ballCenter);
+          if (ball.trail.length > BALL_TRAIL_MAX) {
+            ball.trail.splice(0, 1);
           }
         }
       } // for data.balls
@@ -449,12 +452,6 @@ export function game_update(currentTime) {
   {
     platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
 
-    for (let trailIndex = 0; trailIndex < data.debug.trail.length; trailIndex++) {
-      const [x,y] = data.debug.trail[trailIndex];
-      const rect = { x, y, width: 1, height: 1 };
-      platform_render_rect(rect, "red");
-    }
-
     for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
       const ball = data.balls[ballIndex];
 
@@ -462,26 +459,32 @@ export function game_update(currentTime) {
         continue;
       }
 
+      for (let trailIndex = 0; trailIndex < ball.trail.length; trailIndex++) {
+        const position = ball.trail[trailIndex];
+        const color = { ...BALL_COLOR, a: trailIndex / ball.trail.length };
+        platform_draw_trail(position, BALL_SIZE / 8, color_to_string(color));
+      }
+
       const rect = { width: ball.width, height: ball.height, x: ball.position.x, y: ball.position.y };
-      platform_render_rect(rect, ball.color);
+      platform_draw_rect(rect, color_to_string(ball.color));
     }
 
     for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
       const particle = data.particles[particleIndex];
       const rect = { width: particle.width, height: particle.height, x: particle.position.x, y: particle.position.y };
-      platform_render_rect(rect, `rgba(${particle.color.r}, ${particle.color.g}, ${particle.color.b}, ${particle.color.a})`);
+      platform_draw_rect(rect, color_to_string(particle.color));
     }
 
     {
       const rect = { x: data.paddle.position.x, y: data.paddle.position.y, width: data.paddle.width, height: data.paddle.height };
-      platform_render_rect(rect, PADDLE_COLOR);
+      platform_draw_rect(rect, PADDLE_COLOR);
     }
 
     if (data.debug.showBlocks) {
       for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
         const block = data.blocks[blockIndex];
         const rect = { x: block.position.x, y: block.position.y, width: block.width, height: block.height };
-        platform_render_rect(rect, "blue");
+        platform_draw_rect(rect, "blue");
       }
     }
   }
@@ -535,6 +538,10 @@ function random(min, max) {
   return Math.random() * (max - min) + min;
 }
 
+function color_to_string({ r, g, b, a }) {
+  return `rgba(${r}, ${g}, ${b}, ${a})`;
+}
+
 function spawn_ball(attachedToPaddle) {
   const velocity = { x: 0, y: 0 };
   if (attachedToPaddle === false) {
@@ -550,9 +557,10 @@ function spawn_ball(attachedToPaddle) {
     width: BALL_SIZE,
     height: BALL_SIZE,
     velocity,
-    color: BALL_COLOR,
+    color: { ...BALL_COLOR },
     destroyed: false,
     attachedToPaddle,
+    trail: [],
   };
 
   data.balls.push(ball);

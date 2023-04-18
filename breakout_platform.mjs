@@ -47,9 +47,17 @@ export function platform_clear_rect({ x, y, width, height }) {
   data.context.clearRect(x, y, width, height);
 }
 
-export function platform_render_rect({ x, y, width, height }, color) {
+export function platform_draw_rect({ x, y, width, height }, color) {
   data.context.fillStyle = color;
   data.context.fillRect(x, y, width, height);
+}
+
+export function platform_draw_trail(position, size, color) {
+  data.context.beginPath();
+  data.context.fillStyle = color;
+  data.context.moveTo(position.x, position.y);
+  data.context.fillRect(position.x, position.y, size, size);
+
 }
 
 export function platform_destroy_block(blockIndex) {
