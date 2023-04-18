@@ -387,7 +387,7 @@ export async function platform_start() {
   document.addEventListener("keyup", keyup);
   window.addEventListener("resize", resize);
 
-  console.log("Starting game with blocks:", data.blocks.length);
+  platform_log("Starting game with blocks:", data.blocks.length);
 
   return new Promise((resolve, reject) => {
     const fps = 120;
@@ -405,6 +405,7 @@ export async function platform_start() {
       const [result, score] = game_update(elapsed / 1000);
       if (result > 0) {
         clean_up();
+        window.cancelAnimationFrame(data.renderer.requestId);
         return resolve([result, score]);
       }
 

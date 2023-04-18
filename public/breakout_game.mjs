@@ -253,6 +253,7 @@ export function game_resize(width, height) {
 
 export function game_quit() {
   data.mode = MODE_END;
+  data.state = STATE_LOSE;
 }
 
 export function game_update(currentTime) {
