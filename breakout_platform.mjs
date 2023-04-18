@@ -19,6 +19,8 @@ const platformKeys = {
   32: KEY_CONFIRM,
 };
 
+let blocks = [];
+
 function platform_keydown(e) {
   const key = platformKeys[e.keyCode];
   if (key === undefined) {
@@ -66,20 +68,28 @@ export function platform_render_rect({ x, y, width, height }, color) {
   renderer.context.fillRect(x, y, width, height);
 }
 
-export function platform_destroy_block(block) {
-
+export function platform_destroy_block(blockIndex) {
+  const block = blocks[blockIndex];
+  block.classList.add("breakout-destroyed");
+  // block.remove();
 }
 
 export function platform_get_blocks() {
-  return Array.from(document.querySelectorAll(".avatar, section > *"));
+  return blocks;
 }
 
 // TODO: Update blocks position on resize ?
-export function platform_init(blocks) {
+export function platform_init() {
   renderer.canvas = document.createElement("canvas");
   renderer.canvas.style = "position: absolute; inset: 0; display: block; width: 100%; height: 100%;";
   renderer.context = renderer.canvas.getContext("2d");
   document.body.appendChild(renderer.canvas);
+
+  blocks = Array.from(document.querySelectorAll(".avatar, section > *:not(ul), li > a"));
+  for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+    const block = blocks[blockIndex];
+    block.classList.add("breakout-block");
+  }
 
   window.requestAnimationFrame(platform_update);
   document.addEventListener("keydown", platform_keydown);

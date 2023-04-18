@@ -2,6 +2,7 @@ import {
   platform_clear_rect,
   platform_render_rect,
   platform_get_blocks,
+  platform_destroy_block,
   platform_log,
   platform_error,
 } from "./breakout_platform.mjs"
@@ -10,17 +11,20 @@ export const KEY_MOVE_LEFT = 0;
 export const KEY_MOVE_RIGHT = 1;
 export const KEY_CONFIRM = 2;
 
+const MODE_INIT = 0;
+const MODE_PLAY = 1;
+
 const BACKGROUND_COLOR = "#ffffff"
 const PADDLE_SPEED = 20;
 const PADDLE_COLOR = "#000000";
-const BALL_SPEED = 10;
+const BALL_SPEED = 3;
 const BALL_SIZE = 20;
 const BALL_COLOR = "red";
 const BLOCK_COLOR_ON = "transparent";
 const BLOCK_COLOR_OFF = "white";
 
 const data = {
-  mode: 0, // 0: init, 1: playing
+  mode: MODE_INIT,
 
   window: {
     width: 800,
@@ -86,10 +90,9 @@ function game_spawn_ball() {
 
 export function game_update(currentTime) {
   // Initialize game state
-  if (data.mode === 0) {
+  if (data.mode === MODE_INIT) {
     data.paddle.x = 100;
     data.paddle.y = data.window.height - data.paddle.height;
-
 
     const blocks = platform_get_blocks();
     for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
@@ -97,6 +100,7 @@ export function game_update(currentTime) {
       const rect = block.getClientRects()[0];
 
       data.blocks.push({
+        id: blockIndex,
         width: rect.width + 2,
         height: rect.height + 2,
         x: rect.x - 1,
@@ -106,9 +110,7 @@ export function game_update(currentTime) {
       });
     }
 
-    game_spawn_ball();
-
-    data.mode = 1;
+    data.mode = MODE_PLAY;
   }
 
   // Update
@@ -151,14 +153,15 @@ export function game_update(currentTime) {
         // TODO: Handle collision from the left/right
         ball.velocityY = -ball.velocityY;
         block.destroyed = true;
-        block.color = BLOCK_COLOR_OFF;
+        // block.color = BLOCK_COLOR_OFF;
+        platform_destroy_block(block.id);
       }
     }
   }
 
   // Render
 
-  platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: gitdata.window.height });
+  platform_clear_rect({ x: 0, y: 0, width: data.window.width, height: data.window.height });
 
   for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
     const block = data.blocks[blockIndex];
