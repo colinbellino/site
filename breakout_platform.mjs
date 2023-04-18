@@ -37,6 +37,7 @@ const data = {
     context: null,
   },
   audio: {
+    available: false,
     context: null,
     sfxGain: null,
     clips: [],
@@ -119,6 +120,9 @@ export function platform_hide_pause() {
 }
 
 export function platform_play_audio_clip(key) {
+  if (data.audio.available === false)
+    return;
+
   const clip = data.audio.clips[AUDIO_CLIPS.indexOf(key)];
   const source = data.audio.context.createBufferSource();
   source.buffer = clip.buffer;
@@ -183,7 +187,9 @@ export function platform_start() {
     }
   }
 
-  if (window.AudioContext !== undefined) {
+  const canPlayAudio = window.AudioContext !== undefined;
+  if (canPlayAudio) {
+    data.audio.available = true;
     data.audio.context = new AudioContext();
     data.audio.sfxGain = data.audio.context.createGain();
     data.audio.sfxGain.connect(data.audio.context.destination);
@@ -205,6 +211,7 @@ export function platform_start() {
         platform_log("Audio clips loaded:", data.audio.clips.length);
       });
   } else {
+    data.audio.available = false;
     platform_warn("Web Audio API not available, continuing without audio.");
   }
 
