@@ -87,6 +87,32 @@ export function platform_get_blocks() {
   return blocks;
 }
 
+function platform_split_in_blocks(selector) {
+  document.querySelectorAll(selector).forEach((root) => {
+    root.childNodes.forEach((node) => {
+      if (node.tagName !== undefined)
+        return;
+
+      const replacement = document.createElement("span");
+      const words = node.textContent.split(" ");
+      words.forEach((word) => {
+        if (word === "")
+          return;
+
+        const span = document.createElement("span");
+        span.classList.add("breakout-block");
+        span.innerHTML = word;
+        replacement.appendChild(span);
+        const space = document.createElement("span");
+        space.innerHTML = " ";
+        replacement.appendChild(space);
+      });
+      node.innerHTML = replacement.innerHTML;
+      root.replaceChild(replacement, node);
+    });
+  });
+}
+
 // TODO: Update blocks position on resize ?
 export function platform_init() {
   renderer.canvas = document.createElement("canvas");
@@ -94,7 +120,9 @@ export function platform_init() {
   renderer.context = renderer.canvas.getContext("2d");
   document.body.appendChild(renderer.canvas);
 
-  blocks = Array.from(document.querySelectorAll(".avatar, section > *:not(ul), li > a"));
+  platform_split_in_blocks("section > p");
+  platform_split_in_blocks("section > h2");
+  blocks = Array.from(document.querySelectorAll(".avatar, li > a, h1, .hire-me, .breakout-block"));
   for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
     const block = blocks[blockIndex];
     block.classList.add("breakout-block");

@@ -250,10 +250,7 @@
         </svg>
       </a>
       <h2>I'm a freelance programmer and designer who loves to create cool applications and video games.</h2>
-      <p>I've been coding, tinkering and prototyping for more than 10 years with many technology from JavaScript to C,
-        from video games to web apps. <br>
-        Over the years, I've developed a taste for rapid prototyping and a good intuition for building good UX. If
-        that's something that's interesting to you, let's talk ;)
+      <p>I've been coding, tinkering and prototyping for more than 10 years with many technology from JavaScript to C, from video games to web apps. <br>Over the years, I've developed a taste for rapid prototyping and a good intuition for building good UX. If that's something that's interesting to you, let's talk ;)
       </p>
       <p>Below are some of the latest projects i worked on:</p>
       <ul class="navigation">
@@ -328,8 +325,11 @@
   </script> -->
   <style>
     .breakout-block {
-      transition: all ease-in 100ms;
+      display: inline-block;
       opacity: 1;
+      transform: scale(1);
+      transition: opacity ease-in 100ms, transform ease-in 100ms;
+
       /* outline: 1px solid red; */
     }
 
@@ -339,16 +339,23 @@
     }
   </style>
   <!-- TODO: Load this only when clicking the breakout button -->
-  <!-- TODO: Disable avatar rotation during playmode? -->
   <script type="module">
     import { platform_init } from "./breakout_platform.mjs";
-    platform_init();
-    document.removeEventListener("mousemove", flipAvatar);
+
     // TODO: Clean up when the game is over
     // - remove event listeners
     // - restore dom/css
     // - unload js
     // - free memory
+    function init(e) {
+      if (e.keyCode !== 32)
+        return;
+      platform_init();
+      document.removeEventListener("mousemove", flipAvatar);
+      document.removeEventListener("keyup", init);
+    }
+
+    document.addEventListener("keyup", init);
   </script>
 </body>
 
