@@ -585,21 +585,21 @@ function set_volume_music(value) {
   if (data.debug.noMusic || data.audio.available === false)
     return;
 
+  platform_log("Music volume:", value);
   if (data.paused)
     value *= VOLUME_MUSIC_PAUSED_MULTIPLIER;
   else
     value *= VOLUME_MUSIC_MULTIPLIER;
 
   data.audio.gainMusic.gain.value = value;
-  platform_log("Music volume:", data.audio.gainMusic.gain.value);
 }
 
 function set_volume_sfx(value) {
   if (data.debug.noSfx || data.audio.available === false)
     return;
 
+  platform_log("SFX volume:", value);
   value *= VOLUME_SFX_MULTIPLIER;
 
   data.audio.gainSfx.gain.value = value;
-  platform_log("SFX volume:", data.audio.gainSfx.gain.value);
 }
