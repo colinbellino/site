@@ -61,7 +61,7 @@ const data = {
   },
   settings: {
     volumeSfx: 1,
-    volumeMusic: 1,
+    volumeMusic: 0,
   },
   debug: {
     noMusic: false,
