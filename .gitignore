@@ -29,3 +29,5 @@ yarn-error.log*
 
 *.min.mjs
 *.min.html
+
+/public/placeholder.jfif
