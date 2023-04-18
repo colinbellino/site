@@ -49,7 +49,13 @@ const BALL_SIZE = 20;
 const BALL_COLOR = { r: 255, g: 0, b: 0, a: 1 };
 const BALL_TRAIL_MAX = 20;
 
-const PARTICLE_PER_HIT = 20.
+const PARTICLE_SPEED = 4;
+const PARTICLE_DURATION = 1.5;
+const PARTICLE_PER_HIT_MIN = 5;
+const PARTICLE_PER_HIT_MAX = 20;
+const PARTICLE_SIZE_MIN = 2;
+const PARTICLE_SIZE_MAX = 12;
+const PARTICLE_AREA_MAX = 300;
 
 const SCORE_PER_BLOCK = 10;
 const SCORE_MULTIPLIER = 1;
@@ -415,9 +421,11 @@ export function game_update(currentTime) {
               data.multiplier += SCORE_MULTIPLIER_PER_BLOCK;
               platform_show_score(data.score, data.multiplier);
 
-              for (let particleIndex = 0; particleIndex < PARTICLE_PER_HIT; particleIndex++) {
+              const ratio = Math.min(PARTICLE_AREA_MAX, (block.width + block.height)) / PARTICLE_AREA_MAX;
+              for (let particleIndex = 0; particleIndex < lerp(PARTICLE_PER_HIT_MIN, PARTICLE_PER_HIT_MAX, ratio); particleIndex++) {
                 const velocity = { x: random(-1, 1), y: random(-1, 1) };
-                spawn_particle({ ...ball.position }, velocity, 3, 3, { ...BALL_COLOR });
+                const size = lerp(PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, ratio);
+                spawn_particle({ ...ball.position }, velocity, PARTICLE_DURATION, PARTICLE_SPEED, size, { ...BALL_COLOR });
               }
             }
           }
@@ -649,10 +657,10 @@ function spawn_block(blockIndex, rect) {
   data.blocks.push(block);
 }
 
-function spawn_particle(position, velocity, duration, speed, color) {
+function spawn_particle(position, velocity, duration, speed, size, color) {
   const particle = {
-    width: 5,
-    height: 5,
+    width: size,
+    height: size,
     position,
     velocity,
     color,

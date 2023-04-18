@@ -65,11 +65,11 @@ export function platform_draw_rect({ x, y, width, height }, color) {
   data.renderer.context.fillRect(x, y, width, height);
 }
 
-export function platform_draw_trail(position, size, color) {
+export function platform_draw_trail({ x, y }, size, color) {
   data.renderer.context.beginPath();
   data.renderer.context.fillStyle = color;
-  data.renderer.context.moveTo(position.x, position.y);
-  data.renderer.context.fillRect(position.x, position.y, size, size);
+  data.renderer.context.moveTo(x, y);
+  data.renderer.context.fillRect(x, y, size, size);
 
 }
 
@@ -276,7 +276,7 @@ function mousemove(e) {
 function keydown(e) {
   const key = codeToKey[e.keyCode];
   if (key === undefined) {
-    console.log("e.keyCode", e.keyCode);
+    // console.log("e.keyCode", e.keyCode);
     return;
   }
   game_keydown(key);
