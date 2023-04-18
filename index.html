@@ -53,7 +53,7 @@
       image-rendering: pixelated;
     }
 
-    .avatar.flipped {
+    body:not(.no-animation) .avatar.flipped {
       transform: scaleX(-1);
     }
 
@@ -180,7 +180,6 @@
       border-radius: 3px;
       background: var(--main-color);
       color: #ffffff;
-      transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
     }
 
     .hire-me svg {
@@ -190,17 +189,27 @@
       margin-left: 10px;
       opacity: 0;
       transform: scale(0);
-      transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
     }
 
     .hire-me:hover {
-      width: 110px;
       text-decoration: none;
       background: var(--main-color-hover);
+    }
+
+    body:not(.no-animation) .hire-me.animated {
+      transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
+    }
+
+    body:not(.no-animation) .hire-me.animated svg {
+      transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
+    }
+
+    body:not(.no-animation) .hire-me.animated:hover {
+      width: 110px;
       transition-delay: 0ms, 0ms;
     }
 
-    .hire-me:hover svg {
+    body:not(.no-animation) .hire-me.animated:hover svg {
       opacity: 1;
       transform: scale(1);
       transition-delay: 0ms, 0ms;
@@ -234,7 +243,7 @@
     <img id="avatar" class="avatar pixel-art" src="/public/me.gif" aria-hidden="true" width="175" />
     <section>
       <h1>Colin Bellino</h1>
-      <a class="hire-me" href="mailto:work@colinbellino.com" target="_blank">
+      <a class="hire-me animated" href="mailto:work@colinbellino.com" target="_blank">
         <span>Hire me</span>
         <svg viewBox="0 0 45 45">
           <g transform="matrix(1.25 0 0 -1.25 0 45)">
@@ -303,17 +312,15 @@
     const avatar = document.getElementById("avatar");
     const canHover = matchMedia("(hover: hover)").matches;
     const isDesktopWidth = matchMedia("(min-width: 640px)").matches;
+    let gameIsRunning = false;
 
-    addAvatarListeners();
     if (window.location.hostname === "localhost")
       start_game();
 
-    function addAvatarListeners() {
-      if (isDesktopWidth)
-        avatar.addEventListener("click", start_game);
-      if (canHover)
-        document.addEventListener("mousemove", flip_avatar);
-    }
+    if (isDesktopWidth)
+      avatar.addEventListener("click", start_game);
+    if (canHover)
+      document.addEventListener("mousemove", flip_avatar);
 
     function flip_avatar(e) {
       const rect = avatar.getBoundingClientRect();
@@ -324,26 +331,6 @@
       } else {
         avatar.classList.add("flipped");
       }
-    }
-
-    // TODO: Animate the start of the game so we know what is happening
-    async function start_game() {
-      if (window.breakout === undefined) {
-        await load_game();
-        console.log("All game files loaded.");
-      }
-
-      avatar.removeEventListener("click", start_game);
-      document.removeEventListener("mousemove", flip_avatar);
-      avatar.classList.remove("flipped");
-
-      console.log("Starting game.");
-
-      window.breakout.start().then((result) => {
-        console.log("Game over:", result === 1 ? "win" : "lose");
-        window.breakout.stop();
-        addAvatarListeners();
-      });
     }
 
     function load_game() {
@@ -371,7 +358,28 @@
         document.body.appendChild(link);
       });
     }
-  </script>
+
+    async function start_game() {
+      if (gameIsRunning)
+        return;
+
+      if (window.breakout === undefined) {
+        await load_game();
+        console.log("All game files loaded.");
+      }
+
+      avatar.removeEventListener("click", start_game);
+
+      console.log("Starting game.");
+      gameIsRunning = true;
+
+      window.breakout.start().then((result) => {
+        console.log("Game over:", result === 1 ? "win" : "lose");
+        gameIsRunning = false;
+        window.breakout.stop();
+      });
+    }
+</script>
 </body>
 
 </html>

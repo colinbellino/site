@@ -48,8 +48,3 @@
   opacity: 0;
   transform: translateY(-100%);
 }
-
-/* TODO: Add this class and use it to disable all animations (hire-me, avatar) */
-body.breakout-running {
-
-}

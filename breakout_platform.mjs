@@ -174,6 +174,7 @@ export function breakout_start() {
   document.addEventListener("keyup", platform_keyup);
   window.addEventListener("resize", platform_resize);
 
+  document.body.classList.add("no-animation");
   platform_resize();
 
   return new Promise((resolve, reject) => {
@@ -182,6 +183,7 @@ export function breakout_start() {
       if (result > 0) {
         // Clean up
         help.remove();
+        document.body.classList.remove("no-animation");
         return resolve(result);
       }
       window.requestAnimationFrame(platform_update);
