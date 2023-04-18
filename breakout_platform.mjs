@@ -17,14 +17,15 @@ import {
 } from "./breakout_game.mjs"
 
 const codeToKey = {
-  37: KEY_MOVE_LEFT,
-  39: KEY_MOVE_RIGHT,
-  32: KEY_CONFIRM,
+  37: KEY_MOVE_LEFT, // Left arrow
+  39: KEY_MOVE_RIGHT, // Right arrow
+  32: KEY_CONFIRM, // Space
   // 27: KEY_CANCEL,
-  27: KEY_PAUSE,
-  112: KEY_DEBUG_1,
-  113: KEY_DEBUG_2,
-  114: KEY_DEBUG_3,
+  27: KEY_PAUSE, // Escape
+  112: KEY_DEBUG_1, // F1
+  84: KEY_DEBUG_1, // F1
+  113: KEY_DEBUG_2, // F2
+  114: KEY_DEBUG_3, // F3
 };
 
 const data = {
@@ -224,7 +225,7 @@ export function platform_start() {
 }
 
 export function platform_stop() {
-  console.warn("platform_stop not implemented");
+  platform_warn("platform_stop not implemented");
   // TODO: actually stop the game
   // clean_up();
 }
@@ -257,7 +258,7 @@ function mousedown(e) {
     return game_keydown(KEY_MOUSE_LEFT);
   if (e.which === 3)
     return game_keydown(KEY_MOUSE_RIGHT);
-  console.log(e.which);
+  // console.log(e.which);
 }
 
 function mouseup(e) {
@@ -275,7 +276,7 @@ function mousemove(e) {
 function keydown(e) {
   const key = codeToKey[e.keyCode];
   if (key === undefined) {
-    // console.log("e.keyCode", e.keyCode);
+    console.log("e.keyCode", e.keyCode);
     return;
   }
   game_keydown(key);
@@ -290,7 +291,6 @@ function keyup(e) {
   game_keyup(key);
 }
 
-// FIXME: Update blocks position on resize
 function resize() {
   // console.log("resize", window.innerWidth, window.innerHeight);
   data.renderer.canvas.width = window.innerWidth;

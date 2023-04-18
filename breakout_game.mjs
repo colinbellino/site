@@ -199,6 +199,14 @@ export function game_keyup(key) {
 export function game_resize(width, height) {
   data.window.width = width;
   data.window.height = height;
+
+  if (data.mode === MODE_PLAY) {
+    const blocks = platform_get_blocks();
+    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
+      const rect = blocks[blockIndex].getClientRects()[0];
+      set_block_rect(data.blocks[blockIndex], rect);
+    }
+  }
 }
 
 export function game_update(currentTime) {
@@ -248,7 +256,7 @@ export function game_update(currentTime) {
         if (data.intro.ball.progress === 0) {
           spawn_ball(true);
         }
-        data.balls[0].position.y = lerp(data.paddle.position.y, data.paddle.position.y - BALL_SIZE, data.intro.ball.progress);
+        data.balls[0].position.y = lerp(data.paddle.position.y, data.paddle.position.y - data.balls[0].height, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
       }
 
@@ -332,18 +340,25 @@ export function game_update(currentTime) {
 
         if (ball.attachedToPaddle) {
           ball.position.x = data.paddle.position.x + data.paddle.width / 2 - ball.width / 2;
-          ball.position.y = data.paddle.position.y - BALL_SIZE;
+          ball.position.y = data.paddle.position.y - ball.width;
         } else {
           ball.position.y += ball.velocity.y * BALL_SPEED;
           ball.position.x += ball.velocity.x * BALL_SPEED;
 
           // Bounce on top wall
-          if (ball.position.y < 0)
+          if (ball.position.y < 0) {
             ball.velocity.y = -ball.velocity.y;
+            ball.position.y = 0; // Reset the Y position just in case we resized the window and the ball is stuck outside
+          }
 
           // Bounce on side wall
-          if (ball.position.x + ball.width > data.window.width || ball.position.x < 0)
+          if (ball.position.x + ball.width > data.window.width) {
             ball.velocity.x = -ball.velocity.x;
+            ball.position.x = data.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
+          } else if (ball.position.x < 0) {
+            ball.velocity.x = -ball.velocity.x;
+            ball.position.x = 0; // Reset the X position just in case we resized the window and the ball is stuck outside
+          }
 
           // Hit bottom limit
           if (ball.position.y > data.window.height) {
@@ -410,8 +425,8 @@ export function game_update(currentTime) {
 
         if (ball.attachedToPaddle === false) {
           const center = {
-            x: ball.position.x + BALL_SIZE/2,
-            y: ball.position.y + BALL_SIZE/2,
+            x: ball.position.x + ball.width/2,
+            y: ball.position.y + ball.height/2,
           };
           ball.trail.push(center);
           if (ball.trail.length > BALL_TRAIL_MAX) {
@@ -501,9 +516,13 @@ export function game_update(currentTime) {
       }
 
       for (let trailIndex = 0; trailIndex < ball.trail.length; trailIndex++) {
-        const position = ball.trail[trailIndex];
-        const color = { ...BALL_COLOR, a: trailIndex / ball.trail.length };
-        platform_draw_trail(position, BALL_SIZE / 8, color_to_string(color));
+        const progress = trailIndex / ball.trail.length;
+        const size = ball.width / 2 * progress;
+        const position = { ...ball.trail[trailIndex] };
+        position.x -= size / 2;
+        position.y -= size / 2;
+        const color = { ...BALL_COLOR, a: progress };
+        platform_draw_trail(position, size, color_to_string(color));
       }
 
       const rect = { width: ball.width, height: ball.height, x: ball.position.x, y: ball.position.y };
@@ -525,7 +544,10 @@ export function game_update(currentTime) {
       for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
         const block = data.blocks[blockIndex];
         const rect = { x: block.position.x, y: block.position.y, width: block.width, height: block.height };
-        platform_draw_rect(rect, "blue");
+        const color = { r: 0, g: 0, b: 255, a: 1 };
+        if (block.destroyed)
+          color.a = 0.2;
+        platform_draw_rect(rect, color_to_string(color));
       }
     }
   }
@@ -608,17 +630,21 @@ function spawn_ball(attachedToPaddle) {
   data.balls.push(ball);
 }
 
+function set_block_rect(block, rect) {
+  block.width = rect.width + 2;
+  block.height = rect.height + 2;
+  block.position = {
+    x: rect.x - 1,
+    y: rect.y - 1,
+  };
+}
+
 function spawn_block(blockIndex, rect) {
   const block = {
     id: blockIndex,
-    width: rect.width + 2,
-    height: rect.height + 2,
-    position: {
-      x: rect.x - 1,
-      y: rect.y - 1,
-    },
     destroyed: false,
   };
+  set_block_rect(block, rect);
 
   data.blocks.push(block);
 }
