@@ -4,9 +4,15 @@ const KEY_ARROW_LEFT = 0;
 const KEY_ARROW_RIGHT = 1;
 
 const PADDLE_SPEED = 20;
+const BALL_SPEED = 5;
 
 const data = {
   mode: 0, // 0: init, 1: playing
+
+  window: {
+    width: 800,
+    height: 600,
+  },
 
   paddle: {
     x: 0,
@@ -15,10 +21,17 @@ const data = {
     height: 20,
   },
 
-  window: {
-    width: 800,
-    height: 600,
-  },
+  balls: [
+    {
+      x: 0,
+      y: 0,
+      width: 20,
+      height: 20,
+      velocityX: 1,
+      velocityY: 1,
+      destroyed: false,
+    },
+  ],
 
   keys: {
     [KEY_ARROW_LEFT]: {
@@ -39,20 +52,47 @@ function game_keyup(key) {
 }
 
 function game_update(currentTime) {
-  if (data.keys[KEY_ARROW_LEFT].down)
-    data.paddle.x = Math.max(0, data.paddle.x - PADDLE_SPEED);
-  else if (data.keys[KEY_ARROW_RIGHT].down)
-    data.paddle.x = Math.min(data.window.width - data.paddle.width, data.paddle.x + PADDLE_SPEED);
-
   // Initialize game state
   if (data.mode === 0) {
     data.paddle.y = data.window.height - data.paddle.height;
     data.mode = 1;
   }
 
+  // Updte
+  if (data.keys[KEY_ARROW_LEFT].down)
+    data.paddle.x = Math.max(0, data.paddle.x - PADDLE_SPEED);
+  else if (data.keys[KEY_ARROW_RIGHT].down)
+    data.paddle.x = Math.min(data.window.width - data.paddle.width, data.paddle.x + PADDLE_SPEED);
+
+    for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
+      const ball = data.balls[ballIndex];
+
+      ball.x += ball.velocityX * BALL_SPEED;
+      if (ball.x + ball.width > data.window.width || ball.x < 0)
+        ball.velocityX = -ball.velocityX;
+
+      ball.y += ball.velocityY * BALL_SPEED;
+      if (ball.y > data.window.height)
+        ball.destroyed = true;
+    }
+
   // Render
-  const rect = { width: data.paddle.width, height: data.paddle.height, x: data.paddle.x, y: data.paddle.y };
-  platform_render_rect(rect);
+  {
+    const rect = { width: data.paddle.width, height: data.paddle.height, x: data.paddle.x, y: data.paddle.y };
+    platform_render_rect(rect, "black");
+  }
+
+  for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
+    const ball = data.balls[ballIndex];
+
+    // TODO: Free memory at some point
+    if (ball.destroyed) {
+      continue;
+    }
+
+    const rect = { width: ball.width, height: ball.height, x: ball.x, y: ball.y };
+    platform_render_rect(rect, "red");
+  }
 
   // for (const [key, value] of Object.entries(data.keys)) {
   //   data.keys[key].down = false;
@@ -73,20 +113,24 @@ const platformKeys = {
 
 function platform_keydown(e) {
   const key = platformKeys[e.keyCode];
-  if (key === undefined)
-    return console.log("e.keyCode", e.keyCode);
+  if (key === undefined) {
+    // console.log("e.keyCode", e.keyCode);
+    return;
+  }
   game_keydown(key);
 }
 
 function platform_keyup(e) {
   const key = platformKeys[e.keyCode];
-  if (key === undefined)
-    return console.log("e.keyCode", e.keyCode);
+  if (key === undefined) {
+    // console.log("e.keyCode", e.keyCode);
+    return;
+  }
   game_keyup(key);
 }
 
 function platform_resize() {
-  platform_log("platform_resize", window.innerWidth, window.innerHeight);
+  console.log("platform_resize", window.innerWidth, window.innerHeight);
   data.window.width = window.innerWidth;
   data.window.height = window.innerHeight;
 }
@@ -104,11 +148,9 @@ function platform_log(...args) {
   // document.writeln(args.join(" "));
 }
 
-function platform_render_rect({ width, height, x, y }) {
-  // platform_log({ width, height, x, y });
-
-  renderer.ctx.rect(x, y, width, height);
-  renderer.ctx.fill();
+function platform_render_rect({ width, height, x, y }, color) {
+  renderer.ctx.fillStyle = color;
+  renderer.ctx.fillRect(x, y, width, height);
 }
 
 function platform_init() {
