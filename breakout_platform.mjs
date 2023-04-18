@@ -25,8 +25,13 @@ const platformKeys = {
 };
 
 const data = {
-  canvas: null,
-  context: null,
+  renderer: {
+    canvas: null,
+    context: null,
+  },
+  audio: {
+    context: null,
+  },
   blocks: [],
   ui: {
     help: null,
@@ -39,24 +44,28 @@ export function platform_log(...args) {
   console.log(...args);
 }
 
+export function platform_warn(...args) {
+  console.warn(...args);
+}
+
 export function platform_error(...args) {
   console.error(...args);
 }
 
 export function platform_clear_rect({ x, y, width, height }) {
-  data.context.clearRect(x, y, width, height);
+  data.renderer.context.clearRect(x, y, width, height);
 }
 
 export function platform_draw_rect({ x, y, width, height }, color) {
-  data.context.fillStyle = color;
-  data.context.fillRect(x, y, width, height);
+  data.renderer.context.fillStyle = color;
+  data.renderer.context.fillRect(x, y, width, height);
 }
 
 export function platform_draw_trail(position, size, color) {
-  data.context.beginPath();
-  data.context.fillStyle = color;
-  data.context.moveTo(position.x, position.y);
-  data.context.fillRect(position.x, position.y, size, size);
+  data.renderer.context.beginPath();
+  data.renderer.context.fillStyle = color;
+  data.renderer.context.moveTo(position.x, position.y);
+  data.renderer.context.fillRect(position.x, position.y, size, size);
 
 }
 
@@ -99,10 +108,10 @@ export function platform_hide_pause() {
 }
 
 export function platform_start() {
-  data.canvas = document.createElement("canvas");
-  data.canvas.classList.add("breakout-canvas");
-  data.context = data.canvas.getContext("2d");
-  document.body.appendChild(data.canvas);
+  data.renderer.canvas = document.createElement("canvas");
+  data.renderer.canvas.classList.add("breakout-canvas");
+  data.renderer.context = data.renderer.canvas.getContext("2d");
+  document.body.appendChild(data.renderer.canvas);
 
   if (data.ui.help === null)
   {
@@ -155,6 +164,27 @@ export function platform_start() {
     }
   }
 
+  if (window.AudioContext !== undefined) {
+    data.audio.context = new AudioContext();
+
+    // Promise.all([
+    //   load_audio("https://cdn.freesound.org/previews/523/523088_11537497-lq.ogg"),
+    //   load_audio("https://cdn.freesound.org/previews/74/74879_877451-lq.ogg"),
+    //   load_audio("https://cdn.freesound.org/previews/611/611789_13564385-lq.ogg"),
+    // ]).then(async (sounds) => {
+    //   for (let soundIndex = 0; soundIndex < sounds.length; soundIndex++) {
+    //     const sound = sounds[soundIndex];
+    //     const source = data.audio.context.createBufferSource();
+    //     source.buffer = sound;
+    //     source.connect(data.audio.context.destination);
+    //     source.start();
+    //     await wait_for_milliseconds(2000);
+    //   }
+    // });
+  } else {
+    platform_warn("Web Audio API not available, continuing without audio.");
+  }
+
   document.addEventListener("keydown", keydown);
   document.addEventListener("keyup", keyup);
   window.addEventListener("resize", resize);
@@ -174,7 +204,7 @@ export function platform_start() {
 }
 
 export function platform_stop() {
-  console.log("platform_stop");
+  console.warn("platform_stop not implemented");
   // TODO: actually stop the game
   // clean_up();
 }
@@ -185,9 +215,10 @@ function clean_up() {
     block.classList.remove("destroyed");
   });
   data.blocks = [];
-  data.canvas.remove();
-  data.canvas = null;
-  data.context = null;
+  data.renderer.canvas.remove();
+  data.renderer.canvas = null;
+  data.renderer.context = null;
+  data.audio.context = null;
   data.ui.help.remove();
   data.ui.help = null;
   data.ui.score.remove();
@@ -219,9 +250,9 @@ function keyup(e) {
 // FIXME: Update blocks position on resize
 function resize() {
   // console.log("resize", window.innerWidth, window.innerHeight);
-  data.canvas.width = window.innerWidth;
-  data.canvas.height = window.innerHeight;
-  game_resize(data.canvas.width, data.canvas.height);
+  data.renderer.canvas.width = window.innerWidth;
+  data.renderer.canvas.height = window.innerHeight;
+  game_resize(data.renderer.canvas.width, data.renderer.canvas.height);
 }
 
 function split_in_blocks(selector) {
@@ -253,4 +284,22 @@ function split_in_blocks(selector) {
       root.replaceChild(replacement, node);
     });
   });
+}
+
+function load_audio(url) {
+  return new Promise((resolve, reject) => {
+    const request = new XMLHttpRequest();
+    request.open("GET", url);
+    request.responseType = "arraybuffer";
+    request.onload = function() {
+      let undecodedAudio = request.response;
+      data.audio.context.decodeAudioData(undecodedAudio, resolve);
+
+    };
+    request.send();
+  });
+}
+
+function wait_for_milliseconds(duration) {
+  return new Promise(resolve => setTimeout(resolve, duration));
 }
