@@ -28,85 +28,58 @@
 
     body {
       box-sizing: border-box;
-      padding: 15vh 0 0;
+      padding: 2rem;
     }
 
     main {
-      display: flex;
-      margin: 0 auto;
-      max-width: 600px;
+      display: grid;
+      grid-template-areas:
+        "aside"
+        "content"
+        "nav"
+        "footer";
+    }
+    main > aside {
+      grid-area: aside;
+    }
+    main > nav {
+      grid-area: nav;
+    }
+    main > section {
+      grid-area: content;
+    }
+    main > footer {
+      grid-area: footer;
     }
 
     .avatar {
-      flex: none;
-      margin-right: 30px;
-      width: 175px;
-      height: 175px;
+      display: block;
+      margin: 0 auto 1.5rem auto;
+      width: 128px;
+      height: 128px;
       border-radius: 50%;
       background: #5fcde4;
       transition: transform ease-in-out 0.2s;
       cursor: pointer;
     }
-
-    body.no-animation .avatar {
+    .no-animation .avatar {
       cursor: default;
+    }
+    :not(.no-animation) .avatar.flipped {
+      transform: scaleX(-1);
     }
 
     .pixel-art {
       image-rendering: pixelated;
     }
 
-    body:not(.no-animation) .avatar.flipped {
-      transform: scaleX(-1);
-    }
-
-    ul.socials {
-      margin: 0;
-      padding: 0 0 1em 0;
-      display: flex;
-      flex-wrap: wrap;
-    }
-
-    ul.socials li {
-      display: flex;
-      box-sizing: border-box;
-      align-items: center;
-      padding: 0 0.5em 0.5em 0;
-    }
-
-    ul.socials li a {
-      display: flex;
-      flex-grow: 1;
-      align-items: center;
-      padding: 0.6em 1.5em;
-      border-radius: 3px;
-      box-sizing: border-box;
-      min-width: 100px;
-      min-height: 44px;
-      font-size: 0.9em;
-      font-weight: 600;
-      background: rgba(0, 0, 0, 0.03);
-      transition: all linear 0.2s;
-    }
-
-    ul.socials li a:hover {
-      background: rgba(0, 0, 0, 0.09);
-    }
-
-    ul.socials li a:hover {
-      text-decoration: none;
-    }
-
-    ul.socials li img {
-      display: inline-block;
-      width: 26px;
-      margin-right: 12px;
-    }
-
     h1 {
       display: inline-block;
       margin: 0.8rem 0 1rem;
       font-size: 1.4rem;
+      color: rgba(0, 0, 0, 0.85);
+    }
+    h1 a {
       color: rgba(0, 0, 0, 0.85);
     }
 
@@ -126,10 +99,6 @@
       color: rgba(0, 0, 0, 0.75);
     }
 
-    h1 a {
-      font-size: 0.8em;
-    }
-
     a {
       color: var(--main-color);
       text-decoration: none;
@@ -145,31 +114,41 @@
       text-decoration: underline;
     }
 
-    ul.navigation {
+    ul.links {
+      display: flex;
+      flex-wrap: wrap;
       padding: 0;
       margin: 0 0 1em 0;
     }
-
-    ul.navigation li {
-      display: inline-block;
-      margin: 0 0.2em 0.4em 0;
+    ul.links li {
+      display: block;
+      width: 47%;
+      padding: 0 0.5em 0.5em 0;
+      margin: 0;
     }
-
-    ul.navigation li a {
-      display: inline-block;
-      padding: 0.8em 1.5em;
+    ul.links li a {
+      display: flex;
+      flex-grow: 1;
+      box-sizing: border-box;
+      padding: 0.6em 1.5em;
+      align-items: center;
+      min-height: 44px;
+      border-radius: 3px;
       font-size: 0.9em;
       font-weight: 600;
       border-radius: 3px;
       background: rgba(0, 0, 0, 0.03);
       transition: all linear 0.2s;
     }
-
-    ul.navigation li a:hover {
+    ul.links li img {
+      display: inline-block;
+      width: 26px;
+      margin-right: 12px;
+    }
+    ul.links li a:hover {
       background: rgba(0, 0, 0, 0.09);
     }
-
-    ul.navigation li a:hover {
+    ul.links li a:hover {
       text-decoration: none;
     }
 
@@ -184,7 +163,6 @@
       background: var(--main-color);
       color: #ffffff;
     }
-
     .hire-me svg {
       position: absolute;
       right: 10px;
@@ -193,49 +171,64 @@
       opacity: 0;
       transform: scale(0);
     }
-
     .hire-me:hover {
       text-decoration: none;
       background: var(--main-color-hover);
     }
-
-    body:not(.no-animation) .hire-me.animated {
+    :not(.no-animation) .hire-me.animated {
       transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
     }
-
-    body:not(.no-animation) .hire-me.animated svg {
+    :not(.no-animation) .hire-me.animated svg {
       transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
     }
-
-    body:not(.no-animation) .hire-me.animated:hover {
+    :not(.no-animation) .hire-me.animated:hover {
       width: 110px;
       transition-delay: 0ms, 0ms;
     }
-
-    body:not(.no-animation) .hire-me.animated:hover svg {
+    :not(.no-animation) .hire-me.animated:hover svg {
       opacity: 1;
       transform: scale(1);
       transition-delay: 0ms, 0ms;
     }
 
-    @media (max-width: 640px) {
+    @media (min-width: 700px) {
       body {
-        padding-top: 5vh;
+        padding: 15vh 0 0;
       }
 
       main {
-        flex-direction: column;
-        align-items: center;
-        padding-left: 2rem;
-        padding-right: 2rem;
+        margin: 0 auto;
+        max-width: 660px;
+        grid-template-columns: 200px auto;
+        grid-template-rows: 200px auto;
+        grid-template-areas:
+          "aside content"
+          "nav content"
+          "nav footer";
+      }
+      main > aside {
+        padding-right: 30px;
+      }
+      main > nav {
+        padding-right: 30px;
       }
 
-      .avatar {
-        margin: 0 0 1.5rem;
+      ul.navigation {
+        display: block;
+      }
+      ul.navigation li {
+        display: block;
+        width: auto;
+        padding-right: 0;
       }
 
       ul.socials li {
-        width: 50%;
+        width: 31%;
+      }
+
+      .avatar {
+        width: 100%;
+        height: auto;
       }
     }
   </style>
@@ -243,9 +236,18 @@
 
 <body>
   <main>
-    <img id="avatar" class="avatar pixel-art" src="/public/me.gif" aria-hidden="true" width="175" />
+    <aside>
+      <img id="avatar" class="avatar pixel-art" src="/public/me.gif" aria-hidden="true" width="128" />
+    </aside>
+    <nav>
+      <p>My latest projects:</p>
+      <ul class="links navigation">
+        <li><a href="/web"><span>Web</span></a></li>
+        <li><a href="/games"><span>Games</span></a></li>
+      </ul>
+    </nav>
     <section>
-      <h1>Colin Bellino</h1>
+      <h1><a href="/changelog">Colin Bellino</a></h1>
       <a class="hire-me animated" href="mailto:work@colinbellino.com" target="_blank">
         <span>Hire me</span>
         <svg viewBox="0 0 45 45">
@@ -265,14 +267,10 @@
       </a>
       <h2>I‘m a freelance programmer and designer who loves to create cool applications and video games.</h2>
       <p>I‘ve been coding, tinkering and prototyping for more than 10 years with many technology from JavaScript to C, from video games to web apps. <br>Over the years, I‘ve developed a taste for rapid prototyping and a good intuition for building good UX. If that‘s something that‘s interesting to you, let‘s talk ;)</p>
-      <p>Below are some of the latest projects I worked on:</p>
-      <ul class="navigation">
-        <li><a href="/games">Games</a></li>
-        <li><a href="/web">Web</a></li>
-        <li><a href="/changelog">Changelog</a></li>
-      </ul>
+    </section>
+    <footer>
       <p>Where to find me on social media:</p>
-      <ul class="socials">
+      <ul class="links socials">
         <li>
           <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener">
             <img src="/public/twitter.svg" aria-hidden="true" width="26" height="26" /> <span>Twitter</span>
@@ -309,7 +307,7 @@
           </a>
         </li>
       </ul>
-    </section>
+    </footer>
   </main>
   <script>
     {
@@ -318,8 +316,8 @@
       const isDesktopWidth = matchMedia("(min-width: 640px)").matches;
       let gameIsRunning = false;
 
-      if (window.location.hostname === "localhost")
-        start_game();
+      // if (window.location.hostname === "localhost")
+      //   start_game();
 
       if (isDesktopWidth)
         avatar.addEventListener("click", start_game);
