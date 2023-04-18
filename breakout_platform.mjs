@@ -59,17 +59,22 @@ function platform_split_in_blocks(selector) {
 
       const replacement = document.createElement("span");
       const words = node.textContent.split(" ");
+      let i = 0;
       words.forEach((word) => {
         if (word === "")
           return;
 
         const span = document.createElement("span");
         span.classList.add("breakout-preblock");
+        if (i % 2 !== 0)
+          span.classList.add("odd");
         span.innerHTML = word;
         replacement.appendChild(span);
         const space = document.createElement("span");
         space.innerHTML = " ";
         replacement.appendChild(space);
+
+        i += 1;
       });
       node.innerHTML = replacement.innerHTML;
       root.replaceChild(replacement, node);
@@ -102,7 +107,7 @@ export function platform_render_text(x, y, text, size, color) {
 
 export function platform_destroy_block(blockIndex) {
   const block = blocks[blockIndex];
-  block.classList.add("breakout-destroyed");
+  block.classList.add("destroyed");
 }
 
 export function platform_get_blocks() {
@@ -143,7 +148,7 @@ export function breakout_start() {
 export function breakout_stop() {
   blocks.forEach((block) => {
     block.classList.remove("breakout-block");
-    block.classList.remove("breakout-destroyed");
+    block.classList.remove("destroyed");
   });
   renderer.canvas.remove();
 }
