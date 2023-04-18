@@ -324,11 +324,6 @@
     }
 
     // TODO: Animate the start of the game so we know what is happening
-    // TODO: Clean up when the game is over
-    // - [ ] remove event listeners
-    // - [ ] restore dom/css
-    // - [ ] unload js
-    // - [ ] free memory
     async function start_game() {
       if (window.breakout === undefined) {
         await load_game();
