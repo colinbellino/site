@@ -13,11 +13,6 @@ import {
   game_resize,
 } from "./breakout_game.mjs"
 
-const renderer = {
-  canvas: null,
-  context: null,
-};
-
 const platformKeys = {
   37: KEY_MOVE_LEFT,
   39: KEY_MOVE_RIGHT,
@@ -29,8 +24,12 @@ const platformKeys = {
   114: KEY_DEBUG_3,
 };
 
-let blocks = [];
-let help = null;
+const data = {
+  canvas: null,
+  context: null,
+  blocks: [],
+  help: null,
+};
 
 function keydown(e) {
   const key = platformKeys[e.keyCode];
@@ -53,9 +52,9 @@ function keyup(e) {
 // FIXME: Update blocks position on resize
 function resize() {
   // console.log("resize", window.innerWidth, window.innerHeight);
-  renderer.canvas.width = window.innerWidth;
-  renderer.canvas.height = window.innerHeight;
-  game_resize(renderer.canvas.width, renderer.canvas.height);
+  data.canvas.width = window.innerWidth;
+  data.canvas.height = window.innerHeight;
+  game_resize(data.canvas.width, data.canvas.height);
 }
 
 function split_in_blocks(selector) {
@@ -98,54 +97,74 @@ export function platform_error(...args) {
 }
 
 export function platform_clear_rect({ x, y, width, height }) {
-  renderer.context.clearRect(x, y, width, height);
+  data.context.clearRect(x, y, width, height);
 }
 
 export function platform_render_rect({ x, y, width, height }, color) {
-  renderer.context.fillStyle = color;
-  renderer.context.fillRect(x, y, width, height);
+  data.context.fillStyle = color;
+  data.context.fillRect(x, y, width, height);
 }
 
 export function platform_render_text(x, y, text, size, color) {
-  renderer.context.font = `${size}px sans-serif`;
-  renderer.context.fillStyle = color;
-  renderer.context.fillText(text, x, y + size);
+  data.context.font = `${size}px sans-serif`;
+  data.context.fillStyle = color;
+  data.context.fillText(text, x, y + size);
 }
 
 export function platform_destroy_block(blockIndex) {
-  const block = blocks[blockIndex];
+  const block = data.blocks[blockIndex];
   block.classList.add("destroyed");
 }
 
 export function platform_get_blocks() {
-  return blocks;
+  return data.blocks;
 }
 
 export function platform_show_help() {
-  help.classList.remove("hidden");
+  data.help.classList.remove("hidden");
 
-  const block = help.firstChild;
+  const block = data.help.firstChild;
   block.classList.add("breakout-block");
-  blocks.push(block);
+  data.blocks.push(block);
 }
 
 export function platform_hide_help() {
-  help.classList.add("hidden");
+  data.help.classList.add("hidden");
+}
+
+function clean_up() {
+  data.blocks.forEach((block) => {
+    block.classList.remove("breakout-block");
+    block.classList.remove("destroyed");
+  });
+  data.blocks = [];
+  data.canvas.remove();
+  data.canvas = null;
+  data.context = null;
+  data.help.remove();
+  data.help = null;
+
+  document.body.classList.remove("no-animation");
+  document.removeEventListener("keydown", keydown);
+  document.removeEventListener("keyup", keyup);
+  window.removeEventListener("resize", resize);
+
+  console.log(JSON.stringify(data, null, 2));
 }
 
 export function platform_start() {
-  renderer.canvas = document.createElement("canvas");
-  renderer.canvas.classList.add("breakout-canvas");
-  renderer.context = renderer.canvas.getContext("2d");
-  document.body.appendChild(renderer.canvas);
+  data.canvas = document.createElement("canvas");
+  data.canvas.classList.add("breakout-canvas");
+  data.context = data.canvas.getContext("2d");
+  document.body.appendChild(data.canvas);
 
-  if (help === null)
+  if (data.help === null)
   {
-    help = document.createElement("aside");
-    help.classList.add("breakout-help");
-    help.classList.add("hidden");
-    help.innerHTML = `<p>Use <b>${"LEFT"}</b> and <b>${"RIGHT"}</b> arrows to move your paddle.<br>Press <b>${"SPACE"}</b> to shoot a ball.</p>`;
-    document.body.appendChild(help);
+    data.help = document.createElement("aside");
+    data.help.classList.add("breakout-help");
+    data.help.classList.add("hidden");
+    data.help.innerHTML = `<p>Use <b>${"LEFT"}</b> and <b>${"RIGHT"}</b> arrows to move your paddle.<br>Press <b>${"SPACE"}</b> to shoot a ball.</p>`;
+    document.body.appendChild(data.help);
   }
 
   {
@@ -158,14 +177,14 @@ export function platform_start() {
       "li > a",
       ".breakout-preblock",
     ];
-    blocks = Array.from(document.querySelectorAll(selectors.join(", ")));
-    if (blocks.length === 0) {
+    data.blocks = Array.from(document.querySelectorAll(selectors.join(", ")));
+    if (data.blocks.length === 0) {
       platform_error("No valid blocks were found on the page, refusing to start the game like this.");
       return;
     }
 
-    for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-      const block = blocks[blockIndex];
+    for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
+      const block = data.blocks[blockIndex];
       block.classList.add("breakout-block");
     }
   }
@@ -182,8 +201,7 @@ export function platform_start() {
       const result = game_update(currentTime / 1000);
       if (result > 0) {
         // Clean up
-        help.remove();
-        document.body.classList.remove("no-animation");
+        clean_up();
         return resolve(result);
       }
       window.requestAnimationFrame(update);
@@ -192,9 +210,7 @@ export function platform_start() {
 }
 
 export function platform_stop() {
-  blocks.forEach((block) => {
-    block.classList.remove("breakout-block");
-    block.classList.remove("destroyed");
-  });
-  renderer.canvas.remove();
+  console.log("stop");
+  // TODO: actually stop the game
+  // clean_up();
 }

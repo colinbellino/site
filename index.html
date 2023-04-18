@@ -373,10 +373,10 @@
       console.log("Starting game.");
       gameIsRunning = true;
 
+      // TODO: stop the game when "pause > quit" button clicked
       window.breakout.start().then((result) => {
         console.log("Game over:", result === 1 ? "win" : "lose");
         gameIsRunning = false;
-        window.breakout.stop();
       });
     }
 </script>
