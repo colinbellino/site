@@ -430,7 +430,8 @@ function clean_up() {
   data.renderer.canvas.remove();
   data.renderer.canvas = null;
   data.renderer.context = null;
-  data.audio.context.close();
+  if (data.audio.context)
+    data.audio.context.close();
   data.audio.context = null;
   data.audio.gainMusic = null;
   data.audio.gainSfx = null;
@@ -561,7 +562,7 @@ function wait_for_milliseconds(duration) {
 }
 
 function set_volume_music(value) {
-  if (data.debug.noMusic)
+  if (data.debug.noMusic || data.audio.available === false)
     return;
 
   if (data.paused)
@@ -574,7 +575,7 @@ function set_volume_music(value) {
 }
 
 function set_volume_sfx(value) {
-  if (data.debug.noSfx)
+  if (data.debug.noSfx || data.audio.available === false)
     return;
 
   value *= VOLUME_SFX_MULTIPLIER;
