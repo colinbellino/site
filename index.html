@@ -53,8 +53,11 @@
       padding: 0;
     }
 
-    li {
-      margin: 0 6px;
+    li {}
+
+    li a {
+      display: block;
+      padding: 0 6px;
     }
 
     li img {
@@ -76,6 +79,10 @@
     }
 
     @media (max-width: 640px) {
+      body {
+        padding-top: 15vh;
+      }
+
       main {
         flex-direction: column;
         align-items: center;
@@ -104,10 +111,11 @@
       <h2>I'm an indie game developer. I build cool stuff and i stream
         sometimes.</h2>
       <ul>
-        <li style="margin-left: -3px;">
+        <li>
           <a href="https://twitter.com/colinbellino" title="Twitter"
             target="_blank" rel="noopener">
-            <img src="/public/twitter.svg" alt="Twitter" />
+            <img src="/public/twitter.svg" alt="Twitter"
+              style="margin-left: -3px;" />
           </a>
         </li>
         <li>
@@ -116,23 +124,25 @@
             <img src="/public/itch.svg" alt="itch.io" io" />
           </a>
         </li>
-        <li style="margin: 0;">
+        <li>
           <a href="https://www.twitch.tv/colinbellino" title="Twitch"
             target="_blank" rel="noopener">
-            <img src="/public/twitch.svg" alt="Twitch" style="width: 45px;" />
+            <img src="/public/twitch.svg" alt="Twitch"
+              style="width: 45px; padding: 0;" />
           </a>
         </li>
-        <li style="margin-right: 10px;">
+        <li>
           <!-- TODO: Update this -->
           <a href="https://studio.youtube.com/channel/UCKUa7KbbQQUe8eITP3-_8mQ"
             title="YouTube" target="_blank" rel="noopener">
-            <img src="/public/youtube.svg" alt="YouTube" style="width: 40px;" />
+            <img src="/public/youtube.svg" alt="YouTube"
+              style="width: 40px; padding-right: 10px;" />
           </a>
         </li>
         <li>
           <a href="https://medium.com/@colinbellino" title="Medium"
             target="_blank" rel="noopener">
-            <img src="/public/medium.svg" alt="Medium" style="width: 28px" />
+            <img src="/public/medium.svg" alt="Medium" style="width: 28px;" />
           </a>
         </li>
       </ul>
