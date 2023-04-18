@@ -45,6 +45,7 @@
       height: 175px;
       border-radius: 50%;
       background: #5fcde4;
+      transition: transform ease-in-out 0.2s;
     }
 
     .pixel-art {
@@ -264,10 +265,12 @@
   <script>
     const avatar = document.getElementById("avatar");
     const canHover = matchMedia('(hover: hover)').matches;
+
     if (avatar && canHover) {
       document.addEventListener("mousemove", e => {
         const rect = avatar.getBoundingClientRect();
         const rectCenterX = rect.x + rect.width / 2;
+
         if (e.clientX > rectCenterX) {
           avatar.classList.remove("flipped");
         } else {
