@@ -152,48 +152,6 @@ export function game_resize(width, height) {
   data.window.height = height;
 }
 
-function game_is_point_inside(point, box) {
-  return (point.x >= box.x && point.x <= box.x + box.width) &&
-         (point.y >= box.y && point.y <= box.y + box.height);
-}
-
-function normalize(value, min = 0, max = 1) {
-  return (value - min) / (max - min);
-}
-
-function lerp(a, b, t){
-  return a + (b - a) * clamp_0_1(t);
-}
-
-function clamp_0_1(value) {
-  if (value < 0)
-    return 0;
-  else if (value > 1)
-    return 1;
-  return value;
-}
-
-function game_spawn_ball(launched = true) {
-  let velocityX = 0;
-  let velocityY = 0;
-  if (launched) {
-    velocityX = data.paddle.velocityX < 0 ? -1 : 1;
-    velocityY = -1;
-  }
-
-  data.balls.push({
-    x: data.paddle.x + data.paddle.width/2 - BALL_SIZE/2,
-    y: data.paddle.y - BALL_SIZE,
-    width: BALL_SIZE,
-    height: BALL_SIZE,
-    velocityX,
-    velocityY,
-    color: BALL_COLOR,
-    destroyed: false,
-    launched,
-  });
-}
-
 export function game_update(currentTime) {
   data.delta = currentTime - data.currentTime;
   data.currentTime = currentTime;
@@ -230,7 +188,7 @@ export function game_update(currentTime) {
 
       if (data.intro.paddle.progress >= 1 + data.intro.ball.delay) {
         if (data.intro.ball.progress === 0) {
-          game_spawn_ball(false);
+          spawn_ball(false);
         }
         data.balls[0].y = lerp(data.paddle.y, data.paddle.y - BALL_SIZE, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
@@ -298,7 +256,7 @@ export function game_update(currentTime) {
           firstBall.launched = true;
         } else {
           if (data.balls.length < BALL_MAX || data.debug.cheats) {
-            game_spawn_ball(true);
+            spawn_ball(true);
           }
         }
       }
@@ -335,7 +293,7 @@ export function game_update(currentTime) {
           }
         }
 
-        if (game_is_point_inside(ball, data.paddle)) {
+        if (is_point_inside(ball, data.paddle)) {
           const distLeft = Math.abs((ball.x + ball.width / 2) - (data.paddle.x));
           const distRight = Math.abs((ball.x + ball.width / 2) - (data.paddle.x + data.paddle.width));
           const distTop = Math.abs((ball.y + ball.height / 2) - (data.paddle.y));
@@ -360,7 +318,7 @@ export function game_update(currentTime) {
             continue;
           }
 
-          if (game_is_point_inside(ball, block)) {
+          if (is_point_inside(ball, block)) {
             const distLeft = Math.abs((ball.x + ball.width / 2) - (block.x));
             const distRight = Math.abs((ball.x + ball.width / 2) - (block.x + block.width));
             const distTop = Math.abs((ball.y + ball.height / 2) - (block.y));
@@ -464,4 +422,46 @@ export function game_update(currentTime) {
   }
 
   return STATE_RUNNING;
+}
+
+function is_point_inside(point, box) {
+  return (point.x >= box.x && point.x <= box.x + box.width) &&
+         (point.y >= box.y && point.y <= box.y + box.height);
+}
+
+function normalize(value, min = 0, max = 1) {
+  return (value - min) / (max - min);
+}
+
+function lerp(a, b, t){
+  return a + (b - a) * clamp_0_1(t);
+}
+
+function clamp_0_1(value) {
+  if (value < 0)
+    return 0;
+  else if (value > 1)
+    return 1;
+  return value;
+}
+
+function spawn_ball(launched = true) {
+  let velocityX = 0;
+  let velocityY = 0;
+  if (launched) {
+    velocityX = data.paddle.velocityX < 0 ? -1 : 1;
+    velocityY = -1;
+  }
+
+  data.balls.push({
+    x: data.paddle.x + data.paddle.width/2 - BALL_SIZE/2,
+    y: data.paddle.y - BALL_SIZE,
+    width: BALL_SIZE,
+    height: BALL_SIZE,
+    velocityX,
+    velocityY,
+    color: BALL_COLOR,
+    destroyed: false,
+    launched,
+  });
 }

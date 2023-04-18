@@ -32,7 +32,7 @@ const platformKeys = {
 let blocks = [];
 let help = null;
 
-function platform_keydown(e) {
+function keydown(e) {
   const key = platformKeys[e.keyCode];
   if (key === undefined) {
     // console.log("e.keyCode", e.keyCode);
@@ -41,7 +41,7 @@ function platform_keydown(e) {
   game_keydown(key);
 }
 
-function platform_keyup(e) {
+function keyup(e) {
   const key = platformKeys[e.keyCode];
   if (key === undefined) {
     // console.log("e.keyCode", e.keyCode);
@@ -50,15 +50,15 @@ function platform_keyup(e) {
   game_keyup(key);
 }
 
-// TODO: Update blocks position on resize ?
-function platform_resize() {
-  // console.log("platform_resize", window.innerWidth, window.innerHeight);
+// FIXME: Update blocks position on resize
+function resize() {
+  // console.log("resize", window.innerWidth, window.innerHeight);
   renderer.canvas.width = window.innerWidth;
   renderer.canvas.height = window.innerHeight;
   game_resize(renderer.canvas.width, renderer.canvas.height);
 }
 
-function platform_split_in_blocks(selector) {
+function split_in_blocks(selector) {
   document.querySelectorAll(selector).forEach((root) => {
     root.childNodes.forEach((node) => {
       if (node.tagName !== undefined)
@@ -133,7 +133,7 @@ export function platform_hide_help() {
   help.classList.add("hidden");
 }
 
-export function breakout_start() {
+export function platform_start() {
   renderer.canvas = document.createElement("canvas");
   renderer.canvas.classList.add("breakout-canvas");
   renderer.context = renderer.canvas.getContext("2d");
@@ -149,9 +149,9 @@ export function breakout_start() {
   }
 
   {
-    platform_split_in_blocks("section > h1");
-    platform_split_in_blocks("section > h2");
-    platform_split_in_blocks("section > p");
+    split_in_blocks("section > h1");
+    split_in_blocks("section > h2");
+    split_in_blocks("section > p");
     const selectors = [
       ".avatar",
       ".hire-me",
@@ -170,15 +170,15 @@ export function breakout_start() {
     }
   }
 
-  document.addEventListener("keydown", platform_keydown);
-  document.addEventListener("keyup", platform_keyup);
-  window.addEventListener("resize", platform_resize);
+  document.addEventListener("keydown", keydown);
+  document.addEventListener("keyup", keyup);
+  window.addEventListener("resize", resize);
 
   document.body.classList.add("no-animation");
-  platform_resize();
+  resize();
 
   return new Promise((resolve, reject) => {
-    window.requestAnimationFrame(function platform_update(currentTime) {
+    window.requestAnimationFrame(function update(currentTime) {
       const result = game_update(currentTime / 1000);
       if (result > 0) {
         // Clean up
@@ -186,12 +186,12 @@ export function breakout_start() {
         document.body.classList.remove("no-animation");
         return resolve(result);
       }
-      window.requestAnimationFrame(platform_update);
+      window.requestAnimationFrame(update);
     });
   });
 }
 
-export function breakout_stop() {
+export function platform_stop() {
   blocks.forEach((block) => {
     block.classList.remove("breakout-block");
     block.classList.remove("destroyed");

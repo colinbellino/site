@@ -1,6 +1,6 @@
-import { breakout_start, breakout_stop } from "./breakout_platform.mjs";
+import { platform_start, platform_stop } from "./breakout_platform.mjs";
 
 window.breakout = {
-  start: breakout_start,
-  stop: breakout_stop,
+  start: platform_start,
+  stop: platform_stop,
 };
