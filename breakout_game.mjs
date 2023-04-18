@@ -90,8 +90,10 @@ const data = {
   },
 
   paddle: {
-    x: 0,
-    y: 0,
+    position: {
+      x: 0,
+      y: 0,
+    },
     width: PADDLE_WIDTH,
     height: PADDLE_HEIGHT,
     velocity: { x: 0, y: 0 },
@@ -101,8 +103,8 @@ const data = {
 
   debug: {
     showBlocks: false,
-    trail: [],
     cheats: false,
+    trail: [],
   },
 
   keys: {
@@ -177,23 +179,22 @@ export function game_update(currentTime) {
   // Update
   switch (data.mode) {
     case MODE_INIT: {
-      data.paddle.x = data.window.width / 2 - data.paddle.width / 2;
-      data.paddle.y = data.window.height;
+      data.paddle.position.x = data.window.width / 2 - data.paddle.width / 2;
+      data.paddle.position.y = data.window.height;
       data.balls = [];
       data.blocks = [];
-
       data.intro.paddle.progress = 0;
       data.intro.ball.progress = 0;
-
       data.outro.paddle.progress = 0;
       data.outro.help.progress = 0;
+      data.debug.trail = [];
 
       data.mode = MODE_INTRO;
     } break;
 
     case MODE_INTRO: {
       {
-        data.paddle.y = lerp(data.paddle.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
+        data.paddle.position.y = lerp(data.paddle.position.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
       }
 
@@ -201,7 +202,7 @@ export function game_update(currentTime) {
         if (data.intro.ball.progress === 0) {
           spawn_ball(true);
         }
-        data.balls[0].y = lerp(data.paddle.y, data.paddle.y - BALL_SIZE, data.intro.ball.progress);
+        data.balls[0].y = lerp(data.paddle.position.y, data.paddle.position.y - BALL_SIZE, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
       }
 
@@ -220,17 +221,8 @@ export function game_update(currentTime) {
         // Get the blocks after we show the help, so the help element is in the blocks list.
         const blocks = platform_get_blocks();
         for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
-          const block = blocks[blockIndex];
-          const rect = block.getClientRects()[0];
-
-          data.blocks.push({
-            id: blockIndex,
-            width: rect.width + 2,
-            height: rect.height + 2,
-            x: rect.x - 1,
-            y: rect.y - 1,
-            destroyed: false,
-          });
+          const rect = blocks[blockIndex].getClientRects()[0];
+          spawn_block(blockIndex, rect);
         }
 
         data.mode = MODE_PLAY;
@@ -256,8 +248,8 @@ export function game_update(currentTime) {
       }
 
       {
-        data.paddle.x = data.paddle.x + data.paddle.velocity.x * PADDLE_SPEED;
-        data.paddle.x = clamp(data.paddle.x, 0, data.window.width - data.paddle.width);
+        data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
+        data.paddle.position.x = clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
       }
 
       if (data.keys[KEY_CONFIRM].released) {
@@ -273,6 +265,14 @@ export function game_update(currentTime) {
         }
       }
 
+      // Check for lose condition
+      const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
+      if (ballsRemaining === 0 && data.debug.cheats === false) {
+        data.state = STATE_LOSE;
+        data.mode = MODE_END;
+        break;
+      }
+
       for (let ballIndex = 0; ballIndex < data.balls.length; ballIndex++) {
         const ball = data.balls[ballIndex];
 
@@ -281,45 +281,37 @@ export function game_update(currentTime) {
           continue;
 
         if (ball.attachedToPaddle) {
-          ball.x = data.paddle.x + data.paddle.width / 2 - ball.width / 2;
-          ball.y = data.paddle.y - BALL_SIZE;
+          ball.position.x = data.paddle.position.x + data.paddle.width / 2 - ball.width / 2;
+          ball.position.y = data.paddle.position.y - BALL_SIZE;
         } else {
-          ball.y += ball.velocity.y * BALL_SPEED;
-          ball.x += ball.velocity.x * BALL_SPEED;
+          ball.position.y += ball.velocity.y * BALL_SPEED;
+          ball.position.x += ball.velocity.x * BALL_SPEED;
 
           // Bounce on top wall
-          if (ball.y < 0)
+          if (ball.position.y < 0)
             ball.velocity.y = -ball.velocity.y;
 
           // Bounce on side wall
-          if (ball.x + ball.width > data.window.width || ball.x < 0)
+          if (ball.position.x + ball.width > data.window.width || ball.position.x < 0)
             ball.velocity.x = -ball.velocity.x;
 
           // Hit bottom limit
-          if (ball.y > data.window.height) {
+          if (ball.position.y > data.window.height) {
             ball.destroyed = true;
-
-            // Check for lose condition
-            const ballsRemaining = data.balls.filter(b => b.destroyed === false).length;
-            if (ballsRemaining === 0 && data.debug.cheats === false) {
-              data.state = STATE_LOSE;
-              data.mode = MODE_END;
-              break;
-            }
           }
 
           // Bounce on paddle
           if (is_point_inside(ball, data.paddle)) {
-            const distLeft = Math.abs((ball.x + ball.width / 2) - (data.paddle.x));
-            const distRight = Math.abs((ball.x + ball.width / 2) - (data.paddle.x + data.paddle.width));
-            const distTop = Math.abs((ball.y + ball.height / 2) - (data.paddle.y));
-            const distBottom = Math.abs((ball.y + ball.height / 2) - (data.paddle.y + data.paddle.height));
+            const distLeft = Math.abs((ball.position.x + ball.width / 2) - (data.paddle.position.x));
+            const distRight = Math.abs((ball.position.x + ball.width / 2) - (data.paddle.position.x + data.paddle.width));
+            const distTop = Math.abs((ball.position.y + ball.height / 2) - (data.paddle.position.y));
+            const distBottom = Math.abs((ball.position.y + ball.height / 2) - (data.paddle.position.y + data.paddle.height));
 
             ball.velocity.y = -ball.velocity.y;
             if (data.paddle.velocity.x != 0) {
               ball.velocity.x = data.paddle.velocity.x * 1.5;
             }
-            ball.y = data.paddle.y;
+            ball.position.y = data.paddle.position.y;
             // TODO: check what other breakout games do so the bounces don't feel so janky
           }
 
@@ -334,10 +326,10 @@ export function game_update(currentTime) {
 
             // Hit a block
             if (is_point_inside(ball, block)) {
-              const distLeft = Math.abs((ball.x + ball.width / 2) - (block.x));
-              const distRight = Math.abs((ball.x + ball.width / 2) - (block.x + block.width));
-              const distTop = Math.abs((ball.y + ball.height / 2) - (block.y));
-              const distBottom = Math.abs((ball.y + ball.height / 2) - (block.y + block.height));
+              const distLeft = Math.abs((ball.position.x + ball.width / 2) - (block.x));
+              const distRight = Math.abs((ball.position.x + ball.width / 2) - (block.x + block.width));
+              const distTop = Math.abs((ball.position.y + ball.height / 2) - (block.y));
+              const distBottom = Math.abs((ball.position.y + ball.height / 2) - (block.y + block.height));
 
               if (Math.min(distLeft, distRight) < Math.min(distTop, distBottom)) {
                 ball.velocity.x = -ball.velocity.x;
@@ -351,7 +343,7 @@ export function game_update(currentTime) {
         }
 
         if (data.debug.cheats)
-          data.debug.trail.push([ball.x, ball.y]);
+          data.debug.trail.push([ball.position.x, ball.position.y]);
       } // for data.balls
 
       // Check for win condition
@@ -385,7 +377,7 @@ export function game_update(currentTime) {
       }
 
       {
-        data.paddle.y = lerp(data.paddle.y, data.window.height, data.outro.paddle.progress);
+        data.paddle.position.y = lerp(data.paddle.position.y, data.window.height, data.outro.paddle.progress);
         data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
       }
 
@@ -416,21 +408,20 @@ export function game_update(currentTime) {
         continue;
       }
 
-      const rect = { width: ball.width, height: ball.height, x: ball.x, y: ball.y };
+      const rect = { width: ball.width, height: ball.height, x: ball.position.x, y: ball.position.y };
       platform_render_rect(rect, ball.color);
     }
 
     {
-      const rect = { x: data.paddle.x, y: data.paddle.y, width: data.paddle.width, height: data.paddle.height };
+      const rect = { x: data.paddle.position.x, y: data.paddle.position.y, width: data.paddle.width, height: data.paddle.height };
       platform_render_rect(rect, PADDLE_COLOR);
     }
 
     if (data.debug.showBlocks) {
       for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
         const block = data.blocks[blockIndex];
-
-        const rect = { x: block.x, y: block.y, width: block.width, height: block.height };
-        platform_render_rect(rect, "red");
+        const rect = { x: block.position.x, y: block.position.y, width: block.width, height: block.height };
+        platform_render_rect(rect, "blue");
       }
     }
 
@@ -451,8 +442,8 @@ export function game_update(currentTime) {
 }
 
 function is_point_inside(point, box) {
-  return (point.x >= box.x && point.x <= box.x + box.width) &&
-         (point.y >= box.y && point.y <= box.y + box.height);
+  return (point.position.x >= box.position.x && point.position.x <= box.position.x + box.width) &&
+         (point.position.y >= box.position.y && point.position.y <= box.position.y + box.height);
 }
 
 function normalize(value, min = 0, max = 1) {
@@ -495,8 +486,10 @@ function spawn_ball(attachedToPaddle) {
   }
 
   const ball = {
-    x: data.paddle.x + data.paddle.width/2 - BALL_SIZE/2,
-    y: data.paddle.y - BALL_SIZE,
+    position: {
+      x: data.paddle.position.x + data.paddle.width/2 - BALL_SIZE/2,
+      y: data.paddle.position.y - BALL_SIZE,
+    },
     width: BALL_SIZE,
     height: BALL_SIZE,
     velocity,
@@ -506,4 +499,17 @@ function spawn_ball(attachedToPaddle) {
   };
 
   data.balls.push(ball);
+}
+
+function spawn_block(blockIndex, rect) {
+  data.blocks.push({
+    id: blockIndex,
+    width: rect.width + 2,
+    height: rect.height + 2,
+    position: {
+      x: rect.x - 1,
+      y: rect.y - 1,
+    },
+    destroyed: false,
+  });
 }

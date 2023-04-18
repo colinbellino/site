@@ -6,8 +6,7 @@
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>Colin Bellino</title>
-  <meta name="Description"
-    content="Hi, i‘m Colin. I"m a freelance programmer, designer and all around nerd, I build cool stuff and I stream my work sometimes.">
+  <meta name="Description" content="Hi, I‘m Colin. I‘m a freelance programmer, designer and all around nerd, I build cool stuff and I stream my work sometimes.">
   <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png">
   <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png">
@@ -262,7 +261,7 @@
       </a>
       <h2>I‘m a freelance programmer and designer who loves to create cool applications and video games.</h2>
       <p>I‘ve been coding, tinkering and prototyping for more than 10 years with many technology from JavaScript to C, from video games to web apps. <br>Over the years, I‘ve developed a taste for rapid prototyping and a good intuition for building good UX. If that‘s something that‘s interesting to you, let‘s talk ;)</p>
-      <p>Below are some of the latest projects i worked on:</p>
+      <p>Below are some of the latest projects I worked on:</p>
       <ul class="navigation">
         <li><a href="/games">Games</a></li>
         <li><a href="/web">Web</a></li>
@@ -309,75 +308,75 @@
     </section>
   </main>
   <script>
-    const avatar = document.getElementById("avatar");
-    const canHover = matchMedia("(hover: hover)").matches;
-    const isDesktopWidth = matchMedia("(min-width: 640px)").matches;
-    let gameIsRunning = false;
+    {
+      const avatar = document.getElementById("avatar");
+      const canHover = matchMedia("(hover: hover)").matches;
+      const isDesktopWidth = matchMedia("(min-width: 640px)").matches;
+      let gameIsRunning = false;
 
-    if (window.location.hostname === "localhost")
-      start_game();
+      if (window.location.hostname === "localhost")
+        start_game();
 
-    if (isDesktopWidth)
-      avatar.addEventListener("click", start_game);
-    if (canHover)
-      document.addEventListener("mousemove", flip_avatar);
+      if (isDesktopWidth)
+        avatar.addEventListener("click", start_game);
+      if (canHover)
+        document.addEventListener("mousemove", flip_avatar);
 
-    function flip_avatar(e) {
-      const rect = avatar.getBoundingClientRect();
-      const rectCenterX = rect.x + rect.width / 2;
+      function flip_avatar(e) {
+        const rect = avatar.getBoundingClientRect();
+        const rectCenterX = rect.x + rect.width / 2;
 
-      if (e.clientX > rectCenterX) {
-        avatar.classList.remove("flipped");
-      } else {
-        avatar.classList.add("flipped");
-      }
-    }
-
-    function load_game() {
-      return new Promise((resolve) => {
-        let loaded = 0;
-        let toLoad = 2;
-
-        function onLoad() {
-          loaded += 1;
-          if (loaded >= toLoad)
-            resolve();
-        };
-
-        const script = document.createElement("script");
-        script.setAttribute("type", "text/javascript");
-        script.setAttribute("type", "module");
-        script.setAttribute("src", "breakout_loader.mjs");
-        document.body.appendChild(script);
-        script.onload = onLoad;
-
-        const link = document.createElement("link");
-        link.setAttribute("rel", "stylesheet");
-        link.setAttribute("href", "breakout.css");
-        link.onload = onLoad;
-        document.body.appendChild(link);
-      });
-    }
-
-    async function start_game() {
-      if (gameIsRunning)
-        return;
-
-      if (window.breakout === undefined) {
-        await load_game();
-        console.log("All game files loaded.");
+        if (e.clientX > rectCenterX) {
+          avatar.classList.remove("flipped");
+        } else {
+          avatar.classList.add("flipped");
+        }
       }
 
-      avatar.removeEventListener("click", start_game);
+      function load_game() {
+        return new Promise((resolve) => {
+          let loaded = 0;
+          let toLoad = 2;
 
-      console.log("Starting game.");
-      gameIsRunning = true;
+          function onLoad() {
+            loaded += 1;
+            if (loaded >= toLoad)
+              resolve();
+          };
 
-      // TODO: stop the game when "pause > quit" button clicked
-      window.breakout.start().then((result) => {
-        console.log("Game over:", result === 1 ? "win" : "lose");
-        gameIsRunning = false;
-      });
+          const script = document.createElement("script");
+          script.setAttribute("type", "text/javascript");
+          script.setAttribute("type", "module");
+          script.setAttribute("src", "breakout_loader.mjs");
+          document.body.appendChild(script);
+          script.onload = onLoad;
+
+          const link = document.createElement("link");
+          link.setAttribute("rel", "stylesheet");
+          link.setAttribute("href", "breakout.css");
+          link.onload = onLoad;
+          document.body.appendChild(link);
+        });
+      }
+
+      async function start_game() {
+        if (gameIsRunning)
+          return;
+
+        if (window.breakout === undefined) {
+          await load_game();
+          console.log("All game files loaded.");
+        }
+
+        console.log("Starting game.");
+        gameIsRunning = true;
+
+        // TODO: stop the game when "pause > quit" button clicked
+        window.breakout.start().then((result) => {
+          console.log("Game over:", result === 1 ? "win" : "lose");
+          gameIsRunning = false;
+        });
+      }
     }
 </script>
 </body>
