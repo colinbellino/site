@@ -87,13 +87,14 @@
   width: 200px;
   background: rgba(0, 0, 0, 0.7);
 }
+.breakout-pause > div > *:not(:last-child) {
+  margin-bottom: 20px;
+}
 .breakout-pause h3 {
   text-align: center;
-  margin-bottom: 15px;
 }
 .breakout-pause .link {
   display: block;
-  margin: 0;
   border: 0;
   width: 100%;
   color: white;
@@ -109,4 +110,13 @@
 .breakout-pause.hidden {
   pointer-events: none;
   opacity: 0;
+}
+
+.slider {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+.slider input {
+  display: block;
+  width: 100%;
 }

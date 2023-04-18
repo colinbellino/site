@@ -17,9 +17,10 @@ import {
   game_mousemove,
   game_resize,
 } from "./breakout_game.mjs"
-const VOLUME_SFX_INITIAL = 0.2;
-const VOLUME_MUSIC_INITIAL = 0.2;
-const VOLUME_MUSIC_PAUSED = 0.01;
+
+const VOLUME_SFX_MULTIPLIER = 0.2;
+const VOLUME_MUSIC_MULTIPLIER = 0.2;
+const VOLUME_MUSIC_PAUSED_DIVIDER = 0.05;
 
 const codeToKey = {
   37: KEY_MOVE_LEFT, // Left arrow
@@ -52,6 +53,8 @@ const data = {
     help: null,
     score: null,
     pause: null,
+    musicSlider: null,
+    sfxSlider: null,
   },
   settings: {
     volumeSfx: 0,
@@ -125,13 +128,17 @@ export function platform_hide_score() {
 export function platform_show_pause() {
   data.renderer.canvas.classList.add("blocking")
   data.ui.pause.classList.remove("hidden");
-  set_music_volume(VOLUME_MUSIC_PAUSED);
+  data.ui.musicSlider.setAttribute("value", data.settings.volumeMusic);
+  data.ui.sfxSlider.setAttribute("value", data.settings.volumeSfx);
+  data.paused = true;
+  set_volume_music(data.settings.volumeMusic);
 }
 
 export function platform_hide_pause() {
-  data.renderer.canvas.classList.remove("blocking")
+  data.paused = false;
+  data.renderer.canvas.classList.remove("blocking");
   data.ui.pause.classList.add("hidden");
-  set_music_volume(data.settings.volumeSfx);
+  set_volume_music(data.settings.volumeMusic);
 }
 
 export function platform_play_audio_clip(key, group = 0, loop = false) {
@@ -165,9 +172,9 @@ export function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
   data.audio.sources[index].disconnect();
   data.audio.sources[index].connect(tempGain).connect(data.audio.context.destination);
   if (group === 0)
-    tempGain.gain.value = data.audio.gainSfx.gain.value;
+    tempGain.gain.value = data.audio.gainSfx.gain.value * VOLUME_SFX_MULTIPLIER;
   else
-    tempGain.gain.value = data.audio.gainMusic.gain.value;
+    tempGain.gain.value = data.audio.gainMusic.gain.value * VOLUME_MUSIC_MULTIPLIER;
   tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration)
 }
 
@@ -177,8 +184,8 @@ export async function platform_start() {
   data.renderer.context = data.renderer.canvas.getContext("2d");
   document.body.appendChild(data.renderer.canvas);
 
-  data.settings.volumeSfx = VOLUME_SFX_INITIAL;
-  data.settings.volumeMusic = VOLUME_MUSIC_INITIAL;
+  data.settings.volumeSfx = 1;
+  data.settings.volumeMusic = 1;
 
   if (data.ui.help === null)
   {
@@ -204,18 +211,72 @@ export async function platform_start() {
     data.ui.pause.classList.add("breakout-pause");
     data.ui.pause.classList.add("hidden");
 
-    const parent = document.createElement("div");
-    data.ui.pause.appendChild(parent);
+    const root = document.createElement("div");
+    data.ui.pause.appendChild(root);
 
     const title = document.createElement("h3");
     title.innerHTML = "PAUSED";
-    parent.appendChild(title);
+    root.appendChild(title);
+
+    {
+      const slider = document.createElement("input");
+      slider.setAttribute("name", "volumeMusic");
+      slider.setAttribute("type", "range");
+      slider.setAttribute("min", 0);
+      slider.setAttribute("max", 1);
+      slider.setAttribute("step", 0.1);
+      slider.addEventListener("change", (e) => {
+        const rawValue = parseFloat(e.target.value);
+        const volume = rawValue * VOLUME_MUSIC_MULTIPLIER;
+        data.settings.volumeMusic = volume;
+        set_volume_music(volume);
+      });
+      data.ui.musicSlider = slider;
+
+      const label = document.createElement("label");
+      label.innerHTML = "Music volume:";
+      label.setAttribute("for", "volumeMusic");
+
+      const parent = document.createElement("div");
+      parent.classList.add("slider");
+      parent.appendChild(label);
+      parent.appendChild(slider);
+
+      root.appendChild(parent);
+    }
+
+    {
+      const slider = document.createElement("input");
+      slider.setAttribute("name", "volumeSfx");
+      slider.setAttribute("type", "range");
+      slider.setAttribute("min", 0);
+      slider.setAttribute("max", 1);
+      slider.setAttribute("step", 0.1);
+      slider.addEventListener("change", (e) => {
+        const rawValue = parseFloat(e.target.value);
+        const volume = rawValue * VOLUME_SFX_MULTIPLIER;
+        data.settings.volumeSfx = volume;
+        set_volume_sfx(volume);
+      });
+      data.ui.sfxSlider = slider;
+
+      const label = document.createElement("label");
+      label.innerHTML = "Sounds volume:";
+      label.setAttribute("for", "volumeSfx");
+
+      const parent = document.createElement("div");
+      parent.classList.add("slider");
+      parent.appendChild(label);
+      parent.appendChild(slider);
+
+      root.appendChild(parent);
+    }
 
     const quitButton = document.createElement("button");
     quitButton.innerHTML = "Quit";
     quitButton.classList.add("link");
     quitButton.addEventListener("click", platform_stop);
-    parent.appendChild(quitButton);
+    root.appendChild(quitButton);
 
     document.body.appendChild(data.ui.pause);
   }
@@ -250,10 +311,10 @@ export async function platform_start() {
     data.audio.context = new AudioContext();
     data.audio.gainMusic = data.audio.context.createGain();
     data.audio.gainMusic.connect(data.audio.context.destination);
-    data.audio.gainMusic.gain.value = VOLUME_MUSIC_INITIAL;
+    set_volume_music(data.settings.volumeMusic);
     data.audio.gainSfx = data.audio.context.createGain();
     data.audio.gainSfx.connect(data.audio.context.destination);
-    data.audio.gainSfx.gain.value = VOLUME_SFX_INITIAL;
+    set_volume_sfx(data.settings.volumeSfx);
 
     // Load audio clips
     data.audio.clips = AUDIO_CLIPS.map(key => ({
@@ -341,6 +402,8 @@ function clean_up() {
   data.ui.score = null;
   data.ui.pause.remove();
   data.ui.pause = null;
+  data.ui.musicSlider = null;
+  data.ui.sfxSlider = null;
 
   document.removeEventListener("mouseup", mouseup);
   document.removeEventListener("mousedown", mousedown);
@@ -444,17 +507,24 @@ function wait_for_milliseconds(duration) {
   return new Promise(resolve => setTimeout(resolve, duration));
 }
 
-function set_music_volume(value) {
+function set_volume_music(value) {
   if (data.debug.noMusic)
     return;
+
+  if (data.paused)
+    value *= VOLUME_MUSIC_PAUSED_DIVIDER;
+
+  value *= VOLUME_MUSIC_MULTIPLIER;
 
   data.audio.gainMusic.gain.value = value;
   platform_log("Music volume:", data.audio.gainMusic.gain.value);
 }
 
-function set_sfx_volume(value) {
+function set_volume_sfx(value) {
   if (data.debug.noSfx)
     return;
+
+  value *= VOLUME_SFX_MULTIPLIER;
 
   data.audio.gainSfx.gain.value = value;
   platform_log("SFX volume:", data.audio.gainSfx.gain.value);
