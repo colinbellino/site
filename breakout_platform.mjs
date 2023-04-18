@@ -35,6 +35,7 @@ const codeToKey = {
 
 const data = {
   renderer: {
+    requestId: 0,
     canvas: null,
     context: null,
   },
@@ -55,6 +56,10 @@ const data = {
   settings: {
     volumeSfx: 0,
     volumeMusic: 0,
+  },
+  debug: {
+    noMusic: false,
+    noSfx: false,
   },
 };
 
@@ -120,13 +125,13 @@ export function platform_hide_score() {
 export function platform_show_pause() {
   data.renderer.canvas.classList.add("blocking")
   data.ui.pause.classList.remove("hidden");
-  data.audio.gainMusic.gain.value = VOLUME_MUSIC_PAUSED;
+  set_music_volume(VOLUME_MUSIC_PAUSED);
 }
 
 export function platform_hide_pause() {
   data.renderer.canvas.classList.remove("blocking")
   data.ui.pause.classList.add("hidden");
-  data.audio.gainMusic.gain.value = data.settings.volumeSfx;
+  set_music_volume(data.settings.volumeSfx);
 }
 
 export function platform_play_audio_clip(key, group = 0, loop = false) {
@@ -163,7 +168,7 @@ export function platform_stop_audio_clip(key, group = 0, fadeDuration = 0) {
     tempGain.gain.value = data.audio.gainSfx.gain.value;
   else
     tempGain.gain.value = data.audio.gainMusic.gain.value;
-  tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration);
+  tempGain.gain.linearRampToValueAtTime(0, data.audio.context.currentTime + fadeDuration)
 }
 
 export async function platform_start() {
@@ -198,7 +203,20 @@ export async function platform_start() {
     data.ui.pause = document.createElement("section");
     data.ui.pause.classList.add("breakout-pause");
     data.ui.pause.classList.add("hidden");
-    data.ui.pause.innerHTML = "<p>PAUSED</p>";
+
+    const parent = document.createElement("div");
+    data.ui.pause.appendChild(parent);
+
+    const title = document.createElement("h3");
+    title.innerHTML = "PAUSED";
+    parent.appendChild(title);
+
+    const quitButton = document.createElement("button");
+    quitButton.innerHTML = "Quit";
+    quitButton.classList.add("link");
+    quitButton.addEventListener("click", platform_stop);
+    parent.appendChild(quitButton);
+
     document.body.appendChild(data.ui.pause);
   }
 
@@ -237,12 +255,6 @@ export async function platform_start() {
     data.audio.gainSfx.connect(data.audio.context.destination);
     data.audio.gainSfx.gain.value = VOLUME_SFX_INITIAL;
 
-    // Debug stuff
-    if (window.location.search.includes("no_music"))
-      data.audio.gainMusic.gain.value = 0;
-    if (window.location.search.includes("no_sfx"))
-      data.audio.gainSfx.gain.value = 0;
-
     // Load audio clips
     data.audio.clips = AUDIO_CLIPS.map(key => ({
       url: `/public/audio/${key}.mp3`,
@@ -252,10 +264,21 @@ export async function platform_start() {
     const buffers = await Promise.all(loadPromises);
     for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
       data.audio.clips[clipIndex].buffer = buffers[clipIndex];
-      platform_log("Audio clips loaded:", data.audio.clips.length);
+    platform_log("Audio clips loaded:", data.audio.clips.length);
   } else {
     data.audio.available = false;
     platform_warn("Web Audio API not available, continuing without audio.");
+  }
+
+  // Debug stuff
+  {
+    data.debug.noMusic = window.location.search.includes("no_music");
+    if (data.debug.noMusic)
+      data.audio.gainMusic.gain.value = 0;
+
+    data.debug.noSfx = window.location.search.includes("no_sfx");
+    if (data.debug.noSfx)
+      data.audio.gainSfx.gain.value = 0;
   }
 
   document.addEventListener("mouseup", mouseup);
@@ -286,15 +309,15 @@ export async function platform_start() {
         return resolve([result, score]);
       }
 
-      requestAnimationFrame(update);
+      data.renderer.requestId = window.requestAnimationFrame(update);
     }
   });
 }
 
 export function platform_stop() {
-  platform_warn("platform_stop not implemented");
-  // TODO: actually stop the game
-  // clean_up();
+  platform_log("Stopping the game");
+  window.cancelAnimationFrame(data.renderer.requestId);
+  clean_up();
 }
 
 function clean_up() {
@@ -365,11 +388,6 @@ function keyup(e) {
   game_keyup(key);
 }
 
-function set_sfx_volume(volume) {
-  data.audio.gainSfx.gain.value = clamp(volume, 0, 1);
-  platform_log("SFX volume:", data.audio.gainSfx.gain.value);
-}
-
 function resize() {
   platform_log("Window resized:", window.innerWidth, window.innerHeight);
   data.renderer.canvas.width = window.innerWidth;
@@ -424,4 +442,20 @@ function load_audio(url) {
 
 function wait_for_milliseconds(duration) {
   return new Promise(resolve => setTimeout(resolve, duration));
+}
+
+function set_music_volume(value) {
+  if (data.debug.noMusic)
+    return;
+
+  data.audio.gainMusic.gain.value = value;
+  platform_log("Music volume:", data.audio.gainMusic.gain.value);
+}
+
+function set_sfx_volume(value) {
+  if (data.debug.noSfx)
+    return;
+
+  data.audio.gainSfx.gain.value = value;
+  platform_log("SFX volume:", data.audio.gainSfx.gain.value);
 }

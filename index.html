@@ -178,7 +178,8 @@
       padding: 0 0.5em 0.5em 0;
       margin: 0;
     }
-    ul.links li a {
+
+    .link {
       display: flex;
       flex-grow: 1;
       box-sizing: border-box;
@@ -192,15 +193,13 @@
       background: rgba(0, 0, 0, 0.03);
       transition: all linear 0.2s;
     }
-    ul.links li img {
+    .link img {
       display: inline-block;
       width: 26px;
       margin-right: 12px;
     }
-    ul.links li a:hover {
+    .link:hover {
       background: rgba(0, 0, 0, 0.09);
-    }
-    ul.links li a:hover {
       text-decoration: none;
     }
 
@@ -296,8 +295,8 @@
     <nav>
       <p><b>My portfolio:</b></p>
       <ul class="links navigation">
-        <li><a href="/web"><img src="/public/web.svg" aria-hidden="true" width="26" height="26" /> <span>Web</span></a></li>
-        <li><a href="/games"><img src="/public/games.svg" aria-hidden="true" width="26" height="26" /> <span>Games</span></a></li>
+        <li><a href="/web" class="link"><img src="/public/web.svg" aria-hidden="true" width="26" height="26" /> <span>Web</span></a></li>
+        <li><a href="/games" class="link"><img src="/public/games.svg" aria-hidden="true" width="26" height="26" /> <span>Games</span></a></li>
       </ul>
     </nav>
     <section>
@@ -326,37 +325,37 @@
       <p>Where to find me on social media:</p>
       <ul class="links socials">
         <li>
-          <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-twitter" target="_blank" rel="noopener" class="link">
             <img src="/public/twitter.svg" aria-hidden="true" width="26" height="26" /> <span>Twitter</span>
           </a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-itch" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-itch" target="_blank" rel="noopener" class="link">
             <img src="/public/itch.svg" aria-hidden="true" width="26" height="23" /> <span>Itch</span>
           </a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-code" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-code" target="_blank" rel="noopener" class="link">
             <img src="/public/github.svg" aria-hidden="true" width="26" height="26" /> <span>Github</span>
           </a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-twitch" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-twitch" target="_blank" rel="noopener" class="link">
             <img src="/public/twitch.svg" aria-hidden="true" width="26" height="26" /> <span>Twitch</span>
           </a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-yt" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-yt" target="_blank" rel="noopener" class="link">
             <img src="/public/youtube.svg" aria-hidden="true" width="26" height="26" /> <span>YouTube</span>
           </a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-medium" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-medium" target="_blank" rel="noopener" class="link">
             <img src="/public/medium.svg" aria-hidden="true" width="26" height="26" /> <span>Medium</span>
           </a>
         </li>
         <li>
-          <a href="https://bit.ly/colin-discord" target="_blank" rel="noopener">
+          <a href="https://bit.ly/colin-discord" target="_blank" rel="noopener" class="link">
             <img src="/public/discord.svg" aria-hidden="true" width="26" height="26" /> <span>Discord</span>
           </a>
         </li>
