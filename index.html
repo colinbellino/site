@@ -13,8 +13,8 @@
   <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png">
   <style>
     :root {
-      --main-color: rgba(76, 95, 208, 1);
-      --main-color-hover: rgba(35, 55, 176, 1);
+      --main-color: rgba(35, 55, 176, 1);
+      --main-color-hover: rgba(76, 95, 208, 1);
 
       font-family: Arial, Helvetica, sans-serif;
     }
@@ -168,18 +168,39 @@
     }
 
     .hire-me {
+      position: relative;
       display: inline-block;
+      box-sizing: border-box;
+      width: 88px;
       padding: 8px 16px;
       margin: 0.5em 0 0 0.5em;
       border-radius: 3px;
       background: var(--main-color);
       color: #ffffff;
-      transition: all linear 0.2s;
+      transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
+    }
+
+    .hire-me svg {
+      position: absolute;
+      right: 10px;
+      height: 20px;
+      margin-left: 10px;
+      opacity: 0;
+      transform: scale(0);
+      transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
     }
 
     .hire-me:hover {
+      width: 110px;
       text-decoration: none;
       background: var(--main-color-hover);
+      transition-delay: 0ms, 0ms;
+    }
+
+    .hire-me:hover svg {
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 0ms, 0ms;
     }
 
     @media (max-width: 640px) {
@@ -209,7 +230,24 @@
   <main>
     <img id="avatar" class="avatar pixel-art" src="/public/me.gif" aria-hidden="true" width="175" />
     <section>
-      <h1>Colin Bellino</h1> <a class="hire-me" href="mailto:work@colinbellino.com" target="_blank">Hire me</a>
+      <h1>Colin Bellino</h1>
+      <a class="hire-me" href="mailto:work@colinbellino.com" target="_blank">
+        <span>Hire me</span>
+        <svg viewBox="0 0 45 45">
+          <g transform="matrix(1.25 0 0 -1.25 0 45)">
+            <path d="M11.626 28.512a1.413 1.413 0 0 1-.268-.395l-.008.008L.134 2.86l.011-.011c-.208-.403.14-1.223.853-1.937S2.53-.148 2.933.06l.01-.01L28.21 11.265l-.008.009c.148.07.282.155.395.268 1.562 1.562-.971 6.627-5.657 11.313s-9.752 7.219-11.314 5.657" fill="#dd2e44"/>
+            <path d="M13 24 .416 3.494l-.282-.635.011-.01c-.208-.404.14-1.223.853-1.937a3.97 3.97 0 0 1 .709-.557L17 19l-4 5z" fill="#ea596e"/>
+            <path d="M23.012 22.934c4.67-4.672 7.263-9.652 5.789-11.124s-6.453 1.118-11.126 5.788-7.263 9.653-5.79 11.126 6.454-1.119 11.127-5.79" fill="#a0041e"/>
+            <path d="M18.59 22.391a.99.99 0 0 0-.734-.215c-.868.094-1.597.396-2.109.873-.541.505-.808 1.182-.735 1.862.128 1.192 1.324 2.286 3.363 2.066.793-.085 1.147.169 1.158.291s-.277.446-1.069.532c-.869.094-1.598.396-2.11.873-.541.505-.809 1.183-.735 1.862.13 1.193 1.325 2.286 3.362 2.066.578-.063.882.057 1.011.134.104.063.145.123.149.158.011.12-.276.445-1.071.531a1 1 0 0 0-.886 1.102 1 1 0 0 0 1.101.886c2.037-.219 2.973-1.542 2.844-2.735s-1.324-2.285-3.363-2.065c-.578.063-.88-.057-1.01-.134-.103-.063-.145-.124-.149-.157-.013-.122.277-.447 1.071-.532 2.037-.22 2.973-1.543 2.844-2.736s-1.325-2.286-3.362-2.065c-.578.062-.882-.057-1.012-.134-.103-.063-.143-.124-.147-.158-.013-.121.276-.446 1.07-.531a1 1 0 0 0 .886-1.102.997.997 0 0 0-.367-.672" fill="#aa8dd8"/>
+            <path d="M30.661 13.143c1.973.557 3.334-.323 3.658-1.478s-.378-2.615-2.349-3.169c-.77-.216-1.001-.584-.97-.702s.425-.312 1.193-.094c1.972.554 3.333-.326 3.657-1.48s-.377-2.614-2.35-3.17c-.769-.216-1.001-.585-.967-.702s.423-.31 1.192-.095a1 1 0 0 0 1.234-.691 1 1 0 0 0-.694-1.234c-1.97-.555-3.333.323-3.659 1.479s.379 2.613 2.353 3.169c.769.217 1.001.584.967.702s-.422.312-1.191.096c-1.973-.556-3.334.322-3.659 1.478s.378 2.614 2.352 3.17c.767.215.999.585.966.701s-.422.313-1.192.096a1 1 0 0 0-1.233.692 1 1 0 0 0 .692 1.232" fill="#77b255"/>
+            <path d="M23.001 15.84a1 1 0 0 0-.626 1.781c.218.175 5.418 4.259 12.767 3.208a1 1 0 0 0 .848-1.131.995.995 0 0 0-1.132-.848c-6.493.922-11.187-2.754-11.233-2.791a.994.994 0 0 0-.624-.219" fill="#aa8dd8"/>
+            <path d="M5.754 20a1.03 1.03 0 0 0-.288.042 1 1 0 0 0-.67 1.246c1.133 3.773 2.16 9.793.898 11.363-.142.178-.354.353-.842.316-.939-.071-.849-2.051-.848-2.071a1 1 0 0 0-.922-1.072 1 1 0 0 0-1.072.923c-.104 1.379.326 4.035 2.691 4.214 1.056.08 1.933-.287 2.553-1.057 2.371-2.951-.036-11.506-.543-13.192A1 1 0 0 0 5.754 20" fill="#77b255"/>
+            <path d="M4 18a2 2 0 1 0-4 0 2 2 0 1 0 4 0" fill="#9266cc"/>
+            <path d="M34 16.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0m-9-12a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0" fill="#5c913b"/>
+            <path d="M30 32a2 2 0 1 0-4 0 2 2 0 1 0 4 0m4-4.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0m-3-4a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0m-22-11a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0" fill="#ffcc4d"/>
+          </g>
+        </svg>
+      </a>
       <h2>I'm a freelance programmer and designer who loves to create cool applications and video games.</h2>
       <p>I've been coding, tinkering and prototyping for more than 10 years with many technology from JavaScript to C,
         from video games to web apps. <br>
