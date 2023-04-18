@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <title>Hi - Colin Bellino</title>
+  <style>
+    :root {
+      --main-color: rgb(0, 100, 250);
+
+      font-family: Arial, Helvetica, sans-serif;
+    }
+
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      box-sizing: border-box;
+      padding: 30vh 0 0;
+    }
+
+    main {
+      display: flex;
+      margin: 0 auto;
+      max-width: 600px;
+    }
+
+    main>section {}
+
+    .avatar {
+      flex: none;
+      margin-right: 30px;
+      width: 175px;
+      height: 175px;
+      border-radius: 50%;
+      background: #5fcde4;
+    }
+
+    ul {
+      display: flex;
+      list-style: none;
+      align-items: center;
+      margin: 0;
+      padding: 0;
+    }
+
+    li {
+      margin: 0 6px;
+    }
+
+    li img {
+      width: 32px;
+    }
+
+    h1 {
+      margin: 0.8rem 0 1rem;
+      font-size: 1.4rem;
+      color: rgba(0, 0, 0, 0.85);
+    }
+
+    h2 {
+      margin: 0 0 1rem;
+      font-size: 1.2rem;
+      font-weight: normal;
+      line-height: 150%;
+      color: rgba(0, 0, 0, 0.85);
+    }
+
+    @media (max-width: 640px) {
+      main {
+        flex-direction: column;
+        align-items: center;
+        text-align: center;
+        padding-left: 2rem;
+        padding-right: 2rem;
+      }
+
+      .avatar {
+        margin: 0 0 1.5rem;
+      }
+
+      ul {
+        justify-content: center;
+      }
+    }
+
+  </style>
+</head>
+
+<body>
+  <main>
+    <img class="avatar" src="/public/me.png" alt="My avatar">
+    <section>
+      <h1>Colin Bellino</h1>
+      <h2>I'm an indie game developer. I build cool stuff and i stream
+        sometimes.</h2>
+      <ul>
+        <li style="margin-left: -3px;">
+          <a href="https://twitter.com/colinbellino" target="_blank">
+            <img src="/public/twitter.svg" alt="Twitter" title="Twitter" />
+          </a>
+        </li>
+        <li>
+          <a href="https://colinbellino.itch.io" target="_blank">
+            <img src="/public/itch.svg" alt="itch.io" title="itch.io" />
+          </a>
+        </li>
+        <li style="margin: 0;">
+          <a href="https://www.twitch.tv/colinbellino" target="_blank">
+            <img src="/public/twitch.svg" alt="Twitch" title="Twitch"
+              style="width: 45px;" />
+          </a>
+        </li>
+        <li style="margin-right: 10px;">
+          <!-- TODO: Update this -->
+          <a href="https://studio.youtube.com/channel/UCKUa7KbbQQUe8eITP3-_8mQ"
+            target="_blank">
+            <img src="/public/youtube.svg" alt="YouTube" title="YouTube"
+              style="width: 40px;" />
+          </a>
+        </li>
+        <li>
+          <a href="https://medium.com/@colinbellino" target="_blank">
+            <img src="/public/medium.svg" alt="Medium" title="Medium"
+              style="width: 28px" />
+          </a>
+        </li>
+      </ul>
+    </section>
+  </main>
+</body>
+
+</html>
