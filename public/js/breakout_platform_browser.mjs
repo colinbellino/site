@@ -94,7 +94,6 @@ function platform_draw_trail({ x, y }, size, color) {
   data.renderer.context.fillStyle = color;
   data.renderer.context.moveTo(x, y);
   data.renderer.context.fillRect(x, y, size, size);
-
 }
 
 function platform_destroy_block(blockIndex) {
@@ -356,10 +355,11 @@ export async function platform_start() {
       buffer: null,
     }));
     const loadPromises = data.audio.clips.map((clip) => load_audio(clip.url));
-    const buffers = await Promise.all(loadPromises);
-    for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
-      data.audio.clips[clipIndex].buffer = buffers[clipIndex];
-    platform_log("Audio clips loaded:", data.audio.clips.length);
+    Promise.all(loadPromises).then((buffers) => {
+      for (let clipIndex = 0; clipIndex < buffers.length; clipIndex++)
+        data.audio.clips[clipIndex].buffer = buffers[clipIndex];
+      platform_log("Audio clips loaded:", data.audio.clips.length);
+    });
   } else {
     data.audio.available = false;
     platform_warn("Web Audio API not available, continuing without audio.");

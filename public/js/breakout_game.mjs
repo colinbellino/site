@@ -1,13 +1,4 @@
-import {
-  is_point_inside,
-  normalize,
-  lerp,
-  clamp,
-  magnitude,
-  divide_vector,
-  normalize_vector,
-  random,
-} from "./math.mjs";
+import * as math from "./math.mjs";
 
 export const KEY_MOVE_LEFT = 0;
 export const KEY_MOVE_RIGHT = 1;
@@ -308,7 +299,7 @@ export function game_update(currentTime) {
       }
 
       {
-        data.paddle.position.y = lerp(data.paddle.position.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, data.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
       }
 
@@ -316,7 +307,7 @@ export function game_update(currentTime) {
         if (data.intro.ball.progress === 0) {
           spawn_ball(true);
         }
-        data.balls[0].position.y = lerp(data.paddle.position.y, data.paddle.position.y - data.balls[0].height, data.intro.ball.progress);
+        data.balls[0].position.y = math.lerp(data.paddle.position.y, data.paddle.position.y - data.balls[0].height, data.intro.ball.progress);
         data.intro.ball.progress += data.delta / data.intro.ball.duration;
       }
 
@@ -364,7 +355,7 @@ export function game_update(currentTime) {
           data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
         }
 
-        data.paddle.position.x = clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
+        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, data.window.width - data.paddle.width);
 
         if (data.keys[KEY_PAUSE].released || data.keys[KEY_MOUSE_RIGHT].released) {
           data.platform.show_pause();
@@ -448,7 +439,7 @@ export function game_update(currentTime) {
           }
 
           // Bounce on paddle
-          if (is_point_inside(ball, data.paddle)) {
+          if (math.is_point_inside(ball, data.paddle)) {
             const distLeft = Math.abs((ball.position.x + ball.width / 2) - (data.paddle.position.x));
             const distRight = Math.abs((ball.position.x + ball.width / 2) - (data.paddle.position.x + data.paddle.width));
             const distTop = Math.abs((ball.position.y + ball.height / 2) - (data.paddle.position.y));
@@ -464,7 +455,7 @@ export function game_update(currentTime) {
             data.platform.play_audio_clip(AUDIO_CLIP_BOUNCE_2);
           }
 
-          ball.velocity = normalize_vector(ball.velocity);
+          ball.velocity = math.normalize_vector(ball.velocity);
 
           // Blocks collision
           for (let blockIndex = 0; blockIndex < data.blocks.length; blockIndex++) {
@@ -475,7 +466,7 @@ export function game_update(currentTime) {
             }
 
             // Hit a block
-            if (is_point_inside(ball, block)) {
+            if (math.is_point_inside(ball, block)) {
               const distLeft = Math.abs((ball.position.x + ball.width / 2) - (block.x));
               const distRight = Math.abs((ball.position.x + ball.width / 2) - (block.x + block.width));
               const distTop = Math.abs((ball.position.y + ball.height / 2) - (block.y));
@@ -496,9 +487,9 @@ export function game_update(currentTime) {
               data.platform.show_score(data.score, data.multiplier);
 
               const ratio = Math.min(PARTICLE_AREA_MAX, (block.width + block.height)) / PARTICLE_AREA_MAX;
-              for (let particleIndex = 0; particleIndex < lerp(PARTICLE_PER_HIT_MIN, PARTICLE_PER_HIT_MAX, ratio); particleIndex++) {
-                const velocity = { x: random(-1, 1), y: random(-1, 1) };
-                const size = lerp(PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, ratio);
+              for (let particleIndex = 0; particleIndex < math.lerp(PARTICLE_PER_HIT_MIN, PARTICLE_PER_HIT_MAX, ratio); particleIndex++) {
+                const velocity = { x: math.random(-1, 1), y: math.random(-1, 1) };
+                const size = math.lerp(PARTICLE_SIZE_MIN, PARTICLE_SIZE_MAX, ratio);
                 spawn_particle({ ...ball.position }, velocity, PARTICLE_DURATION, PARTICLE_SPEED, size, { ...BALL_COLOR });
               }
             }
@@ -527,7 +518,7 @@ export function game_update(currentTime) {
         }
 
         const progress = 1 - ((particle.timestamp + particle.duration - data.currentTime) / particle.duration);
-        particle.color.a = lerp(particle.color.a, 0, progress);
+        particle.color.a = math.lerp(particle.color.a, 0, progress);
         particle.position.y += particle.velocity.y * particle.speed;
         particle.position.x += particle.velocity.x * particle.speed;
       }
@@ -564,7 +555,7 @@ export function game_update(currentTime) {
       }
 
       {
-        data.paddle.position.y = lerp(data.paddle.position.y, data.window.height, data.outro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, data.window.height, data.outro.paddle.progress);
         data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
       }
 

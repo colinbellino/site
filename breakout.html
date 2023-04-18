@@ -162,6 +162,8 @@
         const [style, game] = await Promise.all([
           import_style("/public/breakout.css"),
           import("/public/js/breakout_platform_browser.mjs"),
+          import("/public/js/breakout_game.mjs"),
+          import("/public/js/math.mjs"),
         ]);
 
         return game.platform_start().then(([result, score]) => {
