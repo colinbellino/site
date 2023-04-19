@@ -28,7 +28,7 @@
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' 'nonce-style' fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'nonce-script'; img-src 'self' *.cloudfront.net; child-src 'none'; font-src 'self' fonts.gstatic.com;"
+    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' 'nonce-style' fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-script'; img-src 'self' *.cloudfront.net; child-src 'none'; font-src 'self' fonts.gstatic.com;"
 
 [[plugins]]
   package = "netlify-plugin-minify-html"
