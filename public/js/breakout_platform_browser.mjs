@@ -197,6 +197,7 @@ export async function platform_init() {
   data.state.quit = false;
   data.canvas = document.createElement("canvas");
   data.canvas.classList.add("breakout-canvas");
+  data.canvas.setAttribute("id", "breakout");
   document.body.appendChild(data.canvas);
 
   {

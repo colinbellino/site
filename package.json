@@ -6,6 +6,7 @@
   },
   "scripts": {
     "dev": "serve .",
-    "build": "node ./build.js"
+    "dev:odin": "fswatch -or ./src/breakout/* | xargs -n1 -I{} sh -c 'clear && ./build_breakout.sh'",
+    "build": "node ./build.js && ./build_breakout.sh"
   }
 }

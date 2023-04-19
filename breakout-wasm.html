@@ -1,0 +1,226 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <title>Colin Bellino | Breakout</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="Description" content="A small breakout game.">
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png">
+  <style nonce="style">
+    :root {
+      --main-color: rgba(35, 55, 176, 1);
+      --main-color-hover: rgba(76, 95, 208, 1);
+
+      font-family: Arial, Helvetica, sans-serif;
+      color: rgba(0, 0, 0, 0.85);
+    }
+
+    body {
+      padding-top: 100px;
+    }
+
+    main {
+      margin: 0 auto;
+      display: grid;
+      width: 790px;
+      row-gap: 10px;
+      column-gap: 10px;
+      grid-template-columns: repeat(10, 70px);
+      grid-template-rows: repeat(9, 30px);
+    }
+
+    .block {
+      background: darkgray;
+      display: block;
+    }
+    .block.color-0 { background: #fe2d2d; }
+    .block.color-1 { background: #e7812d; }
+    .block.color-2 { background: #cdac2d; }
+    .block.color-3 { background: #accd2c; }
+    .block.color-4 { background: #81e72c; }
+    .block.color-5 { background: #2dfe2c; }
+    .block.color-6 { background: #2ee781; }
+    .block.color-7 { background: #2dcdac; }
+    .block.color-8 { background: #2d81e7; }
+  </style>
+  <style nonce="style_console">
+    pre {
+      position: absolute;
+      top: 0;
+      left: 0;
+      right: 0;
+      line-height: 150%;
+      height: 200px;
+      overflow-y: scroll;
+      color: #ffffff;
+      background: rgba(0, 0, 0, 0.2);
+      z-index: 99;
+      padding: 1rem;
+      margin: 0;
+    }
+  </style>
+</head>
+
+<body>
+  <main>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-0"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-1"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-2"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-3"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-4"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-5"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-6"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-7"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+    <div class="block color-8"></div>
+  </main>
+
+    <script type="text/javascript" src="/public/runtime.js"></script>
+    <script nonce="script">
+    {
+      start_game();
+
+      function import_style(url) {
+        return new Promise((resolve, reject) => {
+          const link = document.createElement("link");
+            link.setAttribute("href", url);
+            link.setAttribute("rel", "stylesheet");
+            link.onload = resolve;
+            document.body.appendChild(link);
+        });
+      }
+
+      async function start_game() {
+        try {
+          const webgl = window.location.search.includes("webgl");
+          console.log(`Loading game files: (WASM, WebGL).`);
+          const [style, platform] = await Promise.all([
+            import_style("/public/breakout.css"),
+            import("/public/js/breakout_platform_browser.mjs"),
+          ]);
+
+          const platform_exports = await platform.platform_init();
+
+          // const consoleElement = document.createElement("pre");
+          // document.body.appendChild(consoleElement);
+          const consoleElement = null;
+
+          const extraImports = {
+            platform: platform_exports,
+          };
+          await odin.runWasm("/public/breakout.wasm", consoleElement, extraImports);
+
+          // const renderer_options = await renderer.renderer_init(platform_options.canvas);
+          // await game.game_init(platform_options, renderer_options);
+          // const [result, score] = await platform.platform_start(game.game_update);
+
+          // if (result === game.STATE_QUIT) {
+          //   renderer.renderer_quit();
+          //   document.querySelectorAll(".block").forEach(block => {
+          //     block.remove();
+          //   });
+          //   return;
+          // }
+
+          // console.log(`Game over: ${(result === 1 ? "WIN" : "LOSE")} (${score})`);
+          // start_game();
+        } catch (error) {
+          console.error(error);
+        }
+      }
+
+      // Prepare some config for breakout
+      function prepare_page_for_breakout() {
+        document.body.setAttribute("data-breakout-min-width", 1000);
+        document.body.setAttribute("data-breakout-min-height", 700);
+        document.querySelectorAll([".block"]).forEach((node) => node.classList.add("breakout-preblock"));
+      }
+    }
+  </script>
+</body>
+
+</html>
