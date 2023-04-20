@@ -1209,7 +1209,7 @@ function odinSetupDefaultImports(wasmMemoryInterface, consoleElement) {
 			}
 
 			if (doIsError) {
-				console.log("%c"+text, style);
+				console.error(text);
 			} else {
 				console.log(text);
 			}
@@ -1656,6 +1656,7 @@ async function runWasm(wasmPath, consoleElement, extraForeignImports) {
 	wasmMemoryInterface.setMemory(exports.memory);
 
 	exports._start();
+  console.log({exports});
 
 	if (exports.step) {
 		const odin_ctx = exports.default_context_ptr();
@@ -1677,7 +1678,7 @@ async function runWasm(wasmPath, consoleElement, extraForeignImports) {
 
 	exports._end();
 
-	return;
+	return wasmMemoryInterface;
 };
 
 window.odin = {

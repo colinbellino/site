@@ -2,21 +2,29 @@ package main
 
 import "core:fmt"
 import "core:math/linalg"
-import "platform"
+import gl "vendor:wasm/WebGL"
+import "vendor:wasm/js"
 
-import webgl "vendor:wasm/WebGL"
-import js "vendor:wasm/js"
+import "platform"
 
 alpha: f32;
 
 main :: proc() {
-    webgl.SetCurrentContextById("breakout");
+    gl.SetCurrentContextById("breakout");
     platform.show_help();
+    // platform.show_pause();
+    platform.error("hello", "world");
 }
 
 @(export)
 step :: proc(dt: f32) {
-    webgl.ClearColor(0, 0, 0, linalg.sin(alpha));
-    webgl.Clear(webgl.COLOR_BUFFER_BIT);
+    gl.ClearColor(0, 0, 0, linalg.sin(alpha));
+    gl.Clear(gl.COLOR_BUFFER_BIT);
     alpha += dt;
+    platform.log("hello");
+}
+
+@(export)
+bla :: proc() {
+
 }

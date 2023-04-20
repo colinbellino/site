@@ -187,11 +187,8 @@
           // const consoleElement = document.createElement("pre");
           // document.body.appendChild(consoleElement);
           const consoleElement = null;
-
-          const extraImports = {
-            platform: platform_exports,
-          };
-          await odin.runWasm("/public/breakout.wasm", consoleElement, extraImports);
+          const extraImports = { platform: platform_exports };
+          const wasmMemoryInterface = await odin.runWasm("/public/breakout.wasm", consoleElement, extraImports);
 
           // const renderer_options = await renderer.renderer_init(platform_options.canvas);
           // await game.game_init(platform_options, renderer_options);
