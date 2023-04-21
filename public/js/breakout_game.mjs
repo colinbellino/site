@@ -94,7 +94,7 @@ const data = {
   state: STATE_RUNNING,
 
   delta: 0,
-  currentTime: 0,
+  current_time: 0,
 
   intro: {
     paddle: {
@@ -168,9 +168,10 @@ export async function game_init(_platform, _renderer) {
   platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
 }
 
-export function game_update(currentTime) {
-  data.delta = currentTime - data.currentTime;
-  data.currentTime = currentTime;
+export function game_update(current_time) {
+  data.delta = current_time - data.current_time;
+  data.current_time = current_time;
+  console.log(1 / data.delta);
 
   if (platform.state.window.resized) {
     if (data.mode === MODE_PLAY) {
@@ -439,12 +440,12 @@ export function game_update(currentTime) {
       for (let particleIndex = data.particles.length - 1; particleIndex >= 0; particleIndex--) {
         const particle = data.particles[particleIndex];
 
-        if (data.currentTime >= particle.timestamp + particle.duration) {
+        if (data.current_time >= particle.timestamp + particle.duration) {
           data.particles.splice(particleIndex, 1);
           continue;
         }
 
-        const progress = 1 - ((particle.timestamp + particle.duration - data.currentTime) / particle.duration);
+        const progress = 1 - ((particle.timestamp + particle.duration - data.current_time) / particle.duration);
         particle.color.a = math.lerp(particle.color.a, 0, progress);
         particle.position.y += particle.velocity.y * particle.speed;
         particle.position.x += particle.velocity.x * particle.speed;
@@ -613,7 +614,7 @@ function spawn_particle(position, velocity, duration, speed, size, color) {
     color,
     speed,
     duration,
-    timestamp: data.currentTime,
+    timestamp: data.current_time,
   };
 
   data.particles.push(particle);

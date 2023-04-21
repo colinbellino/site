@@ -406,17 +406,13 @@ export async function platform_init() {
 
 export function platform_start(game_update) {
   return new Promise((resolve, reject) => {
-    const fps = 120;
-    const then = window.performance.now();
-    const startTime = then;
-    let now = 0;
+    const start_time = window.performance.now();
     let elapsed = 0;
 
     update(window.performance.now());
 
-    function update(newTime) {
-      now = newTime;
-      elapsed = now - then;
+    function update(new_time) {
+      elapsed = new_time - start_time;
 
       const [result, score] = game_update(elapsed / 1000);
       if (result > 0) {

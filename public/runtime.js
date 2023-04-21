@@ -1197,6 +1197,9 @@ function odinSetupDefaultImports(wasmMemoryInterface, consoleElement) {
 		}
 
 		const println = (text, forceIsError) => {
+      if (text === "") {
+        return;
+      }
 			let style = [
 				"color: #eee",
 				"background-color: #d20",

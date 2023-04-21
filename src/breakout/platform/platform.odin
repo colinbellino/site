@@ -22,5 +22,5 @@ foreign platform {
     stop_audio_clip :: proc(key: string, group: i32 = 0, fade_duration: f32 = 0.0) ---
 }
 
-log   :: fmt.print;
-error :: fmt.eprint;
+log   :: fmt.println;
+error :: fmt.eprintln;
