@@ -1,5 +1,5 @@
 //+build js
-package breakout_js
+package breakout_platform
 
 import "core:fmt"
 

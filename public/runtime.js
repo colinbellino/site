@@ -1659,7 +1659,6 @@ async function runWasm(wasmPath, consoleElement, extraForeignImports) {
 	wasmMemoryInterface.setMemory(exports.memory);
 
 	exports._start();
-  console.log({exports});
 
 	if (exports.step) {
 		const odin_ctx = exports.default_context_ptr();

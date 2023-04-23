@@ -10,7 +10,7 @@ const data = {
   attribute_a_position: null,
   tex: null,
 };
-let gl;
+export let gl;
 
 const sprite_vertex_shader = `
   attribute vec4 position;
@@ -54,7 +54,7 @@ function load_texture(src) {
 }
 
 export async function renderer_init(canvas) {
-  data.context = canvas.getContext("webgl");
+  data.context = canvas.getContext("webgl2");
   gl = data.context;
 
   // data.tex = await load_texture("/public/me.png");
@@ -66,8 +66,8 @@ export async function renderer_init(canvas) {
 
   {
     // Compile shaders
-    const vertexShader = make_shader(sprite_vertex_shader, gl.VERTEX_SHADER);
-    const fragmentShader = make_shader(sprite_fragment_shader, gl.FRAGMENT_SHADER);
+    const vertex_shader = make_shader(sprite_vertex_shader, gl.VERTEX_SHADER);
+    const fragment_shader = make_shader(sprite_fragment_shader, gl.FRAGMENT_SHADER);
 
     // Create program
     data.program = gl.createProgram();
@@ -75,8 +75,8 @@ export async function renderer_init(canvas) {
     data.buffer_info = twgl.primitives.createXYQuadBufferInfo(gl);
 
     // Attach and link shaders to the program
-    gl.attachShader(data.program, vertexShader);
-    gl.attachShader(data.program, fragmentShader);
+    gl.attachShader(data.program, vertex_shader);
+    gl.attachShader(data.program, fragment_shader);
     gl.linkProgram(data.program);
     if (gl.getProgramParameter(data.program, gl.LINK_STATUS) === false) {
         console.error("Unable to initialize the shader program");
@@ -149,7 +149,6 @@ export function renderer_draw_rect(rect, color) {
 export function renderer_draw_trail({ x, y }, size, color) {
   renderer_draw_rect({ x, y, width: size, height: size }, color);
 }
-
 
 function make_shader(src, type) {
   const shader = gl.createShader(type);

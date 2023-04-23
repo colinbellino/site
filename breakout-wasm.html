@@ -158,7 +158,6 @@
     <div class="block color-8"></div>
   </main>
 
-    <script type="text/javascript" src="/public/runtime.js"></script>
     <script nonce="script">
     {
       start_game();
@@ -176,22 +175,37 @@
       async function start_game() {
         try {
           const webgl = window.location.search.includes("webgl");
-          console.log(`Loading game files: (WASM, WebGL).`);
-          const [style, platform] = await Promise.all([
+          const [style, runtime, platform, renderer] = await Promise.all([
             import_style("/public/breakout.css"),
+            import("/public/runtime.js"),
             import("/public/js/breakout_platform_browser.mjs"),
+            import("/public/js/breakout_renderer_webgl.mjs"),
           ]);
 
           const platform_exports = await platform.platform_init();
+          await renderer.renderer_init(platform_exports.canvas);
+          const renderer_exports = {
+            renderer_clear: function(...args) {
+              const color = { r: args[0], g: args[1], b: args[2], a: args[3] };
+              return renderer.renderer_clear(color);
+            },
+            renderer_draw_rect: function(...args) {
+              const rect = { x: args[0], y: args[1], width: args[2], height: args[3] };
+              const color = { r: args[4], g: args[5], b: args[6], a: args[7] };
+              return renderer.renderer_draw_rect(rect, color);
+            },
+            renderer_draw_trail: function(...args) {
+              const position = { x: args[0], y: args[1] };
+              const size = args[2]
+              const color = { r: args[3], g: args[4], b: args[5], a: args[6] };
+              return renderer.renderer_draw_trail(position, size, color);
+            }
+          }
+          const extraImports = { platform: platform_exports, renderer: renderer_exports };
+          const wasmMemoryInterface = await odin.runWasm("/public/breakout.wasm", null, extraImports);
 
-          // const consoleElement = document.createElement("pre");
-          // document.body.appendChild(consoleElement);
-          const consoleElement = null;
-          const extraImports = { platform: platform_exports };
-          const wasmMemoryInterface = await odin.runWasm("/public/breakout.wasm", consoleElement, extraImports);
-
-          // const renderer_options = await renderer.renderer_init(platform_options.canvas);
-          // await game.game_init(platform_options, renderer_options);
+          // const renderer_exports = await renderer.renderer_init(platform_options.canvas);
+          // await game.game_init(platform_options, renderer_exports);
           // const [result, score] = await platform.platform_start(game.game_update);
 
           // if (result === game.STATE_QUIT) {

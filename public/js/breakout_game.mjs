@@ -171,7 +171,6 @@ export async function game_init(_platform, _renderer) {
 export function game_update(current_time) {
   data.delta = current_time - data.current_time;
   data.current_time = current_time;
-  console.log(1 / data.delta);
 
   if (platform.state.window.resized) {
     if (data.mode === MODE_PLAY) {

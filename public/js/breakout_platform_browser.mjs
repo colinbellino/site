@@ -339,7 +339,7 @@ export async function platform_init() {
       block.classList.add("breakout-block");
     }
 
-    platform_log("Blocks found on the page:", data.blocks.length);
+    platform_log("[PLATFORM] Blocks found on the page:", data.blocks.length);
   }
 
   const AudioContext = window.AudioContext || window.webkitAudioContext;
@@ -437,7 +437,7 @@ export function platform_start(game_update) {
 }
 
 export function platform_stop() {
-  platform_log("Stopping the game");
+  platform_log("[PLATFORM] Stopping the game");
   data.state.quit = true;
 }
 
@@ -510,7 +510,7 @@ function keyup(e) {
 }
 
 function resize() {
-  platform_log("Window resized:", window.innerWidth, window.innerHeight);
+  platform_log("[PLATFORM] Window resized:", window.innerWidth, window.innerHeight);
   data.canvas.width = window.innerWidth;
   data.canvas.height = window.innerHeight;
   data.state.window.width = data.canvas.width;
@@ -580,7 +580,7 @@ function set_volume_music(value) {
   if (data.debug.noMusic || data.audio.available === false)
     return;
 
-  platform_log("Music volume:", value);
+  platform_log("[PLATFORM] Music volume:", value);
   if (data.paused)
     value *= VOLUME_MUSIC_PAUSED_MULTIPLIER;
   else
@@ -593,7 +593,7 @@ function set_volume_sfx(value) {
   if (data.debug.noSfx || data.audio.available === false)
     return;
 
-  platform_log("SFX volume:", value);
+  platform_log("[PLATFORM] SFX volume:", value);
   value *= VOLUME_SFX_MULTIPLIER;
 
   data.audio.gainSfx.gain.value = value;
