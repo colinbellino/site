@@ -1638,8 +1638,8 @@ function odinSetupDefaultImports(wasmMemoryInterface, consoleElement) {
 	};
 };
 
-async function runWasm(wasmPath, consoleElement, extraForeignImports) {
-	let wasmMemoryInterface = new WasmMemoryInterface();
+async function runWasm(wasmPath, wasmMemoryInterface, consoleElement, extraForeignImports) {
+	// let wasmMemoryInterface = new WasmMemoryInterface();
 
 	let imports = odinSetupDefaultImports(wasmMemoryInterface, consoleElement);
 	let exports = {};
@@ -1680,7 +1680,7 @@ async function runWasm(wasmPath, consoleElement, extraForeignImports) {
 
 	exports._end();
 
-	return wasmMemoryInterface;
+	// return wasmMemoryInterface;
 };
 
 window.odin = {

@@ -37,7 +37,7 @@ const data = {
   },
   settings: {
     volumeSfx: 1,
-    volumeMusic: 0,
+    volumeMusic: 1,
   },
   debug: {
     noMusic: false,
@@ -59,12 +59,12 @@ const data = {
     */
     mouse_keys: {},
     keys: {},
-    window: {
-      width: 800,
-      height: 600,
-      resized: false,
+    window_size: {
+      w: 800,
+      h: 600,
     },
-  }
+    window_resized: false,
+  },
 };
 
 function platform_log(...args) {
@@ -148,7 +148,7 @@ function platform_hide_lives() {
   data.ui.lives.classList.add("hidden");
 }
 
-async function platform_load_audio_clip(key) {
+export async function platform_load_audio_clip(key) {
   const clip = {
     key,
     url: `/public/audio/${key}.mp3`,
@@ -158,7 +158,7 @@ async function platform_load_audio_clip(key) {
   data.audio.clips[key] = clip;
 }
 
-function platform_play_audio_clip(key, group = 0, loop = false) {
+export function platform_play_audio_clip(key, group = 0, loop = false) {
   if (data.audio.available === false)
     return;
 
@@ -423,7 +423,7 @@ export function platform_start(game_update) {
       }
 
       data.animationFrameId = window.requestAnimationFrame(update);
-      data.state.window.resized = false;
+      data.state.window_resized = false;
       // Reset input state at the end of the frame
       data.state.mouse.changed = 0;
       for (const [key, value] of Object.entries(data.state.keys)) {
@@ -492,6 +492,9 @@ function mousedown(e) {
 function mouseup(e) {
   data.state.mouse_keys[e.which].down = false;
   data.state.mouse_keys[e.which].released = true;
+  if (data.audio.available && data.audio.context.state === "suspended") {
+    data.audio.context.resume();
+  }
 }
 
 function mousemove(e) {
@@ -507,15 +510,18 @@ function keydown(e) {
 function keyup(e) {
   data.state.keys[e.keyCode].down = false;
   data.state.keys[e.keyCode].released = true;
+  if (data.audio.available && data.audio.context.state === "suspended") {
+    data.audio.context.resume();
+  }
 }
 
 function resize() {
   platform_log("[PLATFORM] Window resized:", window.innerWidth, window.innerHeight);
   data.canvas.width = window.innerWidth;
   data.canvas.height = window.innerHeight;
-  data.state.window.width = data.canvas.width;
-  data.state.window.height = data.canvas.height;
-  data.state.window.resized = true;
+  data.state.window_size.x = data.canvas.width;
+  data.state.window_size.y = data.canvas.height;
+  data.state.window_resized = true;
 }
 
 function split_in_blocks(nodes) {

@@ -163,7 +163,7 @@ export async function game_init(_platform, _renderer) {
 
   await Promise.all(AUDIO_CLIPS.map((audio_clip) => {
     return platform.load_audio_clip(audio_clip);
-  }))
+  }));
 
   platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
 }
@@ -172,7 +172,7 @@ export function game_update(current_time) {
   data.delta = current_time - data.current_time;
   data.current_time = current_time;
 
-  if (platform.state.window.resized) {
+  if (platform.state.window_resized) {
     if (data.mode === MODE_PLAY) {
       const blocks = platform.get_blocks();
       for (let blockIndex = 0; blockIndex < blocks.length; blockIndex++) {
@@ -180,7 +180,7 @@ export function game_update(current_time) {
         set_block_rect(data.blocks[blockIndex], rect);
       }
 
-      data.paddle.position.y = platform.state.window.height - data.paddle.height - PADDLE_Y;
+      data.paddle.position.y = platform.state.window_size.y - data.paddle.height - PADDLE_Y;
     }
   }
 
@@ -206,8 +206,8 @@ export function game_update(current_time) {
   // Update
   switch (data.mode) {
     case MODE_INIT: {
-      data.paddle.position.x = platform.state.window.width / 2 - data.paddle.width / 2;
-      data.paddle.position.y = platform.state.window.height;
+      data.paddle.position.x = platform.state.window_size.x / 2 - data.paddle.width / 2;
+      data.paddle.position.y = platform.state.window_size.y;
       data.balls = [];
       data.blocks = [];
       data.particles = [];
@@ -226,7 +226,7 @@ export function game_update(current_time) {
 
     case MODE_INTRO: {
       {
-        data.paddle.position.y = math.lerp(data.paddle.position.y, platform.state.window.height - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, platform.state.window_size.y - data.paddle.height - PADDLE_Y, data.intro.paddle.progress);
         data.intro.paddle.progress += data.delta / data.intro.paddle.duration;
       }
 
@@ -282,7 +282,7 @@ export function game_update(current_time) {
           data.paddle.position.x = data.paddle.position.x + data.paddle.velocity.x * PADDLE_SPEED;
         }
 
-        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, platform.state.window.width - data.paddle.width);
+        data.paddle.position.x = math.clamp(data.paddle.position.x, 0, platform.state.window_size.x - data.paddle.width);
 
         if (platform.state.keys[platform.keyCodes.ESCAPE].released || platform.state.mouse_keys[platform.mouseCodes.RIGHT].released) {
           platform.show_pause();
@@ -349,9 +349,9 @@ export function game_update(current_time) {
           }
 
           // Bounce on side wall
-          if (ball.position.x + ball.width > platform.state.window.width) {
+          if (ball.position.x + ball.width > platform.state.window_size.x) {
             ball.velocity.x = -ball.velocity.x;
-            ball.position.x = platform.state.window.width - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
+            ball.position.x = platform.state.window_size.x - ball.width; // Reset the X position just in case we resized the window and the ball is stuck outside
             play_random_audio_clip([AUDIO_CLIP_BOUNCE_1, AUDIO_CLIP_BOUNCE_2]);
           } else if (ball.position.x < 0) {
             ball.velocity.x = -ball.velocity.x;
@@ -360,7 +360,7 @@ export function game_update(current_time) {
           }
 
           // Hit bottom limit
-          if (ball.position.y > platform.state.window.height) {
+          if (ball.position.y > platform.state.window_size.y) {
             ball.destroyed = true;
             platform.play_audio_clip(AUDIO_CLIP_LOSE_1);
           }
@@ -482,7 +482,7 @@ export function game_update(current_time) {
       }
 
       {
-        data.paddle.position.y = math.lerp(data.paddle.position.y, platform.state.window.height, data.outro.paddle.progress);
+        data.paddle.position.y = math.lerp(data.paddle.position.y, platform.state.window_size.y, data.outro.paddle.progress);
         data.outro.paddle.progress += data.delta / data.outro.paddle.duration;
       }
 

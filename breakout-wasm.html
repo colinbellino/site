@@ -182,7 +182,26 @@
             import("/public/js/breakout_renderer_webgl.mjs"),
           ]);
 
+          const wasmMemoryInterface = new window.odin.WasmMemoryInterface();
+
           const platform_exports = await platform.platform_init();
+          platform_exports.load_audio_clip = function(...args) {
+            const key = this.loadString(args[0], args[1]);
+            return platform.platform_load_audio_clip(key).then(() => {
+              this.exports.audio_clip_loaded(args[0], args[1]);
+            });
+          }.bind(wasmMemoryInterface);
+          platform_exports.play_audio_clip = function(...args) {
+            const key = this.loadString(args[0], args[1]);
+            const group = args[2];
+            const loop = new Boolean(args[3]);
+            platform.platform_play_audio_clip(key, group, loop);
+          }.bind(wasmMemoryInterface);
+
+          platform_exports.get_state = function() {
+            // console.log('get_state');
+          }.bind(wasmMemoryInterface);
+
           await renderer.renderer_init(platform_exports.canvas);
           const renderer_exports = {
             renderer_clear: function(...args) {
@@ -199,10 +218,11 @@
               const size = args[2]
               const color = { r: args[3], g: args[4], b: args[5], a: args[6] };
               return renderer.renderer_draw_trail(position, size, color);
-            }
+            },
           }
           const extraImports = { platform: platform_exports, renderer: renderer_exports };
-          const wasmMemoryInterface = await odin.runWasm("/public/breakout.wasm", null, extraImports);
+          await odin.runWasm("/public/breakout.wasm", wasmMemoryInterface, null, extraImports);
+
 
           // const renderer_exports = await renderer.renderer_init(platform_options.canvas);
           // await game.game_init(platform_options, renderer_exports);

@@ -4,12 +4,13 @@ package breakout_renderer_webgl
 import "core:fmt"
 import gl "vendor:wasm/WebGL"
 
-import "../platform"
+import platform "../platform_browser"
+
 foreign import "renderer"
 
-Color :: distinct [4]f32;
-Vector2 :: distinct [2]f32;
-Rect :: distinct [4]f32;
+Color :: platform.Color;
+Vector2 :: platform.Vector2;
+Rect :: platform.Rect;
 
 // SHADER_TYPE_FRAGMENT :: 35632;
 // SHADER_TYPE_VERTEX   :: 35633;
