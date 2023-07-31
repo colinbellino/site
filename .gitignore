@@ -17,3 +17,4 @@ ols.json
 *.min.mjs
 *.min.html
 *.wasm
+*.wasm.o

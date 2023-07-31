@@ -6,8 +6,8 @@
   },
   "scripts": {
     "dev": "serve .",
-    "dev:odin": "./build_breakout.sh && fswatch -or ./src/breakout/* | xargs -n1 -I{} sh -c 'clear && ./build_breakout.sh'",
+    "dev:odin": "./build_life.sh && fswatch -or ./src/life/* | xargs -n1 -I{} sh -c 'clear && ./build_life.sh'",
     "build": "node ./build.js",
-    "build:odin": "./build_breakout.sh && ./install_odin_ubuntu.sh"
+    "build:odin": "./build_life.sh && ./install_odin_ubuntu.sh"
   }
 }

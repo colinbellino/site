@@ -1,0 +1,11 @@
+{
+	"folders": [
+		{
+			"path": "."
+		},
+		{
+			"path": "../../_thirdParty/odin-macos-amd64-dev-2023-03/core"
+		}
+	],
+	"settings": {}
+}
