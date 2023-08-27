@@ -1,0 +1,374 @@
+:root {
+  --main-color: rgba(35, 55, 176, 1);
+  --main-color-hover: rgba(76, 95, 208, 1);
+
+  font-family: Arial, Helvetica, sans-serif;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+html,
+body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+}
+
+body {
+  box-sizing: border-box;
+  padding: 2rem;
+}
+
+.avatar {
+  float: left;
+  margin-right: 15px;
+  width: 32px;
+  height: 32px;
+  border-radius: 50%;
+  background: #5fcde4;
+}
+.avatar img {
+  display: block;
+  margin: 0 auto 1.5rem auto;
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  background: #5fcde4;
+  transition: transform ease-in-out 0.2s;
+}
+.pixel-art {
+  image-rendering: pixelated;
+}
+
+body:not(.game-running) .avatar.clickable:hover .dialog {
+  opacity: 1;
+}
+body:not(.game-running) .avatar.clickable {
+  cursor: pointer;
+}
+body:not(.game-running) .avatar.flipped img {
+  transform: scaleX(-1);
+}
+
+.dialog {
+  position: absolute;
+  display: block;
+  top: -80px;
+  width: 340px;
+  margin: 0 0 20px 0;
+  padding: 15px 20px;
+  border: 2px solid rgba(0, 0, 0, 0.85);
+  border-radius: 3px;
+  font-weight: 600;
+  color: rgba(0, 0, 0, 0.85);
+  opacity: 0;
+  transform: translateY(10px);
+  transition: opacity linear 0.2s, transform ease-in-out 0.2s;
+}
+.dialog::before {
+  position: absolute;
+  content: "";
+  bottom: -14px;
+  left: 70px;
+  width: 0;
+  height: 0;
+  border-left: 14px solid transparent;
+  border-right: 14px solid transparent;
+  border-top: 14px solid rgba(0, 0, 0, 0.85);
+}
+.dialog::after {
+  position: absolute;
+  content: "";
+  bottom: -11px;
+  left: 73px;
+  width: 0;
+  height: 0;
+  border-left: 11px solid transparent;
+  border-right: 11px solid transparent;
+  border-top: 11px solid #ffffff;
+  z-index: 2;
+}
+
+.avatar:hover .dialog {
+  transform: translateY(0);
+}
+
+.pixel-art {
+  image-rendering: pixelated;
+}
+
+main {
+  margin: 0 auto;
+  padding: 0 0 0.5vh 0;
+  max-width: 700px;
+}
+
+main > header {
+  padding: 0.8rem 0 1rem;
+}
+
+h1 {
+  display: inline-block;
+  margin: 0;
+  font-size: 1.4rem;
+  line-height: 1.5em;
+  color: rgba(0, 0, 0, 0.85);
+}
+
+h2 {
+  margin: 0 0 1rem;
+  font-size: 1.1rem;
+  font-weight: bold;
+  line-height: 150%;
+  color: rgba(0, 0, 0, 0.65);
+}
+
+h3 {
+  display: inline-block;
+  margin: 0;
+  font-size: 1rem;
+}
+
+a {
+  color: var(--main-color);
+  text-decoration: none;
+}
+
+p {
+  display: inline-block;
+  margin-top: 0;
+  line-height: 150%;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+ul.links {
+  display: flex;
+  flex-wrap: wrap;
+  padding: 0;
+  margin: 0 0 1em 0;
+}
+ul.links li {
+  display: block;
+  width: 47%;
+  padding: 0 0.5em 0.5em 0;
+  margin: 0;
+}
+
+.link {
+  display: flex;
+  flex-grow: 1;
+  box-sizing: border-box;
+  padding: 0.6em 1.5em;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 3px;
+  font-size: 0.9em;
+  font-weight: 600;
+  border-radius: 3px;
+  background: rgba(0, 0, 0, 0.03);
+  transition: all linear 0.2s;
+}
+.link > img,
+.link > svg {
+  display: inline-block;
+  width: 26px;
+  margin-right: 12px;
+}
+.link:hover {
+  background: rgba(0, 0, 0, 0.09);
+  text-decoration: none;
+}
+
+@media (max-width: 640px) {
+  body {
+    padding: 3vh;
+  }
+}
+
+#search-input {
+  font-size: 1.5em;
+  width: 100%;
+}
+.search_time {
+  margin-top: 4px;
+}
+.search_text {
+  display: inline;
+}
+.search_link {
+  display: inline;
+}
+#sorting {
+  margin-top: 8px;
+  line-height: 1.7em;
+}
+.sort-button {
+  font-size: 1.0em;
+}
+.wrapper {
+  display: block;
+  margin: 0 auto;
+  word-wrap: break-word;
+}
+.flex-wrap {
+  display: flex;
+  flex-direction: column;
+}
+.tweet {
+  padding: 16px;
+  font-size: 1.2em;
+  flex-grow: 1;
+  box-sizing: border-box;
+  padding: .6em 1.5em;
+  align-items: center;
+  min-height: 44px;
+  border-radius: 3px;
+  font-size: .9em;
+  font-weight: 600;
+  border-radius: 3px;
+  background: rgba(0,0,0,.03);
+  transition: all linear .2s;
+}
+.tweet img {
+  max-height: 100%;
+  vertical-align: bottom;
+  width: 100%;
+  object-fit: cover;
+}
+.tweet video {
+  max-height: 100%;
+  vertical-align: bottom;
+  width: 100%;
+}
+.tweet ul {
+  display: flex;
+  flex-wrap: wrap;
+  list-style-type: none;
+  gap: 8px;
+  padding-left: 0px;
+  margin-bottom: 0px;
+}
+.tweet li {
+  height: 20vh;
+  width: 20vh;
+  flex-grow: 1;
+}
+.tweet .display_name {
+  margin-bottom: 0;
+  margin-top: 0;
+}
+.tweet .user_name {
+  margin-top: 4px;
+}
+.tweet .favorite_count {
+  display: inline-block;
+  margin-bottom: 0;
+}
+.tweet .retweet_count {
+  display: inline-block;
+  margin-left: 16px;
+  margin-bottom: 0;
+}
+.tweet .created_at {
+  margin-bottom: 0;
+}
+.tweet .permalink {
+  margin-left: 16px;
+}
+.child {
+  margin-top: 16px;
+  margin-left: 64px;
+  max-width: calc(600px - 64px);
+  background-color: white;
+}
+.parent {
+  margin-bottom: 16px;
+  margin-right: 64px;
+  max-width: calc(600px - 64px);
+  background-color: white;
+}
+@media screen and (max-width: 599px) {
+  .tweet li {
+    height: 15vh;
+    width: 15vh;
+    flex-grow: 1;
+  }
+}
+@media(prefers-color-scheme: dark) {
+  body {
+    background-color: black;
+    color: white;
+  }
+  a {
+    color: #33ff00;
+    text-decoration: none;
+  }
+  a:hover {
+    color: #33ff00;
+    text-decoration: underline;
+  }
+  .tweet {
+    background-color: black;
+    border: 1px solid gray;
+    border-radius: 5px;
+  }
+  .child {
+    background-color: black;
+  }
+  .parent {
+    background-color: black;
+  }
+  button {
+    background-color: black;
+    color: white;
+  }
+  input {
+    background-color: black;
+    color: white;
+  }
+  .tweet .favorite_count {
+    color: #33ff00;
+  }
+  .tweet .retweet_count {
+    color: #33ff00;
+  }
+  .tweet .created_at {
+    color: #33ff00;
+  }
+}
+#tabs {
+  margin: -16px 0 0;
+}
+.tab:first-child {
+  margin-left: -16px;
+  border-top-left-radius: 16px;
+}
+.hr {
+  margin: 0 -16px 16px -16px;
+}
+.tab {
+  border: none;
+  font-size: 1.2em;
+  cursor: pointer;
+  padding: 4px 10px;
+  box-sizing: border-box;
+}
+.tab.active {
+  text-decoration: underline;
+}
+#browse-sort > button {
+  font-size: 1.0em;
+}
+#page-num {
+  font-size: 1.0em;
+  width: 80px;
+}
+#browse-sort {
+  line-height: 1.7em;
+}
+#paging {
+  margin: 8px 0;
+}
