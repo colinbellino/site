@@ -73,7 +73,8 @@ body.game-running::after {
   width: 500px;
   margin: 0 auto;
   border-radius: 3px;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(10, 10, 10, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   color: rgba(255, 255, 255, 0.9);
 }
 .breakout-help.hidden {
@@ -118,7 +119,8 @@ body.game-running::after {
   padding: 30px 50px;
   margin: 0;
   width: 200px;
-  background: rgba(0, 0, 0, 0.9);
+  background: rgba(10, 10, 10, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
   transition: transform ease-out 200ms;
 }
 .breakout-pause > section > *:not(:last-child) {

@@ -14,8 +14,23 @@
     :root {
       --main-color: rgba(35, 55, 176, 1);
       --main-color-hover: rgba(76, 95, 208, 1);
+      --background-color: rgba(255, 255, 255, 1);
+      --text-color: rgba(0, 0, 0, 0.85);
+      --link-background-color: rgba(0, 0, 0, 0.03);
+      --link-background-color-hover: rgba(0, 0, 0, 0.09);
+      --project-background-color: rgba(0, 0, 0, 0.03);
+    }
 
-      font-family: Arial, Helvetica, sans-serif;
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --main-color: rgba(76, 95, 208, 1);
+        --main-color-hover: rgba(35, 55, 176, 1);
+        --background-color: rgba(10, 10, 10, 1);
+        --text-color: rgba(255, 255, 255, 0.9);
+        --link-background-color: rgba(255, 255, 255, 0.7);
+        --link-background-color-hover: rgba(255, 255, 255, 0.6);
+        --project-background-color: rgba(255, 255, 255, 0.04);
+      }
     }
 
     html,
@@ -28,6 +43,9 @@
 
     body {
       box-sizing: border-box;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
     }
 
     main {
@@ -54,7 +72,7 @@
       margin: 0;
       font-size: 1.4rem;
       line-height: 1.5em;
-      color: rgba(0, 0, 0, 0.85);
+      color: var(--text-color);
     }
 
     h2 {
@@ -62,7 +80,7 @@
       font-size: 1.1rem;
       font-weight: bold;
       line-height: 150%;
-      color: rgba(0, 0, 0, 0.65);
+      color: var(--text-color);
     }
 
     h3 {
@@ -94,7 +112,7 @@
       padding: 20px;
       margin-bottom: 20px;
       border-radius: 3px;
-      background: rgba(0, 0, 0, 0.03);
+      background: var(--project-background-color);
     }
 
     ul.screenshots {

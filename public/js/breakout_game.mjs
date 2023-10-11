@@ -35,7 +35,8 @@ const PADDLE_SPEED = 20;
 const PADDLE_WIDTH = 200;
 const PADDLE_HEIGHT = 20;
 const PADDLE_Y = 10;
-const PADDLE_COLOR = { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
+const PADDLE_COLOR_LIGHT = { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
+const PADDLE_COLOR_DARK = { r: 1.0, g: 1.0, b: 1.0, a: 1.0 };
 
 const CLEAR_COLOR = { r: 0.0, g: 0.0, b: 0.0, a: 0.0 };
 
@@ -537,7 +538,8 @@ export function game_update(current_time) {
 
     {
       const rect = { x: data.paddle.position.x, y: data.paddle.position.y, width: data.paddle.width, height: data.paddle.height };
-      renderer.draw_rect(rect, PADDLE_COLOR);
+      const color = prefer_dark_scheme() ? PADDLE_COLOR_DARK : PADDLE_COLOR_LIGHT;
+      renderer.draw_rect(rect, color);
     }
 
     if (data.debug.showBlocks) {
@@ -617,4 +619,8 @@ function spawn_particle(position, velocity, duration, speed, size, color) {
   };
 
   data.particles.push(particle);
+}
+
+function prefer_dark_scheme() {
+  return window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
 }
