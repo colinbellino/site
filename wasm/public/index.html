@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WASM</title>
+    <style>
+        html,
+        body {
+            position: relative;
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        canvas {
+            display: block;
+            background: rgb(20, 20, 20);
+        }
+
+        #log {
+            position: absolute;
+            /* top: 0; */
+            bottom: 0;
+            left: 0;
+            right: 0;
+            padding: 1em;
+            margin: 0;
+            height: 200px;
+            overflow-y: scroll;
+            background: #eee;
+        }
+    </style>
+</head>
+
+<body>
+    <canvas></canvas>
+    <pre id="log"></pre>
+
+    <script src="runtime.js"></script>
+</body>
+
+</html>
