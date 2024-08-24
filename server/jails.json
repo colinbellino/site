@@ -3,7 +3,7 @@
         "modules"
     ],
     "roots": [
-        "src/server.jai"
+        "server.jai"
     ],
     "build_root": "first.jai"
 }
