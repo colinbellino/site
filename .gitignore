@@ -17,3 +17,5 @@ ols.json
 *.min.mjs
 *.min.html
 *.wasm
+
+*.code-workspace
