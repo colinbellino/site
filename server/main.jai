@@ -6,40 +6,32 @@ VERBOSE :: true;
 #if DEBUG {
     #import,file "engine/app_loader.jai";
 
+    ctx: Context;
+    server: App;
+
     main :: () {
-        ctx := context;
-        memory: *void;
-        server := app_library_load(ctx.allocator, VERBOSE);
+        ctx = context;
+        server = app_library_load(ctx.allocator, VERBOSE);
         assert(server.is_valid);
+        server.start(update_callback);
+    }
 
-        quit: bool;
-        while !quit {
+    update_callback :: () {
+        if app_library_changed(*server) {
             if server.is_valid {
-                quit = server.update();
+                app_library_unload(*server, VERBOSE);
             }
-
-            #if DEBUG {
-                if app_library_changed(*server) {
-                    if server.is_valid {
-                        memory = server.unload();
-                        app_library_unload(*server, VERBOSE);
-                    }
-                    new_server := app_library_load(ctx.allocator, VERBOSE);
-                    if new_server.is_valid {
-                        server = new_server;
-                        server.reload(memory);
-                    }
-                }
+            new_server := app_library_load(ctx.allocator, VERBOSE);
+            if new_server.is_valid {
+                server = new_server;
+                server.start(update_callback);
             }
         }
     }
 } else {
-    #load "server.jai";
+    Server :: #load "server.jai";
 
     main :: () {
-        quit := false;
-        while quit == false {
-            quit = update();
-        }
+        Server.start();
     }
 }

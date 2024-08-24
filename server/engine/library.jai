@@ -57,7 +57,7 @@ symbol_address :: (library: *void, symbol_name: string, verbose := false) -> (pt
         #import "POSIX";
         ptr := dlsym(library, to_c_string(symbol_name,, allocator = temp));
         if ptr == null && verbose {
-            log_error("Couldn't load library symbol: get_memory.\n%.", to_string(dlerror()));
+            log_error("Couldn't load library symbol: %.\n%.", symbol_name, to_string(dlerror()));
         }
         return ptr, ptr != null;
     }

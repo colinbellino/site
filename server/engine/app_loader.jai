@@ -14,9 +14,7 @@ library :: #import,file "library.jai";
 
 App :: struct {
     handle:             *void;
-    update:             () -> (quit: bool);
-    unload:             () -> *void;
-    reload:             (memory: *void);
+    start:              (tick_callback: () -> ());
     last_modification:  Apollo_Time;
     is_valid:           bool;
 }
@@ -35,10 +33,8 @@ app_library_load :: (allocator: Allocator, verbose := false) -> (app: App) {
 
     app: App;
     app.handle = library.load(temp_path_full, verbose);
-    app.update = library.symbol_address(app.handle, "update", verbose);
-    app.unload = library.symbol_address(app.handle, "unload", verbose);
-    app.reload = library.symbol_address(app.handle, "reload", verbose);
-    app.is_valid = app.handle != null && app.update != null && app.unload != null && app.reload != null;
+    app.start = library.symbol_address(app.handle, "start", verbose);
+    app.is_valid = app.handle != null && app.start != null;
     if app.is_valid {
         _counter += 1;
         app.last_modification = file_modtime_and_size(source_path_full);
@@ -49,9 +45,7 @@ app_library_load :: (allocator: Allocator, verbose := false) -> (app: App) {
 app_library_unload :: (app: *App, verbose := false) -> (ok: bool) {
     result := library.unload(app.handle, verbose);
     app.handle = null;
-    app.update = null;
-    app.unload = null;
-    app.reload = null;
+    app.start = null;
     app.is_valid = false;
     return result;
 }
