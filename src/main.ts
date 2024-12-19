@@ -52,7 +52,7 @@ const test_fs = `
 
     void main() {
         outColor = u_color;
-        outColor = vec4(1, 0, 0, 1);
+        // outColor = vec4(1, 0, 0, 1);
     }
 `;
 
@@ -235,15 +235,20 @@ function render() {
     state.gl.clear(state.gl.COLOR_BUFFER_BIT | state.gl.DEPTH_BUFFER_BIT);
 
     if (test_pass) {
-        state.gl.useProgram(state.test_pass.program);
-        state.gl.bindVertexArray(state.test_pass.vao);
-        state.gl.uniform2f(state.test_pass.location_resolution, state.gl.canvas.width, state.gl.canvas.height);
-        state.gl.bindBuffer(state.gl.ARRAY_BUFFER, state.test_pass.positions);
-        {
-            var x1 = 100 + 0;
-            var x2 = 100 + 100;
-            var y1 = 100 + 0;
-            var y2 = 100 + 100;
+        const rects = [
+            new Float32Array([100, 100, 200, 100, 1, 0, 1, 1]),
+            new Float32Array([0,   0,   200, 100, 1, 1, 0, 1]),
+        ];
+        function draw_rect(x: number, y: number, w: number, h: number, r: number, g: number, b: number, a: number) {
+            state.gl.useProgram(state.test_pass.program);
+            state.gl.bindVertexArray(state.test_pass.vao);
+            state.gl.uniform2f(state.test_pass.location_resolution, state.gl.canvas.width, state.gl.canvas.height);
+            state.gl.bindBuffer(state.gl.ARRAY_BUFFER, state.test_pass.positions);
+
+            var x1 = x;
+            var x2 = x + w;
+            var y1 = y;
+            var y2 = y + h;
             state.gl.bufferData(state.gl.ARRAY_BUFFER, new Float32Array([
                 x1, y1,
                 x2, y1,
@@ -252,11 +257,15 @@ function render() {
                 x2, y1,
                 x2, y2,
             ]), state.gl.STATIC_DRAW);
+
+            state.gl.uniform4fv(state.test_pass.location_color, [r, g, b, a]);
+
+            state.gl.drawArrays(state.gl.TRIANGLES, 0, 6);
         }
-
-        state.gl.uniform4fv(state.test_pass.location_color, [1, 1, 0, 1]);
-
-        state.gl.drawArrays(state.gl.TRIANGLES, 0, 6);
+        for (let rect_index = 0; rect_index < rects.length; rect_index++) {
+            const rect = rects[rect_index];
+            draw_rect(rect[0], rect[1], rect[2], rect[3], rect[4], rect[5], rect[6], rect[7]);
+        }
     } else {
         state.gl.useProgram(state.sprite_pass.program);
 
