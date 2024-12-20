@@ -73,7 +73,7 @@ type State = {
     },
     test_pass: {
         common:                 Pass_Common;
-        positions:              WebGLBuffer;
+        colors:                 WebGLBuffer;
         vao:                    WebGLVertexArrayObject;
         location_resolution:    WebGLUniformLocation;
         location_color:         WebGLUniformLocation;
@@ -127,13 +127,10 @@ function main() {
         gl.vertexAttribPointer(vertexPosLocation, 2, gl.FLOAT, false, 0, 0);
 
         var vertexColorLocation = 1;  // set with GLSL layout qualifier
-        var colors = new Float32Array([
-            1.0, 0.5, 0.0,
-            0.0, 0.5, 1.0
-        ]);
         var vertexColorBuffer = gl.createBuffer();
-        gl.bindBuffer(gl.ARRAY_BUFFER, vertexColorBuffer);
-        gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STATIC_DRAW);
+        assert(vertexColorBuffer !== null);
+        state.test_pass.colors = vertexColorBuffer;
+        gl.bindBuffer(gl.ARRAY_BUFFER, state.test_pass.colors);
         gl.enableVertexAttribArray(vertexColorLocation);
         gl.vertexAttribPointer(vertexColorLocation, 3, gl.FLOAT, false, 0, 0);
         gl.vertexAttribDivisor(vertexColorLocation, 1); // attribute used once per instance
@@ -201,6 +198,12 @@ function main() {
         }
         if (enable_test_pass) {
             gl.useProgram(state.test_pass.common.program);
+            gl.bindBuffer(gl.ARRAY_BUFFER, state.test_pass.colors);
+            var colors = new Float32Array([
+                1.0, 0.5, sin_01(Date.now(), 1.0 / 1000),
+                0.0, 0.5, sin_01(Date.now(), 1.0 / 1000),
+            ]);
+            gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STREAM_DRAW);
             gl.bindVertexArray(vertexArray);
             gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, 2);
         }
@@ -208,7 +211,6 @@ function main() {
         requestAnimationFrame(render);
     }
 }
-
 
 function load_image(url: string, image_ptr: HTMLImageElement, texture_ptr: WebGLTexture) {
     var img = new Image();
@@ -229,6 +231,10 @@ function load_image(url: string, image_ptr: HTMLImageElement, texture_ptr: WebGL
         texture_ptr = texture;
         console.log("Image loaded", image);
     };
+}
+
+function sin_01(time: number, frequency: number = 1.0): number {
+    return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
 }
 
 function assert(condition: Boolean, message: string | null = ""): asserts condition {
