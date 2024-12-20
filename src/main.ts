@@ -1,13 +1,19 @@
 const sprite_vs = `
     #version 300 es
+    precision highp float;
+    precision highp int;
+
     layout (location=0) in vec4 position;
     layout (location=1) in vec2 uv;
-    layout (location=2) in vec2 i_position;
+    layout (location=2) in vec4 i_color;
+    layout (location=3) in vec2 i_position;
+    out vec4 v_color;
     out vec2 v_uv;
 
     void main() {
         gl_Position = position + vec4(i_position, 0, 0);
         v_uv = uv;
+        v_color = i_color;
     }
 `;
 const sprite_fs = `
@@ -16,42 +22,11 @@ const sprite_fs = `
 
     uniform sampler2D u_texture;
     in vec2 v_uv;
+    in vec4 v_color;
     out vec4 frag_color;
 
     void main() {
-        frag_color = texture(u_texture, v_uv);
-        // frag_color = v_color;
-    }
-`;
-const test_vs = `
-    #version 300 es
-    #define POSITION_LOCATION 0
-    #define COLOR_LOCATION 1
-
-    precision highp float;
-    precision highp int;
-
-    layout(location = POSITION_LOCATION) in vec2 pos;
-    layout(location = COLOR_LOCATION) in vec4 color;
-    flat out vec4 v_color;
-
-    void main()
-    {
-        v_color = color;
-        gl_Position = vec4(pos + vec2(float(gl_InstanceID) - 0.5, 0.0), 0.0, 1.0);
-    }
-`;
-const test_fs = `
-    #version 300 es
-    precision highp float;
-    precision highp int;
-
-    flat in vec4 v_color;
-    out vec4 color;
-
-    void main()
-    {
-        color = v_color;
+        frag_color = texture(u_texture, v_uv) * v_color;
     }
 `;
 
@@ -63,27 +38,20 @@ type Pass_Common = {
 type State = {
     gl:                 WebGL2RenderingContext;
     sprite_pass: {
-        common:             Pass_Common;
-        vertices:           WebGLBuffer;
-        indices:            WebGLBuffer;
-        positions:          WebGLBuffer;
-        vao:                WebGLVertexArrayObject;
-        image0:             HTMLImageElement;
-        texture0:           WebGLTexture;
-    },
-    test_pass: {
         common:                 Pass_Common;
         colors:                 WebGLBuffer;
         vao:                    WebGLVertexArrayObject;
+        indices:                WebGLBuffer;
         location_resolution:    WebGLUniformLocation;
         location_color:         WebGLUniformLocation;
+        image0:                 HTMLImageElement;
+        texture0:               WebGLTexture;
     },
 };
 
 var gl: WebGL2RenderingContext;
 var state: State;
 var enable_sprite_pass = true;
-var enable_test_pass = true;
 
 main();
 
@@ -93,7 +61,7 @@ function main() {
         // @ts-ignore
         sprite_pass: { common: {} },
         // @ts-ignore
-        test_pass: { common: {} },
+        sprite_pass: { common: {} },
     };
 
     const canvas = document.querySelector("canvas");
@@ -106,61 +74,48 @@ function main() {
     assert(_gl !== null, "Couldn't get WebGL2 context.");
     gl = _gl;
 
-    if (enable_test_pass) {
-        create_program(state.test_pass.common, test_vs, test_fs);
+    if (enable_sprite_pass) {
+        create_program(state.sprite_pass.common, sprite_vs, sprite_fs);
 
-        // -- Init Vertex Array
         var vertexArray = gl.createVertexArray();
         gl.bindVertexArray(vertexArray);
 
-        // -- Init Buffers
-        var vertexPosLocation = 0;  // set with GLSL layout qualifier
-        var vertices = new Float32Array([
-            -0.3, -0.5,
-            0.3, -0.5,
-            0.0,  0.5
+        const vertices = new Float32Array([
+            // position     // uv
+            +0.5, +0.5,     1, 1,
+            -0.5, +0.5,     0, 1,
+            -0.5, -0.5,     0, 0,
+            +0.5, -0.5,     1, 0,
         ]);
         var vertexPosBuffer = gl.createBuffer();
         gl.bindBuffer(gl.ARRAY_BUFFER, vertexPosBuffer);
         gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-        gl.enableVertexAttribArray(vertexPosLocation);
-        gl.vertexAttribPointer(vertexPosLocation, 2, gl.FLOAT, false, 0, 0);
-
-        var vertexColorLocation = 1;  // set with GLSL layout qualifier
-        var vertexColorBuffer = gl.createBuffer();
-        assert(vertexColorBuffer !== null);
-        state.test_pass.colors = vertexColorBuffer;
-        gl.bindBuffer(gl.ARRAY_BUFFER, state.test_pass.colors);
-        gl.enableVertexAttribArray(vertexColorLocation);
-        gl.vertexAttribPointer(vertexColorLocation, 3, gl.FLOAT, false, 0, 0);
-        gl.vertexAttribDivisor(vertexColorLocation, 1); // attribute used once per instance
-
-        gl.bindVertexArray(null);
-    }
-    if (enable_sprite_pass) {
-        create_program(state.sprite_pass.common, sprite_vs, sprite_fs);
+        const position = gl.getAttribLocation(state.sprite_pass.common.program, "position");
+        assert(position != -1);
+        gl.enableVertexAttribArray(position);
+        gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 16, 0);
+        const uv = gl.getAttribLocation(state.sprite_pass.common.program, "uv");
+        assert(uv != -1);
+        gl.enableVertexAttribArray(uv);
+        gl.vertexAttribPointer(uv, 2, gl.FLOAT, true, 16, 8);
 
         {
-            const vertices = new Float32Array([
-                // position     // uv
-                +0.5, +0.5,     1, 1,
-                -0.5, +0.5,     0, 1,
-                -0.5, -0.5,     0, 0,
-                +0.5, -0.5,     1, 0,
-            ]);
-            const vertices_buffer = gl.createBuffer();
-            assert(vertices_buffer != null, "Couldn't create vertices_buffer.");
-            gl.bindBuffer(gl.ARRAY_BUFFER, vertices_buffer);
-            gl.bufferData(gl.ARRAY_BUFFER, vertices, gl.STATIC_DRAW);
-            const position = gl.getAttribLocation(state.sprite_pass.common.program, "position");
-            console.log("position", position);
+            var color_buffer = gl.createBuffer();
+            assert(color_buffer !== null);
+            state.sprite_pass.colors = color_buffer;
+            const color = gl.getAttribLocation(state.sprite_pass.common.program, "i_color");
+            assert(color != -1);
+            gl.bindBuffer(gl.ARRAY_BUFFER, state.sprite_pass.colors);
+            gl.enableVertexAttribArray(color);
+            gl.vertexAttribPointer(color, 4, gl.FLOAT, false, 24, 0);
+            gl.vertexAttribDivisor(color, 1);
+
+            const position = gl.getAttribLocation(state.sprite_pass.common.program, "i_position");
+            assert(position != -1);
+            // gl.bindBuffer(gl.ARRAY_BUFFER, state.sprite_pass.positions);
             gl.enableVertexAttribArray(position);
-            gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 16, 0);
-            const uv = gl.getAttribLocation(state.sprite_pass.common.program, "uv");
-            console.log("uv", uv);
-            gl.enableVertexAttribArray(uv);
-            gl.vertexAttribPointer(uv, 2, gl.FLOAT, true, 16, 8);
-            state.sprite_pass.vertices = vertices_buffer;
+            gl.vertexAttribPointer(position, 2, gl.FLOAT, false, 24, 16);
+            gl.vertexAttribDivisor(position, 1);
         }
 
         {
@@ -175,6 +130,8 @@ function main() {
             state.sprite_pass.indices = indices_buffer;
         }
 
+        gl.bindVertexArray(null);
+
         load_image("/public/favicon-16x16.png", state.sprite_pass.image0, state.sprite_pass.texture0);
     }
 
@@ -188,24 +145,14 @@ function main() {
 
         if (enable_sprite_pass) {
             gl.useProgram(state.sprite_pass.common.program);
-            gl.bindVertexArray(null);
-
-            const texture = gl.getUniformLocation(state.sprite_pass.common.program, "u_texture");
-            gl.uniform1i(texture, 0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, state.sprite_pass.vertices);
-
-            gl.drawElements(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, state.sprite_pass.indices as GLintptr);
-        }
-        if (enable_test_pass) {
-            gl.useProgram(state.test_pass.common.program);
-            gl.bindBuffer(gl.ARRAY_BUFFER, state.test_pass.colors);
+            gl.bindBuffer(gl.ARRAY_BUFFER, state.sprite_pass.colors);
             var colors = new Float32Array([
-                1.0, 0.5, sin_01(Date.now(), 1.0 / 1000),
-                0.0, 0.5, sin_01(Date.now(), 1.0 / 1000),
+                1.0, 0.5, 0.0, 1.0,                            /*  */ sin_01(Date.now(), 1.0 / 1000), 1.0,
+                0.0, 0.5, sin_01(Date.now(), 1.0 / 1000), 1.0, /*  */ 0.0, 0.0,
             ]);
             gl.bufferData(gl.ARRAY_BUFFER, colors, gl.STREAM_DRAW);
             gl.bindVertexArray(vertexArray);
-            gl.drawArraysInstanced(gl.TRIANGLES, 0, 3, 2);
+            gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, state.sprite_pass.indices as GLintptr, 2);
         }
 
         requestAnimationFrame(render);
@@ -239,13 +186,13 @@ function sin_01(time: number, frequency: number = 1.0): number {
 
 function assert(condition: Boolean, message: string | null = ""): asserts condition {
     if (!condition) {
+        debugger;
         if (message) {
             console.error("Assertion failed:");
             throw Error(message);
         } else {
             throw Error("Assertion failed!");
         }
-        // debugger;
     }
 }
 
