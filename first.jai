@@ -55,7 +55,9 @@ run_compile_command :: (file_full_path: string) {
         tprint("./bin/%/swc", OS),
         "compile", file_full_path,
         "--out-file=dist/main.js",
+        "--source-maps", "true"
     ];
+    // FIXME: disable source map in release builds
     process_result, output, error := run_command(..args, capture_and_return_output = true);
     // log("process_result: %", process_result);
     // log("output: %", output);
