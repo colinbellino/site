@@ -8,7 +8,7 @@ const sprite_vs = `
     layout(location=1) in vec2 uv;
     layout(location=2) in vec4 i_color;
     layout(location=3) in vec2 i_position;
-    // layout(location=3) in mat4 i_matrix;
+    layout(location=4) in vec2 i_scale;
 
     uniform mat4 u_matrix;
     uniform vec2 u_resolution;
@@ -22,7 +22,7 @@ const sprite_vs = `
         vec2 zero_to_two = zero_to_one * 2.0;
         vec2 clip_space = zero_to_two - 1.0;
 
-        gl_Position = position + u_matrix * vec4(clip_space, 0, 0);
+        gl_Position = (position * vec4(i_scale, 1, 1)) + u_matrix * vec4(clip_space, 0, 0);
         v_uv = uv;
         v_color = i_color;
     }
@@ -32,8 +32,8 @@ const sprite_fs = `
     precision highp float;
 
     uniform sampler2D u_texture;
-    in vec2 v_uv;
     in vec4 v_color;
+    in vec2 v_uv;
     out vec4 frag_color;
 
     void main() {
@@ -142,8 +142,8 @@ function update() {
             gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
             const t = sin_01(Date.now(), 1.0 / 1000);
             const instance_data = new Float32Array([
-                /* color */ 1.0, 0.5, 0.0, 1.0, /* position */ 500 + t * 100,   500.0,
-                /* color */ 0.0, 0.5, t,   1.0, /* position */ 300, 300,
+                /* color */ 0.0, 0.5, t,   1.0, /* position */ 500,           500, /* scale */ 1.0, 1.0,
+                /* color */ 1.0, 0.5, 0.0, 1.0, /* position */ 500 + t * 100, 700, /* scale */ 0.5, 0.5,
             ]);
             // const instance_data = new Float32Array([
             //     /* color */ 1.0, 0.5, 0.0, 1.0, /* matrix */ 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1,
@@ -215,6 +215,7 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         gl.vertexAttribPointer(location_uv, 2, gl.FLOAT, true, 16, 8);
     }
 
+    // :sprite_pass instance_data
     {
         const instance_data = gl.createBuffer();
         assert(instance_data !== null, "Couldn't create instance_data buffer.");
@@ -224,28 +225,23 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         const location_color = gl.getAttribLocation(pass.program, "i_color");
         assert(location_color != -1, "Couldn't get attrib location i_color.");
         gl.enableVertexAttribArray(location_color);
-        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, 24, 0);
+        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, 32, 0);
         gl.vertexAttribDivisor(location_color, 1);
 
         const location_position = gl.getAttribLocation(pass.program, "i_position");
         assert(location_position != -1, "Couldn't get attrib location i_position.");
         gl.enableVertexAttribArray(location_position);
-        gl.vertexAttribPointer(location_position, 2, gl.FLOAT, false, 24, 16);
+        gl.vertexAttribPointer(location_position, 2, gl.FLOAT, false, 32, 16);
         gl.vertexAttribDivisor(location_position, 1);
 
-        // const location_matrix = gl.getAttribLocation(pass.program, "i_matrix");
-        // assert(location_matrix != -1, "Couldn't get attrib location i_matrix.");
-        // gl.enableVertexAttribArray(location_matrix);
-        // gl.vertexAttribPointer(location_matrix+0, 4, gl.FLOAT, false, 80, 16+16*0);
-        // gl.vertexAttribDivisor(location_matrix+0, 1);
-        // gl.vertexAttribPointer(location_matrix+1, 4, gl.FLOAT, false, 80, 16+16*1);
-        // gl.vertexAttribDivisor(location_matrix+1, 1);
-        // gl.vertexAttribPointer(location_matrix+2, 4, gl.FLOAT, false, 80, 16+16*2);
-        // gl.vertexAttribDivisor(location_matrix+2, 1);
-        // gl.vertexAttribPointer(location_matrix+3, 4, gl.FLOAT, false, 80, 16+16*3);
-        // gl.vertexAttribDivisor(location_matrix+3, 1);
+        const location_scale = gl.getAttribLocation(pass.program, "i_scale");
+        assert(location_scale != -1, "Couldn't get attrib location i_scale.");
+        gl.enableVertexAttribArray(location_scale);
+        gl.vertexAttribPointer(location_scale, 2, gl.FLOAT, false, 32, 24);
+        gl.vertexAttribDivisor(location_scale, 1);
     }
 
+    // :sprite_pass uniform
     {
         const location_matrix = gl.getUniformLocation(pass.program, "u_matrix");
         assert(location_matrix !== null, "Couldn't get uniform location u_matrix.");
