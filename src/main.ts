@@ -7,8 +7,7 @@ const sprite_vs = `
     layout(location=0) in vec4 position;
     layout(location=1) in vec2 uv;
     layout(location=2) in vec4 i_color;
-    layout(location=3) in vec2 i_position;
-    layout(location=4) in vec2 i_scale;
+    layout(location=5) in mat4 i_matrix;
 
     uniform mat4 u_matrix;
 
@@ -16,10 +15,13 @@ const sprite_vs = `
     out vec2 v_uv;
 
     void main() {
-        vec4 pos = vec4((u_matrix * vec4(i_position, 1, 1)).xy, 0, 1);
-        gl_Position = (position * vec4(i_scale, 1, 1)) + (pos);
+        gl_Position = u_matrix * i_matrix * position;
         v_uv = uv;
-        v_color = i_color;
+        if (i_matrix[0][3] == 2.0 && i_matrix[1][3] == 3.0) {
+            v_color = vec4(0, 1, 0, 1);
+        } else {
+            v_color = i_color;
+        }
     }
 `;
 const sprite_fs = `
@@ -112,49 +114,185 @@ function update() {
         renderer_update_camera_matrix_main(game.renderer.camera_main);
     }
 
-    gl.viewport(0, 0, gl.canvas.width, gl.canvas.height);
+    gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
 
     // :render
     render: {
         gl.clearColor(0.25, 0.25, 0.25, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        function make_scale_matrix4(v: Vector3): Matrix4 {
-            const result = Matrix4_Zero();
+        function make_scale_matrix4(x: number, y: number, z: number): Matrix4 {
+            const result = Matrix4_Identity();
 
-            result[0] = v[0];
-            result[5] = v[1];
-            result[10] = v[2];
+            result[0] = x;
+            result[5] = y;
+            result[10] = z;
 
             return result;
         }
-        // function make_scale_matrix4(v: Vector3): Matrix4 {
-        //     const sx = v[0];
-        //     const sy = v[1];
-        //     const sz = v[2];
-        //     return new Float32Array([
-        //         sx, 0, 0, 0,
-        //         0, sy, 0, 0,
-        //         0, 0, sz, 0,
-        //         0, 0,  0, 1,
-        //     ]);
-        // }
+        function make_orthographic_matrix(left: number, right: number, bottom: number, top: number, near: number, far: number) {
+            const result = Matrix4_Zero();
+
+            result[ 0] = 2 / (right - left);
+            result[ 1] = 0;
+            result[ 2] = 0;
+            result[ 3] = 0;
+            result[ 4] = 0;
+            result[ 5] = 2 / (top - bottom);
+            result[ 6] = 0;
+            result[ 7] = 0;
+            result[ 8] = 0;
+            result[ 9] = 0;
+            result[10] = 2 / (near - far);
+            result[11] = 0;
+            result[12] = (left + right) / (left - right);
+            result[13] = (bottom + top) / (bottom - top);
+            result[14] = (near + far) / (near - far);
+            result[15] = 1;
+
+            return result;
+        }
+
+        function transpose(m: Matrix4): Matrix4 {
+            const result = Matrix4_Zero();
+
+            result[ 0] = m[0];
+            result[ 1] = m[4];
+            result[ 2] = m[8];
+            result[ 3] = m[12];
+            result[ 4] = m[1];
+            result[ 5] = m[5];
+            result[ 6] = m[9];
+            result[ 7] = m[13];
+            result[ 8] = m[2];
+            result[ 9] = m[6];
+            result[10] = m[10];
+            result[11] = m[14];
+            result[12] = m[3];
+            result[13] = m[7];
+            result[14] = m[11];
+            result[15] = m[15];
+
+            return result;
+          }
+
+        // Returns a translation matrix given a translation vector.
+        function make_translation_matrix4(x: number, y: number, z: number): Matrix4 {
+            const result = Matrix4_Identity();
+
+            // result[3] = x;
+            // result[7] = y;
+            // result[11] = z;
+
+            result[ 0] = 1;
+            result[ 1] = 0;
+            result[ 2] = 0;
+            result[ 3] = 0;
+            result[ 4] = 0;
+            result[ 5] = 1;
+            result[ 6] = 0;
+            result[ 7] = 0;
+            result[ 8] = 0;
+            result[ 9] = 0;
+            result[10] = 1;
+            result[11] = 0;
+            result[12] = x;
+            result[13] = y;
+            result[14] = z;
+            result[15] = 1;
+
+            return result;
+        }
+
+        function z_rotate(m: Matrix4, angle_in_radians:number): Matrix4 {
+            // This is the optimized version of
+            // return multiply(m, zRotation(angle_in_radians), dst);
+            // dst = dst || new MatType(16);
+            const dst = Matrix4_Zero();
+
+            var m00 = m[0 * 4 + 0];
+            var m01 = m[0 * 4 + 1];
+            var m02 = m[0 * 4 + 2];
+            var m03 = m[0 * 4 + 3];
+            var m10 = m[1 * 4 + 0];
+            var m11 = m[1 * 4 + 1];
+            var m12 = m[1 * 4 + 2];
+            var m13 = m[1 * 4 + 3];
+            var c = Math.cos(angle_in_radians);
+            var s = Math.sin(angle_in_radians);
+
+            dst[ 0] = c * m00 + s * m10;
+            dst[ 1] = c * m01 + s * m11;
+            dst[ 2] = c * m02 + s * m12;
+            dst[ 3] = c * m03 + s * m13;
+            dst[ 4] = c * m10 - s * m00;
+            dst[ 5] = c * m11 - s * m01;
+            dst[ 6] = c * m12 - s * m02;
+            dst[ 7] = c * m13 - s * m03;
+
+            /* if (m !== dst)  */{
+              dst[ 8] = m[ 8];
+              dst[ 9] = m[ 9];
+              dst[10] = m[10];
+              dst[11] = m[11];
+              dst[12] = m[12];
+              dst[13] = m[13];
+              dst[14] = m[14];
+              dst[15] = m[15];
+            }
+
+            return dst;
+          }
 
         if (ENABLE_SPRITE_PASS) {
             gl.useProgram(game.renderer.sprite_pass.program);
 
-            // gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, Matrix4_Identity());
-            gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
+            function projection_(width, height, depth): Matrix4 {
+                // Note: This matrix flips the Y axis so 0 is at the top.
+                return new Float32Array([
+                   2 / width, 0, 0, 0,
+                   0, -2 / height, 0, 0,
+                   0, 0, 2 / depth, 0,
+                  -1, 1, 0, 1,
+                ]);
+              };
 
-            gl.bindTexture(gl.TEXTURE_2D, game.texture0);
-            gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
+            // const projection = make_orthographic_matrix(
+            //     -game.renderer.window_size[0]/2,    +game.renderer.window_size[0]/2,
+            //     -game.renderer.window_size[1]/2,    +game.renderer.window_size[1]/2,
+            //     -1,                                 +1,
+            // );
+            const projection = projection_( game.renderer.window_size[0], game.renderer.window_size[1], 400);
+            // const projection = Matrix4_Identity();
+            let view = Matrix4_Identity();
+            view = matrix4_mul(view, make_translation_matrix4(100, 100, 0));
+            gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, matrix4_mul(projection, view));
+            // gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
+
             const t = sin_01(Date.now(), 1.0 / 1000);
-            const instance_data = new Float32Array([
-                /* color */ 0.0, 0.5, t,   1.0, /* position */ 0, 0,                                /* scale */ 1.0, 1.0,
-                /* color */ 1.0, 0.5, 0.0, 1.0, /* position */ t * game.renderer.window_size[0], 0, /* scale */ 0.5, 0.5,
-            ]);
-            gl.bufferData(gl.ARRAY_BUFFER, instance_data, gl.STREAM_DRAW);
+
             gl.bindVertexArray(game.renderer.sprite_pass.vao);
+            gl.bindTexture(gl.TEXTURE_2D, game.texture0);
+
+            let mat1 = Matrix4_Identity();
+            // mat1 = matrix4_mul(mat1, make_translation_matrix4(100, 100, 0));
+            mat1 = matrix4_mul(mat1, make_scale_matrix4(32*2, 32*2, 0));
+            // mat1 = z_rotate(mat1, t);
+            console.log("mat1", mat1);
+            const item1 = new Float32Array([
+                /* color */ 1.0, 0.5, 0.0, 1.0, /* matrix */ ...mat1,
+            ]);
+            let mat2 = Matrix4_Identity();
+            mat2 = matrix4_mul(mat2, make_scale_matrix4(32*1, 32*1, 1));
+            // mat2 = matrix4_mul(mat2, make_scale_matrix4(32, 32, 1));
+            const item2 = new Float32Array([
+                /* color */ 0.0, 0.5, t,   1.0, /* matrix */ ...mat2,
+            ]);
+            const instance_data = Float32Array.from([...item1, ...item2]); // FIXME: this allocates a lot of junk!
+
+            gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
+            gl.bufferData(gl.ARRAY_BUFFER, instance_data, gl.STREAM_DRAW);
+
             const instance_count = 2;
             gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, instance_count);
         }
@@ -229,20 +367,28 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         const location_color = gl.getAttribLocation(pass.program, "i_color");
         assert(location_color != -1, "Couldn't get attrib location i_color.");
         gl.enableVertexAttribArray(location_color);
-        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, 32, 0);
+        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, 80, 0);
         gl.vertexAttribDivisor(location_color, 1);
 
-        const location_position = gl.getAttribLocation(pass.program, "i_position");
-        assert(location_position != -1, "Couldn't get attrib location i_position.");
-        gl.enableVertexAttribArray(location_position);
-        gl.vertexAttribPointer(location_position, 2, gl.FLOAT, false, 32, 16);
-        gl.vertexAttribDivisor(location_position, 1);
-
-        const location_scale = gl.getAttribLocation(pass.program, "i_scale");
-        assert(location_scale != -1, "Couldn't get attrib location i_scale.");
-        gl.enableVertexAttribArray(location_scale);
-        gl.vertexAttribPointer(location_scale, 2, gl.FLOAT, false, 32, 24);
-        gl.vertexAttribDivisor(location_scale, 1);
+        const location_matrix = gl.getAttribLocation(pass.program, "i_matrix");
+        assert(location_matrix != -1, "Couldn't get attrib location i_matrix.");
+        const bytesPerMatrix = 16 + 4 * 16;
+        for (let i = 0; i < 3; ++i) {
+            const loc = location_matrix + i;
+            gl.enableVertexAttribArray(loc);
+            // note the stride and offset
+            const offset = 16 + i * 4 * 4;  // 4 floats per row, 4 bytes per float
+            gl.vertexAttribPointer(
+                loc,              // location
+                4,                // size (num values to pull from buffer per iteration)
+                gl.FLOAT,         // type of data in buffer
+                false,            // normalize
+                bytesPerMatrix,   // stride, num bytes to advance to get to next set of values
+                offset,           // offset in buffer
+            );
+            // this line says this attribute only changes for each 1 instance
+            gl.vertexAttribDivisor(loc, 1);
+        }
     }
 
     // :sprite_pass uniform
@@ -307,22 +453,22 @@ function renderer_create_program(gl: WebGL2RenderingContext, vs: string, fs: str
     return [program, true];
 }
 
-// 11 = 0
-// 12 = 1
-// 13 = 2
-// 14 = 3
-// 21 = 4
-// 22 = 5
-// 23 = 6
-// 24 = 7
-// 31 = 8
-// 32 = 9
-// 33 = 10
-// 34 = 11
-// 41 = 12
-// 42 = 13
-// 43 = 14
-// 44 = 15
+// _11 = 0
+// _12 = 1
+// _13 = 2
+// _14 = 3
+// _21 = 4
+// _22 = 5
+// _23 = 6
+// _24 = 7
+// _31 = 8
+// _32 = 9
+// _33 = 10
+// _34 = 11
+// _41 = 12
+// _42 = 13
+// _43 = 14
+// _44 = 15
 
 function orthographic_projection_matrix(left: float, right: float, bottom: float, top: float, near: float, far: float): Matrix4 {
     const result = Matrix4_Zero();
@@ -363,55 +509,54 @@ function matrix4_mul(m: Matrix4, n: Matrix4): Matrix4 {
     // result[11] = m[8]*n[3] + m[9]*n[7] + m[10]*n[11] + m[11]*n[15];
     // result[15] = m[12]*n[3] + m[13]*n[7] + m[14]*n[11] + m[15]*n[15];
 
-    var a00 = m[0],
-        a01 = m[1],
-        a02 = m[2],
-        a03 = m[3];
-    var a10 = m[4],
-        a11 = m[5],
-        a12 = m[6],
-        a13 = m[7];
-    var a20 = m[8],
-        a21 = m[9],
-        a22 = m[10],
-        a23 = m[11];
-    var a30 = m[12],
-        a31 = m[13],
-        a32 = m[14],
-        a33 = m[15]; // Cache only the current line of the second matrix
-
-    var b0 = n[0],
-        b1 = n[1],
-        b2 = n[2],
-        b3 = n[3];
-    result[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    result[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    result[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    result[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-    b0 = n[4];
-    b1 = n[5];
-    b2 = n[6];
-    b3 = n[7];
-    result[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    result[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    result[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    result[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-    b0 = n[8];
-    b1 = n[9];
-    b2 = n[10];
-    b3 = n[11];
-    result[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    result[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    result[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    result[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
-    b0 = n[12];
-    b1 = n[13];
-    b2 = n[14];
-    b3 = n[15];
-    result[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
-    result[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
-    result[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
-    result[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    var b00 = n[0 * 4 + 0];
+    var b01 = n[0 * 4 + 1];
+    var b02 = n[0 * 4 + 2];
+    var b03 = n[0 * 4 + 3];
+    var b10 = n[1 * 4 + 0];
+    var b11 = n[1 * 4 + 1];
+    var b12 = n[1 * 4 + 2];
+    var b13 = n[1 * 4 + 3];
+    var b20 = n[2 * 4 + 0];
+    var b21 = n[2 * 4 + 1];
+    var b22 = n[2 * 4 + 2];
+    var b23 = n[2 * 4 + 3];
+    var b30 = n[3 * 4 + 0];
+    var b31 = n[3 * 4 + 1];
+    var b32 = n[3 * 4 + 2];
+    var b33 = n[3 * 4 + 3];
+    var a00 = m[0 * 4 + 0];
+    var a01 = m[0 * 4 + 1];
+    var a02 = m[0 * 4 + 2];
+    var a03 = m[0 * 4 + 3];
+    var a10 = m[1 * 4 + 0];
+    var a11 = m[1 * 4 + 1];
+    var a12 = m[1 * 4 + 2];
+    var a13 = m[1 * 4 + 3];
+    var a20 = m[2 * 4 + 0];
+    var a21 = m[2 * 4 + 1];
+    var a22 = m[2 * 4 + 2];
+    var a23 = m[2 * 4 + 3];
+    var a30 = m[3 * 4 + 0];
+    var a31 = m[3 * 4 + 1];
+    var a32 = m[3 * 4 + 2];
+    var a33 = m[3 * 4 + 3];
+    result[ 0] = b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30;
+    result[ 1] = b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31;
+    result[ 2] = b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32;
+    result[ 3] = b00 * a03 + b01 * a13 + b02 * a23 + b03 * a33;
+    result[ 4] = b10 * a00 + b11 * a10 + b12 * a20 + b13 * a30;
+    result[ 5] = b10 * a01 + b11 * a11 + b12 * a21 + b13 * a31;
+    result[ 6] = b10 * a02 + b11 * a12 + b12 * a22 + b13 * a32;
+    result[ 7] = b10 * a03 + b11 * a13 + b12 * a23 + b13 * a33;
+    result[ 8] = b20 * a00 + b21 * a10 + b22 * a20 + b23 * a30;
+    result[ 9] = b20 * a01 + b21 * a11 + b22 * a21 + b23 * a31;
+    result[10] = b20 * a02 + b21 * a12 + b22 * a22 + b23 * a32;
+    result[11] = b20 * a03 + b21 * a13 + b22 * a23 + b23 * a33;
+    result[12] = b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30;
+    result[13] = b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31;
+    result[14] = b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32;
+    result[15] = b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33;
 
     return result;
 }
