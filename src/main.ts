@@ -11,18 +11,13 @@ const sprite_vs = `
     layout(location=4) in vec2 i_scale;
 
     uniform mat4 u_matrix;
-    uniform vec2 u_resolution;
 
     out vec4 v_color;
     out vec2 v_uv;
 
     void main() {
-        vec2 pos = (u_matrix * vec4(i_position, 1, 1)).xy;
-        vec2 zero_to_one = pos / u_resolution;
-        vec2 zero_to_two = zero_to_one * 2.0;
-        vec2 clip_space = zero_to_two - 1.0;
-
-        gl_Position = (position * vec4(i_scale, 1, 1)) + u_matrix * vec4(clip_space, 0, 0);
+        vec4 pos = vec4((u_matrix * vec4(i_position, 1, 1)).xy, 0, 1);
+        gl_Position = (position * vec4(i_scale, 1, 1)) + (pos);
         v_uv = uv;
         v_color = i_color;
     }
@@ -59,7 +54,7 @@ class Sprite_Pass {
     indices:                WebGLBuffer;
     instance_data:          WebGLBuffer;
     location_matrix:        WebGLUniformLocation;
-    location_resolution:    WebGLUniformLocation;
+    // location_resolution:    WebGLUniformLocation;
 }
 class Camera_Orthographic {
     position:                   Vector2;
@@ -72,6 +67,8 @@ class Camera_Orthographic {
 }
 
 type Vector2 = Float32Array;
+type Vector3 = Float32Array;
+type Vector4 = Float32Array;
 type Matrix4 = Float32Array;
 type float   = number;
 
@@ -122,33 +119,40 @@ function update() {
         gl.clearColor(0.25, 0.25, 0.25, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
+        function make_scale_matrix4(v: Vector3): Matrix4 {
+            const result = Matrix4_Zero();
+
+            result[0] = v[0];
+            result[5] = v[1];
+            result[10] = v[2];
+
+            return result;
+        }
+        // function make_scale_matrix4(v: Vector3): Matrix4 {
+        //     const sx = v[0];
+        //     const sy = v[1];
+        //     const sz = v[2];
+        //     return new Float32Array([
+        //         sx, 0, 0, 0,
+        //         0, sy, 0, 0,
+        //         0, 0, sz, 0,
+        //         0, 0,  0, 1,
+        //     ]);
+        // }
+
         if (ENABLE_SPRITE_PASS) {
             gl.useProgram(game.renderer.sprite_pass.program);
 
-            // Compute the matrices
-            // var translationMatrix = m3.translation(translation[0], translation[1]);
-            // var rotationMatrix = m3.rotation(angleInRadians);
-            // var scaleMatrix = m3.scaling(scale[0], scale[1]);
-
-            // // Multiply the matrices.
-            // var matrix = m3.multiply(translationMatrix, rotationMatrix);
-            // matrix = m3.multiply(matrix, scaleMatrix);
-
-            gl.uniform2fv(game.renderer.sprite_pass.location_resolution, game.renderer.window_size);
-            // gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
-            gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, Matrix4_Identity);
+            // gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, Matrix4_Identity());
+            gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
 
             gl.bindTexture(gl.TEXTURE_2D, game.texture0);
             gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
             const t = sin_01(Date.now(), 1.0 / 1000);
             const instance_data = new Float32Array([
-                /* color */ 0.0, 0.5, t,   1.0, /* position */ 500,           500, /* scale */ 1.0, 1.0,
-                /* color */ 1.0, 0.5, 0.0, 1.0, /* position */ 500 + t * 100, 700, /* scale */ 0.5, 0.5,
+                /* color */ 0.0, 0.5, t,   1.0, /* position */ 0, 0,                                /* scale */ 1.0, 1.0,
+                /* color */ 1.0, 0.5, 0.0, 1.0, /* position */ t * game.renderer.window_size[0], 0, /* scale */ 0.5, 0.5,
             ]);
-            // const instance_data = new Float32Array([
-            //     /* color */ 1.0, 0.5, 0.0, 1.0, /* matrix */ 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1,
-            //     /* color */ 0.0, 0.5, t,   1.0, /* matrix */ 1, 0, 0, 0,  0, 1, 0, 0,  0, 0, 1, 0,  0, 0, 0, 1,
-            // ]);
             gl.bufferData(gl.ARRAY_BUFFER, instance_data, gl.STREAM_DRAW);
             gl.bindVertexArray(game.renderer.sprite_pass.vao);
             const instance_count = 2;
@@ -246,10 +250,6 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         const location_matrix = gl.getUniformLocation(pass.program, "u_matrix");
         assert(location_matrix !== null, "Couldn't get uniform location u_matrix.");
         pass.location_matrix = location_matrix;
-
-        const location_resolution = gl.getUniformLocation(pass.program, "u_resolution");
-        assert(location_resolution !== null, "Couldn't get uniform location u_resolution.");
-        pass.location_resolution = location_resolution;
     }
 
     {
@@ -325,44 +325,116 @@ function renderer_create_program(gl: WebGL2RenderingContext, vs: string, fs: str
 // 44 = 15
 
 function orthographic_projection_matrix(left: float, right: float, bottom: float, top: float, near: float, far: float): Matrix4 {
-    const m = new Float32Array(16);
+    const result = Matrix4_Zero();
 
-    m[0] = 2.0 / (right - left);
-    m[3] = - (right + left) / (right - left);
+    result[0] = 2.0 / (right - left);
+    result[3] = - (right + left) / (right - left);
 
-    m[5] = 2.0 / (top - bottom);
-    m[7] = - (top + bottom) / (top - bottom);
+    result[5] = 2.0 / (top - bottom);
+    result[7] = - (top + bottom) / (top - bottom);
 
-    m[10] = -2 / (far - near);
-    m[11] = - (far + near) / (far - near);
-    m[15] = 1.0;
+    result[10] = -2 / (far - near);
+    result[11] = - (far + near) / (far - near);
+    result[15] = 1.0;
 
-    return m;
+    return result;
 }
-function matrix4_mul(mat1: Matrix4, mat2: Matrix4): Matrix4 {
-    const m = Matrix4_Zero;
-    assert(mat1.byteLength === mat1.byteLength);
-    for (let i = 0; i < mat1.length; i++) {
-        m[i] = mat1[i] * mat2[i];
-    }
-    return m;
+function matrix4_mul(m: Matrix4, n: Matrix4): Matrix4 {
+    assert(m.byteLength === n.byteLength);
+    const result = Matrix4_Zero();
+
+    // result[0] = m[0]*n[0] + m[1]*n[4] + m[2]*n[8] + m[3]*n[12];
+    // result[4] = m[4]*n[0] + m[5]*n[4] + m[6]*n[8] + m[7]*n[12];
+    // result[8] = m[8]*n[0] + m[9]*n[4] + m[10]*n[8] + m[11]*n[12];
+    // result[12] = m[12]*n[0] + m[13]*n[4] + m[14]*n[8] + m[15]*n[12];
+
+    // result[1] = m[0]*n[1] + m[1]*n[5] + m[2]*n[9] + m[3]*n[13];
+    // result[5] = m[4]*n[1] + m[5]*n[5] + m[6]*n[9] + m[7]*n[13];
+    // result[9] = m[8]*n[1] + m[9]*n[5] + m[10]*n[9] + m[11]*n[13];
+    // result[13] = m[12]*n[1] + m[13]*n[5] + m[14]*n[9] + m[15]*n[13];
+
+    // result[2] = m[0]*n[2] + m[1]*n[6] + m[2]*n[10] + m[3]*n[14];
+    // result[6] = m[4]*n[2] + m[5]*n[6] + m[6]*n[10] + m[7]*n[14];
+    // result[10] = m[8]*n[2] + m[9]*n[6] + m[10]*n[10] + m[11]*n[14];
+    // result[14] = m[12]*n[2] + m[13]*n[6] + m[14]*n[10] + m[15]*n[14];
+
+    // result[3] = m[0]*n[3] + m[1]*n[7] + m[2]*n[11] + m[3]*n[15];
+    // result[7] = m[4]*n[3] + m[5]*n[7] + m[6]*n[11] + m[7]*n[15];
+    // result[11] = m[8]*n[3] + m[9]*n[7] + m[10]*n[11] + m[11]*n[15];
+    // result[15] = m[12]*n[3] + m[13]*n[7] + m[14]*n[11] + m[15]*n[15];
+
+    var a00 = m[0],
+        a01 = m[1],
+        a02 = m[2],
+        a03 = m[3];
+    var a10 = m[4],
+        a11 = m[5],
+        a12 = m[6],
+        a13 = m[7];
+    var a20 = m[8],
+        a21 = m[9],
+        a22 = m[10],
+        a23 = m[11];
+    var a30 = m[12],
+        a31 = m[13],
+        a32 = m[14],
+        a33 = m[15]; // Cache only the current line of the second matrix
+
+    var b0 = n[0],
+        b1 = n[1],
+        b2 = n[2],
+        b3 = n[3];
+    result[0] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[1] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[2] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[3] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    b0 = n[4];
+    b1 = n[5];
+    b2 = n[6];
+    b3 = n[7];
+    result[4] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[5] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[6] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[7] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    b0 = n[8];
+    b1 = n[9];
+    b2 = n[10];
+    b3 = n[11];
+    result[8] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[9] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[10] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[11] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+    b0 = n[12];
+    b1 = n[13];
+    b2 = n[14];
+    b3 = n[15];
+    result[12] = b0 * a00 + b1 * a10 + b2 * a20 + b3 * a30;
+    result[13] = b0 * a01 + b1 * a11 + b2 * a21 + b3 * a31;
+    result[14] = b0 * a02 + b1 * a12 + b2 * a22 + b3 * a32;
+    result[15] = b0 * a03 + b1 * a13 + b2 * a23 + b3 * a33;
+
+    return result;
 }
 function matrix4_inverse(mat: Matrix4): Matrix4 {
     return mat;
 }
 
-const Matrix4_Zero : Matrix4 = new Float32Array([
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-    0, 0, 0, 0,
-]);
-const Matrix4_Identity : Matrix4 = new Float32Array([
-    1, 0, 0, 0,
-    0, 1, 0, 0,
-    0, 0, 1, 0,
-    0, 0, 0, 1,
-]);
+function Matrix4_Zero(): Matrix4 {
+    return new Float32Array([
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+        0, 0, 0, 0,
+    ])
+}
+function Matrix4_Identity(): Matrix4 {
+    return new Float32Array([
+        1, 0, 0, 0,
+        0, 1, 0, 0,
+        0, 0, 1, 0,
+        0, 0, 0, 1,
+    ])
+}
 
 function renderer_update_camera_matrix_main(camera: Camera_Orthographic): void {
     camera.projection_matrix = orthographic_projection_matrix(
@@ -371,7 +443,7 @@ function renderer_update_camera_matrix_main(camera: Camera_Orthographic): void {
         -1,                                 +1,
     );
 
-    camera.transform_matrix = Matrix4_Identity;
+    camera.transform_matrix = Matrix4_Identity();
     // camera.transform_matrix *= mat4Rotate(.{ 0, 0, 1 }, camera.rotation);
     // camera.transform_matrix *= make_scale_matrix4(.{ 1/camera.zoom, 1/camera.zoom, 0 });
     // camera.transform_matrix *= transpose(make_translation_matrix4(make_vector3(camera.position, 0)));
