@@ -4,10 +4,10 @@ const sprite_vs = `
     precision highp float;
     precision highp int;
 
-    layout(location=0) in vec4 position;
+    layout(location=0) in vec2 position;
     layout(location=1) in vec2 uv;
     layout(location=2) in vec4 i_color;
-    layout(location=5) in mat4 i_matrix;
+    layout(location=3) in mat4 i_matrix;
 
     uniform mat4 u_matrix;
 
@@ -15,13 +15,9 @@ const sprite_vs = `
     out vec2 v_uv;
 
     void main() {
-        gl_Position = u_matrix * i_matrix * position;
+        gl_Position = u_matrix * (i_matrix * vec4(position, 0, 1));
         v_uv = uv;
-        if (i_matrix[0][3] == 2.0 && i_matrix[1][3] == 3.0) {
-            v_color = vec4(0, 1, 0, 1);
-        } else {
-            v_color = i_color;
-        }
+        v_color = i_color;
     }
 `;
 const sprite_fs = `
@@ -121,151 +117,16 @@ function update() {
         gl.clearColor(0.25, 0.25, 0.25, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-        function make_scale_matrix4(x: number, y: number, z: number): Matrix4 {
-            const result = Matrix4_Identity();
-
-            result[0] = x;
-            result[5] = y;
-            result[10] = z;
-
-            return result;
-        }
-        function make_orthographic_matrix(left: number, right: number, bottom: number, top: number, near: number, far: number) {
-            const result = Matrix4_Zero();
-
-            result[ 0] = 2 / (right - left);
-            result[ 1] = 0;
-            result[ 2] = 0;
-            result[ 3] = 0;
-            result[ 4] = 0;
-            result[ 5] = 2 / (top - bottom);
-            result[ 6] = 0;
-            result[ 7] = 0;
-            result[ 8] = 0;
-            result[ 9] = 0;
-            result[10] = 2 / (near - far);
-            result[11] = 0;
-            result[12] = (left + right) / (left - right);
-            result[13] = (bottom + top) / (bottom - top);
-            result[14] = (near + far) / (near - far);
-            result[15] = 1;
-
-            return result;
-        }
-
-        function transpose(m: Matrix4): Matrix4 {
-            const result = Matrix4_Zero();
-
-            result[ 0] = m[0];
-            result[ 1] = m[4];
-            result[ 2] = m[8];
-            result[ 3] = m[12];
-            result[ 4] = m[1];
-            result[ 5] = m[5];
-            result[ 6] = m[9];
-            result[ 7] = m[13];
-            result[ 8] = m[2];
-            result[ 9] = m[6];
-            result[10] = m[10];
-            result[11] = m[14];
-            result[12] = m[3];
-            result[13] = m[7];
-            result[14] = m[11];
-            result[15] = m[15];
-
-            return result;
-          }
-
-        // Returns a translation matrix given a translation vector.
-        function make_translation_matrix4(x: number, y: number, z: number): Matrix4 {
-            const result = Matrix4_Identity();
-
-            // result[3] = x;
-            // result[7] = y;
-            // result[11] = z;
-
-            result[ 0] = 1;
-            result[ 1] = 0;
-            result[ 2] = 0;
-            result[ 3] = 0;
-            result[ 4] = 0;
-            result[ 5] = 1;
-            result[ 6] = 0;
-            result[ 7] = 0;
-            result[ 8] = 0;
-            result[ 9] = 0;
-            result[10] = 1;
-            result[11] = 0;
-            result[12] = x;
-            result[13] = y;
-            result[14] = z;
-            result[15] = 1;
-
-            return result;
-        }
-
-        function z_rotate(m: Matrix4, angle_in_radians:number): Matrix4 {
-            // This is the optimized version of
-            // return multiply(m, zRotation(angle_in_radians), dst);
-            // dst = dst || new MatType(16);
-            const dst = Matrix4_Zero();
-
-            var m00 = m[0 * 4 + 0];
-            var m01 = m[0 * 4 + 1];
-            var m02 = m[0 * 4 + 2];
-            var m03 = m[0 * 4 + 3];
-            var m10 = m[1 * 4 + 0];
-            var m11 = m[1 * 4 + 1];
-            var m12 = m[1 * 4 + 2];
-            var m13 = m[1 * 4 + 3];
-            var c = Math.cos(angle_in_radians);
-            var s = Math.sin(angle_in_radians);
-
-            dst[ 0] = c * m00 + s * m10;
-            dst[ 1] = c * m01 + s * m11;
-            dst[ 2] = c * m02 + s * m12;
-            dst[ 3] = c * m03 + s * m13;
-            dst[ 4] = c * m10 - s * m00;
-            dst[ 5] = c * m11 - s * m01;
-            dst[ 6] = c * m12 - s * m02;
-            dst[ 7] = c * m13 - s * m03;
-
-            /* if (m !== dst)  */{
-              dst[ 8] = m[ 8];
-              dst[ 9] = m[ 9];
-              dst[10] = m[10];
-              dst[11] = m[11];
-              dst[12] = m[12];
-              dst[13] = m[13];
-              dst[14] = m[14];
-              dst[15] = m[15];
-            }
-
-            return dst;
-          }
-
         if (ENABLE_SPRITE_PASS) {
             gl.useProgram(game.renderer.sprite_pass.program);
 
-            function projection_(width, height, depth): Matrix4 {
-                // Note: This matrix flips the Y axis so 0 is at the top.
-                return new Float32Array([
-                   2 / width, 0, 0, 0,
-                   0, -2 / height, 0, 0,
-                   0, 0, 2 / depth, 0,
-                  -1, 1, 0, 1,
-                ]);
-              };
-
-            // const projection = make_orthographic_matrix(
-            //     -game.renderer.window_size[0]/2,    +game.renderer.window_size[0]/2,
-            //     -game.renderer.window_size[1]/2,    +game.renderer.window_size[1]/2,
-            //     -1,                                 +1,
-            // );
-            const projection = projection_( game.renderer.window_size[0], game.renderer.window_size[1], 400);
-            // const projection = Matrix4_Identity();
+            const projection = matrix_ortho3d_f32(
+                game.renderer.window_size[0]*-0.5, game.renderer.window_size[0]*0.5,
+                game.renderer.window_size[1]*-0.5, game.renderer.window_size[1]*0.5,
+                -1,                                +1,
+            );
             let view = Matrix4_Identity();
-            view = matrix4_mul(view, make_translation_matrix4(100, 100, 0));
+            // view = matrix4_mul(view, matrix4_translate_f32(100, 0, 0));
             gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, matrix4_mul(projection, view));
             // gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
 
@@ -274,27 +135,31 @@ function update() {
             gl.bindVertexArray(game.renderer.sprite_pass.vao);
             gl.bindTexture(gl.TEXTURE_2D, game.texture0);
 
-            let mat1 = Matrix4_Identity();
-            // mat1 = matrix4_mul(mat1, make_translation_matrix4(100, 100, 0));
-            mat1 = matrix4_mul(mat1, make_scale_matrix4(32*2, 32*2, 0));
-            // mat1 = z_rotate(mat1, t);
-            console.log("mat1", mat1);
-            const item1 = new Float32Array([
-                /* color */ 1.0, 0.5, 0.0, 1.0, /* matrix */ ...mat1,
-            ]);
-            let mat2 = Matrix4_Identity();
-            mat2 = matrix4_mul(mat2, make_scale_matrix4(32*1, 32*1, 1));
-            // mat2 = matrix4_mul(mat2, make_scale_matrix4(32, 32, 1));
-            const item2 = new Float32Array([
-                /* color */ 0.0, 0.5, t,   1.0, /* matrix */ ...mat2,
-            ]);
-            const instance_data = Float32Array.from([...item1, ...item2]); // FIXME: this allocates a lot of junk!
+            const items: Float32Array[] = [];
+            {
+                let matrix = Matrix4_Identity();
+                matrix = matrix4_mul(matrix, matrix4_translate_f32(100, 0, 0));
+                // FIXME: find out why translation isn't working here
+                matrix = matrix4_mul(matrix, matrix4_scale_f32(32*2, 32*2, 0));
+                matrix = z_rotate(matrix, t);
+                items.push(new Float32Array([
+                    /* color */ 1.0, 0.0, 0.0, 1.0, /* matrix */ ...matrix,
+                ]));
+            }
+            {
+                let matrix = Matrix4_Identity();
+                matrix = matrix4_mul(matrix, matrix4_scale_f32(32*1, 32*1, 1));
+                // matrix = matrix4_mul(matrix, make_scale_matrix4(32, 32, 1));
+                items.push(new Float32Array([
+                    /* color */ 0.0, 1.0, t, 1.0, /* matrix */ ...matrix,
+                ]));
+            }
+            const instance_data = Float32Array.from([...items[0], ...items[1]]); // FIXME: this allocates a lot of junk!
 
             gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
             gl.bufferData(gl.ARRAY_BUFFER, instance_data, gl.STREAM_DRAW);
 
-            const instance_count = 2;
-            gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, instance_count);
+            gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, items.length);
         }
     }
 
@@ -628,4 +493,127 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
             throw Error("Assertion failed!");
         }
     }
+}
+
+function matrix4_scale_f32(x: number, y: number, z: number): Matrix4 {
+    const result = Matrix4_Zero();
+    result[0] = x;
+    result[5] = y;
+    result[10] = z;
+    result[15] = 1;
+    return result;
+}
+function matrix_ortho3d_f32(left: number, right: number, bottom: number, top: number, near: number, far: number, flip_z_axis: boolean = true): Matrix4 {
+    const m = Matrix4_Zero();
+    m[0] = +2 / (right - left);
+    m[5] = +2 / (top - bottom);
+    m[10] = +2 / (far - near);
+    m[3] = -(right + left)   / (right - left);
+    m[7] = -(top   + bottom) / (top - bottom);
+    m[11] = -(far + near) / (far- near);
+    m[15] = 1;
+
+    if (flip_z_axis) {
+        m[2] = -m[2];
+    }
+
+    return m;
+}
+function matrix4_translate_f32(x: number, y: number, z: number): Matrix4 {
+    const m = Matrix4_Identity();
+    m[12] = x;
+    m[13] = y;
+    m[14] = z;
+    return m
+}
+
+function transpose(m: Matrix4): Matrix4 {
+    const result = Matrix4_Zero();
+
+    result[ 0] = m[0];
+    result[ 1] = m[4];
+    result[ 2] = m[8];
+    result[ 3] = m[12];
+    result[ 4] = m[1];
+    result[ 5] = m[5];
+    result[ 6] = m[9];
+    result[ 7] = m[13];
+    result[ 8] = m[2];
+    result[ 9] = m[6];
+    result[10] = m[10];
+    result[11] = m[14];
+    result[12] = m[3];
+    result[13] = m[7];
+    result[14] = m[11];
+    result[15] = m[15];
+
+    return result;
+  }
+
+// Returns a translation matrix given a translation vector.
+function make_translation_matrix4(x: number, y: number, z: number): Matrix4 {
+    const result = Matrix4_Identity();
+
+    // result[3] = x;
+    // result[7] = y;
+    // result[11] = z;
+
+    result[ 0] = 1;
+    result[ 1] = 0;
+    result[ 2] = 0;
+    result[ 3] = 0;
+    result[ 4] = 0;
+    result[ 5] = 1;
+    result[ 6] = 0;
+    result[ 7] = 0;
+    result[ 8] = 0;
+    result[ 9] = 0;
+    result[10] = 1;
+    result[11] = 0;
+    result[12] = x;
+    result[13] = y;
+    result[14] = z;
+    result[15] = 1;
+
+    return result;
+}
+
+function z_rotate(m: Matrix4, angle_in_radians:number): Matrix4 {
+    // This is the optimized version of
+    // return multiply(m, zRotation(angle_in_radians), dst);
+    // dst = dst || new MatType(16);
+    const dst = Matrix4_Zero();
+
+    var m00 = m[0 * 4 + 0];
+    var m01 = m[0 * 4 + 1];
+    var m02 = m[0 * 4 + 2];
+    var m03 = m[0 * 4 + 3];
+    var m10 = m[1 * 4 + 0];
+    var m11 = m[1 * 4 + 1];
+    var m12 = m[1 * 4 + 2];
+    var m13 = m[1 * 4 + 3];
+    var c = Math.cos(angle_in_radians);
+    var s = Math.sin(angle_in_radians);
+
+    dst[ 0] = c * m00 + s * m10;
+    dst[ 1] = c * m01 + s * m11;
+    dst[ 2] = c * m02 + s * m12;
+    dst[ 3] = c * m03 + s * m13;
+    dst[ 4] = c * m10 - s * m00;
+    dst[ 5] = c * m11 - s * m01;
+    dst[ 6] = c * m12 - s * m02;
+    dst[ 7] = c * m13 - s * m03;
+
+    /* if (m !== dst)  */{
+      dst[ 8] = m[ 8];
+      dst[ 9] = m[ 9];
+      dst[10] = m[10];
+      dst[11] = m[11];
+      dst[12] = m[12];
+      dst[13] = m[13];
+      dst[14] = m[14];
+      dst[15] = m[15];
+    }
+
+    return dst;
 }
