@@ -43,6 +43,7 @@ class Game {
     mode:       number;
     renderer:   Renderer;
     texture0:   WebGLTexture;
+    inputs:     Inputs;
 }
 class Renderer {
     gl:                 WebGL2RenderingContext;
@@ -96,7 +97,8 @@ const sprites: Sprite[] = [
 
 (function main() {
     requestAnimationFrame(update);
-    document.addEventListener("keyup", platform_on_key_up, false);
+    document.addEventListener("keydown", inputs_on_key, false);
+    document.addEventListener("keyup", inputs_on_key, false);
 }());
 
 function update() {
@@ -109,6 +111,7 @@ function update() {
             return;
         }
 
+        game.inputs = inputs_init();
         game.renderer = renderer;
         renderer_update_camera_matrix_main(game.renderer.camera_main);
 
@@ -135,10 +138,23 @@ function update() {
     gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
 
     const t = sin_01(Date.now(), 1.0 / 1000);
-    sprites[0].rotation = t * Math.PI*2;
+    // sprites[0].rotation = t * Math.PI*2;
     sprites[1].scale[0] = 1 + t;
     sprites[1].scale[1] = 1 + t;
     sprites[2].position[1] = -32 + 64 * t;
+
+    if (game.inputs.keys["ArrowUp"].down) {
+        sprites[0].position[1] += 1;
+    }
+    if (game.inputs.keys["ArrowDown"].down) {
+        sprites[0].position[1] -= 1;
+    }
+    if (game.inputs.keys["ArrowLeft"].down) {
+        sprites[0].position[0] -= 1;
+    }
+    if (game.inputs.keys["ArrowRight"].down) {
+        sprites[0].position[0] += 1;
+    }
 
     // :render
     render: {
@@ -156,9 +172,9 @@ function update() {
 
                 let matrix = matrix4_identity();
                 matrix = matrix4_multiply(matrix, matrix4_make_translation(sprite.position[0], sprite.position[1], 0));
+                matrix = matrix4_rotate_z(matrix, sprite.rotation);
                 matrix = matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0], sprite.size[1], 0));
                 matrix = matrix4_multiply(matrix, matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0));
-                matrix = matrix4_rotate_z(matrix, sprite.rotation);
                 instance_data.set(matrix, offset);
             }
 
@@ -171,6 +187,8 @@ function update() {
             gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, sprites.length);
         }
     }
+
+    inputs_reset(game.inputs);
 
     requestAnimationFrame(update);
 }
@@ -345,10 +363,175 @@ function renderer_update_camera_matrix_main(camera: Camera_Orthographic): void {
 }
 
 // :inputs
-function platform_on_key_up(event: KeyboardEvent) {
-    if (event.key === "Enter") {
+class Inputs {
+    quit_requested:             boolean;
+    window_resized:             boolean;
+    window_is_focused:          boolean;
+    keyboard_was_used:          boolean;
+    keys:                       { [key in Keyboard_Key]: Key_State };
+    mouse_was_used:             boolean;
+    mouse_keys:                 { [key in Mouse_Key]: Key_State };
+    mouse_position:             Vector2 = [0,0];
+    mouse_wheel:                Vector2 = [0,0];
+    mouse_moved:                boolean;
+    controller_was_used:        boolean;
+    // controllers:                [MAX_CONTROLLERS]Controller_State;
+}
+type Key_State = {
+    pressed:        boolean; // The key was pressed this frame
+    down:           boolean; // The key is down
+    released:       boolean; // The key was released this frame
+}
+// I really hate that i have to do this, but this is JavaScript so here we go...
+enum Keyboard_Key {
+    "_0" = "0",
+    "_1" = "1",
+    "_2" = "2",
+    "_3" = "3",
+    "_4" = "4",
+    "_5" = "5",
+    "_6" = "6",
+    "_7" = "7",
+    "_8" = "8",
+    "_9" = "9",
+    "a" = "a",
+    "b" = "b",
+    "c" = "c",
+    "d" = "d",
+    "e" = "e",
+    "f" = "f",
+    "g" = "g",
+    "h" = "h",
+    "i" = "i",
+    "j" = "j",
+    "k" = "k",
+    "l" = "l",
+    "m" = "m",
+    "n" = "n",
+    "o" = "o",
+    "p" = "p",
+    "q" = "q",
+    "r" = "r",
+    "s" = "s",
+    "t" = "t",
+    "u" = "u",
+    "v" = "v",
+    "w" = "w",
+    "x" = "x",
+    "y" = "y",
+    "z" = "z",
+    "²" = "²",
+    "F1" = "F1",
+    "F2" = "F2",
+    "F3" = "F3",
+    "F4" = "F4",
+    "F5" = "F5",
+    "F6" = "F6",
+    "F7" = "F7",
+    "F8" = "F8",
+    "F9" = "F9",
+    "F10" = "F10",
+    "F11" = "F11",
+    "F12" = "F12",
+    "Tab" = "Tab",
+    "Shift" = "Shift",
+    "Control" = "Control",
+    "Meta" = "Meta",
+    " " = " ",
+    "Alt" = "Alt",
+    "AltGraph" = "AltGraph",
+    "ArrowDown" = "ArrowDown",
+    "ArrowLeft" = "ArrowLeft",
+    "ArrowRight" = "ArrowRight",
+    "ArrowUp" = "ArrowUp",
+}
+enum Mouse_Key {
+    NONE,
+    LEFT,
+    MIDDLE,
+    RIGHT,
+    COUNT,
+}
 
+function inputs_init(): Inputs {
+    const inputs = new Inputs();
+    // @ts-ignore
+    inputs.keys = {};
+    const keys = Object.values(Keyboard_Key);
+    for (let key_index = 0; key_index < keys.length; key_index++) {
+        const key = keys[key_index];
+        inputs.keys[key] = { pressed: false, down: false, released: false };
     }
+    // @ts-ignore
+    inputs.mouse_keys = {};
+    const mouse_keys = Object.values(Keyboard_Key);
+    for (let key_index = 0; key_index < mouse_keys.length; key_index++) {
+        const key = mouse_keys[key_index];
+        inputs.mouse_keys[key] = { pressed: false, down: false, released: false };
+    }
+    return inputs;
+}
+function inputs_on_key(event: KeyboardEvent) {
+    const key_state = game.inputs.keys[event.key];
+    if (!key_state) {
+        console.warn("Unrecognized key:", event.key);
+        return;
+    }
+    key_state.down = event.type == "keydown";
+    key_state.released = event.type == "keyup";
+    key_state.pressed = event.type == "keydown";
+}
+function inputs_reset(inputs: Inputs) {
+    inputs.mouse_wheel[0] = 0;
+    inputs.mouse_wheel[1] = 0;
+    inputs.mouse_moved = false;
+    inputs.quit_requested = false;
+    inputs.window_resized = false;
+
+    inputs.keyboard_was_used = false;
+    for (const key_state of Object.values(inputs.keys)) {
+        if (key_state.pressed || key_state.down || key_state.released) {
+            inputs.keyboard_was_used = true;
+            break;
+        }
+    }
+    inputs.mouse_was_used = false;
+    for (const key_state of Object.values(inputs.mouse_keys)) {
+        if (key_state.pressed || key_state.down || key_state.released) {
+            inputs.mouse_was_used = true;
+            break;
+        }
+    }
+    inputs.controller_was_used = false;
+    // for controller_state : inputs.controllers {
+    //     for key_state : controller_state.buttons {
+    //         if key_state.pressed || key_state.down || key_state.released {
+    //             inputs.controller_was_used = true;
+    //             break;
+    //         }
+    //     }
+    //     for axis_state : controller_state.axes {
+    //         if abs(axis_state) > CONTROLLER_DEADZONE {
+    //             inputs.controller_was_used = true;
+    //             break;
+    //         }
+    //     }
+    // }
+
+    for (const key_state of Object.values(inputs.keys)) {
+        key_state.pressed = false;
+        key_state.released = false;
+    }
+    for (const key_state of Object.values(inputs.mouse_keys)) {
+        key_state.pressed = false;
+        key_state.released = false;
+    }
+    // for controller_state : inputs.controllers {
+    //     for *key_state : controller_state.buttons {
+    //         key_state.pressed = false;
+    //         key_state.released = false;
+    //     }
+    // }
 }
 
 function log_matrix(matrix: Matrix4) {
