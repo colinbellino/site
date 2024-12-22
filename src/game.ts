@@ -1,3 +1,5 @@
+declare var __RELEASE__: boolean;
+
 // :shader
 const sprite_vs = `
     #version 300 es
@@ -113,8 +115,8 @@ function main() {
     if (ENABLE_SPRITE_PASS) {
         game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
         // TODO: Don't render the game while the assets are loading
-        load_image("/public/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
-        // load_image("/public/screenshots/hubside/banner-large.jpg").then(image => { renderer_create_texture(image, game.renderer.gl); });
+        load_image("./images/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+        // load_image("./images/screenshots/hubside/banner-large.jpg").then(image => { renderer_create_texture(image, game.renderer.gl); });
     }
 
     document.addEventListener("keydown", inputs_on_key, false);
@@ -567,7 +569,7 @@ function sin_01(time: float, frequency: float = 1.0): float {
     return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
 }
 function assert(condition: Boolean, message: string | null = ""): asserts condition {
-    if (!condition) {
+    if (!__RELEASE__ && !condition) {
         debugger;
         if (message) {
             console.error("Assertion failed:");

@@ -10,3 +10,6 @@ dist/
 *.wasm
 *.min.mjs
 *.min.html
+
+# Local Netlify folder
+.netlify
