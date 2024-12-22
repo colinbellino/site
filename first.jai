@@ -20,7 +20,7 @@ watcher: File_Watcher(void);
             exit(4);
         }
 
-        run_compile_command("src/main.ts");
+        run_compile_command("src/game.ts");
 
         while true {
             process_changes(*watcher);
@@ -51,17 +51,27 @@ file_change_callback :: (watcher: *File_Watcher(void), change: *File_Change, use
 }
 
 run_compile_command :: (file_full_path: string) {
+    remove_whitespace :: (str: string) -> string {
+        return replace(replace(str, "\n", ""), " ", "");
+    }
+
+    config :: #string STRING
+        {
+            "jsc": { "target": "es6" },
+            "module": { "type": "es6" }
+        }
+    STRING;
     args := string.[
         tprint("./bin/%/swc", OS),
         "compile", file_full_path,
-        "--out-file=dist/main.js",
-        "--source-maps", "true"
+        "--out-file=dist/game.js",
+        // FIXME: disable source map in release builds
+        "--source-maps", "true",
+        "--config-json", remove_whitespace(config),
     ];
-    // FIXME: disable source map in release builds
     process_result, output, error := run_command(..args, capture_and_return_output = true);
-    // log("process_result: %", process_result);
-    // log("output: %", output);
-    if output {
+    log("[SWC] ❯ %", join(..args, " "));
+    if error {
         log_error("[SWC] %", error);
     } else {
         log("[SWC] % compiled.", file_full_path);

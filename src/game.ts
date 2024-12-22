@@ -95,7 +95,9 @@ const sprites: Sprite[] = [
     { color: COLOR_WHITE, position: [-64, -64], size: [32, 32], scale: [2, 2], rotation: 0, },
 ];
 
-(function main() {
+requestAnimationFrame(main);
+
+function main() {
     game = new Game();
 
     const [renderer, renderer_ok] = renderer_init();
@@ -103,9 +105,9 @@ const sprites: Sprite[] = [
         console.error("Couldn't initialize renderer.");
         return;
     }
+    game.renderer = renderer;
 
     game.inputs = inputs_init();
-    game.renderer = renderer;
     renderer_update_camera_matrix_main(game.renderer.camera_main);
 
     if (ENABLE_SPRITE_PASS) {
@@ -119,7 +121,7 @@ const sprites: Sprite[] = [
     document.addEventListener("keyup", inputs_on_key, false);
 
     requestAnimationFrame(update);
-}());
+}
 
 function update() {
     const gl = game.renderer.gl;
@@ -153,6 +155,14 @@ function update() {
     }
     if (game.inputs.keys["ArrowRight"].down) {
         sprites[0].position[0] += 1;
+    }
+    if (game.inputs.keys[" "].down) {
+        sprites[0].scale[0] += 0.1;
+        sprites[0].scale[1] += 0.1;
+    }
+    if (game.inputs.keys[" "].released) {
+        sprites[0].scale[0] = 1;
+        sprites[0].scale[1] = 1;
     }
 
     // :render
@@ -362,7 +372,7 @@ function renderer_update_camera_matrix_main(camera: Camera_Orthographic): void {
 }
 
 // :inputs
-class Inputs {
+type Inputs = {
     quit_requested:             boolean;
     window_resized:             boolean;
     window_is_focused:          boolean;
@@ -370,8 +380,8 @@ class Inputs {
     keys:                       { [key in Keyboard_Key]: Key_State };
     mouse_was_used:             boolean;
     mouse_keys:                 { [key in Mouse_Key]: Key_State };
-    mouse_position:             Vector2 = [0,0];
-    mouse_wheel:                Vector2 = [0,0];
+    mouse_position:             Vector2;
+    mouse_wheel:                Vector2;
     mouse_moved:                boolean;
     controller_was_used:        boolean;
     // controllers:                [MAX_CONTROLLERS]Controller_State;
@@ -443,7 +453,7 @@ enum Keyboard_Key {
     "ArrowLeft" = "ArrowLeft",
     "ArrowRight" = "ArrowRight",
     "ArrowUp" = "ArrowUp",
-}
+};
 enum Mouse_Key {
     NONE,
     LEFT,
@@ -453,16 +463,15 @@ enum Mouse_Key {
 }
 
 function inputs_init(): Inputs {
-    const inputs = new Inputs();
     // @ts-ignore
-    inputs.keys = {};
+    const inputs: Inputs = { keys: {}, mouse_keys: {} };
+    inputs.mouse_position = [0,0];
+    inputs.mouse_wheel = [0,0];
     const keys = Object.values(Keyboard_Key);
     for (let key_index = 0; key_index < keys.length; key_index++) {
         const key = keys[key_index];
         inputs.keys[key] = { pressed: false, down: false, released: false };
     }
-    // @ts-ignore
-    inputs.mouse_keys = {};
     const mouse_keys = Object.values(Keyboard_Key);
     for (let key_index = 0; key_index < mouse_keys.length; key_index++) {
         const key = mouse_keys[key_index];
