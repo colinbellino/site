@@ -96,33 +96,32 @@ const sprites: Sprite[] = [
 ];
 
 (function main() {
-    requestAnimationFrame(update);
+    game = new Game();
+
+    const [renderer, renderer_ok] = renderer_init();
+    if (!renderer_ok) {
+        console.error("Couldn't initialize renderer.");
+        return;
+    }
+
+    game.inputs = inputs_init();
+    game.renderer = renderer;
+    renderer_update_camera_matrix_main(game.renderer.camera_main);
+
+    if (ENABLE_SPRITE_PASS) {
+        game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
+        // TODO: Don't render the game while the assets are loading
+        load_image("/public/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+        // load_image("/public/screenshots/hubside/banner-large.jpg").then(image => { renderer_create_texture(image, game.renderer.gl); });
+    }
+
     document.addEventListener("keydown", inputs_on_key, false);
     document.addEventListener("keyup", inputs_on_key, false);
+
+    requestAnimationFrame(update);
 }());
 
 function update() {
-    if (game === undefined) {
-        game = new Game();
-
-        const [renderer, renderer_ok] = renderer_init();
-        if (!renderer_ok) {
-            console.error("Couldn't initialize renderer.");
-            return;
-        }
-
-        game.inputs = inputs_init();
-        game.renderer = renderer;
-        renderer_update_camera_matrix_main(game.renderer.camera_main);
-
-        if (ENABLE_SPRITE_PASS) {
-            game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
-            // TODO: Don't render the game while the assets are loading
-            load_image("/public/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
-            // load_image("/public/screenshots/hubside/banner-large.jpg").then(image => { renderer_create_texture(image, game.renderer.gl); });
-        }
-    }
-
     const gl = game.renderer.gl;
 
     game.renderer.size_changed = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
