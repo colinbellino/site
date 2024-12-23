@@ -44,6 +44,7 @@ compile_work :: (group: *Thread_Group, thread: *Thread, work: *void) -> Thread_C
     run_compile_command("src/game.ts", config.release);
 
     while true {
+        sleep_milliseconds(100);
         process_changes(*watcher);
     }
     return .CONTINUE;

@@ -13,8 +13,8 @@ const sprite_vs = `
     layout(location=4) in vec4 i_matrix1;
     layout(location=5) in vec4 i_matrix2;
     layout(location=6) in vec4 i_matrix3;
-    layout(location=7) in vec2 i_tex_pos;
-    layout(location=8) in vec2 i_tex_size; // TODO: remove this
+    layout(location=7) in vec2 i_tex_position;
+    layout(location=8) in vec2 i_tex_size;
 
     uniform mat4 u_matrix;
 
@@ -24,7 +24,7 @@ const sprite_vs = `
     void main() {
         mat4 i_matrix = mat4(i_matrix0, i_matrix1, i_matrix2, i_matrix3);
         gl_Position = u_matrix * i_matrix * (vec4(position, 0, 1));
-        v_uv = uv + i_tex_pos + i_tex_size*0.0;
+        v_uv = i_tex_size*uv + i_tex_position;
         v_color = i_color;
     }
 `;
@@ -44,9 +44,10 @@ const sprite_fs = `
 
 // :game
 type Game = {
-    renderer:   Renderer;
-    texture0:   WebGLTexture;
-    inputs:     Inputs;
+    render_active:  boolean;
+    renderer:       Renderer;
+    texture0:       WebGLTexture;
+    inputs:         Inputs;
 }
 type Renderer = {
     gl:                 WebGL2RenderingContext;
@@ -98,9 +99,10 @@ const COLOR_BLUE:  Color = [0, 0, 1, 1];
 let game: Game;
 // :sprites
 const sprites: Sprite[] = [
-    { color: COLOR_WHITE, position: [0, 0],  size: [32, 32], scale: [9, 9], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_WHITE, position: [64, 0], size: [32, 32], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_WHITE, position: [-64, -64], size: [32, 32], scale: [2, 2], rotation: 0, texture_size: [8, 8], texture_position: [0, 0] },
+    // FIXME: scale should be applied after position
+    { color: COLOR_WHITE, position: [0, 32], size: [54, 54], scale: [4, 4], rotation: 0, texture_size: [54, 54], texture_position: [0, 16] },
+    { color: COLOR_WHITE, position: [0, 0],  size: [32, 32], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
+    { color: COLOR_WHITE, position: [32, -32], size: [32, 32], scale: [2, 2], rotation: 0, texture_size: [16, 16], texture_position: [16, 0] },
 ];
 
 requestAnimationFrame(main);
@@ -148,17 +150,21 @@ function update() {
 
     gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
 
-    const t = sin_01(Date.now(), 1.0 / 1000);
-    // sprites[0].rotation = t * Math.PI*2;
+    const t = sin_01(Date.now(), 1.0 / 2000);
+    // sprites[1].rotation = t * 2*Math.PI;
     sprites[1].scale[0] = 1 + t;
     sprites[1].scale[1] = 1 + t;
-    sprites[2].position[1] = -32 + 64 * t;
+    // sprites[2].position[1] = -32 + 64 * t;
+
+    if (game.inputs.keys["p"].released) {
+        game.render_active = !game.render_active;
+    }
 
     if (game.inputs.keys["ArrowUp"].down) {
-        sprites[0].position[1] += 1;
+        sprites[0].position[1] -= 1;
     }
     if (game.inputs.keys["ArrowDown"].down) {
-        sprites[0].position[1] -= 1;
+        sprites[0].position[1] += 1;
     }
     if (game.inputs.keys["ArrowLeft"].down) {
         sprites[0].position[0] -= 1;
@@ -167,22 +173,30 @@ function update() {
         sprites[0].position[0] += 1;
     }
     if (game.inputs.keys[" "].down) {
-        sprites[0].scale[0] += 0.1;
-        sprites[0].scale[1] += 0.1;
+        // sprites[2].scale[0] += 0.1;
+        // sprites[2].scale[1] += 0.1;
+        sprites[2].rotation = t;
     }
     if (game.inputs.keys[" "].released) {
-        sprites[0].scale[0] = 1;
-        sprites[0].scale[1] = 1;
+        // sprites[2].scale[0] = 1;
+        // sprites[2].scale[1] = 1;
+        sprites[2].rotation = 0;
     }
 
     // :render
     render: {
+        if (game.render_active)  { break render; }
+
         gl.clearColor(0.25, 0.25, 0.25, 1);
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         if (ENABLE_SPRITE_PASS) {
             // TODO: Don't recreate this every frame
             let instance_data = new Float32Array(sprites.length * SPRITE_PASS_INSTANCE_DATA_SIZE);
+            const pixel_size = [
+                1 / ATLAS_SIZE[0],
+                1 / ATLAS_SIZE[1],
+            ];
             for (let sprite_index = 0; sprite_index < sprites.length; sprite_index++) {
                 const sprite = sprites[sprite_index];
                 let offset = SPRITE_PASS_INSTANCE_DATA_SIZE * sprite_index;
@@ -191,26 +205,27 @@ function update() {
                 offset += 4;
 
                 let matrix = matrix4_identity();
+                const pivot = [0.5, 0.5];
+                const size = [sprite.size[0] * sprite.scale[0], sprite.size[1] * sprite.scale[1]];
                 matrix = matrix4_multiply(matrix, matrix4_make_translation(sprite.position[0], sprite.position[1], 0));
+                matrix = matrix4_multiply(matrix, matrix4_make_translation(size[0]*-pivot[0], size[1]*-pivot[1], 0));
+                matrix = matrix4_multiply(matrix, matrix4_make_translation(size[0]*2*pivot[0], size[1]*2*pivot[1], 0));
+                matrix = matrix4_multiply(matrix, matrix4_make_scale(size[0], size[1], 0));
                 matrix = matrix4_rotate_z(matrix, sprite.rotation);
-                matrix = matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0], sprite.size[1], 0));
-                matrix = matrix4_multiply(matrix, matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0));
                 instance_data.set(matrix, offset);
                 offset += 16;
 
                 const texture_position = [
-                    sprite.texture_position[0] / ATLAS_SIZE[0],
-                    sprite.texture_position[1] / ATLAS_SIZE[1],
+                    sprite.texture_position[0] * pixel_size[0],
+                    sprite.texture_position[1] * pixel_size[1],
                 ];
-                // console.log("texture_position", texture_position);
                 instance_data.set(texture_position, offset);
                 offset += 2;
 
                 const texture_size = [
-                    sprite.texture_size[0]/ATLAS_SIZE[0],
-                    sprite.texture_size[1]/ATLAS_SIZE[1],
+                    sprite.texture_size[0] * pixel_size[0],
+                    sprite.texture_size[1] * pixel_size[1],
                 ];
-                // console.log("texture_size", texture_size);
                 instance_data.set(texture_size, offset);
                 offset += 2;
             }
@@ -303,50 +318,50 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         const location_color = gl.getAttribLocation(pass.program, "i_color");
         assert(location_color != -1, "Couldn't get attrib location i_color.");
         gl.enableVertexAttribArray(location_color);
-        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_color, 1);
-        offset += 16;
+        offset += 4;
 
         const location_matrix0 = gl.getAttribLocation(pass.program, "i_matrix0");
         assert(location_matrix0 != -1, "Couldn't get attrib location i_matrix0.");
         gl.enableVertexAttribArray(location_matrix0);
-        gl.vertexAttribPointer(location_matrix0, 4, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribPointer(location_matrix0, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_matrix0, 1);
-        offset += 16;
+        offset += 4;
         const location_matrix1 = gl.getAttribLocation(pass.program, "i_matrix1");
         assert(location_matrix1 != -1, "Couldn't get attrib location i_matrix1.");
         gl.enableVertexAttribArray(location_matrix1);
-        gl.vertexAttribPointer(location_matrix1, 4, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribPointer(location_matrix1, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_matrix1, 1);
-        offset += 16;
+        offset += 4;
         const location_matrix2 = gl.getAttribLocation(pass.program, "i_matrix2");
         assert(location_matrix2 != -1, "Couldn't get attrib location i_matrix2");
         gl.enableVertexAttribArray(location_matrix2);
-        gl.vertexAttribPointer(location_matrix2, 4, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribPointer(location_matrix2, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_matrix2, 1);
-        offset += 16;
+        offset += 4;
         const location_matrix3 = gl.getAttribLocation(pass.program, "i_matrix3");
         assert(location_matrix3 != -1, "Couldn't get attrib location i_matrix3");
         gl.enableVertexAttribArray(location_matrix3);
-        gl.vertexAttribPointer(location_matrix3, 4, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribPointer(location_matrix3, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_matrix3, 1);
-        offset += 16;
+        offset += 4;
 
-        const location_tex_pos = gl.getAttribLocation(pass.program, "i_tex_pos");
-        assert(location_tex_pos != -1, "Couldn't get attrib location i_tex_pos.");
-        gl.enableVertexAttribArray(location_tex_pos);
-        gl.vertexAttribPointer(location_tex_pos, 2, gl.FLOAT, false, STRIDE, offset);
-        gl.vertexAttribDivisor(location_tex_pos, 1);
-        offset += 8;
+        const location_tex_position = gl.getAttribLocation(pass.program, "i_tex_position");
+        assert(location_tex_position != -1, "Couldn't get attrib location i_tex_position.");
+        gl.enableVertexAttribArray(location_tex_position);
+        gl.vertexAttribPointer(location_tex_position, 2, gl.FLOAT, false, STRIDE, offset*4);
+        gl.vertexAttribDivisor(location_tex_position, 1);
+        offset += 2;
 
         const location_tex_size = gl.getAttribLocation(pass.program, "i_tex_size");
         assert(location_tex_size != -1, "Couldn't get attrib location i_tex_size.");
         gl.enableVertexAttribArray(location_tex_size);
-        gl.vertexAttribPointer(location_tex_size, 2, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribPointer(location_tex_size, 2, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_tex_size, 1);
-        offset += 8;
+        offset += 2;
 
-        assert(SPRITE_PASS_INSTANCE_DATA_SIZE*4 === offset, "SPRITE_PASS_INSTANCE_DATA_SIZE doesn't match the attributes byte size.");
+        assert(SPRITE_PASS_INSTANCE_DATA_SIZE === offset, "SPRITE_PASS_INSTANCE_DATA_SIZE doesn't match the attributes byte size.");
     }
 
     // :sprite_pass uniform
@@ -377,7 +392,7 @@ function renderer_create_texture(image: HTMLImageElement, gl: WebGL2RenderingCon
     assert(texture !== null, "Couldn't create texture.");
 
     gl.activeTexture(gl.TEXTURE0);
-    gl.pixelStorei  (gl.UNPACK_FLIP_Y_WEBGL, true);
+    // gl.pixelStorei  (gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture  (gl.TEXTURE_2D, texture);
     gl.texImage2D   (gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
@@ -416,7 +431,7 @@ function renderer_create_program(gl: WebGL2RenderingContext, vs: string, fs: str
 function renderer_update_camera_matrix_main(camera: Camera_Orthographic): void {
     camera.projection_matrix = matrix4_make_orthographic_projection(
         game.renderer.window_size[0]*-0.5, game.renderer.window_size[0]*0.5,
-        game.renderer.window_size[1]*-0.5, game.renderer.window_size[1]*0.5,
+        game.renderer.window_size[1]*0.5, game.renderer.window_size[1]*-0.5,
         -1,                                 +1,
     );
 
