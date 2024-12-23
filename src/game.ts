@@ -13,6 +13,8 @@ const sprite_vs = `
     layout(location=4) in vec4 i_matrix1;
     layout(location=5) in vec4 i_matrix2;
     layout(location=6) in vec4 i_matrix3;
+    layout(location=7) in vec2 i_tex_pos;
+    layout(location=8) in vec2 i_tex_size; // TODO: remove this
 
     uniform mat4 u_matrix;
 
@@ -22,7 +24,7 @@ const sprite_vs = `
     void main() {
         mat4 i_matrix = mat4(i_matrix0, i_matrix1, i_matrix2, i_matrix3);
         gl_Position = u_matrix * i_matrix * (vec4(position, 0, 1));
-        v_uv = uv;
+        v_uv = uv + i_tex_pos + i_tex_size*0.0;
         v_color = i_color;
     }
 `;
@@ -41,27 +43,26 @@ const sprite_fs = `
 `;
 
 // :game
-class Game {
-    mode:       number;
+type Game = {
     renderer:   Renderer;
     texture0:   WebGLTexture;
     inputs:     Inputs;
 }
-class Renderer {
+type Renderer = {
     gl:                 WebGL2RenderingContext;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
     size_changed:       boolean;
 }
-class Sprite_Pass {
+type Sprite_Pass = {
     program:                WebGLProgram;
     vao:                    WebGLVertexArrayObject;
     indices:                WebGLBuffer;
     instance_data:          WebGLBuffer;
     location_matrix:        WebGLUniformLocation;
 }
-class Camera_Orthographic {
+type Camera_Orthographic = {
     position:                   Vector2;
     rotation:                   number;
     zoom:                       number;
@@ -78,29 +79,35 @@ type Matrix4 = [float,float,float,float,float,float,float,float,float,float,floa
 type float   = GLfloat;
 type Color = [float, float, float, float];
 type Sprite = {
-    color:      Color;
-    position:   Vector2;
-    size:       Vector2;
-    scale:      Vector2;
-    rotation:   float;
+    color:              Color;
+    position:           Vector2;
+    size:               Vector2;
+    scale:              Vector2;
+    texture_size:       Vector2;
+    texture_position:   Vector2;
+    rotation:           float;
 }
 
 const ENABLE_SPRITE_PASS = true;
-const SPRITE_PASS_INSTANCE_DATA_SIZE = 20;
+const ATLAS_SIZE = [512, 512];
+const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
 const COLOR_WHITE: Color = [1, 1, 1, 1];
 const COLOR_RED:   Color = [1, 0, 0, 1];
+const COLOR_BLUE:  Color = [0, 0, 1, 1];
 
 let game: Game;
+// :sprites
 const sprites: Sprite[] = [
-    { color: COLOR_RED,   position: [0, 0],  size: [32, 32], scale: [1, 1], rotation: 0, },
-    { color: COLOR_WHITE, position: [64, 0], size: [32, 32], scale: [1, 1], rotation: 0, },
-    { color: COLOR_WHITE, position: [-64, -64], size: [32, 32], scale: [2, 2], rotation: 0, },
+    { color: COLOR_WHITE, position: [0, 0],  size: [32, 32], scale: [9, 9], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
+    { color: COLOR_WHITE, position: [64, 0], size: [32, 32], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
+    { color: COLOR_WHITE, position: [-64, -64], size: [32, 32], scale: [2, 2], rotation: 0, texture_size: [8, 8], texture_position: [0, 0] },
 ];
 
 requestAnimationFrame(main);
 
 function main() {
-    game = new Game();
+    // @ts-ignore
+    game = {};
 
     const [renderer, renderer_ok] = renderer_init();
     if (!renderer_ok) {
@@ -115,7 +122,8 @@ function main() {
     if (ENABLE_SPRITE_PASS) {
         game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
         // TODO: Don't render the game while the assets are loading
-        load_image("./images/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+        load_image("./images/atlas.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+        // load_image("./images/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
         // load_image("./images/screenshots/hubside/banner-large.jpg").then(image => { renderer_create_texture(image, game.renderer.gl); });
     }
 
@@ -173,6 +181,7 @@ function update() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         if (ENABLE_SPRITE_PASS) {
+            // TODO: Don't recreate this every frame
             let instance_data = new Float32Array(sprites.length * SPRITE_PASS_INSTANCE_DATA_SIZE);
             for (let sprite_index = 0; sprite_index < sprites.length; sprite_index++) {
                 const sprite = sprites[sprite_index];
@@ -187,6 +196,23 @@ function update() {
                 matrix = matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0], sprite.size[1], 0));
                 matrix = matrix4_multiply(matrix, matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0));
                 instance_data.set(matrix, offset);
+                offset += 16;
+
+                const texture_position = [
+                    sprite.texture_position[0] / ATLAS_SIZE[0],
+                    sprite.texture_position[1] / ATLAS_SIZE[1],
+                ];
+                // console.log("texture_position", texture_position);
+                instance_data.set(texture_position, offset);
+                offset += 2;
+
+                const texture_size = [
+                    sprite.texture_size[0]/ATLAS_SIZE[0],
+                    sprite.texture_size[1]/ATLAS_SIZE[1],
+                ];
+                // console.log("texture_size", texture_size);
+                instance_data.set(texture_size, offset);
+                offset += 2;
             }
 
             gl.useProgram(game.renderer.sprite_pass.program);
@@ -215,17 +241,21 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
-    const renderer = new Renderer();
+    // @ts-ignore
+    const renderer: Renderer = {};
     renderer.gl = _gl;
 
-    renderer.sprite_pass = new Sprite_Pass();
+    // @ts-ignore
+    renderer.sprite_pass = {};
+    // @ts-ignore
+    renderer.camera_main = {};
     renderer.window_size = [window.innerWidth, window.innerHeight];
-    renderer.camera_main = new Camera_Orthographic();
 
     return [renderer, true];
 }
 function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
-    const pass = new Sprite_Pass();
+    // @ts-ignore
+    const pass: Sprite_Pass = {};
     const [program, program_ok] = renderer_create_program(gl, sprite_vs, sprite_fs);
     if (program_ok) {
         pass.program = program;
@@ -267,32 +297,56 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         pass.instance_data = instance_data;
         gl.bindBuffer(gl.ARRAY_BUFFER, pass.instance_data);
 
+        const STRIDE = SPRITE_PASS_INSTANCE_DATA_SIZE*4;
+        let offset = 0;
+
         const location_color = gl.getAttribLocation(pass.program, "i_color");
         assert(location_color != -1, "Couldn't get attrib location i_color.");
         gl.enableVertexAttribArray(location_color);
-        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, SPRITE_PASS_INSTANCE_DATA_SIZE*4, 0);
+        gl.vertexAttribPointer(location_color, 4, gl.FLOAT, false, STRIDE, offset);
         gl.vertexAttribDivisor(location_color, 1);
+        offset += 16;
 
         const location_matrix0 = gl.getAttribLocation(pass.program, "i_matrix0");
         assert(location_matrix0 != -1, "Couldn't get attrib location i_matrix0.");
         gl.enableVertexAttribArray(location_matrix0);
-        gl.vertexAttribPointer(location_matrix0, 4, gl.FLOAT, false, SPRITE_PASS_INSTANCE_DATA_SIZE*4, 16);
+        gl.vertexAttribPointer(location_matrix0, 4, gl.FLOAT, false, STRIDE, offset);
         gl.vertexAttribDivisor(location_matrix0, 1);
+        offset += 16;
         const location_matrix1 = gl.getAttribLocation(pass.program, "i_matrix1");
         assert(location_matrix1 != -1, "Couldn't get attrib location i_matrix1.");
         gl.enableVertexAttribArray(location_matrix1);
-        gl.vertexAttribPointer(location_matrix1, 4, gl.FLOAT, false, SPRITE_PASS_INSTANCE_DATA_SIZE*4, 32);
+        gl.vertexAttribPointer(location_matrix1, 4, gl.FLOAT, false, STRIDE, offset);
         gl.vertexAttribDivisor(location_matrix1, 1);
+        offset += 16;
         const location_matrix2 = gl.getAttribLocation(pass.program, "i_matrix2");
         assert(location_matrix2 != -1, "Couldn't get attrib location i_matrix2");
         gl.enableVertexAttribArray(location_matrix2);
-        gl.vertexAttribPointer(location_matrix2, 4, gl.FLOAT, false, SPRITE_PASS_INSTANCE_DATA_SIZE*4, 48);
+        gl.vertexAttribPointer(location_matrix2, 4, gl.FLOAT, false, STRIDE, offset);
         gl.vertexAttribDivisor(location_matrix2, 1);
+        offset += 16;
         const location_matrix3 = gl.getAttribLocation(pass.program, "i_matrix3");
         assert(location_matrix3 != -1, "Couldn't get attrib location i_matrix3");
         gl.enableVertexAttribArray(location_matrix3);
-        gl.vertexAttribPointer(location_matrix3, 4, gl.FLOAT, false, SPRITE_PASS_INSTANCE_DATA_SIZE*4, 64);
+        gl.vertexAttribPointer(location_matrix3, 4, gl.FLOAT, false, STRIDE, offset);
         gl.vertexAttribDivisor(location_matrix3, 1);
+        offset += 16;
+
+        const location_tex_pos = gl.getAttribLocation(pass.program, "i_tex_pos");
+        assert(location_tex_pos != -1, "Couldn't get attrib location i_tex_pos.");
+        gl.enableVertexAttribArray(location_tex_pos);
+        gl.vertexAttribPointer(location_tex_pos, 2, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribDivisor(location_tex_pos, 1);
+        offset += 8;
+
+        const location_tex_size = gl.getAttribLocation(pass.program, "i_tex_size");
+        assert(location_tex_size != -1, "Couldn't get attrib location i_tex_size.");
+        gl.enableVertexAttribArray(location_tex_size);
+        gl.vertexAttribPointer(location_tex_size, 2, gl.FLOAT, false, STRIDE, offset);
+        gl.vertexAttribDivisor(location_tex_size, 1);
+        offset += 8;
+
+        assert(SPRITE_PASS_INSTANCE_DATA_SIZE*4 === offset, "SPRITE_PASS_INSTANCE_DATA_SIZE doesn't match the attributes byte size.");
     }
 
     // :sprite_pass uniform
@@ -328,6 +382,8 @@ function renderer_create_texture(image: HTMLImageElement, gl: WebGL2RenderingCon
     gl.texImage2D   (gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+    gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
 
     return texture;
 }
