@@ -61,6 +61,9 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     remove_whitespace :: (str: string) -> string {
         return replace(replace(str, "\n", ""), " ", "");
     }
+    to_dist_path :: (path: string) -> string {
+        return replace(replace(path, ".ts", ".js"), "src/", "public/dist/");
+    }
 
     config := tprint(#string STRING
         {
@@ -80,7 +83,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     args := string.[
         tprint("./bin/%/swc", OS),
         "compile", file_full_path,
-        "--out-file=public/dist/game.js",
+        "--out-file", to_dist_path(file_full_path),
         "--source-maps", ifx is_release then "false" else "true",
         "--config-json", remove_whitespace(config),
     ];
@@ -89,6 +92,8 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     if error {
         log_error("[SWC] %", error);
     } else {
-        log("[SWC] % compiled.", file_full_path);
+        #import "File";
+        data, read_ok := read_entire_file(to_dist_path(file_full_path));
+        log("[SWC] % compiled (% bytes).", file_full_path, data.count);
     }
 }
