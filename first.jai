@@ -24,7 +24,7 @@ Config :: struct {
     start(*thread_group);
     add_work(*thread_group, null, tprint("Work item 0"));
 
-    args := string.[tprint("./bin/%/simple-http-server", OS), "public"];
+    args := string.[tprint("./bin/%/simple-http-server", OS), "public", "--compress", "js"];
     process_result, output, error := run_command(..args, capture_and_return_output = false, print_captured_output = true);
 }
 
@@ -68,8 +68,10 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     config := tprint(#string STRING
         {
             "jsc": {
-                "target": "es6",
+                "target": "es2016",
                 "minify": { "mangle": %1, "compress": %1 },
+                "loose": false,
+                "keepClassNames": false,
                 "transform": {
                     "optimizer": {
                         "globals": { "vars": { "__RELEASE__": "%1" } }

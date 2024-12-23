@@ -42,19 +42,41 @@ const sprite_fs = `
     }
 `;
 
+type Vector2 = Static_Array<float,2>;
+type Vector3 = Static_Array<float,3>;
+type Vector4 = Static_Array<float,4>;
+type Matrix4 = Static_Array<float, 16>;
+type float = GLfloat;
+type int = GLint;
+type Color = Static_Array<float, 4>;
+type Fixed_Size_Array<T, N extends int> = {
+    data:   Static_Array<T, N>;
+    count:  int;
+    total:  N;
+};
+
 // :game
 type Game = {
     render_active:  boolean;
     renderer:       Renderer;
     texture0:       WebGLTexture;
     inputs:         Inputs;
+    entities:       Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
+    world_grid:     Static_Array<Sprite, typeof WORLD_GRID_SIZE>;
+    tile_grid:      Static_Array<Sprite, typeof TILE_GRID_SIZE>;
 }
+type Entity = {
+    name:           string;
+    sprite:         Sprite;
+}
+
 type Renderer = {
     gl:                 WebGL2RenderingContext;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
     size_changed:       boolean;
+    sprites:            Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
 }
 type Sprite_Pass = {
     program:                WebGLProgram;
@@ -72,27 +94,28 @@ type Camera_Orthographic = {
     view_matrix:                Matrix4;
     view_projection_matrix:     Matrix4;
 }
-
-type Vector2 = [float, float];
-type Vector3 = [float,float,float];
-type Vector4 = [float,float,float,float];
-type Matrix4 = [float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float];
-type float = GLfloat;
-type int = GLint;
-type Color = [float, float, float, float];
 type Sprite = {
-    color:              Color;
     position:           Vector2;
     size:               Vector2;
     scale:              Vector2;
+    rotation:           float;
+    color:              Color;
     texture_size:       Vector2;
     texture_position:   Vector2;
-    rotation:           float;
     z_index:            int;
 }
 
+
+const WORLD_GRID_WIDTH: int = 24;
+const WORLD_GRID_HEIGHT: int = 24;
+const WORLD_GRID_SIZE = WORLD_GRID_WIDTH * WORLD_GRID_HEIGHT;
+const TILE_GRID_WIDTH: int = 24;
+const TILE_GRID_HEIGHT: int = 24;
+const TILE_GRID_SIZE = TILE_GRID_WIDTH * TILE_GRID_HEIGHT;
+const MAX_ENTITIES : number = 100;
+const MAX_SPRITES : number = 2048;
 const ENABLE_SPRITE_PASS = true;
-const ATLAS_SIZE = [512, 512];
+const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
 const COLOR_WHITE: Color = [1, 1, 1, 1];
 const COLOR_RED:   Color = [1, 0, 0, 1];
@@ -100,44 +123,78 @@ const COLOR_BLUE:  Color = [0, 0, 1, 1];
 const COLOR_GREEN:  Color = [0, 1, 0, 1];
 const COLOR_YELLOW:  Color = [1, 1, 0, 1];
 const COLOR_PINK:  Color = [1, 0, 1, 1];
+const COLOR_GREY: Color = [0.5, 0.5, 0.5, 1];
+const COLOR_BLACK: Color = [0, 0, 0, 1];
 
 let game: Game;
-// :sprites
-const sprites: Sprite[] = [
-    { color: COLOR_WHITE,  position: [0*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 },
-    { color: COLOR_BLUE,   position: [1*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 },
-    { color: COLOR_RED,    position: [2*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 },
-    { color: COLOR_GREEN,  position: [0*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 },
-    { color: COLOR_PINK,   position: [1*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 5 },
-    { color: COLOR_YELLOW, position: [2*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 },
-    { color: COLOR_WHITE,  position: [0*16+19, 2*16+19], size: [54, 54], scale: [1, 1], rotation: 0, texture_size: [54, 54], texture_position: [0, 16], z_index: 3 },
-];
 
 requestAnimationFrame(main);
 
 function main() {
     // @ts-ignore
     game = {};
+    game.entities = fixed_array_make(MAX_ENTITIES);
+    game.world_grid = Array(WORLD_GRID_SIZE);
+    game.tile_grid = Array(TILE_GRID_SIZE);
 
     const [renderer, renderer_ok] = renderer_init();
     if (!renderer_ok) {
         console.error("Couldn't initialize renderer.");
         return;
     }
+
     game.renderer = renderer;
-
-    game.inputs = inputs_init();
     renderer_update_camera_matrix_main(game.renderer.camera_main);
-
     game.renderer.camera_main.zoom = 4;
-    game.renderer.camera_main.position = [0, 0];
-
+    game.renderer.camera_main.position = [-600, -600];
     if (ENABLE_SPRITE_PASS) {
         game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
         // TODO: Don't render the game while the assets are loading
         load_image("./images/atlas.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
         // load_image("./images/favicon-16x16.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
         // load_image("./images/screenshots/hubside/banner-large.jpg").then(image => { renderer_create_texture(image, game.renderer.gl); });
+    }
+
+    game.inputs = inputs_init();
+
+    fixed_array_add(game.entities, { name: "ENTITY_0", sprite: { color: COLOR_BLACK,  position: [(10+0)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 } });
+    fixed_array_add(game.entities, { name: "ENTITY_1", sprite: { color: COLOR_BLUE,   position: [(10+1)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 } });
+    fixed_array_add(game.entities, { name: "ENTITY_2", sprite: { color: COLOR_RED,    position: [(10+2)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 } });
+    fixed_array_add(game.entities, { name: "ENTITY_3", sprite: { color: COLOR_GREEN,  position: [(10+0)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 } });
+    fixed_array_add(game.entities, { name: "ENTITY_4", sprite: { color: COLOR_PINK,   position: [(10+1)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 5 } });
+    fixed_array_add(game.entities, { name: "ENTITY_5", sprite: { color: COLOR_YELLOW, position: [(10+2)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 } });
+
+    for (let y = 0; y < WORLD_GRID_HEIGHT; y++) {
+        for (let x = 0; x < WORLD_GRID_WIDTH; x++) {
+            const grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
+            game.world_grid[grid_index] = {
+                color:              (x+y)%2 ? COLOR_WHITE : COLOR_GREY,
+                position:           [x*16, y*16],
+                size:               [16, 16],
+                scale:              [1, 1],
+                rotation:           0,
+                texture_size:       [16, 16],
+                texture_position:   [0, 0],
+                z_index:            0,
+            };
+        }
+    }
+    for (let y = 0; y < TILE_GRID_HEIGHT; y++) {
+        for (let x = 0; x < TILE_GRID_WIDTH; x++) {
+            const grid_index = grid_position_to_index([x, y], TILE_GRID_WIDTH);
+            const color = (x+y)%2 ? COLOR_RED : COLOR_BLUE;
+            color[3] = 0.5;
+            game.tile_grid[grid_index] = {
+                color:              color,
+                position:           [x*16+8, y*16+8],
+                size:               [16, 16],
+                scale:              [1, 1],
+                rotation:           0,
+                texture_size:       [16, 16],
+                texture_position:   [0, 0],
+                z_index:            1,
+            };
+        }
     }
 
     document.addEventListener("keydown", inputs_on_key, false);
@@ -152,16 +209,13 @@ function update() {
     game.renderer.size_changed = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
     game.renderer.window_size[0] = window.innerWidth;
     game.renderer.window_size[1] = window.innerHeight;
+    game.renderer.sprites.count = 0;
     gl.canvas.width = game.renderer.window_size[0];
     gl.canvas.height = game.renderer.window_size[1];
 
     renderer_update_camera_matrix_main(game.renderer.camera_main);
 
     const t = sin_01(Date.now(), 1.0 / 2000);
-    // sprites[1].rotation = t * 2*Math.PI;
-    sprites[1].scale[0] = 1 + t/5;
-    sprites[1].scale[1] = 1 + t/5;
-    // sprites[2].position[1] = -32 + 64 * t;
 
     if (game.inputs.keys["p"].released) {
         game.render_active = !game.render_active;
@@ -174,44 +228,62 @@ function update() {
         game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
     }
     if (game.inputs.keys["z"].down) {
-        game.renderer.camera_main.position[1] += 1;
+        game.renderer.camera_main.position[1] += game.renderer.camera_main.zoom;
     }
     if (game.inputs.keys["s"].down) {
-        game.renderer.camera_main.position[1] -= 1;
+        game.renderer.camera_main.position[1] -= game.renderer.camera_main.zoom;
     }
     if (game.inputs.keys["q"].down) {
-        game.renderer.camera_main.position[0] += 1;
+        game.renderer.camera_main.position[0] += game.renderer.camera_main.zoom;
     }
     if (game.inputs.keys["d"].down) {
-        game.renderer.camera_main.position[0] -= 1;
+        game.renderer.camera_main.position[0] -= game.renderer.camera_main.zoom;
     }
 
+    // game.entities.data[1].sprite.rotation = t * 2*Math.PI;
+    game.entities.data[1].sprite.scale[0] = 1 + t/5;
+    game.entities.data[1].sprite.scale[1] = 1 + t/5;
+    // game.entities.data[2].sprite.position[1] = -32 + 64 * t;
+
     if (game.inputs.keys["ArrowUp"].down) {
-        sprites[0].position[1] -= 1;
+        game.entities.data[0].sprite.position[1] -= 1;
     }
     if (game.inputs.keys["ArrowDown"].down) {
-        sprites[0].position[1] += 1;
+        game.entities.data[0].sprite.position[1] += 1;
     }
     if (game.inputs.keys["ArrowLeft"].down) {
-        sprites[0].position[0] -= 1;
+        game.entities.data[0].sprite.position[0] -= 1;
     }
     if (game.inputs.keys["ArrowRight"].down) {
-        sprites[0].position[0] += 1;
+        game.entities.data[0].sprite.position[0] += 1;
     }
     if (game.inputs.keys[" "].down) {
-        // sprites[2].scale[0] += 0.1;
-        // sprites[2].scale[1] += 0.1;
-        sprites[2].rotation = t;
+        // game.entities.data[2].sprite.scale[0] += 0.1;
+        // game.entities.data[2].sprite.scale[1] += 0.1;
+        game.entities.data[2].sprite.rotation = t;
     }
     if (game.inputs.keys[" "].released) {
-        // sprites[2].scale[0] = 1;
-        // sprites[2].scale[1] = 1;
-        sprites[2].rotation = 0;
+        // game.entities.data[2].sprite.scale[0] = 1;
+        // game.entities.data[2].sprite.scale[1] = 1;
+        game.entities.data[2].sprite.rotation = 0;
     }
 
     // :render
     render: {
         if (game.render_active)  { break render; }
+
+        for (let entity_index = 0; entity_index < game.entities.count; entity_index++) {
+            const entity = game.entities.data[entity_index];
+            fixed_array_add(game.renderer.sprites, entity.sprite);
+        }
+        for (let world_cell_index = 0; world_cell_index < WORLD_GRID_SIZE; world_cell_index++) {
+            const world_cell = game.world_grid[world_cell_index];
+            fixed_array_add(game.renderer.sprites, world_cell);
+        }
+        for (let tile_cell_index = 0; tile_cell_index < WORLD_GRID_SIZE; tile_cell_index++) {
+            const tile_cell = game.tile_grid[tile_cell_index];
+            fixed_array_add(game.renderer.sprites, tile_cell);
+        }
 
         gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
 
@@ -220,18 +292,19 @@ function update() {
 
         if (ENABLE_SPRITE_PASS) {
             // TODO: Don't allocate this every frame!
-            const sorted_sprites = Array.from(sprites);
+            const sorted_sprites = game.renderer.sprites.data.slice(0, game.renderer.sprites.count);
             sorted_sprites.sort(function sort_by_z_index(a, b) {
                 return a.z_index - b.z_index;
             });
             // TODO: Don't recreate this every frame
             let instance_data = new Float32Array(sorted_sprites.length * SPRITE_PASS_INSTANCE_DATA_SIZE);
-            const pixel_size = [
+            const pixel_size : Vector2 = [
                 1 / ATLAS_SIZE[0],
                 1 / ATLAS_SIZE[1],
             ];
             for (let sprite_index = 0; sprite_index < sorted_sprites.length; sprite_index++) {
                 const sprite = sorted_sprites[sprite_index];
+                if (sprite === undefined) { break; } // We have reached the end of the sprites (uninitialized are at the bottom)
                 let offset = SPRITE_PASS_INSTANCE_DATA_SIZE * sprite_index;
 
                 instance_data.set(sprite.color, offset);
@@ -299,10 +372,14 @@ function renderer_init(): [Renderer, true] | [null, false] {
     const renderer: Renderer = {};
     renderer.gl = _gl;
 
+    _gl.enable(_gl.BLEND);
+    _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
+
     // @ts-ignore
     renderer.sprite_pass = {};
     renderer.camera_main = CAMERA_DEFAULT;
     renderer.window_size = [window.innerWidth, window.innerHeight];
+    renderer.sprites = fixed_array_make(MAX_SPRITES);
 
     return [renderer, true];
 }
@@ -580,22 +657,22 @@ function inputs_init(): Inputs {
     inputs.mouse_wheel = [0,0];
     const keys = Object.values(Keyboard_Key);
     for (let key_index = 0; key_index < keys.length; key_index++) {
-        const key = keys[key_index];
+        const key = keys[key_index] as Keyboard_Key;
         inputs.keys[key] = { pressed: false, down: false, released: false };
     }
-    const mouse_keys = Object.values(Keyboard_Key);
+    const mouse_keys = Object.values(Mouse_Key);
     for (let key_index = 0; key_index < mouse_keys.length; key_index++) {
-        const key = mouse_keys[key_index];
+        const key = mouse_keys[key_index] as Mouse_Key;
         inputs.mouse_keys[key] = { pressed: false, down: false, released: false };
     }
     return inputs;
 }
 function inputs_on_key(event: KeyboardEvent) {
-    const key_state = game.inputs.keys[event.key];
-    if (!key_state) {
+    if (!game.inputs.keys.hasOwnProperty(event.key)) {
         console.warn("Unrecognized key:", event.key);
         return;
     }
+    const key_state = game.inputs.keys[event.key as Keyboard_Key];
     key_state.down = event.type == "keydown";
     key_state.released = event.type == "keyup";
     key_state.pressed = event.type == "keydown";
@@ -653,8 +730,22 @@ function inputs_reset(inputs: Inputs) {
     // }
 }
 
-function clamp(min: number, max: number, value: number): number {
-    return Math.min(Math.max(value, min), max);
+// TypeScript was a mistake... The future is dumb.
+type Static_Array<T, N extends number> = N extends N ? number extends N ? T[] : _TupleOf<T, N, []> : never;
+type _TupleOf<T, N extends number, R extends unknown[]> = R['length'] extends N ? R : _TupleOf<T, N, [T, ...R]>;
+
+function fixed_array_make<T>(total: int): Fixed_Size_Array<T, int> {
+    return {
+        data: Array<T>(total),
+        count: 0,
+        total: total,
+    };
+}
+function fixed_array_add<T>(arr: Fixed_Size_Array<T, any>, item: T): T {
+    assert(arr.count <= arr.total-1, `Fixed array full, can't add more items before clearing it (${arr.count}/${arr.count})`);
+    arr.data[arr.count] = item;
+    arr.count += 1;
+    return arr.data[arr.count-1];
 }
 function log_matrix(matrix: Matrix4) {
     let str = "";
@@ -677,9 +768,6 @@ function load_image(url: string): Promise<HTMLImageElement> {
         image.onerror = reject;
     });
 }
-function sin_01(time: float, frequency: float = 1.0): float {
-    return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
-}
 function assert(condition: Boolean, message: string | null = ""): asserts condition {
     if (!__RELEASE__ && !condition) {
         debugger;
@@ -691,7 +779,21 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
         }
     }
 }
+// :math
+function grid_index_to_position(grid_index: int, grid_size: Vector2): Vector2 {
+    return [ grid_index % grid_size[0], grid_index / grid_size[0] ];
+}
+function grid_position_to_index(grid_position: Vector2, grid_width: int): int {
+    return (grid_position[1] * grid_width) + grid_position[0];
+}
+function clamp(min: number, max: number, value: number): number {
+    return Math.min(Math.max(value, min), max);
+}
+function sin_01(time: float, frequency: float = 1.0): float {
+    return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
+}
 
+// :matrix
 /*
 Mapping from jai structs (_11 - _44) to flat array indices (0-15).
 _11 = 0
