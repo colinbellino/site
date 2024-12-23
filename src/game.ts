@@ -77,7 +77,8 @@ type Vector2 = [float, float];
 type Vector3 = [float,float,float];
 type Vector4 = [float,float,float,float];
 type Matrix4 = [float,float,float,float,float,float,float,float,float,float,float,float,float,float,float,float];
-type float   = GLfloat;
+type float = GLfloat;
+type int = GLint;
 type Color = [float, float, float, float];
 type Sprite = {
     color:              Color;
@@ -87,6 +88,7 @@ type Sprite = {
     texture_size:       Vector2;
     texture_position:   Vector2;
     rotation:           float;
+    z_index:            int;
 }
 
 const ENABLE_SPRITE_PASS = true;
@@ -102,13 +104,13 @@ const COLOR_PINK:  Color = [1, 0, 1, 1];
 let game: Game;
 // :sprites
 const sprites: Sprite[] = [
-    { color: COLOR_WHITE,  position: [0*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_BLUE,   position: [1*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_RED,    position: [2*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_GREEN,  position: [0*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_PINK,   position: [1*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0] },
-    { color: COLOR_YELLOW, position: [2*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0] },
-    { color: COLOR_WHITE,  position: [0*16+19, 2*16+19], size: [54, 54], scale: [1, 1], rotation: 0, texture_size: [54, 54], texture_position: [0, 16] },
+    { color: COLOR_WHITE,  position: [0*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 },
+    { color: COLOR_BLUE,   position: [1*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 },
+    { color: COLOR_RED,    position: [2*16, 0*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 },
+    { color: COLOR_GREEN,  position: [0*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 },
+    { color: COLOR_PINK,   position: [1*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 5 },
+    { color: COLOR_YELLOW, position: [2*16, 1*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 },
+    { color: COLOR_WHITE,  position: [0*16+19, 2*16+19], size: [54, 54], scale: [1, 1], rotation: 0, texture_size: [54, 54], texture_position: [0, 16], z_index: 3 },
 ];
 
 requestAnimationFrame(main);
@@ -217,14 +219,19 @@ function update() {
         gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
         if (ENABLE_SPRITE_PASS) {
+            // TODO: Don't allocate this every frame!
+            const sorted_sprites = Array.from(sprites);
+            sorted_sprites.sort(function sort_by_z_index(a, b) {
+                return a.z_index - b.z_index;
+            });
             // TODO: Don't recreate this every frame
-            let instance_data = new Float32Array(sprites.length * SPRITE_PASS_INSTANCE_DATA_SIZE);
+            let instance_data = new Float32Array(sorted_sprites.length * SPRITE_PASS_INSTANCE_DATA_SIZE);
             const pixel_size = [
                 1 / ATLAS_SIZE[0],
                 1 / ATLAS_SIZE[1],
             ];
-            for (let sprite_index = 0; sprite_index < sprites.length; sprite_index++) {
-                const sprite = sprites[sprite_index];
+            for (let sprite_index = 0; sprite_index < sorted_sprites.length; sprite_index++) {
+                const sprite = sorted_sprites[sprite_index];
                 let offset = SPRITE_PASS_INSTANCE_DATA_SIZE * sprite_index;
 
                 instance_data.set(sprite.color, offset);
@@ -259,7 +266,7 @@ function update() {
             gl.bindTexture(gl.TEXTURE_2D, game.texture0);
             gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
             gl.bufferData(gl.ARRAY_BUFFER, instance_data, gl.STREAM_DRAW);
-            gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, sprites.length);
+            gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, sorted_sprites.length);
         }
     }
 
