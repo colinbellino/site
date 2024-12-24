@@ -24,7 +24,7 @@ Config :: struct {
     start(*thread_group);
     add_work(*thread_group, null, tprint("Work item 0"));
 
-    args := string.[tprint("./bin/%/simple-http-server", OS), "public", "--compress", "js"];
+    args := string.[tprint("./bin/%/http-server", OS), "--port", "8000", "--path", "public"];
     process_result, output, error := run_command(..args, capture_and_return_output = false, print_captured_output = true);
 }
 

@@ -57,13 +57,16 @@ type Fixed_Size_Array<T, N extends int> = {
 
 // :game
 type Game = {
-    render_active:  boolean;
-    renderer:       Renderer;
-    texture0:       WebGLTexture;
-    inputs:         Inputs;
-    entities:       Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
-    world_grid:     Static_Array<Sprite, typeof WORLD_GRID_SIZE>;
-    tile_grid:      Static_Array<Sprite, typeof TILE_GRID_SIZE>;
+    render_active:          boolean;
+    renderer:               Renderer;
+    texture0:               WebGLTexture;
+    inputs:                 Inputs;
+    entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
+    world_grid:             Static_Array<Sprite, typeof WORLD_GRID_SIZE>;
+    tile_grid:              Static_Array<Sprite, typeof TILE_GRID_SIZE>;
+    debug_draw_entities:    boolean;
+    debug_draw_world_grid:  boolean;
+    debug_draw_tile_grid:   boolean;
 }
 type Entity = {
     name:           string;
@@ -217,6 +220,15 @@ function update() {
 
     const t = sin_01(Date.now(), 1.0 / 2000);
 
+    if (game.inputs.keys["²"].released) {
+        game.debug_draw_entities = !game.debug_draw_entities;
+    }
+    // if (game.inputs.keys["&"].released) {
+    //     game.debug_draw_world_grid = !game.debug_draw_world_grid;
+    // }
+    // if (game.inputs.keys["é"].released) {
+    //     game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
+    // }
     if (game.inputs.keys["p"].released) {
         game.render_active = !game.render_active;
     }
@@ -272,17 +284,23 @@ function update() {
     render: {
         if (game.render_active)  { break render; }
 
-        for (let entity_index = 0; entity_index < game.entities.count; entity_index++) {
-            const entity = game.entities.data[entity_index];
-            fixed_array_add(game.renderer.sprites, entity.sprite);
+        if (game.debug_draw_entities) {
+            for (let entity_index = 0; entity_index < game.entities.count; entity_index++) {
+                const entity = game.entities.data[entity_index];
+                fixed_array_add(game.renderer.sprites, entity.sprite);
+            }
         }
-        for (let world_cell_index = 0; world_cell_index < WORLD_GRID_SIZE; world_cell_index++) {
-            const world_cell = game.world_grid[world_cell_index];
-            fixed_array_add(game.renderer.sprites, world_cell);
+        if (game.debug_draw_world_grid) {
+            for (let world_cell_index = 0; world_cell_index < WORLD_GRID_SIZE; world_cell_index++) {
+                const world_cell = game.world_grid[world_cell_index];
+                fixed_array_add(game.renderer.sprites, world_cell);
+            }
         }
-        for (let tile_cell_index = 0; tile_cell_index < WORLD_GRID_SIZE; tile_cell_index++) {
-            const tile_cell = game.tile_grid[tile_cell_index];
-            fixed_array_add(game.renderer.sprites, tile_cell);
+        if (game.debug_draw_tile_grid) {
+            for (let tile_cell_index = 0; tile_cell_index < WORLD_GRID_SIZE; tile_cell_index++) {
+                const tile_cell = game.tile_grid[tile_cell_index];
+                fixed_array_add(game.renderer.sprites, tile_cell);
+            }
         }
 
         gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
@@ -668,6 +686,7 @@ function inputs_init(): Inputs {
     return inputs;
 }
 function inputs_on_key(event: KeyboardEvent) {
+    console.log("game.inputs.keys", game.inputs.keys, event.key);
     if (!game.inputs.keys.hasOwnProperty(event.key)) {
         console.warn("Unrecognized key:", event.key);
         return;
