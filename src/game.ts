@@ -142,7 +142,7 @@ function main() {
     game.world_grid = Array(WORLD_GRID_SIZE);
     game.tile_grid = Array(TILE_GRID_SIZE);
     game.debug_draw_entities = true;
-    game.debug_draw_world_grid = false;
+    game.debug_draw_world_grid = true;
     game.debug_draw_tile_grid = true;
 
     const [renderer, renderer_ok] = renderer_init();
@@ -213,7 +213,7 @@ function main() {
 
             game.tile_grid[tile_grid_index] = {
                 color:              color,
-                position:           [x*GRID_SIZE /* - GRID_SIZE/2 */, y*GRID_SIZE /* - GRID_SIZE/2 */],
+                position:           [x*GRID_SIZE - GRID_SIZE/2, y*GRID_SIZE - GRID_SIZE/2],
                 size:               [GRID_SIZE, GRID_SIZE],
                 scale:              [1, 1],
                 rotation:           0,
@@ -801,90 +801,24 @@ function inputs_reset(inputs: Inputs) {
 
 // :auto_tile
 /*
-    Every bit represent a side/corner: 1 same tile, 0 different tile:
+    Every bit represent a side: 1 same tile, 0 different tile:
 
-    0 1 2
-    3 x 4 -> 0b7654_3210
-    5 6 7
-
-    So single tile surrounded by different tiles would be:
-    0 0 0
-    0 x 0 -> 0b0000_0000
-    0 0 0
+    0 . 1
+    . x . -> 0b0123
+    2 . 3
 
     A top left corner tile would be:
-    0 1 0
-    1 x 0 -> 0b0101_0000
-    0 0 0
+    1 . 0
+    . x . -> 0b1010_0000
+    1 . 0
 
     Resources:
     - https://web.archive.org/web/20210909030608/https://codereview.stackexchange.com/questions/257655/algorithm-for-auto-tiling-of-tiles-in-a-2d-tile-map
     - https://web.archive.org/web/20210909030608im_/https://i.stack.imgur.com/9p0st.png
     - https://web.archive.org/web/20210909030608im_/https://i.stack.imgur.com/j3IXI.png
+    - https://web.archive.org/web/20220226222317/https://twitter.com/OskSta/status/1448248658865049605
 */
 type Tile_Value = number;
-const TILE_VALUES = [
-    0b0000_1011, //  0 0
-    0b0001_1111, //  1 0
-    0b0001_0110, //  2 0
-    0b0000_1000, //  3 0
-    0b0001_1000, //  4 0
-    0b0001_0000, //  5 0
-    0b0001_1011, //  6 0
-    0b0001_1110, //  7 0
-    0b0111_1011, //  8 0
-    0b1101_1110, //  9 0
-    0b0101_1011, // 10 0
-    0b0101_1110, // 11 0
-    0b0110_1011, //  0 1
-    0b1111_1111, //  1 1
-    0b1101_0110, //  2 1
-    0b0000_0000, //  3 1
-    0b0000_0010, //  4 1
-    0b0000_0000, //  5 1
-    0b0111_1000, //  6 1
-    0b1101_1000, //  7 1
-    0b1111_1010, //  8 1
-    0b0101_1111, //  9 1
-    0b0111_1010, // 10 1
-    0b1101_1010, // 11 1
-    0b0110_1000, //  0 2
-    0b1111_1000, //  1 2
-    0b1101_0000, //  2 2
-    0b0101_1010, //  3 2
-    0b0100_0010, //  4 2
-    0b0000_0000, //  5 2
-    0b0100_1011, //  6 2
-    0b0101_0110, //  7 2
-    0b0100_1010, //  8 2
-    0b0001_1010, //  9 2
-    0b0111_1110, // 10 2
-    0b0000_0000, // 11 2
-    0b0111_1111, //  0 3
-    0b1101_1111, //  1 3
-    0b0000_1010, //  2 3
-    0b0001_0010, //  3 3
-    0b0100_0000, //  4 3
-    0b0000_0000, //  5 3
-    0b0110_1010, //  6 3
-    0b1101_0010, //  7 3
-    0b0101_1000, //  8 3
-    0b0101_0010, //  9 3
-    0b1101_1011, // 10 3
-    0b0000_0000, // 11 3
-    0b1111_1011, //  0 4
-    0b1111_1110, //  1 4
-    0b0100_1000, //  2 4
-    0b0101_0000, //  3 4
-    0b0000_0000, //  4 4
-    0b0000_0000, //  5 4
-    0b0000_0000, //  6 4
-    0b0000_0000, //  7 4
-    0b0000_0000, //  8 4
-    0b0000_0000, //  9 4
-    0b0000_0000, // 10 4
-    0b0000_0000, // 11 4
-];
 enum Direction_All { NORTH_WEST, NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST }
 const DIRECTIONS_ALL : Vector2[] = [
     [ -1, -1 ] /* .North_West */ ,
@@ -896,47 +830,38 @@ const DIRECTIONS_ALL : Vector2[] = [
     [ -1, +1 ] /* .South_West */ ,
     [ -1, +0 ] /* .West       */ ,
 ];
+const TILE_VALUES = [
+    0b0000, // 0 0
+    0b1100, // 1 0
+    0b1010, // 2 0
+    0b1111, // 3 0
+    0b1110, // 4 0
+    0b1111, // 1 0
+    0b0010, // 1 1
+    0b0011, // 1 2
+    0b0110, // 1 3
+    0b1011, // 1 4
+];
 const TILESET_POSITION = [0, 80];
 const AUTO_TILE_SIZE: Vector2 = [12, 5];
-function calculate_tile_value(grid_position: Vector2): Tile_Value {
-
-    function is_same_tile(grid_position: Vector2): int {
-        const grid_index = grid_position_to_index(grid_position, WORLD_GRID_WIDTH);
-        if (!is_in_bounds(grid_position, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) {
-            return 0;
-        }
-        return game.world_grid[grid_index].value ? 1 : 0;
+function is_same_tile(grid_position: Vector2): int {
+    const grid_index = grid_position_to_index(grid_position, WORLD_GRID_WIDTH);
+    if (!is_in_bounds(grid_position, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) {
+        return 0;
     }
-
+    return game.world_grid[grid_index].value ? 1 : 0;
+}
+function calculate_tile_value(grid_position: Vector2): Tile_Value {
     const t = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH]));
     const l = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.WEST]));
     const r = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.EAST]));
     const b = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH]));
-    // Corners are only relevant if both cardinals connecting the corner to the center tile have positive value.
-    const tl = (t == 1 && l == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH_WEST])) : 0;
-    const tr = (t == 1 && r == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH_EAST])) : 0;
-    const bl = (b == 1 && l == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH_WEST])) : 0;
-    const br = (b == 1 && r == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH_EAST])) : 0;
 
     let value: Tile_Value = 0;
-    value |= tl * (1 << 7);
-    value |= t * (1 << 6);
-    value |= tr * (1 << 5);
-    value |= l * (1 << 4);
-    value |= r * (1 << 3);
-    value |= bl * (1 << 2);
-    value |= b * (1 << 1);
-    value |= br * (1 << 0);
-
-    const tile_index = TILE_VALUES.indexOf(value);
-    const tile_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE);
-    if (vector2_equal([1, 1], grid_position)) {
-        console.log("grid_position", grid_position, " -> value", dec2bin(value), { tile_index }, tile_position);
-    }
-
-    function dec2bin(dec: number) {
-        return (dec >>> 0).toString(2);
-      }
+    value |= b * (1 << 0);
+    value |= r * (1 << 1);
+    value |= l * (1 << 2);
+    value |= t * (1 << 3);
 
     return value;
 }
@@ -991,6 +916,9 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
     }
 }
 // :math
+function number_to_binary_string(dec: number): string {
+    return (dec >>> 0).toString(2);
+}
 function vector2_equal(vec1: Vector2, vec2: Vector2): boolean {
     return vec1[0] === vec2[0] && vec1[1] === vec2[1];
 }
