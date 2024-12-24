@@ -3,6 +3,7 @@
 .history
 .vscode
 ols.json
+*.code-workspace
 
 .build/
 dist/

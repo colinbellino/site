@@ -62,11 +62,14 @@ type Game = {
     texture0:               WebGLTexture;
     inputs:                 Inputs;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
-    world_grid:             Static_Array<Sprite, typeof WORLD_GRID_SIZE>;
+    world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<Sprite, typeof TILE_GRID_SIZE>;
     debug_draw_entities:    boolean;
     debug_draw_world_grid:  boolean;
     debug_draw_tile_grid:   boolean;
+}
+type Cell = {
+    value:  int;
 }
 type Entity = {
     name:           string;
@@ -78,7 +81,6 @@ type Renderer = {
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
-    size_changed:       boolean;
     sprites:            Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
 }
 type Sprite_Pass = {
@@ -108,26 +110,26 @@ type Sprite = {
     z_index:            int;
 }
 
-
-const WORLD_GRID_WIDTH: int = 24;
-const WORLD_GRID_HEIGHT: int = 24;
+const GRID_SIZE = 16;
+const WORLD_GRID_WIDTH: int = 10;
+const WORLD_GRID_HEIGHT: int = 10;
 const WORLD_GRID_SIZE = WORLD_GRID_WIDTH * WORLD_GRID_HEIGHT;
-const TILE_GRID_WIDTH: int = 24;
-const TILE_GRID_HEIGHT: int = 24;
+const TILE_GRID_WIDTH: int = 10;
+const TILE_GRID_HEIGHT: int = 10;
 const TILE_GRID_SIZE = TILE_GRID_WIDTH * TILE_GRID_HEIGHT;
 const MAX_ENTITIES : number = 100;
 const MAX_SPRITES : number = 2048;
 const ENABLE_SPRITE_PASS = true;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
-const COLOR_WHITE: Color = [1, 1, 1, 1];
-const COLOR_RED:   Color = [1, 0, 0, 1];
-const COLOR_BLUE:  Color = [0, 0, 1, 1];
-const COLOR_GREEN:  Color = [0, 1, 0, 1];
-const COLOR_YELLOW:  Color = [1, 1, 0, 1];
-const COLOR_PINK:  Color = [1, 0, 1, 1];
-const COLOR_GREY: Color = [0.5, 0.5, 0.5, 1];
-const COLOR_BLACK: Color = [0, 0, 0, 1];
+function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
+function COLOR_RED(): Color { return [1, 0, 0, 1]; }
+function COLOR_BLUE(): Color { return [0, 0, 1, 1]; }
+function COLOR_GREEN(): Color { return [0, 1, 0, 1]; }
+function COLOR_YELLOW(): Color { return [1, 1, 0, 1]; }
+function COLOR_PINK(): Color { return [1, 0, 1, 1]; }
+function COLOR_GREY(): Color { return [0.5, 0.5, 0.5, 1]; }
+function COLOR_BLACK(): Color { return [0, 0, 0, 1]; }
 
 let game: Game;
 
@@ -139,6 +141,9 @@ function main() {
     game.entities = fixed_array_make(MAX_ENTITIES);
     game.world_grid = Array(WORLD_GRID_SIZE);
     game.tile_grid = Array(TILE_GRID_SIZE);
+    game.debug_draw_entities = true;
+    game.debug_draw_world_grid = false;
+    game.debug_draw_tile_grid = true;
 
     const [renderer, renderer_ok] = renderer_init();
     if (!renderer_ok) {
@@ -149,7 +154,7 @@ function main() {
     game.renderer = renderer;
     renderer_update_camera_matrix_main(game.renderer.camera_main);
     game.renderer.camera_main.zoom = 4;
-    game.renderer.camera_main.position = [-600, -600];
+    game.renderer.camera_main.position = [-300, -300];
     if (ENABLE_SPRITE_PASS) {
         game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
         // TODO: Don't render the game while the assets are loading
@@ -160,41 +165,63 @@ function main() {
 
     game.inputs = inputs_init();
 
-    fixed_array_add(game.entities, { name: "ENTITY_0", sprite: { color: COLOR_BLACK,  position: [(10+0)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 } });
-    fixed_array_add(game.entities, { name: "ENTITY_1", sprite: { color: COLOR_BLUE,   position: [(10+1)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 } });
-    fixed_array_add(game.entities, { name: "ENTITY_2", sprite: { color: COLOR_RED,    position: [(10+2)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 } });
-    fixed_array_add(game.entities, { name: "ENTITY_3", sprite: { color: COLOR_GREEN,  position: [(10+0)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 } });
-    fixed_array_add(game.entities, { name: "ENTITY_4", sprite: { color: COLOR_PINK,   position: [(10+1)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 5 } });
-    fixed_array_add(game.entities, { name: "ENTITY_5", sprite: { color: COLOR_YELLOW, position: [(10+2)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 } });
+    fixed_array_add(game.entities, { name: "ENTITY_0", sprite: { color: COLOR_BLACK(),  position: [(10+0)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 } });
+    fixed_array_add(game.entities, { name: "ENTITY_1", sprite: { color: COLOR_BLUE(),   position: [(10+1)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 } });
+    fixed_array_add(game.entities, { name: "ENTITY_2", sprite: { color: COLOR_RED(),    position: [(10+2)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 } });
+    fixed_array_add(game.entities, { name: "ENTITY_3", sprite: { color: COLOR_GREEN(),  position: [(10+0)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 } });
+    fixed_array_add(game.entities, { name: "ENTITY_4", sprite: { color: COLOR_PINK(),   position: [(10+1)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 5 } });
+    fixed_array_add(game.entities, { name: "ENTITY_5", sprite: { color: COLOR_YELLOW(), position: [(10+2)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 } });
 
+    // :init world
+    const world = [
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 1, 1,
+        1, 0, 0, 0, 0, 0, 0, 1, 1, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
+        1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
+        1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+        1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
+        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+    ];
+    assert(world.length === WORLD_GRID_HEIGHT * WORLD_GRID_WIDTH);
     for (let y = 0; y < WORLD_GRID_HEIGHT; y++) {
         for (let x = 0; x < WORLD_GRID_WIDTH; x++) {
             const grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
             game.world_grid[grid_index] = {
-                color:              (x+y)%2 ? COLOR_WHITE : COLOR_GREY,
-                position:           [x*16, y*16],
-                size:               [16, 16],
-                scale:              [1, 1],
-                rotation:           0,
-                texture_size:       [16, 16],
-                texture_position:   [0, 0],
-                z_index:            0,
+                value:              world[grid_index],
             };
         }
     }
+    // :init tile
     for (let y = 0; y < TILE_GRID_HEIGHT; y++) {
         for (let x = 0; x < TILE_GRID_WIDTH; x++) {
-            const grid_index = grid_position_to_index([x, y], TILE_GRID_WIDTH);
-            const color = (x+y)%2 ? COLOR_RED : COLOR_BLUE;
-            color[3] = 0.5;
-            game.tile_grid[grid_index] = {
+            const tile_grid_index = grid_position_to_index([x, y], TILE_GRID_WIDTH);
+            const world_grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
+
+            if (game.world_grid[world_grid_index].value === 0) { continue; }
+
+            const tile_value = calculate_tile_value([x, y]);
+            const tile_index = TILE_VALUES.indexOf(tile_value);
+            assert(tile_index > -1);
+            const tile_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE);
+
+            let color: Vector4 = [0.5, 0.5, 0.5, 1.0];
+            if ((x+y)%2) { color = [0.4, 0.4, 0.4, 1.0]; }
+            color[3] *= 0.5;
+
+            game.tile_grid[tile_grid_index] = {
                 color:              color,
-                position:           [x*16+8, y*16+8],
-                size:               [16, 16],
+                position:           [x*GRID_SIZE /* - GRID_SIZE/2 */, y*GRID_SIZE /* - GRID_SIZE/2 */],
+                size:               [GRID_SIZE, GRID_SIZE],
                 scale:              [1, 1],
                 rotation:           0,
-                texture_size:       [16, 16],
-                texture_position:   [0, 0],
+                texture_size:       [GRID_SIZE, GRID_SIZE],
+                texture_position:   [
+                    tile_position[0] * GRID_SIZE + TILESET_POSITION[0],
+                    tile_position[1] * GRID_SIZE + TILESET_POSITION[1],
+                ],
                 z_index:            1,
             };
         }
@@ -209,7 +236,7 @@ function main() {
 function update() {
     const gl = game.renderer.gl;
 
-    game.renderer.size_changed = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
+    game.inputs.window_resized = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
     game.renderer.window_size[0] = window.innerWidth;
     game.renderer.window_size[1] = window.innerHeight;
     game.renderer.sprites.count = 0;
@@ -220,84 +247,105 @@ function update() {
 
     const t = sin_01(Date.now(), 1.0 / 2000);
 
-    if (game.inputs.keys["²"].released) {
-        game.debug_draw_entities = !game.debug_draw_entities;
-    }
-    // if (game.inputs.keys["&"].released) {
-    //     game.debug_draw_world_grid = !game.debug_draw_world_grid;
-    // }
-    // if (game.inputs.keys["é"].released) {
-    //     game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
-    // }
-    if (game.inputs.keys["p"].released) {
-        game.render_active = !game.render_active;
+    if (game.inputs.window_resized) {
+        console.log("window_size", game.renderer.window_size);
     }
 
-    if (game.inputs.keys["r"].down) {
-        game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom + 0.1);
-    }
-    if (game.inputs.keys["f"].down) {
-        game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
-    }
-    if (game.inputs.keys["z"].down) {
-        game.renderer.camera_main.position[1] += game.renderer.camera_main.zoom;
-    }
-    if (game.inputs.keys["s"].down) {
-        game.renderer.camera_main.position[1] -= game.renderer.camera_main.zoom;
-    }
-    if (game.inputs.keys["q"].down) {
-        game.renderer.camera_main.position[0] += game.renderer.camera_main.zoom;
-    }
-    if (game.inputs.keys["d"].down) {
-        game.renderer.camera_main.position[0] -= game.renderer.camera_main.zoom;
-    }
+    // :debug inputs
+    {
+        if (game.inputs.keys["²"].released) {
+            game.debug_draw_entities = !game.debug_draw_entities;
+        }
+        if (game.inputs.keys["&"].released) {
+            game.debug_draw_world_grid = !game.debug_draw_world_grid;
+        }
+        if (game.inputs.keys["é"].released) {
+            game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
+        }
+        if (game.inputs.keys["p"].released) {
+            game.render_active = !game.render_active;
+        }
 
-    // game.entities.data[1].sprite.rotation = t * 2*Math.PI;
-    game.entities.data[1].sprite.scale[0] = 1 + t/5;
-    game.entities.data[1].sprite.scale[1] = 1 + t/5;
-    // game.entities.data[2].sprite.position[1] = -32 + 64 * t;
+        if (game.inputs.keys["r"].down) {
+            game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom + 0.1);
+        }
+        if (game.inputs.keys["f"].down) {
+            game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
+        }
+        if (game.inputs.keys["z"].down) {
+            game.renderer.camera_main.position[1] += game.renderer.camera_main.zoom;
+        }
+        if (game.inputs.keys["s"].down) {
+            game.renderer.camera_main.position[1] -= game.renderer.camera_main.zoom;
+        }
+        if (game.inputs.keys["q"].down) {
+            game.renderer.camera_main.position[0] += game.renderer.camera_main.zoom;
+        }
+        if (game.inputs.keys["d"].down) {
+            game.renderer.camera_main.position[0] -= game.renderer.camera_main.zoom;
+        }
 
-    if (game.inputs.keys["ArrowUp"].down) {
-        game.entities.data[0].sprite.position[1] -= 1;
-    }
-    if (game.inputs.keys["ArrowDown"].down) {
-        game.entities.data[0].sprite.position[1] += 1;
-    }
-    if (game.inputs.keys["ArrowLeft"].down) {
-        game.entities.data[0].sprite.position[0] -= 1;
-    }
-    if (game.inputs.keys["ArrowRight"].down) {
-        game.entities.data[0].sprite.position[0] += 1;
-    }
-    if (game.inputs.keys[" "].down) {
-        // game.entities.data[2].sprite.scale[0] += 0.1;
-        // game.entities.data[2].sprite.scale[1] += 0.1;
-        game.entities.data[2].sprite.rotation = t;
-    }
-    if (game.inputs.keys[" "].released) {
-        // game.entities.data[2].sprite.scale[0] = 1;
-        // game.entities.data[2].sprite.scale[1] = 1;
-        game.entities.data[2].sprite.rotation = 0;
+        // game.entities.data[1].sprite.rotation = t * 2*Math.PI;
+        game.entities.data[1].sprite.scale[0] = 1 + t/5;
+        game.entities.data[1].sprite.scale[1] = 1 + t/5;
+        // game.entities.data[2].sprite.position[1] = -32 + 64 * t;
+
+        if (game.inputs.keys["ArrowUp"].down) {
+            game.entities.data[0].sprite.position[1] -= 1;
+        }
+        if (game.inputs.keys["ArrowDown"].down) {
+            game.entities.data[0].sprite.position[1] += 1;
+        }
+        if (game.inputs.keys["ArrowLeft"].down) {
+            game.entities.data[0].sprite.position[0] -= 1;
+        }
+        if (game.inputs.keys["ArrowRight"].down) {
+            game.entities.data[0].sprite.position[0] += 1;
+        }
+        if (game.inputs.keys[" "].down) {
+            // game.entities.data[2].sprite.scale[0] += 0.1;
+            // game.entities.data[2].sprite.scale[1] += 0.1;
+            game.entities.data[2].sprite.rotation = t;
+        }
+        if (game.inputs.keys[" "].released) {
+            // game.entities.data[2].sprite.scale[0] = 1;
+            // game.entities.data[2].sprite.scale[1] = 1;
+            game.entities.data[2].sprite.rotation = 0;
+        }
     }
 
     // :render
     render: {
         if (game.render_active)  { break render; }
 
+        // :render entities
         if (game.debug_draw_entities) {
             for (let entity_index = 0; entity_index < game.entities.count; entity_index++) {
                 const entity = game.entities.data[entity_index];
                 fixed_array_add(game.renderer.sprites, entity.sprite);
             }
         }
+        // :render world
         if (game.debug_draw_world_grid) {
             for (let world_cell_index = 0; world_cell_index < WORLD_GRID_SIZE; world_cell_index++) {
                 const world_cell = game.world_grid[world_cell_index];
-                fixed_array_add(game.renderer.sprites, world_cell);
+                const grid_position = grid_index_to_position(world_cell_index, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]);
+                const sprite: Sprite = {
+                    color:              world_cell.value === 0 ? COLOR_BLACK() : COLOR_WHITE(),
+                    position:           [grid_position[0]*GRID_SIZE, grid_position[1]*GRID_SIZE],
+                    size:               [GRID_SIZE, GRID_SIZE],
+                    scale:              [1, 1],
+                    rotation:           0,
+                    texture_size:       [GRID_SIZE, GRID_SIZE],
+                    texture_position:   [0, 0],
+                    z_index:            0,
+                };
+                fixed_array_add(game.renderer.sprites, sprite);
             }
         }
+        // :render tile
         if (game.debug_draw_tile_grid) {
-            for (let tile_cell_index = 0; tile_cell_index < WORLD_GRID_SIZE; tile_cell_index++) {
+            for (let tile_cell_index = 0; tile_cell_index < TILE_GRID_SIZE; tile_cell_index++) {
                 const tile_cell = game.tile_grid[tile_cell_index];
                 fixed_array_add(game.renderer.sprites, tile_cell);
             }
@@ -659,7 +707,10 @@ enum Keyboard_Key {
     "ArrowLeft" = "ArrowLeft",
     "ArrowRight" = "ArrowRight",
     "ArrowUp" = "ArrowUp",
+    "&" = "&",
+    "é" = "é",
 };
+// FIXME: handle non ZQSD keyboard layouts
 enum Mouse_Key {
     NONE,
     LEFT,
@@ -686,7 +737,6 @@ function inputs_init(): Inputs {
     return inputs;
 }
 function inputs_on_key(event: KeyboardEvent) {
-    console.log("game.inputs.keys", game.inputs.keys, event.key);
     if (!game.inputs.keys.hasOwnProperty(event.key)) {
         console.warn("Unrecognized key:", event.key);
         return;
@@ -749,6 +799,148 @@ function inputs_reset(inputs: Inputs) {
     // }
 }
 
+// :auto_tile
+/*
+    Every bit represent a side/corner: 1 same tile, 0 different tile:
+
+    0 1 2
+    3 x 4 -> 0b7654_3210
+    5 6 7
+
+    So single tile surrounded by different tiles would be:
+    0 0 0
+    0 x 0 -> 0b0000_0000
+    0 0 0
+
+    A top left corner tile would be:
+    0 1 0
+    1 x 0 -> 0b0101_0000
+    0 0 0
+
+    Resources:
+    - https://web.archive.org/web/20210909030608/https://codereview.stackexchange.com/questions/257655/algorithm-for-auto-tiling-of-tiles-in-a-2d-tile-map
+    - https://web.archive.org/web/20210909030608im_/https://i.stack.imgur.com/9p0st.png
+    - https://web.archive.org/web/20210909030608im_/https://i.stack.imgur.com/j3IXI.png
+*/
+type Tile_Value = number;
+const TILE_VALUES = [
+    0b0000_1011, //  0 0
+    0b0001_1111, //  1 0
+    0b0001_0110, //  2 0
+    0b0000_1000, //  3 0
+    0b0001_1000, //  4 0
+    0b0001_0000, //  5 0
+    0b0001_1011, //  6 0
+    0b0001_1110, //  7 0
+    0b0111_1011, //  8 0
+    0b1101_1110, //  9 0
+    0b0101_1011, // 10 0
+    0b0101_1110, // 11 0
+    0b0110_1011, //  0 1
+    0b1111_1111, //  1 1
+    0b1101_0110, //  2 1
+    0b0000_0000, //  3 1
+    0b0000_0010, //  4 1
+    0b0000_0000, //  5 1
+    0b0111_1000, //  6 1
+    0b1101_1000, //  7 1
+    0b1111_1010, //  8 1
+    0b0101_1111, //  9 1
+    0b0111_1010, // 10 1
+    0b1101_1010, // 11 1
+    0b0110_1000, //  0 2
+    0b1111_1000, //  1 2
+    0b1101_0000, //  2 2
+    0b0101_1010, //  3 2
+    0b0100_0010, //  4 2
+    0b0000_0000, //  5 2
+    0b0100_1011, //  6 2
+    0b0101_0110, //  7 2
+    0b0100_1010, //  8 2
+    0b0001_1010, //  9 2
+    0b0111_1110, // 10 2
+    0b0000_0000, // 11 2
+    0b0111_1111, //  0 3
+    0b1101_1111, //  1 3
+    0b0000_1010, //  2 3
+    0b0001_0010, //  3 3
+    0b0100_0000, //  4 3
+    0b0000_0000, //  5 3
+    0b0110_1010, //  6 3
+    0b1101_0010, //  7 3
+    0b0101_1000, //  8 3
+    0b0101_0010, //  9 3
+    0b1101_1011, // 10 3
+    0b0000_0000, // 11 3
+    0b1111_1011, //  0 4
+    0b1111_1110, //  1 4
+    0b0100_1000, //  2 4
+    0b0101_0000, //  3 4
+    0b0000_0000, //  4 4
+    0b0000_0000, //  5 4
+    0b0000_0000, //  6 4
+    0b0000_0000, //  7 4
+    0b0000_0000, //  8 4
+    0b0000_0000, //  9 4
+    0b0000_0000, // 10 4
+    0b0000_0000, // 11 4
+];
+enum Direction_All { NORTH_WEST, NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST }
+const DIRECTIONS_ALL : Vector2[] = [
+    [ -1, -1 ] /* .North_West */ ,
+    [ +0, -1 ] /* .North      */ ,
+    [ +1, -1 ] /* .North_East */ ,
+    [ +1, +0 ] /* .East       */ ,
+    [ +1, +1 ] /* .South_East */ ,
+    [ +0, +1 ] /* .South      */ ,
+    [ -1, +1 ] /* .South_West */ ,
+    [ -1, +0 ] /* .West       */ ,
+];
+const TILESET_POSITION = [0, 80];
+const AUTO_TILE_SIZE: Vector2 = [12, 5];
+function calculate_tile_value(grid_position: Vector2): Tile_Value {
+
+    function is_same_tile(grid_position: Vector2): int {
+        const grid_index = grid_position_to_index(grid_position, WORLD_GRID_WIDTH);
+        if (!is_in_bounds(grid_position, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) {
+            return 0;
+        }
+        return game.world_grid[grid_index].value ? 1 : 0;
+    }
+
+    const t = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH]));
+    const l = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.WEST]));
+    const r = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.EAST]));
+    const b = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH]));
+    // Corners are only relevant if both cardinals connecting the corner to the center tile have positive value.
+    const tl = (t == 1 && l == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH_WEST])) : 0;
+    const tr = (t == 1 && r == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH_EAST])) : 0;
+    const bl = (b == 1 && l == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH_WEST])) : 0;
+    const br = (b == 1 && r == 1) ? is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH_EAST])) : 0;
+
+    let value: Tile_Value = 0;
+    value |= tl * (1 << 7);
+    value |= t * (1 << 6);
+    value |= tr * (1 << 5);
+    value |= l * (1 << 4);
+    value |= r * (1 << 3);
+    value |= bl * (1 << 2);
+    value |= b * (1 << 1);
+    value |= br * (1 << 0);
+
+    const tile_index = TILE_VALUES.indexOf(value);
+    const tile_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE);
+    if (vector2_equal([1, 1], grid_position)) {
+        console.log("grid_position", grid_position, " -> value", dec2bin(value), { tile_index }, tile_position);
+    }
+
+    function dec2bin(dec: number) {
+        return (dec >>> 0).toString(2);
+      }
+
+    return value;
+}
+
 // TypeScript was a mistake... The future is dumb.
 type Static_Array<T, N extends number> = N extends N ? number extends N ? T[] : _TupleOf<T, N, []> : never;
 type _TupleOf<T, N extends number, R extends unknown[]> = R['length'] extends N ? R : _TupleOf<T, N, [T, ...R]>;
@@ -799,8 +991,11 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
     }
 }
 // :math
+function vector2_equal(vec1: Vector2, vec2: Vector2): boolean {
+    return vec1[0] === vec2[0] && vec1[1] === vec2[1];
+}
 function grid_index_to_position(grid_index: int, grid_size: Vector2): Vector2 {
-    return [ grid_index % grid_size[0], grid_index / grid_size[0] ];
+    return [ grid_index % grid_size[0], Math.floor(grid_index / grid_size[0]) ];
 }
 function grid_position_to_index(grid_position: Vector2, grid_width: int): int {
     return (grid_position[1] * grid_width) + grid_position[0];
@@ -810,6 +1005,15 @@ function clamp(min: number, max: number, value: number): number {
 }
 function sin_01(time: float, frequency: float = 1.0): float {
     return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
+}
+function vector2_add(arr1: Vector2, arr2: Vector2): Vector2 {
+    const result: Vector2 = [0, 0];
+    result[0] = arr1[0] + arr2[0];
+    result[1] = arr1[1] + arr2[1];
+    return result;
+}
+function is_in_bounds(grid_position: Vector2, grid_size: Vector2): boolean {
+    return grid_position[0] >= 0 && grid_position[0] < grid_size[0] && grid_position[1] >= 0 && grid_position[1] < grid_size[1];
 }
 
 // :matrix
