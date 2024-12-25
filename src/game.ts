@@ -144,7 +144,7 @@ function main() {
     game.world_grid = Array(WORLD_GRID_SIZE);
     game.tile_grid = Array(TILE_GRID_SIZE);
     game.debug_draw_entities = true;
-    game.debug_draw_world_grid = true;
+    game.debug_draw_world_grid = false;
     game.debug_draw_tile_grid = true;
 
     const [renderer, renderer_ok] = renderer_init();
@@ -197,22 +197,6 @@ function main() {
         }
     }
     // :init tile
-    for (let y = 0; y < TILE_GRID_HEIGHT; y++) {
-        for (let x = 0; x < TILE_GRID_WIDTH; x++) {
-            const tile_grid_index = grid_position_to_index([x, y], TILE_GRID_WIDTH);
-            const world_grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
-            const world_cell = game.world_grid[world_grid_index];
-
-            const tile_value = calculate_tile_value([x, y]);
-            // if (game.frame_count === 0) {
-            //     console.log("world_position", [x, y], "world_cell", world_cell.value, "tile_value", number_to_binary_string(tile_value));
-            // }
-            // assert(tile_index > -1);
-
-            game.tile_grid[tile_grid_index] = tile_value;
-        }
-    }
-
     document.addEventListener("keydown", inputs_on_key, false);
     document.addEventListener("keyup", inputs_on_key, false);
 
@@ -335,29 +319,15 @@ function update() {
         // :render tile
         if (game.debug_draw_tile_grid) {
             for (let tile_cell_index = 0; tile_cell_index < TILE_GRID_SIZE; tile_cell_index++) {
-                // const tile_cell = game.tile_grid[tile_cell_index];
                 const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
 
                 let color: Vector4 = [1.0, 1.0, 1.0, 1.0];
                 if ((tile_position[0]+tile_position[1]) % 2) { color = [0.9, 0.9, 0.9, 1.0]; }
                 // color[3] *= 0.8;
 
-                // TODO: clean this up
-                const tl = vector2_add(tile_position, [-1, -1]);
-                const tr = vector2_add(tile_position, [+0, -1]);
-                const bl = vector2_add(tile_position, [-1, +0]);
-                const br = vector2_add(tile_position, [+0, +0]);
-                let tile_value: Tile_Value = 0;
-                if (is_in_bounds(tl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
-                    tile_value |= game.world_grid[grid_position_to_index(tl, WORLD_GRID_WIDTH)].value * (1 << 3);
-                if (is_in_bounds(tr, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
-                    tile_value |= game.world_grid[grid_position_to_index(tr, WORLD_GRID_WIDTH)].value * (1 << 2);
-                if (is_in_bounds(bl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
-                    tile_value |= game.world_grid[grid_position_to_index(bl, WORLD_GRID_WIDTH)].value * (1 << 1);
-                if (is_in_bounds(br, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
-                    tile_value |= game.world_grid[grid_position_to_index(br, WORLD_GRID_WIDTH)].value * (1 << 0);
-
+                const tile_value = calculate_tile_value(tile_position);
                 const tile_index = TILE_VALUES.indexOf(tile_value);
+                assert(tile_index > -1);
                 const tile_texture_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE[0]);
 
                 const texture_position: Vector2 = [
@@ -376,15 +346,6 @@ function update() {
                     z_index:            1,
                 }
 
-                if (game.frame_count === 0 && vector2_equal([0, 0], tile_position)) {
-                    console.log("tile_position", tile_position);
-                    if (is_in_bounds(tl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- tl", JSON.stringify(tl), game.world_grid[grid_position_to_index(tl, WORLD_GRID_WIDTH)].value);
-                    if (is_in_bounds(tr, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- tr", JSON.stringify(tr), game.world_grid[grid_position_to_index(tr, WORLD_GRID_WIDTH)].value);
-                    if (is_in_bounds(bl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- bl", JSON.stringify(bl), game.world_grid[grid_position_to_index(bl, WORLD_GRID_WIDTH)].value);
-                    if (is_in_bounds(br, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- br", JSON.stringify(br), game.world_grid[grid_position_to_index(br, WORLD_GRID_WIDTH)].value);
-                    console.log("value", number_to_binary_string(tile_value), "tile_index", tile_index, "texture_position", texture_position);
-                }
-                assert(tile_index > -1);
 
                 fixed_array_add(game.renderer.sprites, sprite);
             }
@@ -902,19 +863,22 @@ function is_same_tile(grid_position: Vector2): int {
     }
     return game.world_grid[grid_index].value ? 1 : 0;
 }
-function calculate_tile_value(grid_position: Vector2): Tile_Value {
-    const t = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.NORTH]));
-    const l = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.WEST]));
-    const r = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.EAST]));
-    const b = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH]));
 
-    let value: Tile_Value = 0;
-    value |= t * (1 << 3);
-    value |= l * (1 << 2);
-    value |= r * (1 << 1);
-    value |= b * (1 << 0);
-
-    return value;
+function calculate_tile_value(tile_position: Vector2): Tile_Value {
+    const tl = vector2_add(tile_position, [-1, -1]);
+    const tr = vector2_add(tile_position, [+0, -1]);
+    const bl = vector2_add(tile_position, [-1, +0]);
+    const br = vector2_add(tile_position, [+0, +0]);
+    let tile_value: Tile_Value = 0;
+    if (is_in_bounds(tl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+        tile_value |= game.world_grid[grid_position_to_index(tl, WORLD_GRID_WIDTH)].value * (1 << 3);
+    if (is_in_bounds(tr, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+        tile_value |= game.world_grid[grid_position_to_index(tr, WORLD_GRID_WIDTH)].value * (1 << 2);
+    if (is_in_bounds(bl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+        tile_value |= game.world_grid[grid_position_to_index(bl, WORLD_GRID_WIDTH)].value * (1 << 1);
+    if (is_in_bounds(br, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+        tile_value |= game.world_grid[grid_position_to_index(br, WORLD_GRID_WIDTH)].value * (1 << 0);
+    return tile_value;
 }
 
 // TypeScript was a mistake... The future is dumb.
