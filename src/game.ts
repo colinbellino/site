@@ -59,11 +59,12 @@ type Fixed_Size_Array<T, N extends int> = {
 type Game = {
     render_active:          boolean;
     renderer:               Renderer;
+    frame_count:            int;
     texture0:               WebGLTexture;
     inputs:                 Inputs;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
-    tile_grid:              Static_Array<Sprite, typeof TILE_GRID_SIZE>;
+    tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
     debug_draw_entities:    boolean;
     debug_draw_world_grid:  boolean;
     debug_draw_tile_grid:   boolean;
@@ -114,8 +115,8 @@ const GRID_SIZE = 16;
 const WORLD_GRID_WIDTH: int = 10;
 const WORLD_GRID_HEIGHT: int = 10;
 const WORLD_GRID_SIZE = WORLD_GRID_WIDTH * WORLD_GRID_HEIGHT;
-const TILE_GRID_WIDTH: int = 10;
-const TILE_GRID_HEIGHT: int = 10;
+const TILE_GRID_WIDTH: int = WORLD_GRID_WIDTH+1;
+const TILE_GRID_HEIGHT: int = WORLD_GRID_HEIGHT+1;
 const TILE_GRID_SIZE = TILE_GRID_WIDTH * TILE_GRID_HEIGHT;
 const MAX_ENTITIES : number = 100;
 const MAX_SPRITES : number = 2048;
@@ -138,6 +139,7 @@ requestAnimationFrame(main);
 function main() {
     // @ts-ignore
     game = {};
+    game.frame_count = 0;
     game.entities = fixed_array_make(MAX_ENTITIES);
     game.world_grid = Array(WORLD_GRID_SIZE);
     game.tile_grid = Array(TILE_GRID_SIZE);
@@ -174,16 +176,16 @@ function main() {
 
     // :init world
     const world = [
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-        1, 0, 0, 0, 0, 0, 0, 0, 1, 1,
-        1, 0, 0, 0, 0, 0, 0, 1, 1, 1,
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
+        1, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+        0, 0, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
+        1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
         1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
         1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
-        1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-        1, 0, 0, 0, 0, 1, 1, 1, 1, 1,
-        1, 0, 0, 0, 0, 0, 0, 0, 0, 1,
-        1, 1, 1, 1, 1, 1, 1, 1, 1, 1,
+        1, 1, 0, 0, 0, 1, 1, 1, 1, 1,
+        1, 1, 0, 0, 0, 1, 1, 1, 1, 1,
+        1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
+        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
     ];
     assert(world.length === WORLD_GRID_HEIGHT * WORLD_GRID_WIDTH);
     for (let y = 0; y < WORLD_GRID_HEIGHT; y++) {
@@ -199,31 +201,15 @@ function main() {
         for (let x = 0; x < TILE_GRID_WIDTH; x++) {
             const tile_grid_index = grid_position_to_index([x, y], TILE_GRID_WIDTH);
             const world_grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
-
-            if (game.world_grid[world_grid_index].value === 0) { continue; }
+            const world_cell = game.world_grid[world_grid_index];
 
             const tile_value = calculate_tile_value([x, y]);
-            const tile_index = TILE_VALUES.indexOf(tile_value);
-            assert(tile_index > -1);
-            const tile_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE);
+            // if (game.frame_count === 0) {
+            //     console.log("world_position", [x, y], "world_cell", world_cell.value, "tile_value", number_to_binary_string(tile_value));
+            // }
+            // assert(tile_index > -1);
 
-            let color: Vector4 = [0.5, 0.5, 0.5, 1.0];
-            if ((x+y)%2) { color = [0.4, 0.4, 0.4, 1.0]; }
-            color[3] *= 0.5;
-
-            game.tile_grid[tile_grid_index] = {
-                color:              color,
-                position:           [x*GRID_SIZE - GRID_SIZE/2, y*GRID_SIZE - GRID_SIZE/2],
-                size:               [GRID_SIZE, GRID_SIZE],
-                scale:              [1, 1],
-                rotation:           0,
-                texture_size:       [GRID_SIZE, GRID_SIZE],
-                texture_position:   [
-                    tile_position[0] * GRID_SIZE + TILESET_POSITION[0],
-                    tile_position[1] * GRID_SIZE + TILESET_POSITION[1],
-                ],
-                z_index:            1,
-            };
+            game.tile_grid[tile_grid_index] = tile_value;
         }
     }
 
@@ -329,16 +315,19 @@ function update() {
         if (game.debug_draw_world_grid) {
             for (let world_cell_index = 0; world_cell_index < WORLD_GRID_SIZE; world_cell_index++) {
                 const world_cell = game.world_grid[world_cell_index];
-                const grid_position = grid_index_to_position(world_cell_index, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]);
+                const world_position = grid_index_to_position(world_cell_index, WORLD_GRID_WIDTH);
+                let color = world_cell.value === 0 ? COLOR_BLACK() : COLOR_WHITE();
+                color[3] *= 0.3;
                 const sprite: Sprite = {
-                    color:              world_cell.value === 0 ? COLOR_BLACK() : COLOR_WHITE(),
-                    position:           [grid_position[0]*GRID_SIZE, grid_position[1]*GRID_SIZE],
+                    color:              color,
+                    position:           [world_position[0]*GRID_SIZE, world_position[1]*GRID_SIZE],
                     size:               [GRID_SIZE, GRID_SIZE],
                     scale:              [1, 1],
                     rotation:           0,
                     texture_size:       [GRID_SIZE, GRID_SIZE],
+                    // texture_position:   [48, 96+16],
                     texture_position:   [0, 0],
-                    z_index:            0,
+                    z_index:            2,
                 };
                 fixed_array_add(game.renderer.sprites, sprite);
             }
@@ -346,8 +335,58 @@ function update() {
         // :render tile
         if (game.debug_draw_tile_grid) {
             for (let tile_cell_index = 0; tile_cell_index < TILE_GRID_SIZE; tile_cell_index++) {
-                const tile_cell = game.tile_grid[tile_cell_index];
-                fixed_array_add(game.renderer.sprites, tile_cell);
+                // const tile_cell = game.tile_grid[tile_cell_index];
+                const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
+
+                let color: Vector4 = [1.0, 1.0, 1.0, 1.0];
+                // if ((tile_position[0]+tile_position[1]) % 2) { color = [0.9, 0.9, 0.9, 1.0]; }
+                // color[3] *= 0.8;
+
+                // TODO: clean this up
+                const tl = vector2_add(tile_position, [-1, -1]);
+                const tr = vector2_add(tile_position, [+0, -1]);
+                const bl = vector2_add(tile_position, [-1, +0]);
+                const br = vector2_add(tile_position, [+0, +0]);
+                let tile_value: Tile_Value = 0;
+                if (is_in_bounds(tl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+                    tile_value |= game.world_grid[grid_position_to_index(tl, WORLD_GRID_WIDTH)].value * (1 << 3);
+                if (is_in_bounds(tr, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+                    tile_value |= game.world_grid[grid_position_to_index(tr, WORLD_GRID_WIDTH)].value * (1 << 2);
+                if (is_in_bounds(bl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+                    tile_value |= game.world_grid[grid_position_to_index(bl, WORLD_GRID_WIDTH)].value * (1 << 1);
+                if (is_in_bounds(br, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT]))
+                    tile_value |= game.world_grid[grid_position_to_index(br, WORLD_GRID_WIDTH)].value * (1 << 0);
+
+                const tile_index = TILE_VALUES.indexOf(tile_value);
+                const tile_texture_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE[0]);
+
+                const texture_position: Vector2 = [
+                    tile_texture_position[0]*GRID_SIZE + TILESET_POSITION[0],
+                    tile_texture_position[1]*GRID_SIZE + TILESET_POSITION[1],
+                ]
+
+                const sprite: Sprite = {
+                    color:              color,
+                    position:           [tile_position[0]*GRID_SIZE - GRID_SIZE/2, tile_position[1]*GRID_SIZE - GRID_SIZE/2],
+                    size:               [GRID_SIZE, GRID_SIZE],
+                    scale:              [1, 1],
+                    rotation:           0,
+                    texture_size:       [GRID_SIZE, GRID_SIZE],
+                    texture_position:   texture_position,
+                    z_index:            1,
+                }
+
+                if (game.frame_count === 0 && vector2_equal([1, 3], tile_position)) {
+                    console.log("tile_position", tile_position);
+                    if (is_in_bounds(tl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- tl", JSON.stringify(tl), game.world_grid[grid_position_to_index(tl, WORLD_GRID_WIDTH)].value);
+                    if (is_in_bounds(tr, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- tr", JSON.stringify(tr), game.world_grid[grid_position_to_index(tr, WORLD_GRID_WIDTH)].value);
+                    if (is_in_bounds(bl, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- bl", JSON.stringify(bl), game.world_grid[grid_position_to_index(bl, WORLD_GRID_WIDTH)].value);
+                    if (is_in_bounds(br, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) console.log("- br", JSON.stringify(br), game.world_grid[grid_position_to_index(br, WORLD_GRID_WIDTH)].value);
+                    console.log("value", number_to_binary_string(tile_value), "tile_index", tile_index, "texture_position", texture_position);
+                }
+                assert(tile_index > -1);
+
+                fixed_array_add(game.renderer.sprites, sprite);
             }
         }
 
@@ -410,6 +449,8 @@ function update() {
     }
 
     inputs_reset(game.inputs);
+
+    game.frame_count += 1;
 
     requestAnimationFrame(update);
 }
@@ -742,9 +783,9 @@ function inputs_on_key(event: KeyboardEvent) {
         return;
     }
     const key_state = game.inputs.keys[event.key as Keyboard_Key];
-    key_state.down = event.type == "keydown";
-    key_state.released = event.type == "keyup";
-    key_state.pressed = event.type == "keydown";
+    key_state.down = event.type === "keydown";
+    key_state.released = event.type === "keyup";
+    key_state.pressed = event.type === "keydown";
 }
 function inputs_reset(inputs: Inputs) {
     inputs.mouse_wheel[0] = 0;
@@ -832,18 +873,28 @@ const DIRECTIONS_ALL : Vector2[] = [
 ];
 const TILE_VALUES = [
     0b0000, // 0 0
-    0b1100, // 1 0
+    0b1000, // 1 0
     0b1010, // 2 0
-    0b1111, // 3 0
+    0b1001, // 3 0
     0b1110, // 4 0
-    0b1111, // 1 0
+    0b1111, // 0 1
     0b0010, // 1 1
-    0b0011, // 1 2
-    0b0110, // 1 3
-    0b1011, // 1 4
+    0b0011, // 2 1
+    0b0110, // 3 1
+    0b1011, // 4 1
+    0b0000, // 0 2
+    0b0100, // 1 2
+    0b0101, // 2 2
+    0b1001, // 3 2
+    0b1101, // 4 2
+    0b0000, // 0 3
+    0b0001, // 1 3
+    0b1100, // 2 3
+    0b0101, // 3 3
+    0b0111, // 4 3
 ];
-const TILESET_POSITION = [0, 80];
-const AUTO_TILE_SIZE: Vector2 = [12, 5];
+const TILESET_POSITION = [0, 176];
+const AUTO_TILE_SIZE: Vector2 = [5, 4];
 function is_same_tile(grid_position: Vector2): int {
     const grid_index = grid_position_to_index(grid_position, WORLD_GRID_WIDTH);
     if (!is_in_bounds(grid_position, [WORLD_GRID_WIDTH, WORLD_GRID_HEIGHT])) {
@@ -858,10 +909,10 @@ function calculate_tile_value(grid_position: Vector2): Tile_Value {
     const b = is_same_tile(vector2_add(grid_position, DIRECTIONS_ALL[Direction_All.SOUTH]));
 
     let value: Tile_Value = 0;
-    value |= b * (1 << 0);
-    value |= r * (1 << 1);
-    value |= l * (1 << 2);
     value |= t * (1 << 3);
+    value |= l * (1 << 2);
+    value |= r * (1 << 1);
+    value |= b * (1 << 0);
 
     return value;
 }
@@ -886,7 +937,7 @@ function fixed_array_add<T>(arr: Fixed_Size_Array<T, any>, item: T): T {
 function log_matrix(matrix: Matrix4) {
     let str = "";
     for (let i = 0; i < matrix.length; i++) {
-        if (i > 0 && i % 4 == 0) {
+        if (i > 0 && i % 4 === 0) {
             str += "\n";
         }
         str += `${matrix[i].toString().padStart(4)}, `;
@@ -915,15 +966,23 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
         }
     }
 }
-// :math
-function number_to_binary_string(dec: number): string {
-    return (dec >>> 0).toString(2);
+// :debug
+function number_to_binary_string(dec: number, size: number = 4): string {
+    return (dec >>> 0).toString(2).padStart(size, "0");
 }
+
+// :math
 function vector2_equal(vec1: Vector2, vec2: Vector2): boolean {
     return vec1[0] === vec2[0] && vec1[1] === vec2[1];
 }
-function grid_index_to_position(grid_index: int, grid_size: Vector2): Vector2 {
-    return [ grid_index % grid_size[0], Math.floor(grid_index / grid_size[0]) ];
+function vector2_add(arr1: Vector2, arr2: Vector2): Vector2 {
+    const result: Vector2 = [0, 0];
+    result[0] = arr1[0] + arr2[0];
+    result[1] = arr1[1] + arr2[1];
+    return result;
+}
+function grid_index_to_position(grid_index: int, grid_width: int): Vector2 {
+    return [ grid_index % grid_width, Math.floor(grid_index / grid_width) ];
 }
 function grid_position_to_index(grid_position: Vector2, grid_width: int): int {
     return (grid_position[1] * grid_width) + grid_position[0];
@@ -933,12 +992,6 @@ function clamp(min: number, max: number, value: number): number {
 }
 function sin_01(time: float, frequency: float = 1.0): float {
     return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
-}
-function vector2_add(arr1: Vector2, arr2: Vector2): Vector2 {
-    const result: Vector2 = [0, 0];
-    result[0] = arr1[0] + arr2[0];
-    result[1] = arr1[1] + arr2[1];
-    return result;
 }
 function is_in_bounds(grid_position: Vector2, grid_size: Vector2): boolean {
     return grid_position[0] >= 0 && grid_position[0] < grid_size[0] && grid_position[1] >= 0 && grid_position[1] < grid_size[1];
