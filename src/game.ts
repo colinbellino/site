@@ -21,15 +21,25 @@ type Game = {
     render_active:          boolean;
     renderer:               Renderer;
     frame_count:            int;
+    frame_end:              number;
+    fps:                    int;
+    fps_last_update:        number;
+    fps_count:              number;
     texture0:               WebGLTexture;
     inputs:                 Inputs;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
+    messages:               Fixed_Size_Array<Message, typeof MAX_MESSAGES>;
     clear_color:            Color;
     debug_draw_entities:    boolean;
     debug_draw_world_grid:  boolean;
     debug_draw_tile_grid:   boolean;
+}
+type Message = {
+    text:           string;
+    position:       Vector2;
+    font_size:      number;
 }
 type Cell = {
     value:  int;
@@ -41,6 +51,7 @@ type Entity = {
 
 type Renderer = {
     gl:                 WebGL2RenderingContext;
+    text_context:       CanvasRenderingContext2D;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
@@ -74,6 +85,7 @@ type Sprite = {
 }
 
 // :constants
+const TEXT_RATIO = 4;
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION = [0, 240];
@@ -83,7 +95,8 @@ const WORLD_GRID_SIZE = WORLD_GRID_WIDTH * WORLD_GRID_HEIGHT;
 const TILE_GRID_WIDTH: int = WORLD_GRID_WIDTH+1;
 const TILE_GRID_HEIGHT: int = WORLD_GRID_HEIGHT+1;
 const TILE_GRID_SIZE = TILE_GRID_WIDTH * TILE_GRID_HEIGHT;
-const MAX_ENTITIES : number = 100;
+const MAX_MESSAGES : number = 128;
+const MAX_ENTITIES : number = 128;
 const MAX_SPRITES : number = 2048;
 const ENABLE_SPRITE_PASS = true;
 const ATLAS_SIZE : Vector2 = [512, 512];
@@ -107,7 +120,12 @@ function update() {
             // @ts-ignore
             game = {};
             game.frame_count = 0;
+            game.frame_end = 0;
+            game.fps = 0;
+            game.fps_last_update = 0;
+            game.fps_count = 0;
             game.entities = fixed_array_make(MAX_ENTITIES);
+            game.messages = fixed_array_make(MAX_MESSAGES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
             game.debug_draw_entities = true;
@@ -120,7 +138,6 @@ function update() {
                 console.error("Couldn't initialize renderer.");
                 return;
             }
-
             game.renderer = renderer;
             renderer_resize_canvas(window.innerWidth, window.innerHeight);
             renderer_update_camera_matrix_main(game.renderer.camera_main);
@@ -136,7 +153,7 @@ function update() {
 
             game.inputs = inputs_init();
 
-            fixed_array_add(game.entities, { name: "ENTITY_0", sprite: { color: COLOR_BLACK(),  position: [(10+0)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 } });
+            fixed_array_add(game.entities, { name: "PLAYER", sprite: { color: COLOR_BLACK(),  position: [(10+0)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 } });
             // fixed_array_add(game.entities, { name: "ENTITY_1", sprite: { color: COLOR_BLUE(),   position: [(10+1)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 } });
             // fixed_array_add(game.entities, { name: "ENTITY_2", sprite: { color: COLOR_RED(),    position: [(10+2)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 } });
             // fixed_array_add(game.entities, { name: "ENTITY_3", sprite: { color: COLOR_GREEN(),  position: [(10+0)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 } });
@@ -173,8 +190,16 @@ function update() {
         }
 
         const gl = game.renderer.gl;
+        const now = performance.now();
 
         game.renderer.sprites.count = 0;
+        game.messages.count = 0;
+        if (now >= game.fps_last_update + 1000) {
+            game.fps = game.fps_count;
+            game.fps_count = 0;
+            game.fps_last_update = now
+        }
+        fixed_array_add(game.messages, { text: `FPS: ${game.fps.toFixed(0)}`, font_size: 18, position: [10, 10] });
 
         if (game.inputs.window_resized) {
             renderer_resize_canvas(window.innerWidth, window.innerHeight);
@@ -183,6 +208,9 @@ function update() {
         renderer_update_camera_matrix_main(game.renderer.camera_main);
 
         const t = sin_01(Date.now(), 1.0 / 2000);
+
+        // fixed_array_add(game.messages, { text: "Hello", font_family: "Arial", font_size: 20, position: [10, 10] });
+        // fixed_array_add(game.messages, { text: "Hello2", font_family: "Arial", font_size: 20, position: [102, 10] });
 
         // :debug inputs
         if (game.inputs.keys["Meta"].down === false) {
@@ -313,6 +341,17 @@ function update() {
                     fixed_array_add(game.renderer.sprites, sprite);
                 }
             }
+            // :render messages
+            game.renderer.text_context.clearRect(0, 0, game.renderer.text_context.canvas.width, game.renderer.text_context.canvas.height);
+            for (let message_index = 0; message_index < game.messages.count; message_index++) {
+                const message = game.messages.data[message_index];
+
+                game.renderer.text_context.font = `${message.font_size*TEXT_RATIO}px Courier New`;
+                game.renderer.text_context.fillStyle = "white";
+                game.renderer.text_context.textAlign = "left";
+                game.renderer.text_context.fillText(message.text, message.position[0] * TEXT_RATIO, message.position[1]*TEXT_RATIO + message.font_size*TEXT_RATIO*0.7);
+
+            }
 
             gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
 
@@ -376,6 +415,8 @@ function update() {
         inputs_reset(game.inputs);
 
         game.frame_count += 1;
+        game.fps_count += 1;
+        game.frame_end = performance.now();
 
         requestAnimationFrame(update);
     } catch(e) {
@@ -407,6 +448,11 @@ function renderer_resize_canvas(width: int, height: int) {
     game.renderer.window_size[1] = final_height;
     game.renderer.gl.canvas.width = game.renderer.window_size[0];
     game.renderer.gl.canvas.height = game.renderer.window_size[1];
+
+;    game.renderer.text_context.canvas.style.width = game.renderer.window_size[0] + "px";
+    game.renderer.text_context.canvas.style.height = game.renderer.window_size[1] + "px";
+    game.renderer.text_context.canvas.width = game.renderer.window_size[0] * TEXT_RATIO;
+    game.renderer.text_context.canvas.height = game.renderer.window_size[1] * TEXT_RATIO;
     // console.log("window_size", game.renderer.window_size);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
@@ -420,6 +466,14 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
+    const text_canvas = document.createElement("canvas");
+    text_canvas.id = "text";
+    text_canvas.style.zIndex = "99";
+    text_canvas.style.position = "absolute";
+    document.querySelector("body").prepend(text_canvas);
+    const text_context = text_canvas.getContext("2d");
+    text_context.scale(TEXT_RATIO, TEXT_RATIO);
+
     const renderer: Renderer = {
         // @ts-ignore
         sprite_pass: {},
@@ -427,6 +481,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         sprites: fixed_array_make(MAX_SPRITES),
         window_size: [0, 0],
         gl: _gl,
+        text_context: text_context,
     };
 
     _gl.enable(_gl.BLEND);
