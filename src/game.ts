@@ -72,7 +72,7 @@ type Sprite = {
     z_index:            int;
 }
 
-const GRID_SIZE = 32;
+const GRID_SIZE = 48;
 const TILESET_POSITION = [0, 240];
 const WORLD_GRID_WIDTH: int = 10;
 const WORLD_GRID_HEIGHT: int = 10;
