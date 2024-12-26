@@ -138,30 +138,32 @@ function main() {
     fixed_array_add(game.entities, { name: "ENTITY_5", sprite: { color: COLOR_YELLOW(), position: [(10+2)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 } });
 
     // :init world
-    const world = [
-        0, 0, 0, 1, 1, 1, 1, 1, 1, 1,
-        0, 1, 0, 1, 1, 1, 1, 1, 1, 1,
-        0, 0, 1, 0, 0, 0, 0, 1, 1, 1,
-        1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-        1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
-        1, 1, 0, 0, 0, 0, 0, 1, 1, 1,
-        1, 1, 0, 0, 0, 1, 1, 1, 1, 1,
-        1, 1, 0, 0, 0, 1, 1, 1, 1, 1,
-        1, 1, 0, 0, 0, 0, 0, 0, 0, 1,
-        0, 1, 1, 1, 1, 1, 1, 1, 1, 1,
-    ];
+    const world_str = `
+        1 0 0 0 0 1 1 0 0 0
+        1 0 0 0 0 0 0 0 0 1
+        0 0 1 1 1 1 1 0 0 1
+        1 1 1 1 1 1 1 0 0 1
+        0 0 0 0 0 0 0 1 0 1
+        0 0 0 0 0 0 0 1 1 1
+        0 1 0 1 0 1 1 1 1 1
+        0 0 1 0 0 1 1 1 1 1
+        0 1 1 1 1 0 0 0 0 1
+        0 1 1 1 1 1 1 1 1 1
+    `;
+    const world = world_str.replace(/\s/g, "").split("");
     assert(world.length === WORLD_GRID_HEIGHT * WORLD_GRID_WIDTH);
     for (let y = 0; y < WORLD_GRID_HEIGHT; y++) {
         for (let x = 0; x < WORLD_GRID_WIDTH; x++) {
             const grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
             game.world_grid[grid_index] = {
-                value:              world[grid_index],
+                value:              parseInt(world[grid_index]),
             };
         }
     }
     // :init tile
-    document.addEventListener("keydown", inputs_on_key, false);
-    document.addEventListener("keyup", inputs_on_key, false);
+    window.addEventListener("resize", window_on_resize, false);
+    window.addEventListener("keydown", inputs_on_key, false);
+    window.addEventListener("keyup", inputs_on_key, false);
 
     requestAnimationFrame(update);
 }
@@ -170,7 +172,6 @@ function update() {
     const gl = game.renderer.gl;
 
     game.renderer.sprites.count = 0;
-    game.inputs.window_resized = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
 
     if (game.inputs.window_resized) {
         renderer_resize_canvas(window.innerWidth, window.innerHeight);
@@ -281,7 +282,7 @@ function update() {
                 const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
 
                 let color: Vector4 = [1.0, 1.0, 1.0, 1.0];
-                if ((tile_position[0]+tile_position[1]) % 2) { color = [0.9, 0.9, 0.9, 1.0]; }
+                if ((tile_position[0]+tile_position[1]) % 2) { color = [0.95, 0.95, 0.95, 1.0]; }
                 // color[3] *= 0.8;
 
                 const tile_value = calculate_tile_value(tile_position);
@@ -396,7 +397,7 @@ function renderer_resize_canvas(width: int, height: int) {
     game.renderer.window_size[1] = final_height;
     game.renderer.gl.canvas.width = game.renderer.window_size[0];
     game.renderer.gl.canvas.height = game.renderer.window_size[1];
-    console.log("window_size", game.renderer.window_size);
+    // console.log("window_size", game.renderer.window_size);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
     const canvas = document.querySelector("canvas");
@@ -409,20 +410,19 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
-    // @ts-ignore
-    const renderer: Renderer = {};
-    renderer.gl = _gl;
+    const renderer: Renderer = {
+        // @ts-ignore
+        sprite_pass: {},
+        camera_main: CAMERA_DEFAULT,
+        sprites: fixed_array_make(MAX_SPRITES),
+        window_size: [0, 0],
+        gl: _gl,
+    };
 
     _gl.enable(_gl.BLEND);
     _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
     _gl.getExtension("OES_standard_derivatives");
     _gl.getExtension("EXT_shader_texture_lod");
-
-    // @ts-ignore
-    renderer.sprite_pass = {};
-    renderer.camera_main = CAMERA_DEFAULT;
-    renderer.sprites = fixed_array_make(MAX_SPRITES);
-    renderer.window_size = [0, 0];
 
     return [renderer, true];
 }
@@ -714,6 +714,9 @@ function inputs_init(): Inputs {
         inputs.mouse_keys[key] = { pressed: false, down: false, released: false };
     }
     return inputs;
+}
+function window_on_resize(_event: Event) {
+    game.inputs.window_resized = true;
 }
 function inputs_on_key(event: KeyboardEvent) {
     if (!game.inputs.keys.hasOwnProperty(event.key)) {
