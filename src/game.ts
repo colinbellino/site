@@ -32,6 +32,7 @@ type Game = {
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
     messages:               Fixed_Size_Array<Message, typeof MAX_MESSAGES>;
     clear_color:            Color;
+    debug_draw_messages:        boolean;
     debug_draw_entities:    boolean;
     debug_draw_world_grid:  boolean;
     debug_draw_tile_grid:   boolean;
@@ -128,6 +129,7 @@ function update() {
             game.messages = fixed_array_make(MAX_MESSAGES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
+            game.debug_draw_messages = true;
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
             game.debug_draw_tile_grid = true;
@@ -193,13 +195,22 @@ function update() {
         const now = performance.now();
 
         game.renderer.sprites.count = 0;
-        game.messages.count = 0;
         if (now >= game.fps_last_update + 1000) {
             game.fps = game.fps_count;
             game.fps_count = 0;
             game.fps_last_update = now
         }
-        fixed_array_add(game.messages, { text: `FPS: ${game.fps.toFixed(0)}`, font_size: 18, position: [10, 10] });
+
+        game.messages.count = 0;
+        if (game.debug_draw_messages) {
+            let line = 0;
+            fixed_array_add(game.messages, { text: `fps:            ${game.fps.toFixed(0)}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            fixed_array_add(game.messages, { text: `entities:       ${game.entities.count}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            fixed_array_add(game.messages, { text: `tiles_draw:     ${game.debug_draw_tile_grid}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            fixed_array_add(game.messages, { text: `tiles_count:    ${game.tile_grid.length}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            fixed_array_add(game.messages, { text: `world_draw:     ${game.debug_draw_world_grid}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            fixed_array_add(game.messages, { text: `world_count:    ${game.world_grid.length}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+        }
 
         if (game.inputs.window_resized) {
             renderer_resize_canvas(window.innerWidth, window.innerHeight);
@@ -209,40 +220,40 @@ function update() {
 
         const t = sin_01(Date.now(), 1.0 / 2000);
 
-        // fixed_array_add(game.messages, { text: "Hello", font_family: "Arial", font_size: 20, position: [10, 10] });
-        // fixed_array_add(game.messages, { text: "Hello2", font_family: "Arial", font_size: 20, position: [102, 10] });
-
         // :debug inputs
-        if (game.inputs.keys["Meta"].down === false) {
-            if (game.inputs.keys["²"].released) {
-                game.debug_draw_entities = !game.debug_draw_entities;
+        if (game.inputs.keys["MetaLeft"].down === false) {
+            if (game.inputs.keys["Backquote"].released) {
+                game.debug_draw_messages = !game.debug_draw_messages;
             }
-            if (game.inputs.keys["&"].released) {
+            if (game.inputs.keys["Digit1"].released) {
                 game.debug_draw_world_grid = !game.debug_draw_world_grid;
             }
-            if (game.inputs.keys["é"].released) {
+            if (game.inputs.keys["Digit2"].released) {
                 game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
             }
-            if (game.inputs.keys["p"].released) {
+            if (game.inputs.keys["Digit3"].released) {
+                game.debug_draw_entities = !game.debug_draw_entities;
+            }
+            if (game.inputs.keys["KeyP"].released) {
                 game.render_active = !game.render_active;
             }
 
-            if (game.inputs.keys["r"].down) {
+            if (game.inputs.keys["KeyR"].down) {
                 game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom + 0.1);
             }
-            if (game.inputs.keys["f"].down) {
+            if (game.inputs.keys["KeyF"].down) {
                 game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
             }
-            if (game.inputs.keys["z"].down) {
+            if (game.inputs.keys["KeyW"].down) {
                 game.renderer.camera_main.position[1] += game.renderer.camera_main.zoom;
             }
-            if (game.inputs.keys["s"].down) {
+            if (game.inputs.keys["KeyS"].down) {
                 game.renderer.camera_main.position[1] -= game.renderer.camera_main.zoom;
             }
-            if (game.inputs.keys["q"].down) {
+            if (game.inputs.keys["KeyA"].down) {
                 game.renderer.camera_main.position[0] += game.renderer.camera_main.zoom;
             }
-            if (game.inputs.keys["d"].down) {
+            if (game.inputs.keys["KeyD"].down) {
                 game.renderer.camera_main.position[0] -= game.renderer.camera_main.zoom;
             }
 
@@ -263,12 +274,12 @@ function update() {
             if (game.inputs.keys["ArrowRight"].down) {
                 game.entities.data[0].sprite.position[0] += 1;
             }
-            if (game.inputs.keys[" "].down) {
+            if (game.inputs.keys["KeySpace"].down) {
                 // game.entities.data[2].sprite.scale[0] += 0.1;
                 // game.entities.data[2].sprite.scale[1] += 0.1;
                 game.entities.data[2].sprite.rotation = t;
             }
-            if (game.inputs.keys[" "].released) {
+            if (game.inputs.keys["KeySpace"].released) {
                 // game.entities.data[2].sprite.scale[0] = 1;
                 // game.entities.data[2].sprite.scale[1] = 1;
                 game.entities.data[2].sprite.rotation = 0;
@@ -691,43 +702,44 @@ type Key_State = {
 }
 // I really hate that i have to do this, but this is JavaScript so here we go...
 enum Keyboard_Key {
-    "_0" = "0",
-    "_1" = "1",
-    "_2" = "2",
-    "_3" = "3",
-    "_4" = "4",
-    "_5" = "5",
-    "_6" = "6",
-    "_7" = "7",
-    "_8" = "8",
-    "_9" = "9",
-    "a" = "a",
-    "b" = "b",
-    "c" = "c",
-    "d" = "d",
-    "e" = "e",
-    "f" = "f",
-    "g" = "g",
-    "h" = "h",
-    "i" = "i",
-    "j" = "j",
-    "k" = "k",
-    "l" = "l",
-    "m" = "m",
-    "n" = "n",
-    "o" = "o",
-    "p" = "p",
-    "q" = "q",
-    "r" = "r",
-    "s" = "s",
-    "t" = "t",
-    "u" = "u",
-    "v" = "v",
-    "w" = "w",
-    "x" = "x",
-    "y" = "y",
-    "z" = "z",
-    "²" = "²",
+    "Digit0" = "Digit0",
+    "Digit1" = "Digit1",
+    "Digit2" = "Digit2",
+    "Digit3" = "Digit3",
+    "Digit4" = "Digit4",
+    "Digit5" = "Digit5",
+    "Digit6" = "Digit6",
+    "Digit7" = "Digit7",
+    "Digit8" = "Digit8",
+    "Digit9" = "Digit9",
+    "KeyA" = "KeyA",
+    "KeyB" = "KeyB",
+    "KeyC" = "KeyC",
+    "KeyD" = "KeyD",
+    "KeyE" = "KeyE",
+    "KeyF" = "KeyF",
+    "KeyG" = "KeyG",
+    "KeyH" = "KeyH",
+    "KeyI" = "KeyI",
+    "KeyJ" = "KeyJ",
+    "KeyK" = "KeyK",
+    "KeyL" = "KeyL",
+    "KeyM" = "KeyM",
+    "KeyN" = "KeyN",
+    "KeyO" = "KeyO",
+    "KeyP" = "KeyP",
+    "KeyQ" = "KeyQ",
+    "KeyR" = "KeyR",
+    "KeyS" = "KeyS",
+    "KeyT" = "KeyT",
+    "KeyU" = "KeyU",
+    "KeyV" = "KeyV",
+    "KeyW" = "KeyW",
+    "KeyX" = "KeyX",
+    "KeyY" = "KeyY",
+    "KeyZ" = "KeyZ",
+    "KeySpace" = "KeySpace",
+    "Backquote" = "Backquote",
     "F1" = "F1",
     "F2" = "F2",
     "F3" = "F3",
@@ -741,18 +753,13 @@ enum Keyboard_Key {
     "F11" = "F11",
     "F12" = "F12",
     "Tab" = "Tab",
-    "Shift" = "Shift",
-    "Control" = "Control",
-    "Meta" = "Meta",
-    " " = " ",
-    "Alt" = "Alt",
-    "AltGraph" = "AltGraph",
+    "ShiftLeft" = "ShiftLeft",
+    "ControlLeft" = "ControlLeft",
+    "MetaLeft" = "MetaLeft",
     "ArrowDown" = "ArrowDown",
     "ArrowLeft" = "ArrowLeft",
     "ArrowRight" = "ArrowRight",
     "ArrowUp" = "ArrowUp",
-    "&" = "&",
-    "é" = "é",
 };
 // FIXME: handle non ZQSD keyboard layouts
 enum Mouse_Key {
@@ -784,11 +791,11 @@ function window_on_resize(_event: Event) {
     game.inputs.window_resized = true;
 }
 function inputs_on_key(event: KeyboardEvent) {
-    if (!game.inputs.keys.hasOwnProperty(event.key)) {
-        console.warn("Unrecognized key:", event.key);
+    if (!game.inputs.keys.hasOwnProperty(event.code)) {
+        console.warn("Unrecognized key:", event.code);
         return;
     }
-    const key_state = game.inputs.keys[event.key as Keyboard_Key];
+    const key_state = game.inputs.keys[event.code as Keyboard_Key];
     key_state.down = event.type === "keydown";
     key_state.released = event.type === "keyup";
     key_state.pressed = event.type === "keydown";
