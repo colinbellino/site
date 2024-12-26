@@ -1,47 +1,9 @@
+// These are injected at build time
 declare var __RELEASE__: boolean;
+declare var sprite_vs: string;
+declare var sprite_fs: string;
 
 // :shader
-const sprite_vs = `
-    #version 300 es
-    precision highp float;
-    precision highp int;
-
-    layout(location=0) in vec2 position;
-    layout(location=1) in vec2 uv;
-    layout(location=2) in vec4 i_color;
-    layout(location=3) in vec4 i_matrix0;
-    layout(location=4) in vec4 i_matrix1;
-    layout(location=5) in vec4 i_matrix2;
-    layout(location=6) in vec4 i_matrix3;
-    layout(location=7) in vec2 i_tex_position;
-    layout(location=8) in vec2 i_tex_size;
-
-    uniform mat4 u_matrix;
-
-    out vec4 v_color;
-    out vec2 v_uv;
-
-    void main() {
-        mat4 i_matrix = mat4(i_matrix0, i_matrix1, i_matrix2, i_matrix3);
-        gl_Position = u_matrix * i_matrix * (vec4(position, 0, 1));
-        v_uv = i_tex_size*uv + i_tex_position;
-        v_color = i_color;
-    }
-`;
-const sprite_fs = `
-    #version 300 es
-    precision highp float;
-
-    uniform sampler2D u_texture;
-    in vec4 v_color;
-    in vec2 v_uv;
-    out vec4 frag_color;
-
-    void main() {
-        frag_color = texture(u_texture, v_uv) * v_color;
-    }
-`;
-
 type Vector2 = Static_Array<float,2>;
 type Vector3 = Static_Array<float,3>;
 type Vector4 = Static_Array<float,4>;
@@ -442,6 +404,8 @@ function renderer_init(): [Renderer, true] | [null, false] {
 
     _gl.enable(_gl.BLEND);
     _gl.blendFunc(_gl.SRC_ALPHA, _gl.ONE_MINUS_SRC_ALPHA);
+    _gl.getExtension("OES_standard_derivatives");
+    _gl.getExtension("EXT_shader_texture_lod");
 
     // @ts-ignore
     renderer.sprite_pass = {};
@@ -578,6 +542,8 @@ function renderer_create_texture(image: HTMLImageElement, gl: WebGL2RenderingCon
     // gl.pixelStorei  (gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture  (gl.TEXTURE_2D, texture);
     gl.texImage2D   (gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);

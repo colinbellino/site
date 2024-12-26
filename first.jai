@@ -98,4 +98,19 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         data, read_ok := read_entire_file(to_dist_path(file_full_path));
         log("[SWC] % compiled (% bytes).", file_full_path, data.count);
     }
+
+    {
+        sprite_vert, sprite_vert_ok := read_entire_file("./src/sprite.glsl.vert");
+        if !sprite_vert_ok { log_error("Couldn't read shader file: sprite.glsl.vert"); return; }
+        sprite_frag, sprite_frag_ok := read_entire_file("./src/sprite.glsl.frag");
+        if !sprite_frag_ok { log_error("Couldn't read shader file: sprite.glsl.frag"); return; }
+
+        js_file, js_file_ok := file_open("./public/dist/game.js", true, true);
+        if !js_file_ok { log_error("Couldn't open js file to append shaders."); return; }
+        defer file_close(*js_file);
+        file_set_position(js_file, file_length(js_file));
+
+        stuff := tprint("\nconst sprite_vs = `%`;\nconst sprite_fs = `%`;\n", sprite_vert, sprite_frag);
+        file_write(*js_file, stuff.data, stuff.count);
+    }
 }
