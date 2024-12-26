@@ -129,7 +129,7 @@ function update() {
             game.messages = fixed_array_make(MAX_MESSAGES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
-            game.debug_draw_messages = true;
+            game.debug_draw_messages = false;
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
             game.debug_draw_tile_grid = true;
@@ -143,7 +143,7 @@ function update() {
             game.renderer = renderer;
             renderer_resize_canvas(window.innerWidth, window.innerHeight);
             renderer_update_camera_matrix_main(game.renderer.camera_main);
-            game.renderer.camera_main.zoom = 2;
+            game.renderer.camera_main.zoom = 4;
             game.renderer.camera_main.position = [-300, -300];
             if (ENABLE_SPRITE_PASS) {
                 game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
@@ -155,12 +155,12 @@ function update() {
 
             game.inputs = inputs_init();
 
-            fixed_array_add(game.entities, { name: "PLAYER", sprite: { color: COLOR_BLACK(),  position: [(10+0)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 9 } });
-            // fixed_array_add(game.entities, { name: "ENTITY_1", sprite: { color: COLOR_BLUE(),   position: [(10+1)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 8 } });
-            // fixed_array_add(game.entities, { name: "ENTITY_2", sprite: { color: COLOR_RED(),    position: [(10+2)*16, (10+0)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 7 } });
-            // fixed_array_add(game.entities, { name: "ENTITY_3", sprite: { color: COLOR_GREEN(),  position: [(10+0)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 6 } });
-            // fixed_array_add(game.entities, { name: "ENTITY_4", sprite: { color: COLOR_PINK(),   position: [(10+1)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [0, 0], z_index: 5 } });
-            // fixed_array_add(game.entities, { name: "ENTITY_5", sprite: { color: COLOR_YELLOW(), position: [(10+2)*16, (10+1)*16], size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [16, 0], z_index: 4 } });
+            fixed_array_add(game.entities, { name: "PLAYER",  sprite: { color: COLOR_WHITE(),  position: grid_position_center(1, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [48, 0], z_index: 9 } });
+            fixed_array_add(game.entities, { name: "POINT_1", sprite: { color: COLOR_WHITE(),  position: grid_position_center(1, 1), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
+            fixed_array_add(game.entities, { name: "POINT_2", sprite: { color: COLOR_WHITE(),  position: grid_position_center(1, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
+            fixed_array_add(game.entities, { name: "POINT_3", sprite: { color: COLOR_WHITE(),  position: grid_position_center(4, 3), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
+            fixed_array_add(game.entities, { name: "POINT_4", sprite: { color: COLOR_WHITE(),  position: grid_position_center(6, 1), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
+            fixed_array_add(game.entities, { name: "POINT_5", sprite: { color: COLOR_WHITE(),  position: grid_position_center(7, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
 
             // :init world
             const world_str = `
@@ -206,10 +206,14 @@ function update() {
             let line = 0;
             fixed_array_add(game.messages, { text: `fps:            ${game.fps.toFixed(0)}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
             fixed_array_add(game.messages, { text: `entities:       ${game.entities.count}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
-            fixed_array_add(game.messages, { text: `tiles_draw:     ${game.debug_draw_tile_grid}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
-            fixed_array_add(game.messages, { text: `tiles_count:    ${game.tile_grid.length}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
             fixed_array_add(game.messages, { text: `world_draw:     ${game.debug_draw_world_grid}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
-            fixed_array_add(game.messages, { text: `world_count:    ${game.world_grid.length}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            if (game.debug_draw_world_grid) {
+                fixed_array_add(game.messages, { text: `world_count:    ${game.world_grid.length}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            }
+            fixed_array_add(game.messages, { text: `tiles_draw:     ${game.debug_draw_tile_grid}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            if (game.debug_draw_tile_grid) {
+                fixed_array_add(game.messages, { text: `tiles_count:    ${game.tile_grid.length}`, font_size: 18, position: [10, 10+22*line] }); line += 1;
+            }
         }
 
         if (game.inputs.window_resized) {
@@ -285,6 +289,8 @@ function update() {
                 game.entities.data[2].sprite.rotation = 0;
             }
         }
+
+        // game.renderer.camera_main.position = game.entities.data[0].sprite.position;
 
         // :render
         render: {
@@ -1291,4 +1297,8 @@ function matrix4_rotate_z(m: Matrix4, angle_in_radians: float): Matrix4 {
     }
 
     return result;
+}
+
+function grid_position_center(x: int, y: int): Vector2 {
+    return [x*GRID_SIZE - GRID_SIZE, y*GRID_SIZE - GRID_SIZE];
 }
