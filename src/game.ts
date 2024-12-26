@@ -3,7 +3,6 @@ declare var __RELEASE__: boolean;
 declare var sprite_vs: string;
 declare var sprite_fs: string;
 
-// :shader
 type Vector2 = Static_Array<float,2>;
 type Vector3 = Static_Array<float,3>;
 type Vector4 = Static_Array<float,4>;
@@ -116,6 +115,7 @@ function main() {
     }
 
     game.renderer = renderer;
+    renderer_resize_canvas(window.innerWidth, window.innerHeight);
     renderer_update_camera_matrix_main(game.renderer.camera_main);
     game.renderer.camera_main.zoom = 4;
     game.renderer.camera_main.position = [-300, -300];
@@ -168,23 +168,19 @@ function main() {
 function update() {
     const gl = game.renderer.gl;
 
-    game.inputs.window_resized = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
-    game.renderer.window_size[0] = window.innerWidth;
-    game.renderer.window_size[1] = window.innerHeight;
     game.renderer.sprites.count = 0;
-    gl.canvas.width = game.renderer.window_size[0];
-    gl.canvas.height = game.renderer.window_size[1];
+    game.inputs.window_resized = window.innerWidth !== game.renderer.window_size[0] || window.innerHeight !== game.renderer.window_size[1];
+
+    if (game.inputs.window_resized) {
+        renderer_resize_canvas(window.innerWidth, window.innerHeight);
+    }
 
     renderer_update_camera_matrix_main(game.renderer.camera_main);
 
     const t = sin_01(Date.now(), 1.0 / 2000);
 
-    if (game.inputs.window_resized) {
-        console.log("window_size", game.renderer.window_size);
-    }
-
     // :debug inputs
-    {
+    if (game.inputs.keys["Meta"].down === false) {
         if (game.inputs.keys["²"].released) {
             game.debug_draw_entities = !game.debug_draw_entities;
         }
@@ -371,6 +367,7 @@ function update() {
         }
     }
 
+    // TODO: maybe we need to reset the keys state if we lose focus of the window?
     inputs_reset(game.inputs);
 
     game.frame_count += 1;
@@ -378,6 +375,7 @@ function update() {
     requestAnimationFrame(update);
 }
 
+// :renderer
 const CAMERA_DEFAULT: Camera_Orthographic = {
     zoom: 0,
     rotation: 0,
@@ -387,6 +385,18 @@ const CAMERA_DEFAULT: Camera_Orthographic = {
     view_matrix: matrix4_identity(),
     view_projection_matrix: matrix4_identity(),
 };
+function renderer_resize_canvas(width: int, height: int) {
+    let final_width = width;
+    let final_height = height;
+    if (width % 2)  { final_width -= 1; }
+    if (height % 2) { final_height -= 1; }
+
+    game.renderer.window_size[0] = final_width;
+    game.renderer.window_size[1] = final_height;
+    game.renderer.gl.canvas.width = game.renderer.window_size[0];
+    game.renderer.gl.canvas.height = game.renderer.window_size[1];
+    console.log("window_size", game.renderer.window_size);
+}
 function renderer_init(): [Renderer, true] | [null, false] {
     const canvas = document.querySelector("canvas");
     assert(canvas !== null, "Canvas not found");
@@ -410,8 +420,8 @@ function renderer_init(): [Renderer, true] | [null, false] {
     // @ts-ignore
     renderer.sprite_pass = {};
     renderer.camera_main = CAMERA_DEFAULT;
-    renderer.window_size = [window.innerWidth, window.innerHeight];
     renderer.sprites = fixed_array_make(MAX_SPRITES);
+    renderer.window_size = [0, 0];
 
     return [renderer, true];
 }
@@ -879,10 +889,13 @@ function load_image(url: string): Promise<HTMLImageElement> {
     image.src = url;
     return new Promise((resolve, reject) => {
         image.onload = function(_event: Event) {
-            console.log("Image loaded", image);
+            // console.log("Image loaded:", url);
             resolve(image);
         };
-        image.onerror = reject;
+        image.onerror = function() {
+            console.error("Image couldn't be loaded:", url);
+            reject();
+        };
     });
 }
 function assert(condition: Boolean, message: string | null = ""): asserts condition {

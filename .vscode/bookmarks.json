@@ -4,13 +4,13 @@
 			"path": "src/game.ts",
 			"bookmarks": [
 				{
-					"line": 6,
+					"line": 18,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 19,
-					"column": 4,
+					"line": 138,
+					"column": 8,
 					"label": ""
 				},
 				{
@@ -19,62 +19,67 @@
 					"label": ""
 				},
 				{
-					"line": 185,
+					"line": 181,
+					"column": 8,
+					"label": ""
+				},
+				{
+					"line": 244,
 					"column": 8,
 					"label": ""
 				},
 				{
 					"line": 248,
-					"column": 8,
-					"label": ""
-				},
-				{
-					"line": 252,
 					"column": 12,
 					"label": ""
 				},
 				{
-					"line": 259,
+					"line": 255,
 					"column": 12,
 					"label": ""
 				},
 				{
-					"line": 280,
+					"line": 276,
 					"column": 12,
 					"label": ""
 				},
 				{
-					"line": 454,
+					"line": 377,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 464,
 					"column": 8,
 					"label": ""
 				},
 				{
-					"line": 513,
+					"line": 523,
 					"column": 8,
 					"label": ""
 				},
 				{
-					"line": 595,
+					"line": 605,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 769,
+					"line": 779,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 898,
+					"line": 911,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 903,
+					"line": 916,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 929,
+					"line": 942,
 					"column": 4,
 					"label": ""
 				}
