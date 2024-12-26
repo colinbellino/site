@@ -72,7 +72,8 @@ type Sprite = {
     z_index:            int;
 }
 
-const GRID_SIZE = 16;
+const GRID_SIZE = 32;
+const TILESET_POSITION = [0, 240];
 const WORLD_GRID_WIDTH: int = 10;
 const WORLD_GRID_HEIGHT: int = 10;
 const WORLD_GRID_SIZE = WORLD_GRID_WIDTH * WORLD_GRID_HEIGHT;
@@ -266,7 +267,7 @@ function update() {
                     size:               [GRID_SIZE, GRID_SIZE],
                     scale:              [1, 1],
                     rotation:           0,
-                    texture_size:       [GRID_SIZE, GRID_SIZE],
+                    texture_size:       [16, 16],
                     // texture_position:   [48, 96+16],
                     texture_position:   [0, 0],
                     z_index:            2,
@@ -291,7 +292,7 @@ function update() {
                 const texture_position: Vector2 = [
                     tile_texture_position[0]*GRID_SIZE + TILESET_POSITION[0],
                     tile_texture_position[1]*GRID_SIZE + TILESET_POSITION[1],
-                ]
+                ];
 
                 const sprite: Sprite = {
                     color:              color,
@@ -830,7 +831,6 @@ const TILE_VALUES = [
     0b0101, // 3 3
     0b0111, // 4 3
 ];
-const TILESET_POSITION = [0, 176];
 const AUTO_TILE_SIZE: Vector2 = [5, 4];
 function is_same_tile(grid_position: Vector2): int {
     const grid_index = grid_position_to_index(grid_position, WORLD_GRID_WIDTH);
