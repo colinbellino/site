@@ -10,22 +10,28 @@ config: Config;
 
 Config :: struct {
     release:    bool;
+    no_server:  bool;
 }
 
 #run {
     root_options := get_build_options();
 
     config.release = array_find(root_options.compile_time_command_line, "-release");
+    config.no_server = array_find(root_options.compile_time_command_line, "-no-server");
 
-    thread_group: Thread_Group;
-    init(*thread_group, 1, compile_work);
-    thread_group.name    = "SWC";
-    thread_group.logging = false;
-    start(*thread_group);
-    add_work(*thread_group, null, tprint("Work item 0"));
+    if config.no_server {
+        run_compile_command("src/game.ts", config.release);
+    } else {
+        thread_group: Thread_Group;
+        init(*thread_group, 1, compile_work);
+        thread_group.name    = "SWC";
+        thread_group.logging = false;
+        start(*thread_group);
+        add_work(*thread_group, null, tprint("Work item 0"));
 
-    args := string.[tprint("./bin/%/http-server", OS), "--port", "8000", "--path", "public"];
-    process_result, output, error := run_command(..args, capture_and_return_output = false, print_captured_output = true);
+        args := string.[tprint("./bin/%/http-server", OS), "--port", "8000", "--path", "public"];
+        process_result, output, error := run_command(..args, capture_and_return_output = false, print_captured_output = true);
+    }
 }
 
 compile_work :: (group: *Thread_Group, thread: *Thread, work: *void) -> Thread_Continue_Status {
