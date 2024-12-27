@@ -19,10 +19,13 @@ type Fixed_Size_Array<T, N extends int> = {
 // :game
 type Game = {
     ready:                  boolean;
+    world_mode:             World_Mode;
+    world_mode_timer:       int;
     clear_color:            Color;
     player:                 Entity;
     points:                 Fixed_Size_Array<Point, typeof MAX_POINTS>,
-    points_current:          int;
+    points_current:         int;
+    points_destination:     int;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
@@ -55,41 +58,6 @@ type Point = {
     neighbours:     Vector4; // index into game.points (order: NESW)
 }
 
-type Renderer = {
-    gl:                 WebGL2RenderingContext;
-    message_container:  HTMLDivElement;
-    sprite_pass:        Sprite_Pass;
-    camera_main:        Camera_Orthographic;
-    window_size:        Vector2;
-    sprites:            Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
-}
-type Sprite_Pass = {
-    program:                WebGLProgram;
-    vao:                    WebGLVertexArrayObject;
-    indices:                WebGLBuffer;
-    instance_data:          WebGLBuffer;
-    location_matrix:        WebGLUniformLocation;
-}
-type Camera_Orthographic = {
-    position:                   Vector2;
-    rotation:                   number;
-    zoom:                       number;
-    projection_matrix:          Matrix4;
-    transform_matrix:           Matrix4;
-    view_matrix:                Matrix4;
-    view_projection_matrix:     Matrix4;
-}
-type Sprite = {
-    position:           Vector2;
-    size:               Vector2;
-    scale:              Vector2;
-    rotation:           float;
-    color:              Color;
-    texture_size:       Vector2;
-    texture_position:   Vector2;
-    z_index:            int;
-}
-
 // :constants
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
@@ -106,6 +74,15 @@ const MAX_POINTS : number = 64;
 const MAX_SPRITES : number = 2048;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
+const DIRECTIONS_ORTHOGONAL : Vector2[] = [
+    [ +0, -1 ], // .North
+    [ +1, +0 ], // .East
+    [ +0, +1 ], // .South
+    [ -1, +0 ], // .West
+];
+const enum Direction_Orthogonal { NORTH, EAST, SOUTH, WEST }
+const enum World_Mode { IDLE, MOVING }
+
 function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
 function COLOR_RED(): Color { return [1, 0, 0, 1]; }
 function COLOR_BLUE(): Color { return [0, 0, 1, 1]; }
@@ -125,6 +102,7 @@ function update() {
             // @ts-ignore
             game = {};
             game.ready = false;
+            game.world_mode = World_Mode.IDLE;
             game.frame_count = 0;
             game.frame_end = 0;
             game.fps = 0;
@@ -158,45 +136,51 @@ function update() {
 
             game.inputs = inputs_init();
 
-            game.player = fixed_array_add(game.entities, { name: "PLAYER",  sprite: { color: COLOR_WHITE(),  position: grid_position_center(1, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [48, 0], z_index: 9 } });
-            fixed_array_add(game.entities, { name: "PLAYER",  sprite: { color: COLOR_WHITE(),  position: grid_position_center(2, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [48, 0], z_index: 9 } });
-            fixed_array_add(game.entities, { name: "POINT_1", sprite: { color: COLOR_WHITE(),  position: grid_position_center(1, 1), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
-            fixed_array_add(game.entities, { name: "POINT_2", sprite: { color: COLOR_WHITE(),  position: grid_position_center(1, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
-            fixed_array_add(game.entities, { name: "POINT_3", sprite: { color: COLOR_WHITE(),  position: grid_position_center(4, 3), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
-            fixed_array_add(game.entities, { name: "POINT_4", sprite: { color: COLOR_WHITE(),  position: grid_position_center(6, 1), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
-            fixed_array_add(game.entities, { name: "POINT_5", sprite: { color: COLOR_WHITE(),  position: grid_position_center(7, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
-
-            game.points_current = 1;
+            game.points_current = 2;
             game.points = fixed_array_make(MAX_POINTS);
-            fixed_array_add(game.points, { grid_position: [0, 0], neighbours: [0, 0, 0, 0] });
-            fixed_array_add(game.points, { grid_position: [1, 4], neighbours: [0, 2, 0, 0] });
-            fixed_array_add(game.points, { grid_position: [4, 3], neighbours: [0, 3, 0, 1] });
-            fixed_array_add(game.points, { grid_position: [7, 4], neighbours: [0, 0, 0, 2] });
+            fixed_array_add(game.points, { grid_position: [99, 99], neighbours: [0, 0, 0, 0] }); // 0
+            fixed_array_add(game.points, { grid_position: [1, 4],   neighbours: [0, 2, 0, 0] }); // 1
+            fixed_array_add(game.points, { grid_position: [4, 5],   neighbours: [0, 3, 4, 1] }); // 2
+            fixed_array_add(game.points, { grid_position: [7, 4],   neighbours: [0, 0, 0, 2] }); // 3
+            fixed_array_add(game.points, { grid_position: [3, 8],   neighbours: [2, 0, 0, 0] }); // 4
+
+            game.player = fixed_array_add(game.entities, {
+                name: "PLAYER",
+                sprite: {
+                    color: COLOR_WHITE(),
+                    position: grid_position_center(game.points.data[game.points_current].grid_position),
+                    size: [16, 16],
+                    scale: [1, 1],
+                    rotation: 0,
+                    texture_size: [16, 16],
+                    texture_position: [48, 0],
+                    z_index: 9,
+                },
+            });
 
             game.renderer.camera_main.zoom = 4;
             game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
             // :init world
             const world_str = `
-                1  0  0  0  0  1  1  0  0  0
-                1  0  0  0  0  0  0  0  0  1
-                0  0  1  1  1  1  1  0  0  1
-                1  1  1  1  1  1  1  0  0  1
-                0  0  0  0  0  0  0  1  0  1
-                0  0  0  0  0  0  0  1  1  1
-                0  1  0  1  0  1  1  1  1  1
-                0  0  1  0  0  1  1  1  1  1
-                0  1  1  1  1  0  0  0  0  1
-                0  1  1  1  1  1  1  1  1  1
+                1  1  1  1  0  0  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  0  0  0  0
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
+                1  1  1  1  1  1  1  1  1  1
             `;
             const world = world_str.replace(/\s/g, "").split("");
             assert(world.length === WORLD_GRID_HEIGHT * WORLD_GRID_WIDTH);
             for (let y = 0; y < WORLD_GRID_HEIGHT; y++) {
                 for (let x = 0; x < WORLD_GRID_WIDTH; x++) {
                     const grid_index = grid_position_to_index([x, y], WORLD_GRID_WIDTH);
-                    game.world_grid[grid_index] = {
-                        value:              parseInt(world[grid_index]),
-                    };
+                    let value = parseInt(world[grid_index]);
+                    game.world_grid[grid_index] = { value: value };
                 }
             }
             // :init tile
@@ -218,8 +202,6 @@ function update() {
         if (game.inputs.window_resized) {
             renderer_resize_canvas(window.innerWidth, window.innerHeight);
         }
-
-        renderer_update_camera_matrix_main(game.renderer.camera_main);
 
         game.messages.count = 0;
         {
@@ -245,9 +227,11 @@ function update() {
             }
         }
 
+        let player_move_input: Vector2 = [0, 0];
+
         // :debug inputs
-        if (!__RELEASE__) {
-            if (game.inputs.keys["ShiftLeft"].down === false) {
+        if (game.inputs.keys["ShiftLeft"].down) {
+            if (!__RELEASE__) {
                 if (game.inputs.keys["Backquote"].released || game.inputs.keys["Backquote"].released) {
                     game.debug_draw_messages = !game.debug_draw_messages;
                 }
@@ -261,10 +245,10 @@ function update() {
                     game.debug_draw_entities = !game.debug_draw_entities;
                 }
                 if (game.inputs.keys["KeyR"].down) {
-                    game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom + 0.1);
+                    game.renderer.camera_main.zoom = clamp(game.renderer.camera_main.zoom + 0.1, 1, 16);
                 }
                 if (game.inputs.keys["KeyF"].down) {
-                    game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
+                    game.renderer.camera_main.zoom = clamp(game.renderer.camera_main.zoom - 0.1, 1, 16);
                 }
                 if (game.inputs.keys["KeyW"].down) {
                     game.renderer.camera_main.position[1] -= 1.0;
@@ -279,39 +263,63 @@ function update() {
                     game.renderer.camera_main.position[0] += 1.0;
                 }
             }
+        } else {
+            // :player inputs
+            // FIXME: prevent input during movement and use .down events again
+            if (game.inputs.keys["KeyW"].released || game.inputs.keys["ArrowUp"].released) {
+                player_move_input[1] = -1;
+            } else if (game.inputs.keys["KeyS"].released || game.inputs.keys["ArrowDown"].released) {
+                player_move_input[1] = +1;
+            } else if (game.inputs.keys["KeyA"].released || game.inputs.keys["ArrowLeft"].released) {
+                player_move_input[0] = -1;
+            } else if (game.inputs.keys["KeyD"].released || game.inputs.keys["ArrowRight"].released) {
+                player_move_input[0] = +1;
+            }
         }
 
         {
-            let direction: int = -1;
-            // FIXME: prevent input during movement and use .down events again
-            if (game.inputs.keys["KeyW"].released || game.inputs.keys["ArrowUp"].released) {
-                direction = 0;
-            } else if (game.inputs.keys["KeyS"].released || game.inputs.keys["ArrowDown"].released) {
-                direction = 2;
-            } else if (game.inputs.keys["KeyA"].released || game.inputs.keys["ArrowLeft"].released) {
-                direction = 3;
-            } else if (game.inputs.keys["KeyD"].released || game.inputs.keys["ArrowRight"].released) {
-                direction = 1;
-            }
+            switch (game.world_mode) {
+                // :world IDLE
+                case World_Mode.IDLE: {
+                    if (!vector2_equal(player_move_input, [0, 0])) {
+                        const direction = vector_to_direction(player_move_input);
+                        const current_point = game.points.data[game.points_current];
+                        const destination = current_point.neighbours[direction];
+                        if (destination > 0) {
+                            game.points_destination = destination;
+                            game.world_mode = World_Mode.MOVING;
+                            game.world_mode_timer = now;
+                        } else {
+                            console.warn("Can't move in this direction");
+                        }
+                    }
+                } break;
+                // :world MOVING
+                case World_Mode.MOVING: {
+                    const DURATION = 1000;
+                    const end = game.world_mode_timer + DURATION;
+                    const remaining = end - now;
+                    const progress = clamp(1.0 - (1.0 / (DURATION / remaining)), 0, 1);
 
-            if (direction !== -1) {
-                const current_point = game.points.data[game.points_current];
-                const destination = current_point.neighbours[direction];
-                console.log("destination", destination);
-                if (destination > 0) {
-                    const destination_point = game.points.data[destination];
-                    game.points_current = destination;
-                    game.player.sprite.position = grid_position_center(destination_point.grid_position[0], destination_point.grid_position[1]);
+                    const current_point = game.points.data[game.points_current];
+                    const destination_point = game.points.data[game.points_destination];
+                    game.player.sprite.position = vector2_lerp(grid_position_center(current_point.grid_position), grid_position_center(destination_point.grid_position), progress);
                     game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
-                } else {
-                    console.warn("Can't move in this direction");
-                }
+
+                    if (progress === 1) {
+                        console.log("done!");
+                        game.points_current = game.points_destination;
+                        game.world_mode = World_Mode.IDLE;
+                    }
+                } break;
             }
         }
 
         // :render
         render: {
             if (!game.ready) { break render; }
+
+            renderer_update_camera_matrix_main(game.renderer.camera_main);
 
             // :render entities
             if (game.debug_draw_entities) {
@@ -320,12 +328,32 @@ function update() {
                     fixed_array_add(game.renderer.sprites, entity.sprite);
                 }
             }
+            // :render points
+            {
+                for (let point_index = 0; point_index < game.points.count; point_index++) {
+                    const point = game.points.data[point_index];
+                    const sprite = {
+                        color: COLOR_WHITE(),
+                        position: grid_position_center(point.grid_position),
+                        size: [16, 16],
+                        scale: [1, 1],
+                        rotation: 0,
+                        texture_size: [16, 16],
+                        texture_position: [32, 0],
+                        z_index: 2
+                    };
+                    fixed_array_add(game.renderer.sprites, sprite);
+                }
+            }
             // :render world
             if (game.debug_draw_world_grid) {
                 for (let world_cell_index = 0; world_cell_index < WORLD_GRID_SIZE; world_cell_index++) {
                     const world_cell = game.world_grid[world_cell_index];
                     const world_position = grid_index_to_position(world_cell_index, WORLD_GRID_WIDTH);
-                    let color = world_cell.value === 0 ? COLOR_BLACK() : COLOR_WHITE();
+                    if (world_cell.value === 0) { continue; }
+
+                    let color = COLOR_BLACK();
+                    if ((world_position[0] + world_position[1]) % 2) { color[1] = 0.2; }
                     color[3] *= 0.3;
                     const sprite: Sprite = {
                         color:              color,
@@ -460,6 +488,40 @@ function update() {
 }
 
 // :renderer
+type Renderer = {
+    gl:                 WebGL2RenderingContext;
+    message_container:  HTMLDivElement;
+    sprite_pass:        Sprite_Pass;
+    camera_main:        Camera_Orthographic;
+    window_size:        Vector2;
+    sprites:            Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
+}
+type Sprite_Pass = {
+    program:                WebGLProgram;
+    vao:                    WebGLVertexArrayObject;
+    indices:                WebGLBuffer;
+    instance_data:          WebGLBuffer;
+    location_matrix:        WebGLUniformLocation;
+}
+type Camera_Orthographic = {
+    position:                   Vector2;
+    rotation:                   number;
+    zoom:                       number;
+    projection_matrix:          Matrix4;
+    transform_matrix:           Matrix4;
+    view_matrix:                Matrix4;
+    view_projection_matrix:     Matrix4;
+}
+type Sprite = {
+    position:           Vector2;
+    size:               Vector2;
+    scale:              Vector2;
+    rotation:           float;
+    color:              Color;
+    texture_size:       Vector2;
+    texture_position:   Vector2;
+    z_index:            int;
+}
 const CAMERA_DEFAULT: Camera_Orthographic = {
     zoom: 0,
     rotation: 0,
@@ -897,17 +959,6 @@ function inputs_reset(inputs: Inputs) {
     - https://web.archive.org/web/20220226222317/https://twitter.com/OskSta/status/1448248658865049605
 */
 type Tile_Value = number;
-enum Direction_All { NORTH_WEST, NORTH, NORTH_EAST, EAST, SOUTH_EAST, SOUTH, SOUTH_WEST, WEST }
-const DIRECTIONS_ALL : Vector2[] = [
-    [ -1, -1 ] /* .North_West */ ,
-    [ +0, -1 ] /* .North      */ ,
-    [ +1, -1 ] /* .North_East */ ,
-    [ +1, +0 ] /* .East       */ ,
-    [ +1, +1 ] /* .South_East */ ,
-    [ +0, +1 ] /* .South      */ ,
-    [ -1, +1 ] /* .South_West */ ,
-    [ -1, +0 ] /* .West       */ ,
-];
 const TILE_VALUES = [
     0b0000, // 0 0
     0b1000, // 1 0
@@ -1040,13 +1091,19 @@ function vector2_multiply_float(arr1: Vector2, value: float): Vector2 {
     result[1] = arr1[1] * value;
     return result;
 }
+function vector2_lerp(a: Vector2, b: Vector2, t: float): Vector2 {
+    const result: Vector2 = [0, 0];
+    result[0] = a[0] + t * (b[0] - a[0]);
+    result[1] = a[1] + t * (b[1] - a[1]);
+    return result;
+}
 function grid_index_to_position(grid_index: int, grid_width: int): Vector2 {
     return [ grid_index % grid_width, Math.floor(grid_index / grid_width) ];
 }
 function grid_position_to_index(grid_position: Vector2, grid_width: int): int {
     return (grid_position[1] * grid_width) + grid_position[0];
 }
-function clamp(min: number, max: number, value: number): number {
+function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
 function sin_01(time: float, frequency: float = 1.0): float {
@@ -1326,9 +1383,15 @@ function matrix4_rotate_z(m: Matrix4, angle_in_radians: float): Matrix4 {
     return result;
 }
 
-function grid_position_center(x: int, y: int): Vector2 {
-    return [x*GRID_SIZE - GRID_SIZE, y*GRID_SIZE - GRID_SIZE];
+function grid_position_center(grid_position: Vector2): Vector2 {
+    return [grid_position[0]*GRID_SIZE - GRID_SIZE, grid_position[1]*GRID_SIZE - GRID_SIZE];
 }
 function push_message(message: string) {
     fixed_array_add(game.messages, message);
+}
+function vector_to_direction(vec: Vector2): Direction_Orthogonal {
+    if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.NORTH])) { return Direction_Orthogonal.NORTH; }
+    if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.EAST])) { return Direction_Orthogonal.EAST; }
+    if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.SOUTH])) { return Direction_Orthogonal.SOUTH; }
+    return Direction_Orthogonal.WEST;
 }
