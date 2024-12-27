@@ -158,7 +158,6 @@ function update() {
                 },
             });
 
-            game.renderer.camera_main.zoom = 4;
             game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
             // :init world
@@ -196,7 +195,13 @@ function update() {
         if (now >= game.fps_last_update + 1000) {
             game.fps = game.fps_count;
             game.fps_count = 0;
-            game.fps_last_update = now
+            game.fps_last_update = now;
+        }
+
+        if (game.renderer.window_size[0] > game.renderer.window_size[1]) {
+            game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / 480);
+        } else {
+            game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / 270);
         }
 
         if (game.inputs.window_resized) {
@@ -307,7 +312,6 @@ function update() {
                     game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
                     if (progress === 1) {
-                        console.log("done!");
                         game.points_current = game.points_destination;
                         game.world_mode = World_Mode.IDLE;
                     }

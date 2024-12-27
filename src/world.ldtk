@@ -11,7 +11,7 @@
 	"iid": "20b4a0e0-c210-11ef-a872-334d9525beb2",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 6,
+	"nextUid": 10,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -145,7 +145,156 @@
 			"limitBehavior": "MoveLastOne",
 			"pivotX": 0,
 			"pivotY": 0,
-			"fieldDefs": []
+			"fieldDefs": [
+				{
+					"identifier": "NORTH",
+					"doc": null,
+					"__type": "EntityRef",
+					"uid": 6,
+					"type": "F_EntityRef",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "RefLinkBetweenCenters",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "CurvedArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": true,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "EAST",
+					"doc": null,
+					"__type": "EntityRef",
+					"uid": 9,
+					"type": "F_EntityRef",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "RefLinkBetweenCenters",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "CurvedArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "SOUTH",
+					"doc": null,
+					"__type": "EntityRef",
+					"uid": 8,
+					"type": "F_EntityRef",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "RefLinkBetweenCenters",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "CurvedArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "WEST",
+					"doc": null,
+					"__type": "EntityRef",
+					"uid": 7,
+					"type": "F_EntityRef",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "RefLinkBetweenCenters",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "CurvedArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				}
+			]
 		}
 	], "tilesets": [], "enums": [], "externalEnums": [], "levelFields": [] },
 	"levels": [
@@ -196,7 +345,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "Point",
-							"__grid": [2,3],
+							"__grid": [2,2],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -205,14 +354,43 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 5,
-							"px": [32,48],
-							"fieldInstances": [],
+							"px": [32,32],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 6, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
+								}] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+									"entityIid": "7dbc8be0-c210-11ef-a872-eb2adb802b1e",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 9, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7dbc8be0-c210-11ef-a872-eb2adb802b1e"]
+								}] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 8, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
+								}] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
+							],
 							"__worldX": 32,
-							"__worldY": 48
+							"__worldY": 32
 						},
 						{
 							"__identifier": "Point",
-							"__grid": [7,3],
+							"__grid": [7,2],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -221,10 +399,23 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 5,
-							"px": [112,48],
-							"fieldInstances": [],
+							"px": [112,32],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 7, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
+								}] }
+							],
 							"__worldX": 112,
-							"__worldY": 48
+							"__worldY": 32
 						},
 						{
 							"__identifier": "Point",
@@ -238,7 +429,20 @@
 							"height": 16,
 							"defUid": 5,
 							"px": [112,112],
-							"fieldInstances": [],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 7, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
+								}] }
+							],
 							"__worldX": 112,
 							"__worldY": 112
 						},
@@ -254,7 +458,28 @@
 							"height": 16,
 							"defUid": 5,
 							"px": [32,112],
-							"fieldInstances": [],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 6, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
+								}] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+									"entityIid": "7ebae910-c210-11ef-a872-5fae80970927",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 9, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7ebae910-c210-11ef-a872-5fae80970927"]
+								}] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
+							],
 							"__worldX": 32,
 							"__worldY": 112
 						}
@@ -279,9 +504,9 @@
 					"visible": true,
 					"optionalRules": [],
 					"intGridCsv": [
-						0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,
-						1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,0,
-						0,1,1,1,1,1,1,1,1,0,0,1,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0
+						0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,
+						1,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,
+						1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0
 					],
 					"autoLayerTiles": [],
 					"seed": 4621124,
