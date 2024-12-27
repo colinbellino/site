@@ -175,7 +175,7 @@
 					"acceptFileTypes": null,
 					"defaultOverride": null,
 					"textLanguageMode": null,
-					"symmetricalRef": true,
+					"symmetricalRef": false,
 					"autoChainRef": true,
 					"allowOutOfLevelRef": true,
 					"allowedRefs": "OnlySame",
@@ -345,7 +345,7 @@
 					"entityInstances": [
 						{
 							"__identifier": "Point",
-							"__grid": [2,2],
+							"__grid": [0,0],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -354,17 +354,9 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 5,
-							"px": [32,32],
+							"px": [0,0],
 							"fieldInstances": [
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
-									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
-									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
-									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
-									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
-								}, "__tile": null, "defUid": 6, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
-								}] },
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
 								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
 									"entityIid": "7dbc8be0-c210-11ef-a872-eb2adb802b1e",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
@@ -375,22 +367,22 @@
 									"params": ["7dbc8be0-c210-11ef-a872-eb2adb802b1e"]
 								}] },
 								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
-									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
+									"entityIid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
 									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
 								}, "__tile": null, "defUid": 8, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
+									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
 								}] },
 								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
 							],
-							"__worldX": 32,
-							"__worldY": 32
+							"__worldX": 0,
+							"__worldY": 0
 						},
 						{
 							"__identifier": "Point",
-							"__grid": [7,2],
+							"__grid": [2,0],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -399,10 +391,18 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 5,
-							"px": [112,32],
+							"px": [32,0],
 							"fieldInstances": [
 								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+									"entityIid": "08a597b0-c210-11ef-82b7-c3d9d21c7e94",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 9, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["08a597b0-c210-11ef-82b7-c3d9d21c7e94"]
+								}] },
 								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
 								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
 									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
@@ -414,12 +414,12 @@
 									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
 								}] }
 							],
-							"__worldX": 112,
-							"__worldY": 32
+							"__worldX": 32,
+							"__worldY": 0
 						},
 						{
 							"__identifier": "Point",
-							"__grid": [7,7],
+							"__grid": [4,3],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -428,7 +428,7 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 5,
-							"px": [112,112],
+							"px": [64,48],
 							"fieldInstances": [
 								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
 								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
@@ -443,12 +443,12 @@
 									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
 								}] }
 							],
-							"__worldX": 112,
-							"__worldY": 112
+							"__worldX": 64,
+							"__worldY": 48
 						},
 						{
 							"__identifier": "Point",
-							"__grid": [2,7],
+							"__grid": [2,3],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": null,
@@ -457,7 +457,44 @@
 							"width": 16,
 							"height": 16,
 							"defUid": 5,
-							"px": [32,112],
+							"px": [32,48],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+									"entityIid": "7ebae910-c210-11ef-a872-5fae80970927",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 9, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7ebae910-c210-11ef-a872-5fae80970927"]
+								}] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+									"entityIid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 7, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
+								}] }
+							],
+							"__worldX": 32,
+							"__worldY": 48
+						},
+						{
+							"__identifier": "Point",
+							"__grid": [0,3],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#BE4A2F",
+							"iid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
+							"width": 16,
+							"height": 16,
+							"defUid": 5,
+							"px": [0,48],
 							"fieldInstances": [
 								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
 									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
@@ -469,19 +506,85 @@
 									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
 								}] },
 								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
-									"entityIid": "7ebae910-c210-11ef-a872-5fae80970927",
+									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
 									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
 								}, "__tile": null, "defUid": 9, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["7ebae910-c210-11ef-a872-5fae80970927"]
+									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
 								}] },
 								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
 								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
 							],
-							"__worldX": 32,
-							"__worldY": 112
+							"__worldX": 0,
+							"__worldY": 48
+						},
+						{
+							"__identifier": "Point",
+							"__grid": [4,0],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#BE4A2F",
+							"iid": "08a597b0-c210-11ef-82b7-c3d9d21c7e94",
+							"width": 16,
+							"height": 16,
+							"defUid": 5,
+							"px": [64,0],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+									"entityIid": "12d88620-c210-11ef-82b7-7900e60c6d0f",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 9, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["12d88620-c210-11ef-82b7-7900e60c6d0f"]
+								}] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+									"entityIid": "7dbc8be0-c210-11ef-a872-eb2adb802b1e",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 7, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7dbc8be0-c210-11ef-a872-eb2adb802b1e"]
+								}] }
+							],
+							"__worldX": 64,
+							"__worldY": 0
+						},
+						{
+							"__identifier": "Point",
+							"__grid": [6,1],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#BE4A2F",
+							"iid": "12d88620-c210-11ef-82b7-7900e60c6d0f",
+							"width": 16,
+							"height": 16,
+							"defUid": 5,
+							"px": [96,16],
+							"fieldInstances": [
+								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+									"entityIid": "08a597b0-c210-11ef-82b7-c3d9d21c7e94",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 6, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["08a597b0-c210-11ef-82b7-c3d9d21c7e94"]
+								}] },
+								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
+							],
+							"__worldX": 96,
+							"__worldY": 16
 						}
 					]
 				},
@@ -504,9 +607,9 @@
 					"visible": true,
 					"optionalRules": [],
 					"intGridCsv": [
-						0,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,
-						1,1,1,1,0,0,1,1,1,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,1,1,1,1,1,1,1,1,1,0,
-						1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,1,0,1,1,1,1,1,1,1,1,0
+						1,0,1,0,1,1,1,0,0,0,1,0,0,0,1,0,1,0,0,0,0,0,1,0,1,1,0,0,0,0,1,1,1,0,1,
+						0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 					],
 					"autoLayerTiles": [],
 					"seed": 4621124,

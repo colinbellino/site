@@ -4,112 +4,112 @@
 			"path": "src/game.ts",
 			"bookmarks": [
 				{
-					"line": 18,
+					"line": 22,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 60,
+					"line": 70,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 162,
-					"column": 16,
+					"line": 172,
+					"column": 1,
 					"label": ""
 				},
 				{
-					"line": 184,
-					"column": 16,
-					"label": ""
-				},
-				{
-					"line": 236,
+					"line": 227,
 					"column": 12,
 					"label": ""
 				},
 				{
-					"line": 271,
-					"column": 29,
-					"label": ""
-				},
-				{
-					"line": 286,
+					"line": 262,
 					"column": 16,
 					"label": ""
 				},
 				{
-					"line": 301,
-					"column": 25,
-					"label": ""
-				},
-				{
-					"line": 321,
-					"column": 12,
-					"label": ""
-				},
-				{
-					"line": 327,
+					"line": 277,
 					"column": 20,
 					"label": ""
 				},
 				{
-					"line": 336,
+					"line": 292,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 312,
+					"column": 12,
+					"label": ""
+				},
+				{
+					"line": 318,
 					"column": 16,
 					"label": ""
 				},
 				{
-					"line": 351,
+					"line": 325,
 					"column": 16,
 					"label": ""
 				},
 				{
-					"line": 375,
+					"line": 343,
 					"column": 16,
 					"label": ""
 				},
 				{
-					"line": 409,
+					"line": 368,
 					"column": 16,
 					"label": ""
 				},
 				{
-					"line": 493,
+					"line": 401,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 427,
+					"column": 34,
+					"label": ""
+				},
+				{
+					"line": 494,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 627,
+					"line": 629,
 					"column": 8,
 					"label": ""
 				},
 				{
-					"line": 686,
+					"line": 688,
 					"column": 8,
 					"label": ""
 				},
 				{
-					"line": 771,
+					"line": 773,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 945,
+					"line": 947,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 1065,
+					"line": 1067,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 1070,
+					"line": 1072,
 					"column": 4,
 					"label": ""
 				},
 				{
-					"line": 1119,
+					"line": 1121,
 					"column": 4,
 					"label": ""
 				}
