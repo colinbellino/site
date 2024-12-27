@@ -139,7 +139,6 @@ function update() {
             game.renderer = renderer;
             renderer_resize_canvas(window.innerWidth, window.innerHeight);
             renderer_update_camera_matrix_main(game.renderer.camera_main);
-            game.renderer.camera_main.zoom = 4;
             {
                 game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
                 load_image("./images/atlas.png").then(image => {
@@ -157,6 +156,9 @@ function update() {
             fixed_array_add(game.entities, { name: "POINT_3", sprite: { color: COLOR_WHITE(),  position: grid_position_center(4, 3), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
             fixed_array_add(game.entities, { name: "POINT_4", sprite: { color: COLOR_WHITE(),  position: grid_position_center(6, 1), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
             fixed_array_add(game.entities, { name: "POINT_5", sprite: { color: COLOR_WHITE(),  position: grid_position_center(7, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
+
+            game.renderer.camera_main.zoom = 4;
+            game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
             // :init world
             const world_str = `
@@ -430,7 +432,6 @@ const CAMERA_DEFAULT: Camera_Orthographic = {
     view_projection_matrix: matrix4_identity(),
 };
 function renderer_resize_canvas(width: int, height: int) {
-    console.log("width", width, "height", height);
     let final_width = width;
     let final_height = height;
     if (width % 2)  { final_width -= 1; }
@@ -982,6 +983,9 @@ function hex_to_color(hex_value: number): Color {
     color[2] = ((hex_value >> 8) & 0xff) / 255;
     color[3] = ((hex_value) & 0xff) / 255;
     return color;
+}
+function vector2_copy(arr: Vector2): Vector2 {
+    return Array.from(arr) as Vector2;
 }
 function vector2_equal(vec1: Vector2, vec2: Vector2): boolean {
     return vec1[0] === vec2[0] && vec1[1] === vec2[1];
