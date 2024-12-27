@@ -19,6 +19,20 @@ type Fixed_Size_Array<T, N extends int> = {
 // :game
 type Game = {
     ready:                  boolean;
+    clear_color:            Color;
+    player:                 Entity;
+    points:                 Fixed_Size_Array<Point, typeof MAX_POINTS>,
+    points_current:          int;
+    entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
+    world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
+    tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
+    messages:               Fixed_Size_Array<Message, typeof MAX_MESSAGES>;
+
+    debug_draw_messages:    boolean;
+    debug_draw_entities:    boolean;
+    debug_draw_world_grid:  boolean;
+    debug_draw_tile_grid:   boolean;
+
     renderer:               Renderer;
     frame_count:            int;
     frame_end:              number;
@@ -27,16 +41,6 @@ type Game = {
     fps_count:              number;
     texture0:               WebGLTexture;
     inputs:                 Inputs;
-    entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
-    world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
-    tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
-    messages:               Fixed_Size_Array<Message, typeof MAX_MESSAGES>;
-    player:                 Entity;
-    clear_color:            Color;
-    debug_draw_messages:    boolean;
-    debug_draw_entities:    boolean;
-    debug_draw_world_grid:  boolean;
-    debug_draw_tile_grid:   boolean;
 }
 type Message = string;
 type Cell = {
@@ -45,6 +49,10 @@ type Cell = {
 type Entity = {
     name:           string;
     sprite:         Sprite;
+}
+type Point = {
+    grid_position:  Vector2,
+    neighbours:     Vector4; // index into game.points (order: NESW)
 }
 
 type Renderer = {
@@ -94,6 +102,7 @@ const TILE_GRID_HEIGHT: int = WORLD_GRID_HEIGHT+1;
 const TILE_GRID_SIZE = TILE_GRID_WIDTH * TILE_GRID_HEIGHT;
 const MAX_MESSAGES : number = 128;
 const MAX_ENTITIES : number = 128;
+const MAX_POINTS : number = 64;
 const MAX_SPRITES : number = 2048;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
@@ -157,21 +166,28 @@ function update() {
             fixed_array_add(game.entities, { name: "POINT_4", sprite: { color: COLOR_WHITE(),  position: grid_position_center(6, 1), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
             fixed_array_add(game.entities, { name: "POINT_5", sprite: { color: COLOR_WHITE(),  position: grid_position_center(7, 4), size: [16, 16], scale: [1, 1], rotation: 0, texture_size: [16, 16], texture_position: [32, 0], z_index: 2 } });
 
+            game.points_current = 1;
+            game.points = fixed_array_make(MAX_POINTS);
+            fixed_array_add(game.points, { grid_position: [0, 0], neighbours: [0, 0, 0, 0] });
+            fixed_array_add(game.points, { grid_position: [1, 4], neighbours: [0, 2, 0, 0] });
+            fixed_array_add(game.points, { grid_position: [4, 3], neighbours: [0, 3, 0, 1] });
+            fixed_array_add(game.points, { grid_position: [7, 4], neighbours: [0, 0, 0, 2] });
+
             game.renderer.camera_main.zoom = 4;
             game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
             // :init world
             const world_str = `
-                1 0 0 0 0 1 1 0 0 0
-                1 0 0 0 0 0 0 0 0 1
-                0 0 1 1 1 1 1 0 0 1
-                1 1 1 1 1 1 1 0 0 1
-                0 0 0 0 0 0 0 1 0 1
-                0 0 0 0 0 0 0 1 1 1
-                0 1 0 1 0 1 1 1 1 1
-                0 0 1 0 0 1 1 1 1 1
-                0 1 1 1 1 0 0 0 0 1
-                0 1 1 1 1 1 1 1 1 1
+                1  0  0  0  0  1  1  0  0  0
+                1  0  0  0  0  0  0  0  0  1
+                0  0  1  1  1  1  1  0  0  1
+                1  1  1  1  1  1  1  0  0  1
+                0  0  0  0  0  0  0  1  0  1
+                0  0  0  0  0  0  0  1  1  1
+                0  1  0  1  0  1  1  1  1  1
+                0  0  1  0  0  1  1  1  1  1
+                0  1  1  1  1  0  0  0  0  1
+                0  1  1  1  1  1  1  1  1  1
             `;
             const world = world_str.replace(/\s/g, "").split("");
             assert(world.length === WORLD_GRID_HEIGHT * WORLD_GRID_WIDTH);
@@ -212,6 +228,12 @@ function update() {
             push_message("camera_position:    " + game.renderer.camera_main.position);
             push_message("camera_zoom:        " + game.renderer.camera_main.zoom);
             push_message("entities:           " + game.entities.count);
+            push_message("points_current:     " + game.points_current);
+            push_message("points:             ");
+            for (let point_index = 0; point_index < game.points.count; point_index++) {
+                const point = game.points.data[point_index];
+                push_message(" - " + point_index + " " + JSON.stringify(point));
+            }
             push_message("player_position:    " + game.player.sprite.position);
             push_message("world_draw:         " + game.debug_draw_world_grid);
             if (game.debug_draw_world_grid) {
@@ -224,50 +246,66 @@ function update() {
         }
 
         // :debug inputs
-        if (game.inputs.keys["MetaLeft"].down === false) {
-            if (game.inputs.keys["Backquote"].released || game.inputs.keys["Backquote"].released) {
-                game.debug_draw_messages = !game.debug_draw_messages;
+        if (!__RELEASE__) {
+            if (game.inputs.keys["ShiftLeft"].down === false) {
+                if (game.inputs.keys["Backquote"].released || game.inputs.keys["Backquote"].released) {
+                    game.debug_draw_messages = !game.debug_draw_messages;
+                }
+                if (game.inputs.keys["Digit1"].released) {
+                    game.debug_draw_world_grid = !game.debug_draw_world_grid;
+                }
+                if (game.inputs.keys["Digit2"].released) {
+                    game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
+                }
+                if (game.inputs.keys["Digit3"].released) {
+                    game.debug_draw_entities = !game.debug_draw_entities;
+                }
+                if (game.inputs.keys["KeyR"].down) {
+                    game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom + 0.1);
+                }
+                if (game.inputs.keys["KeyF"].down) {
+                    game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
+                }
+                if (game.inputs.keys["KeyW"].down) {
+                    game.renderer.camera_main.position[1] -= 1.0;
+                }
+                if (game.inputs.keys["KeyS"].down) {
+                    game.renderer.camera_main.position[1] += 1.0;
+                }
+                if (game.inputs.keys["KeyA"].down) {
+                    game.renderer.camera_main.position[0] -= 1.0;
+                }
+                if (game.inputs.keys["KeyD"].down) {
+                    game.renderer.camera_main.position[0] += 1.0;
+                }
             }
-            if (game.inputs.keys["Digit1"].released) {
-                game.debug_draw_world_grid = !game.debug_draw_world_grid;
-            }
-            if (game.inputs.keys["Digit2"].released) {
-                game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
-            }
-            if (game.inputs.keys["Digit3"].released) {
-                game.debug_draw_entities = !game.debug_draw_entities;
+        }
+
+        {
+            let direction: int = -1;
+            // FIXME: prevent input during movement and use .down events again
+            if (game.inputs.keys["KeyW"].released || game.inputs.keys["ArrowUp"].released) {
+                direction = 0;
+            } else if (game.inputs.keys["KeyS"].released || game.inputs.keys["ArrowDown"].released) {
+                direction = 2;
+            } else if (game.inputs.keys["KeyA"].released || game.inputs.keys["ArrowLeft"].released) {
+                direction = 3;
+            } else if (game.inputs.keys["KeyD"].released || game.inputs.keys["ArrowRight"].released) {
+                direction = 1;
             }
 
-            if (game.inputs.keys["KeyR"].down) {
-                game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom + 0.1);
-            }
-            if (game.inputs.keys["KeyF"].down) {
-                game.renderer.camera_main.zoom = clamp(1, 16, game.renderer.camera_main.zoom - 0.1);
-            }
-            if (game.inputs.keys["KeyW"].down) {
-                game.renderer.camera_main.position[1] -= 1.0;
-            }
-            if (game.inputs.keys["KeyS"].down) {
-                game.renderer.camera_main.position[1] += 1.0;
-            }
-            if (game.inputs.keys["KeyA"].down) {
-                game.renderer.camera_main.position[0] -= 1.0;
-            }
-            if (game.inputs.keys["KeyD"].down) {
-                game.renderer.camera_main.position[0] += 1.0;
-            }
-
-            if (game.inputs.keys["ArrowUp"].down) {
-                game.entities.data[0].sprite.position[1] -= 1;
-            }
-            if (game.inputs.keys["ArrowDown"].down) {
-                game.entities.data[0].sprite.position[1] += 1;
-            }
-            if (game.inputs.keys["ArrowLeft"].down) {
-                game.entities.data[0].sprite.position[0] -= 1;
-            }
-            if (game.inputs.keys["ArrowRight"].down) {
-                game.entities.data[0].sprite.position[0] += 1;
+            if (direction !== -1) {
+                const current_point = game.points.data[game.points_current];
+                const destination = current_point.neighbours[direction];
+                console.log("destination", destination);
+                if (destination > 0) {
+                    const destination_point = game.points.data[destination];
+                    game.points_current = destination;
+                    game.player.sprite.position = grid_position_center(destination_point.grid_position[0], destination_point.grid_position[1]);
+                    game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
+                } else {
+                    console.warn("Can't move in this direction");
+                }
             }
         }
 
