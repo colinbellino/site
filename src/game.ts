@@ -67,8 +67,21 @@ type Point = {
     grid_position:  Vector2,
     neighbours:     Vector4; // index into game.points (order: NESW)
 }
+type Project = {
+    id:     int;
+    name:   string;
+}
 
 // :constants
+const PROJECTS : Project[] = [
+    { id: 0, name: "Bonbon and the Deep Below" },
+    { id: 1, name: "Flight" },
+    { id: 2, name: "Snowball" },
+    { id: 3, name: "Alteration" },
+    { id: 4, name: "Feast & Famine" },
+    { id: 5, name: "The Legend of Ján Ïtor" },
+    { id: 6, name: "Monstrum Prison" },
+];
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION = [0, 240];
@@ -283,6 +296,7 @@ function update() {
                         const destination = current_point.neighbours[direction];
                         if (destination > -1) {
                             game.points_destination = destination;
+                            ui_project_close();
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
@@ -304,6 +318,7 @@ function update() {
 
                     if (progress === 1) {
                         game.points_current = game.points_destination;
+                        ui_project_open("Project " + game.points_current);
                         game.world_mode = World_Mode.IDLE;
                     }
                 } break;
@@ -496,6 +511,7 @@ function update_zoom() {
 type Renderer = {
     gl:                 WebGL2RenderingContext;
     message_container:  HTMLDivElement;
+    project_container:  HTMLDivElement;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
@@ -550,6 +566,9 @@ function renderer_resize_canvas(width: int, height: int) {
 
     game.renderer.message_container.style.width = game.renderer.window_size[0] + "px";
     game.renderer.message_container.style.height = game.renderer.window_size[1] + "px";
+
+    game.renderer.project_container.style.left = (game.renderer.window_size[0]*0.5 - 100) + "px";
+    game.renderer.project_container.style.top = (game.renderer.window_size[1]*0.5 - 150) + "px";
     console.log("window_size", game.renderer.window_size);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
@@ -563,6 +582,10 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
+    const project_container = document.createElement("div");
+    project_container.classList.add("project");
+    document.querySelector("body").appendChild(project_container);
+
     const message_container = document.createElement("div");
     message_container.style.zIndex = "99";
     message_container.style.position = "absolute";
@@ -572,7 +595,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
     message_container.style.color = "#ffffff";
     message_container.style.padding = "10px";
     message_container.style.whiteSpace = "pre";
-    document.querySelector("body").prepend(message_container);
+    document.querySelector("body").appendChild(message_container);
 
     const renderer: Renderer = {
         // @ts-ignore
@@ -582,6 +605,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         window_size: [0, 0],
         gl: _gl,
         message_container: message_container,
+        project_container: project_container,
     };
 
     _gl.enable(_gl.BLEND);
@@ -1400,4 +1424,13 @@ function vector_to_direction(vec: Vector2): Direction_Orthogonal {
     if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.EAST])) { return Direction_Orthogonal.EAST; }
     if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.SOUTH])) { return Direction_Orthogonal.SOUTH; }
     return Direction_Orthogonal.WEST;
+}
+
+// :ui
+function ui_project_open(title: string) {
+    game.renderer.project_container.innerHTML = title;
+    game.renderer.project_container.classList.add("open");
+}
+function ui_project_close() {
+    game.renderer.project_container.classList.remove("open");
 }
