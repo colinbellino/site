@@ -9,26 +9,336 @@
             z-index: 999;
             padding: 15px;
             box-sizing: border-box;
-            min-width: 200px;
+            min-width: 30vw;
+            max-width: 90vw;
             border-radius: 5px;
             font-family: "Arial";
-            font-size: 2rem;
+            font-size: 1rem;
             background: rgba(0, 0, 0, 0.8);
             color: rgba(255, 255, 255, 0.9);
-            text-align: center;
 
             opacity: 0;
             transition: opacity linear 50ms;
         }
+
+        .project.test {
+            top: 50px;
+            left: 50px;
+        }
+
         .project.open {
             opacity: 1;
+        }
+
+        .project h3 {
+            text-align: center;
+            font-size: 2rem;
+            padding: 0;
+            margin: 0;
+        }
+
+        .project a {
+            color: rgba(255, 255, 255, 0.9);
+        }
+
+        .project ul {
+            margin: 0;
+            padding: 0;
+            list-style-position: inside;
+        }
+
+        .project .screenshots {}
+
+        .project .screenshots li {
+            list-style: none;
+            float: left;
         }
     </style>
 </head>
 
 <body style="margin: 0; overflow: hidden; background: #2080ff">
     <canvas></canvas>
+    <div class="project test"></div>
     <script async src="./dist/game.js"></script>
+    <!-- TODO: do we really want to load that data from the DOM? Only advantage is that we can maybe use it for SEO purposes... but do we care? -->
+    <ul class="projects" style="display: none;">
+        <li>
+            <h3><a href="https://colinbellino.itch.io/feast" target="_blank" rel="noopener">Feast & Famine</a></h3>
+            <p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game
+                jam.</p>
+            <p>
+                Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress
+                to the next level. But be quick because your health is constantly draining!
+            </p>
+            <ul>
+                <li>Engine: Unity</li>
+                <li>Language: C#</li>
+                <li>Duration: 72h</li>
+                <li><a href="https://github.com/colinbellino/ludum-dare-50" target="_blank" rel="noopener">Source
+                        code</a><br /><br /></li>
+            </ul>
+            <ul class="screenshots">
+                <li>
+                    <a href="https://colinbellino.itch.io/feast" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/feast/banner-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/feast/banner-small.png" alt="Banner of the game." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/feast/screenshot1-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/feast/screenshot1-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/feast/screenshot1-small.png"
+                                alt="A Screenshot of the game (1 of 3)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/feast/screenshot2-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/feast/screenshot2-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/feast/screenshot2-small.png"
+                                alt="A Screenshot of the game (2 of 3)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/feast/screenshot3-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/feast/screenshot3-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/feast/screenshot3-small.png"
+                                alt="A Screenshot of the game (3 of 3)." />
+                        </picture>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <h3><a href="https://colinbellino.itch.io/alteration" target="_blank" rel="noopener">Alteration</a></h3>
+            <p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.
+            </p>
+            <p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach
+                perfect balance, symbolized by the goal of each level. <br />
+                But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>
+            <ul>
+                <li>Engine: Unity</li>
+                <li>Language: C#</li>
+                <li>Duration: 72h (+ a couple of days after the jam)</li>
+                <li><a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source
+                        code</a><br /><br /></li>
+            </ul>
+            <ul class="screenshots">
+                <li>
+                    <a href="https://colinbellino.itch.io/alteration" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/alteration/banner-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/alteration/banner-small.jpg" alt="Banner of the game." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/alteration/screenshot1-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/alteration/screenshot1-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/alteration/screenshot1-small.png"
+                                alt="A Screenshot of the game (1 of 5)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/alteration/screenshot2-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/alteration/screenshot2-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/alteration/screenshot2-small.png"
+                                alt="A Screenshot of the game (2 of 5)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/alteration/screenshot3-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/alteration/screenshot3-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/alteration/screenshot3-small.png"
+                                alt="A Screenshot of the game (3 of 5)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/alteration/screenshot4-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/alteration/screenshot4-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/alteration/screenshot4-small.png"
+                                alt="A Screenshot of the game (4 of 5)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/alteration/screenshot5-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/alteration/screenshot5-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/alteration/screenshot5-small.png"
+                                alt="A Screenshot of the game (5 of 5)." />
+                        </picture>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <h3><a href="https://colinbellino.itch.io/snowball" target="_blank" rel="noopener">Snowball</a></h3>
+            <p>A minimalist Tactical RPG game created in about a month as a solo project (art, audio & code) as a small
+                challenge for myself.</p>
+            <p>I wanted to make a game about kids playing outside and throwing snowballs around and also wondered how a
+                battle system like this would work in a side view game. So, i've combined the two to make Snowball ⛄!
+            </p>
+            <ul>
+                <li>Engine: Unity</li>
+                <li>Language: C#</li>
+                <li>Duration: Around a month (4h / day)</li>
+                <li><a href="https://github.com/colinbellino/snowball" target="_blank" rel="noopener">Source
+                        code</a><br /><br /></li>
+            </ul>
+            <ul class="screenshots">
+                <li>
+                    <a href="https://colinbellino.itch.io/snowball" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/snowball/banner-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/snowball/banner-small.png" alt="Banner of the game." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/snowball/screenshot1-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/snowball/screenshot1-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/snowball/screenshot1-small.png"
+                                alt="A Screenshot of the game (1 of 4)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/snowball/screenshot2-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/snowball/screenshot2-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/snowball/screenshot2-small.png"
+                                alt="A Screenshot of the game (2 of 4)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/snowball/screenshot3-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/snowball/screenshot3-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/snowball/screenshot3-small.png"
+                                alt="A Screenshot of the game (3 of 4)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/snowball/screenshot4-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/snowball/screenshot4-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/snowball/screenshot4-small.png"
+                                alt="A Screenshot of the game (4 of 4)." />
+                        </picture>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <h3><a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">Flight</a></h3>
+            <p>A platformer game created in 72 hours with a team of 2 (art, & code) for the Indie Tales 2021 game jam.
+            </p>
+            <ul>
+                <li>Engine: Unity</li>
+                <li>Language: C#</li>
+                <li>Duration: 72h</li>
+                <li><a href="https://github.com/colinbellino/indie-tales-2021" target="_blank" rel="noopener">Source
+                        code</a><br /><br /></li>
+            </ul>
+            <ul class="screenshots">
+                <li>
+                    <a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/flight/banner-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/flight/banner-small.png" alt="Banner of the game." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/flight/screenshot1-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/flight/screenshot1-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/flight/screenshot1-small.png"
+                                alt="A Screenshot of the game (1 of 2)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/flight/screenshot2-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/flight/screenshot2-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/flight/screenshot2-small.png"
+                                alt="A Screenshot of the game (2 of 2)." />
+                        </picture>
+                    </a>
+                </li>
+            </ul>
+        </li>
+        <li>
+            <h3><a href="https://colinbellino.itch.io/bonbon" target="_blank" rel="noopener">Bonbon and the Deep
+                    Below</a>
+            </h3>
+            <p>A platformer game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 48 game
+                jam.
+            </p>
+            <ul>
+                <li>Engine: Unity</li>
+                <li>Language: C#</li>
+                <li>Duration: 72h</li>
+                <li><a href="https://github.com/colinbellino/ludum-dare-48" target="_blank" rel="noopener">Source
+                        code</a><br /><br /></li>
+            </ul>
+            <ul class="screenshots">
+                <li>
+                    <a href="https://colinbellino.itch.io/bonbon" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/bonbon/banner-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/bonbon/banner-small.jpg" alt="Banner of the game." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/bonbon/screenshot1-large.webp" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/bonbon/screenshot1-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/bonbon/screenshot1-small.png"
+                                alt="A Screenshot of the game (1 of 3)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/bonbon/screenshot2-large.png" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/bonbon/screenshot2-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/bonbon/screenshot2-small.png"
+                                alt="A Screenshot of the game (2 of 3)." />
+                        </picture>
+                    </a>
+                </li>
+                <li>
+                    <a href="https://colinbellino.com/public/screenshots/bonbon/screenshot3-large.webp" target="_blank" rel="noopener">
+                        <picture>
+                            <source srcset="https://colinbellino.com/public/screenshots/bonbon/screenshot3-small.webp" type="image/webp" />
+                            <img src="https://colinbellino.com/public/screenshots/bonbon/screenshot3-small.png"
+                                alt="A Screenshot of the game (3 of 3)." />
+                        </picture>
+                    </a>
+                </li>
+            </ul>
+        </li>
+    </ul>
 </body>
 
 </html>

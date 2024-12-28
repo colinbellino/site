@@ -131,6 +131,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         Point :: struct {
             grid_position: [2]s32;
             neighbours:    [4]s32;
+            project_id:    s32;
         }
 
         result := ldtk_load("./src/world.ldtk", temp);
@@ -140,6 +141,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
 
         grid: [..]s32;
         points: [..]Point;
+        project_id: s32;
         for level.layerInstances[LAYER_GRID].intGridCsv {
             array_add(*grid, it);
         }
@@ -148,24 +150,30 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             for field_instance, field_index : entity_instance.fieldInstances {
                 if field_instance.__value.object == null { continue; }
 
-                value, success := table_find(field_instance.__value.object, "entityIid");
-                assert(success);
-
-                target_entity_iid := value.str;
-                neighbour_index := -1;
-                for other, other_index : level.layerInstances[LAYER_ENTITY].entityInstances {
-                    if other.iid == target_entity_iid {
-                        // local_position := s32.[cast(s32)other.px[0]/GRID_SIZE, cast(s32)other.px[1]/GRID_SIZE];
-                        // local_grid_index := grid_position_to_index(local_position, level.size.x);
-                        neighbour_index = other_index;
-                        neighbours[field_index] = cast(s32)other_index;
-                        break;
+                if field_instance.__identifier == {
+                    case "NORTH"; #through;
+                    case "EAST"; #through;
+                    case "SOUTH"; #through;
+                    case "WEST"; {
+                        value, success := table_find(field_instance.__value.object, "entityIid");
+                        assert(success);
+                        target_entity_iid := value.str;
+                        for other, other_index : level.layerInstances[LAYER_ENTITY].entityInstances {
+                            if other.iid == target_entity_iid {
+                                neighbours[field_index] = cast(s32)other_index;
+                                break;
+                            }
+                        }
+                    }
+                    case "project_id"; {
+                        project_id = cast(s32) field_instance.__value.number;
                     }
                 }
             }
             array_add(*points, Point.{
                 grid_position = entity_instance.__grid,
                 neighbours    = neighbours,
+                project_id    = project_id,
             });
         }
 
@@ -177,7 +185,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         for grid { append(*world_str, tprint("%, ", it)); }
         append(*world_str, "],\n");
         append(*world_str, tprint("  points:   ["));
-        for points { append(*world_str, tprint("{ grid_position: %, neighbours: % }, ", it.grid_position, it.neighbours)); }
+        for points { append(*world_str, tprint("{ grid_position: %, neighbours: %, project_id: % }, ", it.grid_position, it.neighbours, it.project_id)); }
         append(*world_str, "],\n");
         append(*world_str, "}");
 

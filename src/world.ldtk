@@ -11,7 +11,7 @@
 	"iid": "20b4a0e0-c210-11ef-a872-334d9525beb2",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 11,
+	"nextUid": 12,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -293,6 +293,43 @@
 					"allowedRefsEntityUid": null,
 					"allowedRefTags": [],
 					"tilesetUid": null
+				},
+				{
+					"identifier": "project_id",
+					"doc": null,
+					"__type": "Int",
+					"uid": 11,
+					"type": "F_Int",
+					"isArray": false,
+					"canBeNull": false,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "NameAndValue",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
 				}
 			]
 		}
@@ -398,7 +435,8 @@
 									"id": "V_String",
 									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [null] }
 							],
 							"__worldX": 0,
 							"__worldY": 0
@@ -435,7 +473,8 @@
 								}, "__tile": null, "defUid": 7, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
-								}] }
+								}] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [null] }
 							],
 							"__worldX": 32,
 							"__worldY": 0
@@ -480,7 +519,8 @@
 								}, "__tile": null, "defUid": 7, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
-								}] }
+								}] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [1] }] }
 							],
 							"__worldX": 64,
 							"__worldY": 48
@@ -517,7 +557,8 @@
 								}, "__tile": null, "defUid": 7, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
-								}] }
+								}] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 2, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [2] }] }
 							],
 							"__worldX": 32,
 							"__worldY": 48
@@ -554,7 +595,8 @@
 									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
 								}] },
 								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 3, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [3] }] }
 							],
 							"__worldX": 0,
 							"__worldY": 48
@@ -599,7 +641,8 @@
 								}, "__tile": null, "defUid": 7, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["7dbc8be0-c210-11ef-a872-eb2adb802b1e"]
-								}] }
+								}] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 5, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [5] }] }
 							],
 							"__worldX": 64,
 							"__worldY": 0
@@ -636,7 +679,8 @@
 									"id": "V_String",
 									"params": ["7ebae910-c210-11ef-a872-5fae80970927"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] }
+								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 4, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [4] }] }
 							],
 							"__worldX": 96,
 							"__worldY": 16

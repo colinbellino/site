@@ -4,7 +4,117 @@
 			"path": "src/game.ts",
 			"bookmarks": [
 				{
-					"line": 1428,
+					"line": 22,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 76,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 190,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 250,
+					"column": 12,
+					"label": ""
+				},
+				{
+					"line": 285,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 300,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 316,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 339,
+					"column": 12,
+					"label": ""
+				},
+				{
+					"line": 345,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 352,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 370,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 395,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 428,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 454,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 521,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 665,
+					"column": 8,
+					"label": ""
+				},
+				{
+					"line": 724,
+					"column": 8,
+					"label": ""
+				},
+				{
+					"line": 809,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 983,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1103,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1108,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1157,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1440,
 					"column": 6,
 					"label": ""
 				}

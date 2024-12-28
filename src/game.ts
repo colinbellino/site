@@ -27,6 +27,7 @@ type Game = {
     world_mode_timer:       int;
     clear_color:            Color;
     player:                 Entity;
+    projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
     points:                 Fixed_Size_Array<Point, typeof MAX_POINTS>,
     points_current:         int;
     points_destination:     int;
@@ -66,28 +67,21 @@ type Entity = {
 type Point = {
     grid_position:  Vector2,
     neighbours:     Vector4; // index into game.points (order: NESW)
+    project_id:     int;
 }
 type Project = {
     id:     int;
-    name:   string;
+    html:   string;
 }
 
 // :constants
-const PROJECTS : Project[] = [
-    { id: 0, name: "Bonbon and the Deep Below" },
-    { id: 1, name: "Flight" },
-    { id: 2, name: "Snowball" },
-    { id: 3, name: "Alteration" },
-    { id: 4, name: "Feast & Famine" },
-    { id: 5, name: "The Legend of Ján Ïtor" },
-    { id: 6, name: "Monstrum Prison" },
-];
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION = [0, 240];
 const MAX_MESSAGES : number = 128;
 const MAX_ENTITIES : number = 128;
-const MAX_POINTS : number = 64;
+const MAX_PROJECTS : number = 32;
+const MAX_POINTS : number = 32;
 const MAX_SPRITES : number = 2048;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
@@ -158,12 +152,23 @@ function update() {
 
             game.inputs = inputs_init();
 
-            game.points_current = 2;
+            game.projects = fixed_array_make(MAX_PROJECTS);
+            fixed_array_add(game.projects, { id: 0, html: "<PLACEHOLDER>" });
+            const project_elements = document.querySelectorAll(".projects > li");
+            for (let project_index = 0; project_index < project_elements.length; project_index++) {
+                const project_element = project_elements[project_index];
+                fixed_array_add(game.projects, { id: project_index+1, html: project_element.innerHTML });
+            }
+
             game.points = fixed_array_make(MAX_POINTS);
             for (let point_index = 0; point_index < WORLD.points.length; point_index++) {
                 const point = WORLD.points[point_index];
+                assert(point.project_id <= game.projects.count-1, `Invalid project_id: ${point.project_id}`);
                 fixed_array_add(game.points, point);
             }
+            game.points_current = 2;
+
+            ui_project_open(game.points.data[game.points_current].project_id);
 
             game.player = fixed_array_add(game.entities, {
                 name: "PLAYER",
@@ -219,12 +224,6 @@ function update() {
             push_message("camera_position:    " + game.renderer.camera_main.position);
             push_message("camera_zoom:        " + game.renderer.camera_main.zoom);
             push_message("entities:           " + game.entities.count);
-            push_message("points_current:     " + game.points_current);
-            push_message("points:             ");
-            for (let point_index = 0; point_index < game.points.count; point_index++) {
-                const point = game.points.data[point_index];
-                push_message(" - " + point_index + " " + JSON.stringify(point));
-            }
             push_message("player_position:    " + game.player.sprite.position);
             push_message("world_draw:         " + game.debug_draw_world_grid);
             if (game.debug_draw_world_grid) {
@@ -233,6 +232,17 @@ function update() {
             push_message("tiles_draw:         " + game.debug_draw_tile_grid);
             if (game.debug_draw_tile_grid) {
                 push_message("tiles_count:        " + game.tile_grid.length);
+            }
+            push_message("points_current:     " + game.points_current);
+            push_message("points:             ");
+            for (let point_index = 0; point_index < game.points.count; point_index++) {
+                const point = game.points.data[point_index];
+                push_message(" - " + point_index + " " + JSON.stringify(point));
+            }
+            push_message("projects:             ");
+            for (let project_index = 0; project_index < game.projects.count; project_index++) {
+                const project = game.projects.data[project_index];
+                push_message(" - " + project_index + " project_id: " + project.id);
             }
         }
 
@@ -318,7 +328,9 @@ function update() {
 
                     if (progress === 1) {
                         game.points_current = game.points_destination;
-                        ui_project_open("Project " + game.points_current);
+                        const point = game.points.data[game.points_current];
+                        console.log({"point": point, "curr": game.points_current, "project_id": point.project_id });
+                        ui_project_open(point.project_id);
                         game.world_mode = World_Mode.IDLE;
                     }
                 } break;
@@ -392,7 +404,7 @@ function update() {
 
                     const tile_value = calculate_tile_value(tile_position);
                     const tile_index = TILE_VALUES.indexOf(tile_value);
-                    assert(tile_index > -1);
+                    assert(tile_index > -1, "Invalid tile_index.");
                     const tile_texture_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE[0]);
 
                     const texture_position: Vector2 = [
@@ -582,13 +594,13 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
-    const project_container = document.createElement("div");
-    project_container.classList.add("project");
-    document.querySelector("body").appendChild(project_container);
+    const project_container = document.querySelector(".project") as HTMLDivElement;
 
     const message_container = document.createElement("div");
     message_container.style.zIndex = "99";
     message_container.style.position = "absolute";
+    message_container.style.top = "0px";
+    message_container.style.left = "0px";
     message_container.style.width = "100%";
     message_container.style.height = "100%";
     message_container.style.font = "18px Courier New";
@@ -623,7 +635,7 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
     }
 
     const vao = gl.createVertexArray();
-    assert(vao !== null);
+    assert(vao !== null, "Couldn't create VAO.");
     pass.vao = vao;
     gl.bindVertexArray(vao);
 
@@ -1427,8 +1439,12 @@ function vector_to_direction(vec: Vector2): Direction_Orthogonal {
 }
 
 // :ui
-function ui_project_open(title: string) {
-    game.renderer.project_container.innerHTML = title;
+function ui_project_open(project_id: int) {
+    if (project_id === 0) { return; }
+    console.log({project_id}, {count:game.projects.count-1});
+    if (project_id > game.projects.count-1) { return; }
+    const project = game.projects.data[project_id];
+    game.renderer.project_container.innerHTML = project.html;
     game.renderer.project_container.classList.add("open");
 }
 function ui_project_close() {
