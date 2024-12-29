@@ -4,14 +4,30 @@
 <head>
     <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png" />
     <style>
+        html,body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+            width: 100%;
+        }
+        html {
+            font-size: 4vw;
+        }
+        body {
+            background: #2080ff;
+            overflow: hidden;
+        }
+
         .project {
             position: absolute;
-            z-index: 999;
+            z-index: 2;
             padding: 15px;
             box-sizing: border-box;
-            min-width: 30vw;
-            max-width: 90vw;
-            border-radius: 5px;
+            top: 2vw;
+            right: 2vw;
+            bottom: 2vw;
+            left: 2vw;
+            border-radius: 1vw;
             font-family: "Arial";
             font-size: 1rem;
             background: rgba(0, 0, 0, 0.8);
@@ -20,50 +36,88 @@
             opacity: 0;
             transition: opacity linear 50ms;
         }
-
-        .project.test {
-            top: 50px;
-            left: 50px;
-        }
-
         .project.open {
             opacity: 1;
         }
-
         .project h3 {
             text-align: center;
             font-size: 2rem;
             padding: 0;
             margin: 0;
         }
-
-        .project a {
-            color: rgba(255, 255, 255, 0.9);
+        .project .close {
+            position: absolute;
+            top: 2vw;
+            right: 2vw;
+            background: none;
+            color: inherit;
+            font-size: 2rem;
+            border: none;
         }
-
+        .project a {
+            color: inherit
+        }
         .project ul {
             margin: 0;
             padding: 0;
             list-style-position: inside;
         }
-
-        .project .screenshots {}
-
         .project .screenshots li {
             list-style: none;
             float: left;
         }
+
+        .hud_button {
+            z-index: 10;
+            position: absolute;
+            width: 80px;
+            height: 80px;
+            font-size: 1rem;
+        }
+        .hud_button.up {
+            top: 0px;
+            left: 50%;
+        }
+        .hud_button.down {
+            bottom: 0px;
+            left: 50%;
+        }
+        .hud_button.left {
+            top: 50%;
+            left: 0px;
+        }
+        .hud_button.right {
+            top: 50%;
+            right: 0px;
+        }
+
+        .message_container {
+            z-index: 99;
+            position: absolute;
+            overflow: hidden;
+            pointer-events: none;
+            top: 0px;
+            left: 0px;
+            box-sizing: border-box;
+            font: 18px "Courier New";
+            color: #ffffff;
+            padding: 10px;
+            white-space: pre;
+        }
     </style>
 </head>
 
-<body style="margin: 0; overflow: hidden; background: #2080ff">
+<body>
     <canvas></canvas>
-    <div class="project test"></div>
+    <div id="ui_root" style="overflow: hidden;">
+        <div class="project"></div>
+    </div>
     <script async src="./dist/game.js"></script>
     <!-- TODO: do we really want to load that data from the DOM? Only advantage is that we can maybe use it for SEO purposes... but do we care? -->
     <ul class="projects" style="display: none;">
         <li>
             <h3><a href="https://colinbellino.itch.io/feast" target="_blank" rel="noopener">Feast & Famine</a></h3>
+            <button class="close">✕</button>
             <p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game
                 jam.</p>
             <p>
@@ -117,6 +171,7 @@
         </li>
         <li>
             <h3><a href="https://colinbellino.itch.io/alteration" target="_blank" rel="noopener">Alteration</a></h3>
+            <button class="close">✕</button>
             <p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.
             </p>
             <p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach
@@ -187,6 +242,7 @@
         </li>
         <li>
             <h3><a href="https://colinbellino.itch.io/snowball" target="_blank" rel="noopener">Snowball</a></h3>
+            <button class="close">✕</button>
             <p>A minimalist Tactical RPG game created in about a month as a solo project (art, audio & code) as a small
                 challenge for myself.</p>
             <p>I wanted to make a game about kids playing outside and throwing snowballs around and also wondered how a
@@ -248,6 +304,7 @@
         </li>
         <li>
             <h3><a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">Flight</a></h3>
+            <button class="close">✕</button>
             <p>A platformer game created in 72 hours with a team of 2 (art, & code) for the Indie Tales 2021 game jam.
             </p>
             <ul>
@@ -290,6 +347,7 @@
             <h3><a href="https://colinbellino.itch.io/bonbon" target="_blank" rel="noopener">Bonbon and the Deep
                     Below</a>
             </h3>
+            <button class="close">✕</button>
             <p>A platformer game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 48 game
                 jam.
             </p>

@@ -28,9 +28,8 @@ vec2 uv_fat_pixel( vec2 uv, ivec2 texture_size, float texels_per_pixel) {
 }
 
 void main() {
-    mat4 i_matrix = mat4(i_matrix0, i_matrix1, i_matrix2, i_matrix3);
-    gl_Position = u_matrix * i_matrix * (vec4(position, 0, 1));
     v_color = i_color;
-
     v_uv = i_tex_size*uv + i_tex_position;
+    mat4 i_matrix = mat4(i_matrix0, i_matrix1, i_matrix2, i_matrix3);
+    gl_Position = u_matrix * i_matrix * vec4(position, 0, 1);
 }

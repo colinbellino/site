@@ -140,7 +140,6 @@ function update() {
                 return;
             }
             game.renderer = renderer;
-            renderer_resize_canvas(window.innerWidth, window.innerHeight);
             renderer_update_camera_matrix_main(game.renderer.camera_main);
             {
                 game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
@@ -186,10 +185,11 @@ function update() {
             });
 
             game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
+            renderer_resize_canvas();
             update_zoom();
 
             // :init world
-            assert(WORLD.grid.length === WORLD.height * WORLD.width, "Invalid world!");
+            assert(WORLD.grid.length > 0 && WORLD.grid.length === WORLD.height * WORLD.width, "Invalid world!");
             for (let y = 0; y < WORLD.height; y++) {
                 for (let x = 0; x < WORLD.width; x++) {
                     const grid_index = grid_position_to_index([x, y], WORLD.width);
@@ -213,7 +213,7 @@ function update() {
         }
 
         if (game.inputs.window_resized) {
-            renderer_resize_canvas(window.innerWidth, window.innerHeight);
+            renderer_resize_canvas();
             update_zoom();
         }
 
@@ -329,7 +329,6 @@ function update() {
                     if (progress === 1) {
                         game.points_current = game.points_destination;
                         const point = game.points.data[game.points_current];
-                        console.log({"point": point, "curr": game.points_current, "project_id": point.project_id });
                         ui_project_open(point.project_id);
                         game.world_mode = World_Mode.IDLE;
                     }
@@ -427,6 +426,7 @@ function update() {
                 }
             }
             // :render messages
+            // FIXME: don't do this in __RELEASE__
             let messages = "";
             if (game.debug_draw_messages) {
                 for (let message_index = 0; message_index < game.messages.count; message_index++) {
@@ -504,7 +504,7 @@ function update() {
         requestAnimationFrame(update);
     } catch(e) {
         if (!__RELEASE__) {
-            document.querySelector("body").style.borderTop = "2px solid red";
+            document.body.style.borderTop = "4px solid red";
         }
         // TODO: better error handling for release
         console.error(e);
@@ -512,6 +512,7 @@ function update() {
 }
 
 function update_zoom() {
+    assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
     if (game.renderer.window_size[0] > game.renderer.window_size[1]) {
         game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / 320);
     } else {
@@ -522,7 +523,8 @@ function update_zoom() {
 // :renderer
 type Renderer = {
     gl:                 WebGL2RenderingContext;
-    message_container:  HTMLDivElement;
+    ui_root:            HTMLDivElement;
+    message_container:  HTMLPreElement;
     project_container:  HTMLDivElement;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
@@ -565,7 +567,10 @@ const CAMERA_DEFAULT: Camera_Orthographic = {
     view_matrix: matrix4_identity(),
     view_projection_matrix: matrix4_identity(),
 };
-function renderer_resize_canvas(width: int, height: int) {
+function renderer_resize_canvas() {
+    const width = window.innerWidth /* * window.devicePixelRatio */;
+    const height = window.innerHeight /* * window.devicePixelRatio */;
+
     let final_width = width;
     let final_height = height;
     if (width % 2)  { final_width -= 1; }
@@ -573,49 +578,64 @@ function renderer_resize_canvas(width: int, height: int) {
 
     game.renderer.window_size[0] = final_width;
     game.renderer.window_size[1] = final_height;
-    game.renderer.gl.canvas.width = game.renderer.window_size[0];
-    game.renderer.gl.canvas.height = game.renderer.window_size[1];
+    game.renderer.gl.canvas.width = final_width;
+    game.renderer.gl.canvas.height = final_height;
 
-    game.renderer.message_container.style.width = game.renderer.window_size[0] + "px";
-    game.renderer.message_container.style.height = game.renderer.window_size[1] + "px";
-
-    game.renderer.project_container.style.left = (game.renderer.window_size[0]*0.5 - 100) + "px";
-    game.renderer.project_container.style.top = (game.renderer.window_size[1]*0.5 - 150) + "px";
     console.log("window_size", game.renderer.window_size);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
     const canvas = document.querySelector("canvas");
     assert(canvas !== null, "Canvas not found");
-    canvas.width = window.innerWidth;
-    canvas.height = window.innerHeight;
 
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
     }
 
+    const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
+    assert(ui_root !== undefined);
+
     const project_container = document.querySelector(".project") as HTMLDivElement;
 
-    const message_container = document.createElement("div");
-    message_container.style.zIndex = "99";
-    message_container.style.position = "absolute";
-    message_container.style.top = "0px";
-    message_container.style.left = "0px";
-    message_container.style.width = "100%";
-    message_container.style.height = "100%";
-    message_container.style.font = "18px Courier New";
-    message_container.style.color = "#ffffff";
-    message_container.style.padding = "10px";
-    message_container.style.whiteSpace = "pre";
-    document.querySelector("body").appendChild(message_container);
+    // TODO: clean this up
+    {
+        const button_up = document.createElement("button");
+        button_up.classList.add("hud_button", "up");
+        button_up.textContent = "↑";
+        ui_root.appendChild(button_up);
+        button_up.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowUp } as KeyboardEvent); });
+
+        const button_down = document.createElement("button");
+        button_down.classList.add("hud_button", "down");
+        button_down.textContent = "↓";
+        ui_root.appendChild(button_down);
+        button_down.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowDown } as KeyboardEvent); });
+
+        const button_left = document.createElement("button");
+        button_left.classList.add("hud_button", "left");
+        button_left.textContent = "←";
+        ui_root.appendChild(button_left);
+        button_left.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowLeft } as KeyboardEvent); });
+
+        const button_right = document.createElement("button");
+        button_right.classList.add("hud_button", "right");
+        button_right.textContent = "→";
+        ui_root.appendChild(button_right);
+        button_right.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowRight } as KeyboardEvent); });
+    }
+
+    const message_container = document.createElement("pre");
+    message_container.classList.add("message_container");
+    ui_root.appendChild(message_container);
 
     const renderer: Renderer = {
         // @ts-ignore
-        sprite_pass: {},
-        camera_main: CAMERA_DEFAULT,
-        sprites: fixed_array_make(MAX_SPRITES),
-        window_size: [0, 0],
-        gl: _gl,
+        sprite_pass:        {},
+        camera_main:        CAMERA_DEFAULT,
+        sprites:            fixed_array_make(MAX_SPRITES),
+        window_size:        [0, 0],
+        gl:                 _gl,
+        ui_root:           ui_root,
         message_container: message_container,
         project_container: project_container,
     };
@@ -693,13 +713,13 @@ function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
         gl.vertexAttribDivisor(location_matrix1, 1);
         offset += 4;
         const location_matrix2 = gl.getAttribLocation(pass.program, "i_matrix2");
-        assert(location_matrix2 != -1, "Couldn't get attrib location i_matrix2");
+        // assert(location_matrix2 != -1, "Couldn't get attrib location i_matrix2");
         gl.enableVertexAttribArray(location_matrix2);
         gl.vertexAttribPointer(location_matrix2, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_matrix2, 1);
         offset += 4;
         const location_matrix3 = gl.getAttribLocation(pass.program, "i_matrix3");
-        assert(location_matrix3 != -1, "Couldn't get attrib location i_matrix3");
+        // assert(location_matrix3 != -1, "Couldn't get attrib location i_matrix3");
         gl.enableVertexAttribArray(location_matrix3);
         gl.vertexAttribPointer(location_matrix3, 4, gl.FLOAT, false, STRIDE, offset*4);
         gl.vertexAttribDivisor(location_matrix3, 1);
@@ -1092,7 +1112,7 @@ function load_image(url: string): Promise<HTMLImageElement> {
 }
 function assert(condition: Boolean, message: string | null = ""): asserts condition {
     if (!__RELEASE__ && !condition) {
-        debugger;
+        // debugger;
         if (message) {
             console.error("Assertion failed:");
             throw Error(message);
@@ -1441,11 +1461,15 @@ function vector_to_direction(vec: Vector2): Direction_Orthogonal {
 // :ui
 function ui_project_open(project_id: int) {
     if (project_id === 0) { return; }
-    console.log({project_id}, {count:game.projects.count-1});
     if (project_id > game.projects.count-1) { return; }
     const project = game.projects.data[project_id];
     game.renderer.project_container.innerHTML = project.html;
     game.renderer.project_container.classList.add("open");
+    // FIXME: don't do this on open!
+    game.renderer.project_container.querySelector(".close").addEventListener("click", () => {
+        // TODO: change world_mode instead of just toggling the UI!
+        ui_project_close();
+    });
 }
 function ui_project_close() {
     game.renderer.project_container.classList.remove("open");
