@@ -67,6 +67,22 @@
       padding: 0.8rem 0 1rem;
     }
 
+    main > aside {
+      padding: 1.3rem 0 1rem;
+      float: right;
+      font-size: 1rem;
+    }
+    main > aside ul {
+      margin: 0;
+    }
+    main > aside li {
+      list-style: none;
+      display: inline;
+    }
+    main > aside li:not(:last-of-type):after {
+      content: " - "
+    }
+
     h1 {
       display: inline-block;
       margin: 0;
@@ -121,7 +137,7 @@
     ul.screenshots li {
       float: left;
       display: block;
-      margin: 0 0.6vh 0.6vh 0;
+      margin: 0 5px 5px 0;
     }
     ul.screenshots li img {
       display: block;
@@ -195,9 +211,20 @@
         padding: 3vh;
       }
 
+      ul.screenshots li:not(:first-of-type) {
+        width: calc(50% - 5px/2);
+        margin: 0 0 5px 0;
+      }
+      ul.screenshots > li:nth-child(odd) {
+        margin-left: 5px;
+      }
+      ul.screenshots li:not(:first-of-type) img {
+        width: 100%;
+      }
       ul.screenshots li:first-of-type {
         float: none;
-        margin: 0 0 0.6vh 0;
+        width: 100%;
+        margin: 0 0 5px 0;
       }
 
       ul.screenshots li:first-of-type img {
@@ -209,18 +236,80 @@
 
 <body>
   <main>
+    <aside>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/games">My game projects</a></li>
+      </ul>
+    </aside>
     <header>
       <a href="/"><img class="avatar pixel-art" src="/public/me.png" alt="My avatar" width="32" width="32"></a>
-      <h1>Some web projects i worked on</h1>
+      <h1>My latest web projects</h1>
     </header>
     <section>
       <ul class="projects">
         <li>
-          <h3><a href="https://photos.hubside.com" target="_blank" rel="noopener">Photos web app</a></h3>
+          <h3><a href="https://www.chipsmarket.com/" target="_blank" rel="noopener">Chipsmarket</a> (Precogs)</h3>
+          <p>A Business-to-Business international marketplace for electronic parts.</p>
+          <p>I was tasked to prepare the new version of the application (the new onboarding screens, improved workflows, etc) in collaboration with the CTO and the rest of the tech team.</p>
+          <p>We started with mockups and discussions with the design team, then i iterated on the new version of the application, making a feedback loop as soon as possible.</p>
+          <p>The team seemed interested in performance aware programming and my input on architecture decisions, so i took the time to share my knowledge on these subjects when that felt appropriate.</p>
+          <p>After a prototyping period and much discussion with the team, we settled on the tech stack below:</p>
+          <ul>
+            <li>Frontend: Vue3 / TypeScript / Tailwind</li>
+            <li>Backend: Node / TypeScript / Express / PostgreSQL</li>
+            <li>AWS: cloud functions, pub/sub, etc</li>
+            <li>Testing: Jest / Cypress / Github Actions / Storybook / Chromatic<br /><br /></li>
+          </ul>
+          <ul class="screenshots">
+            <li>
+              <a href="/public/screenshots/precogs/banner-large.webp" target="_blank" rel="noopener">
+                <picture>
+                  <source srcset="/public/screenshots/precogs/banner-small.webp" type="image/webp" />
+                  <img src="/public/screenshots/precogs/banner-small.jpg" alt="Homepage of the application." />
+                </picture>
+              </a>
+            </li>
+            <li>
+              <a href="/public/screenshots/precogs/screenshot1-large.webp" target="_blank" rel="noopener">
+                <picture>
+                  <source srcset="/public/screenshots/precogs/screenshot1-small.webp" type="image/webp" alt="A Screenshot of the app (1 of 4)." />
+                  <img src="/public/screenshots/precogs/screenshot1-small.jpg" alt="A Screenshot of the app (1 of 4)." />
+                </picture>
+              </a>
+            </li>
+            <li>
+              <a href="/public/screenshots/precogs/screenshot2-large.webp" target="_blank" rel="noopener">
+                <picture>
+                  <source srcset="/public/screenshots/precogs/screenshot2-small.webp" type="image/webp" alt="A Screenshot of the app (2 of 4)." />
+                  <img src="/public/screenshots/precogs/screenshot2-small.jpg" alt="A Screenshot of the app (2 of 4)." />
+                </picture>
+              </a>
+            </li>
+            <li>
+              <a href="/public/screenshots/precogs/screenshot3-large.webp" target="_blank" rel="noopener">
+                <picture>
+                  <source srcset="/public/screenshots/precogs/screenshot3-small.webp" type="image/webp" alt="A Screenshot of the app (3 of 4)." />
+                  <img src="/public/screenshots/precogs/screenshot3-small.jpg" alt="A Screenshot of the app (3 of 4)." />
+                </picture>
+              </a>
+            </li>
+            <li>
+              <a href="/public/screenshots/precogs/screenshot4-large.webp" target="_blank" rel="noopener">
+                <picture>
+                  <source srcset="/public/screenshots/precogs/screenshot4-small.webp" type="image/webp" alt="A Screenshot of the app (4 of 4)." />
+                  <img src="/public/screenshots/precogs/screenshot4-small.jpg" alt="A Screenshot of the app (4 of 4)." />
+                </picture>
+              </a>
+            </li>
+          </ul>
+        </li>
+        <li>
+          <h3><a href="https://photos.hubside.com" target="_blank" rel="noopener">MyPhotos</a> (Hubside)</h3>
           <p>A Web App to regroup all your photos in one place and easily/safely share them online.</p>
           <p>I was on the project from the first line of code to the MVP release, we worked hand in hand with the
             product owner, designers and developers to create something we could be proud of.
-            A lot of work went into the architecture of the app, to make sure it runs ans scales smoothly on GCP and is
+            A lot of work went into the architecture of the app, to make sure it runs and scales smoothly on GCP and is
             easy to maintain.</p>
           <p>The backend revolves around a GraphQL schema that is shared with the frontend and iOS app to facilitate
             communications.</p>
@@ -258,7 +347,7 @@
               </a>
             </li>
             <li>
-              <a href="https/public/screenshots/hubside/screenshot3-large.webp" target="_blank" rel="noopener">
+              <a href="/public/screenshots/hubside/screenshot3-large.webp" target="_blank" rel="noopener">
                 <picture>
                   <source srcset="/public/screenshots/hubside/screenshot3-small.webp" type="image/webp" alt="A Screenshot of the app (3 of 3)." />
                   <img src="/public/screenshots/hubside/screenshot3-small.jpg" alt="A Screenshot of the app (3 of 3)." />
@@ -268,8 +357,7 @@
           </ul>
         </li>
         <li>
-          <h3>Supply chain project for <a href="https://www.renaultgroup.com/en/talent/our-career-areas/digital"
-              target="_blank" rel="noopener">Renault Digital</a></h3>
+          <h3>Bi-BOP: Supply chain (<a href="https://www.linkedin.com/company/renault-digital/" target="_blank" rel="noopener">Renault Digital</a>)</h3>
           <p>A large single page application used by the supply chain team at Renault.</p>
           <p>We created the UI components, code the logic to connect them to the backend (a JSON API that we also
             developed), discuss potential UX problems with the team among other things.</p>
@@ -311,7 +399,7 @@
               </a>
             </li>
             <li>
-              <a href="https/public/screenshots/renault/screenshot3-large.webp" target="_blank" rel="noopener">
+              <a href="/public/screenshots/renault/screenshot3-large.webp" target="_blank" rel="noopener">
                 <picture>
                   <source srcset="/public/screenshots/renault/screenshot3-small.webp" type="image/webp" />
                   <img src="/public/screenshots/renault/screenshot3-small.jpg" alt="A Screenshot of the app (3 of 4)." />
@@ -330,13 +418,14 @@
         </li>
         </li>
         <li>
-          <h3><a href="https://colinbellino.com" target="_blank" rel="noopener">This website</a></h3>
+          <h3><a href="https://colinbellino.com" target="_blank" rel="noopener">My portfolio</a></h3>
           <p>The site you are currently on. I created it as a portfolio and hub for all my work & contact infos.</p>
-          <p>The goal was to keep it simple, accessible and performant (hence the choice of tech).</p>
+          <p>The goal was to keep it simple, accessible and blazingly fast (hence the choice of tech).</p>
           <ul>
             <li>HTML</li>
             <li>CSS</li>
             <li>Netlify for static files hosting</li>
+            <li>Some JavaScript for bonus content and easter eggs (not loaded until you find it)</li>
             <li>Source code: <a href="https://github.com/colinbellino/site" target="_blank" rel="noopener">https://github.com/colinbellino/site</a></li>
           </ul>
         </li>

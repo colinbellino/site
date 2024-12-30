@@ -67,6 +67,22 @@
       padding: 0.8rem 0 1rem;
     }
 
+    main > aside {
+      padding: 1.3rem 0 1rem;
+      float: right;
+      font-size: 1rem;
+    }
+    main > aside ul {
+      margin: 0;
+    }
+    main > aside li {
+      list-style: none;
+      display: inline;
+    }
+    main > aside li:not(:last-of-type):after {
+      content: " - "
+    }
+
     h1 {
       display: inline-block;
       margin: 0;
@@ -121,7 +137,7 @@
     ul.screenshots li {
       float: left;
       display: block;
-      margin: 0 0.6vh 0.6vh 0;
+      margin: 0 5px 5px 0;
     }
     ul.screenshots li img {
       display: block;
@@ -195,9 +211,20 @@
         padding: 3vh;
       }
 
+      ul.screenshots li:not(:first-of-type) {
+        width: calc(50% - 5px/2);
+        margin: 0 0 5px 0;
+      }
+      ul.screenshots > li:nth-child(odd) {
+        margin-left: 5px;
+      }
+      ul.screenshots li:not(:first-of-type) img {
+        width: 100%;
+      }
       ul.screenshots li:first-of-type {
         float: none;
-        margin: 0 0 0.6vh 0;
+        width: 100%;
+        margin: 0 0 5px 0;
       }
 
       ul.screenshots li:first-of-type img {
@@ -209,9 +236,15 @@
 
 <body>
   <main>
+    <aside>
+      <ul>
+        <li><a href="/">Home</a></li>
+        <li><a href="/web">My web projects</a></li>
+      </ul>
+    </aside>
     <header>
       <a href="/"><img class="avatar pixel-art" src="/public/me.png" alt="My avatar" width="32" width="32"></a>
-      <h1>Games & prototypes i made</h1>
+      <h1>My latest games & prototypes</h1>
     </header>
     <section>
       <ul class="projects">
