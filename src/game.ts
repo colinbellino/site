@@ -250,7 +250,8 @@ function update() {
             }
         }
 
-        let player_move_input: Vector2 = [0, 0];
+        let player_input_move: Vector2 = [0, 0];
+        let player_input_confirm = false;
 
         // :debug inputs
         if (game.inputs.keys["ShiftLeft"].down) {
@@ -290,13 +291,17 @@ function update() {
             // :player inputs
             // FIXME: prevent input during movement and use .down events again
             if (game.inputs.keys["KeyW"].released || game.inputs.keys["ArrowUp"].released) {
-                player_move_input[1] = -1;
+                player_input_move[1] = -1;
             } else if (game.inputs.keys["KeyS"].released || game.inputs.keys["ArrowDown"].released) {
-                player_move_input[1] = +1;
+                player_input_move[1] = +1;
             } else if (game.inputs.keys["KeyA"].released || game.inputs.keys["ArrowLeft"].released) {
-                player_move_input[0] = -1;
+                player_input_move[0] = -1;
             } else if (game.inputs.keys["KeyD"].released || game.inputs.keys["ArrowRight"].released) {
-                player_move_input[0] = +1;
+                player_input_move[0] = +1;
+            }
+
+            if (game.inputs.keys["Space"].down || game.inputs.keys["Enter"].down) {
+                player_input_confirm = true;
             }
         }
 
@@ -304,17 +309,35 @@ function update() {
             switch (game.world_mode) {
                 // :world IDLE
                 case World_Mode.IDLE: {
-                    if (!vector2_equal(player_move_input, [0, 0])) {
-                        const direction = vector_to_direction(player_move_input);
+                    if (!vector2_equal(player_input_move, [0, 0])) {
+                        const direction = vector_to_direction(player_input_move);
                         const current_node = game.nodes.data[game.nodes_current];
                         const destination = current_node.neighbours[direction];
                         if (destination > -1) {
-                            game.nodes_destination = destination;
                             ui_panel_close();
+                            game.nodes_destination = destination;
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
                             console.warn("Can't move in this direction");
+                        }
+                    }
+
+                    if (player_input_confirm) {
+                        const node = game.nodes.data[game.nodes_current];
+                        switch (node.type) {
+                            case Node_Type.EMPTY: { } break;
+                            case Node_Type.START:
+                            case Node_Type.PROJECT: {
+                                ui_panel_open_node(node);
+                            } break;
+                            case Node_Type.TELEPORT: {
+                                ui_panel_close();
+                                const destination = node.teleport_target;
+                                game.nodes_destination = destination;
+                                game.world_mode = World_Mode.MOVING;
+                                game.world_mode_timer = now;
+                            } break;
                         }
                     }
                 } break;
@@ -327,28 +350,19 @@ function update() {
 
                     const current_node = game.nodes.data[game.nodes_current];
                     const destination_node = game.nodes.data[game.nodes_destination];
+                    if (current_node.type === Node_Type.TELEPORT && destination_node.type == Node_Type.TELEPORT) {
+                        game.player.sprite.scale = [0, 0];
+                    }
                     game.player.sprite.position = vector2_lerp(grid_position_center(current_node.grid_position), grid_position_center(destination_node.grid_position), progress);
                     game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
                     if (progress === 1) {
                         game.nodes_current = game.nodes_destination;
                         const node = game.nodes.data[game.nodes_current];
-                        switch (node.type) {
-                            case Node_Type.EMPTY: { } break;
-                            case Node_Type.START: {
-                                ui_panel_open_node(node);
-                            } break;
-                            case Node_Type.PROJECT: {
-                                ui_panel_open_node(node);
-                            } break;
-                            case Node_Type.TELEPORT: {
-                                // TODO: do this on player input
-                                const teleport_target = game.nodes.data[node.teleport_target];
-                                game.nodes_current = node.teleport_target;
-                                game.player.sprite.position = grid_position_center(teleport_target.grid_position);
-                                game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
-                            } break;
+                        if (current_node.type === Node_Type.TELEPORT && destination_node.type == Node_Type.TELEPORT) {
+                            game.player.sprite.scale = [1, 1];
                         }
+                        ui_panel_open_node(node);
                         game.world_mode = World_Mode.IDLE;
                     }
                 } break;
@@ -919,7 +933,8 @@ enum Keyboard_Key {
     "KeyX" = "KeyX",
     "KeyY" = "KeyY",
     "KeyZ" = "KeyZ",
-    "KeySpace" = "KeySpace",
+    "Enter" = "Enter",
+    "Space" = "Space",
     "Backquote" = "Backquote",
     "IntlBackslash" = "IntlBackslash",
     "F1" = "F1",
