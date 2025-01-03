@@ -28,7 +28,7 @@ type Game = {
     clear_color:            Color;
     player:                 Entity;
     projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
-    nodes:                 Fixed_Size_Array<Map_Node, typeof MAX_POINTS>,
+    nodes:                 Fixed_Size_Array<Map_Node, typeof MAX_NODES>,
     nodes_current:         int;
     nodes_destination:     int;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
@@ -86,7 +86,7 @@ const TILESET_POSITION = [0, 240];
 const MAX_CONSOLE_LINES : number = 128;
 const MAX_ENTITIES : number = 128;
 const MAX_PROJECTS : number = 16;
-const MAX_POINTS : number = 16;
+const MAX_NODES : number = 32;
 const MAX_SPRITES : number = 2048;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
@@ -161,7 +161,7 @@ function update() {
                 fixed_array_add(game.projects, PROJECTS[project_index]);
             }
 
-            game.nodes = fixed_array_make(MAX_POINTS);
+            game.nodes = fixed_array_make(MAX_NODES);
             for (let node_index = 0; node_index < WORLD.nodes.length; node_index++) {
                 const node = WORLD.nodes[node_index];
                 // assert(node.project_id <= game.projects.count-1, `Invalid project_id: ${node.project_id}`);
@@ -171,7 +171,7 @@ function update() {
                 }
             }
 
-            ui_panel_open_node(game.nodes.data[game.nodes_current]);
+            ui_panel_node_open(game.nodes.data[game.nodes_current]);
 
             game.player = fixed_array_add(game.entities, {
                 name: "PLAYER",
@@ -329,7 +329,7 @@ function update() {
                             case Node_Type.EMPTY: { } break;
                             case Node_Type.START:
                             case Node_Type.PROJECT: {
-                                ui_panel_open_node(node);
+                                ui_panel_node_open(node);
                             } break;
                             case Node_Type.TELEPORT: {
                                 ui_panel_close();
@@ -362,7 +362,7 @@ function update() {
                         if (current_node.type === Node_Type.TELEPORT && destination_node.type == Node_Type.TELEPORT) {
                             game.player.sprite.scale = [1, 1];
                         }
-                        ui_panel_open_node(node);
+                        ui_panel_node_open(node);
                         game.world_mode = World_Mode.IDLE;
                     }
                 } break;
@@ -482,7 +482,7 @@ function update() {
 
             // :render panel project
             {
-                ui_set_element_class(game.renderer.ui_panel_project.element_root, "open", game.renderer.ui_panel_project.opened);
+                ui_set_element_class(game.renderer.ui_panel_node.element_root, "open", game.renderer.ui_panel_node.opened);
             }
 
             gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
@@ -575,7 +575,7 @@ type Renderer = {
     gl:                 WebGL2RenderingContext;
     ui_root:            HTMLDivElement;
     ui_console:         HTMLPreElement;
-    ui_panel_project:   UI_Panel;
+    ui_panel_node:      UI_Panel;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
@@ -645,8 +645,6 @@ function renderer_init(): [Renderer, true] | [null, false] {
     const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
     assert(ui_root !== undefined);
 
-    const ui_panel_project = ui_create_panel(ui_root);
-
     // TODO: clean this up
     {
         const button_up = document.createElement("button");
@@ -677,6 +675,8 @@ function renderer_init(): [Renderer, true] | [null, false] {
     // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
 
+    const ui_panel_node = ui_create_panel(ui_root);
+
     const renderer: Renderer = {
         sprite_pass:        {} as Sprite_Pass,
         camera_main:        CAMERA_DEFAULT,
@@ -685,7 +685,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         gl:                 _gl,
         ui_root:            ui_root,
         ui_console:         ui_console,
-        ui_panel_project:   ui_panel_project,
+        ui_panel_node:      ui_panel_node,
     };
 
     _gl.enable(_gl.BLEND);
@@ -1516,11 +1516,11 @@ type UI_Panel = {
 function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
 }
-function ui_panel_open_node(node: Map_Node) {
+function ui_panel_node_open(node: Map_Node) {
     switch (node.type) {
         case Node_Type.EMPTY: { } break;
         case Node_Type.START: {
-            game.renderer.ui_panel_project.element_content.innerHTML = `
+            game.renderer.ui_panel_node.element_content.innerHTML = `
                 < WEB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GAMES >
             `;
         } break;
@@ -1529,18 +1529,18 @@ function ui_panel_open_node(node: Map_Node) {
             assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
             assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
             const project = game.projects.data[project_id];
-            game.renderer.ui_panel_project.element_content.innerHTML = project.name;
+            game.renderer.ui_panel_node.element_content.innerHTML = project.name;
             // TODO: on close?
         } break;
         case Node_Type.TELEPORT: {
-            game.renderer.ui_panel_project.element_content.innerHTML = `TELEPORT`;
+            game.renderer.ui_panel_node.element_content.innerHTML = `TELEPORT`;
         } break;
     }
 
-    game.renderer.ui_panel_project.opened = true;
+    game.renderer.ui_panel_node.opened = true;
 }
 function ui_panel_close() {
-    game.renderer.ui_panel_project.opened = false;
+    game.renderer.ui_panel_node.opened = false;
 }
 function ui_create_element<T>(ui_root: HTMLElement, html: string) {
     const parent = document.createElement("div");
