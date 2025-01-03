@@ -34,9 +34,9 @@ type Game = {
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
-    messages:               Fixed_Size_Array<Message, typeof MAX_MESSAGES>;
+    console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
 
-    debug_draw_messages:    boolean;
+    debug_draw_console:    boolean;
     debug_draw_entities:    boolean;
     debug_draw_world_grid:  boolean;
     debug_draw_tile_grid:   boolean;
@@ -83,20 +83,20 @@ type Map_Node = {
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION = [0, 240];
-const MAX_MESSAGES : number = 128;
+const MAX_CONSOLE_LINES : number = 128;
 const MAX_ENTITIES : number = 128;
 const MAX_PROJECTS : number = 16;
 const MAX_POINTS : number = 16;
 const MAX_SPRITES : number = 2048;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
-const DIRECTIONS_ORTHOGONAL : Vector2[] = [
+const DIRECTIONS : Vector2[] = [
     [ +0, -1 ], // .North
     [ +1, +0 ], // .East
     [ +0, +1 ], // .South
     [ -1, +0 ], // .West
 ];
-const enum Direction_Orthogonal { NORTH, EAST, SOUTH, WEST }
+const enum Direction { NORTH, EAST, SOUTH, WEST }
 const enum World_Mode { IDLE, MOVING }
 
 function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
@@ -130,10 +130,10 @@ function update() {
             game.fps_last_update = 0;
             game.fps_count = 0;
             game.entities = fixed_array_make(MAX_ENTITIES);
-            game.messages = fixed_array_make(MAX_MESSAGES);
+            game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
-            game.debug_draw_messages = false;
+            game.debug_draw_console = false;
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
             game.debug_draw_tile_grid = true;
@@ -170,6 +170,8 @@ function update() {
                     game.nodes_current = node_index;
                 }
             }
+
+            ui_panel_open_node(game.nodes.data[game.nodes_current]);
 
             game.player = fixed_array_add(game.entities, {
                 name: "PLAYER",
@@ -219,32 +221,32 @@ function update() {
             update_zoom();
         }
 
-        game.messages.count = 0;
+        game.console_lines.count = 0;
         {
-            push_message("fps:                " + game.fps.toFixed(0));
-            push_message("window_size:        " + game.renderer.window_size);
-            push_message("camera_position:    " + game.renderer.camera_main.position);
-            push_message("camera_zoom:        " + game.renderer.camera_main.zoom);
-            push_message("entities:           " + game.entities.count);
-            push_message("player_position:    " + game.player.sprite.position);
-            push_message("world_draw:         " + game.debug_draw_world_grid);
+            ui_push_console_line("fps:                " + game.fps.toFixed(0));
+            ui_push_console_line("window_size:        " + game.renderer.window_size);
+            ui_push_console_line("camera_position:    " + game.renderer.camera_main.position);
+            ui_push_console_line("camera_zoom:        " + game.renderer.camera_main.zoom);
+            ui_push_console_line("entities:           " + game.entities.count);
+            ui_push_console_line("player_position:    " + game.player.sprite.position);
+            ui_push_console_line("world_draw:         " + game.debug_draw_world_grid);
             if (game.debug_draw_world_grid) {
-                push_message("world_count:        " + game.world_grid.length);
+                ui_push_console_line("world_count:        " + game.world_grid.length);
             }
-            push_message("tiles_draw:         " + game.debug_draw_tile_grid);
+            ui_push_console_line("tiles_draw:         " + game.debug_draw_tile_grid);
             if (game.debug_draw_tile_grid) {
-                push_message("tiles_count:        " + game.tile_grid.length);
+                ui_push_console_line("tiles_count:        " + game.tile_grid.length);
             }
-            push_message("nodes_current:      " + game.nodes_current);
-            push_message("nodes:              ");
+            ui_push_console_line("nodes_current:      " + game.nodes_current);
+            ui_push_console_line("nodes:              ");
             for (let node_index = 0; node_index < game.nodes.count; node_index++) {
                 const node = game.nodes.data[node_index];
-                push_message("  " + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node) + " " + (node_index === game.nodes_current ? "*" : ""));
+                ui_push_console_line("  " + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node) + " " + (node_index === game.nodes_current ? "*" : ""));
             }
-            push_message("projects:             ");
+            ui_push_console_line("projects:             ");
             for (let project_index = 0; project_index < game.projects.count; project_index++) {
                 const project = game.projects.data[project_index];
-                push_message("  " + project_index + " - " + project.id + " name: " + project.name);
+                ui_push_console_line("  " + project_index + " - " + project.id + " name: " + project.name);
             }
         }
 
@@ -254,7 +256,7 @@ function update() {
         if (game.inputs.keys["ShiftLeft"].down) {
             if (!__RELEASE__) {
                 if (game.inputs.keys["Backquote"].released || game.inputs.keys["Backquote"].released) {
-                    game.debug_draw_messages = !game.debug_draw_messages;
+                    game.debug_draw_console = !game.debug_draw_console;
                 }
                 if (game.inputs.keys["Digit1"].released) {
                     game.debug_draw_world_grid = !game.debug_draw_world_grid;
@@ -308,7 +310,7 @@ function update() {
                         const destination = current_node.neighbours[direction];
                         if (destination > -1) {
                             game.nodes_destination = destination;
-                            ui_project_close();
+                            ui_panel_close();
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
@@ -333,11 +335,14 @@ function update() {
                         const node = game.nodes.data[game.nodes_current];
                         switch (node.type) {
                             case Node_Type.EMPTY: { } break;
-                            case Node_Type.START: { } break;
+                            case Node_Type.START: {
+                                ui_panel_open_node(node);
+                            } break;
                             case Node_Type.PROJECT: {
-                                ui_project_open(node.project_id);
+                                ui_panel_open_node(node);
                             } break;
                             case Node_Type.TELEPORT: {
+                                // TODO: do this on player input
                                 const teleport_target = game.nodes.data[node.teleport_target];
                                 game.nodes_current = node.teleport_target;
                                 game.player.sprite.position = grid_position_center(teleport_target.grid_position);
@@ -450,18 +455,21 @@ function update() {
                     fixed_array_add(game.renderer.sprites, sprite);
                 }
             }
-            // :render messages
+            // :render console lines
             // FIXME: don't do this in __RELEASE__
-            let messages = "";
-            if (game.debug_draw_messages) {
-                for (let message_index = 0; message_index < game.messages.count; message_index++) {
-                    messages += game.messages.data[message_index] + "\n";
+            let console_lines = "";
+            if (game.debug_draw_console) {
+                for (let line_index = 0; line_index < game.console_lines.count; line_index++) {
+                    console_lines += game.console_lines.data[line_index] + "\n";
                 }
-                game.renderer.message_container.classList.add("open");
-            } else {
-                game.renderer.message_container.classList.remove("open");
             }
-            game.renderer.message_container.innerHTML = messages;
+            ui_set_element_class(game.renderer.ui_console, "open", game.debug_draw_console);
+            game.renderer.ui_console.innerHTML = console_lines;
+
+            // :render panel project
+            {
+                ui_set_element_class(game.renderer.ui_panel_project.element_root, "open", game.renderer.ui_panel_project.opened);
+            }
 
             gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
 
@@ -552,8 +560,8 @@ function update_zoom() {
 type Renderer = {
     gl:                 WebGL2RenderingContext;
     ui_root:            HTMLDivElement;
-    message_container:  HTMLPreElement;
-    project_container:  HTMLDivElement;
+    ui_console:         HTMLPreElement;
+    ui_panel_project:   UI_Panel;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
@@ -623,7 +631,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
     const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
     assert(ui_root !== undefined);
 
-    const project_container = document.querySelector(".project") as HTMLDivElement;
+    const ui_panel_project = ui_create_panel(ui_root);
 
     // TODO: clean this up
     {
@@ -653,20 +661,17 @@ function renderer_init(): [Renderer, true] | [null, false] {
     }
 
     // TODO: disable this in __RELEASE__
-    const message_container = document.createElement("pre");
-    message_container.classList.add("message_container");
-    ui_root.appendChild(message_container);
+    const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
 
     const renderer: Renderer = {
-        // @ts-ignore
-        sprite_pass:        {},
+        sprite_pass:        {} as Sprite_Pass,
         camera_main:        CAMERA_DEFAULT,
         sprites:            fixed_array_make(MAX_SPRITES),
         window_size:        [0, 0],
         gl:                 _gl,
-        ui_root:           ui_root,
-        message_container: message_container,
-        project_container: project_container,
+        ui_root:            ui_root,
+        ui_console:         ui_console,
+        ui_panel_project:   ui_panel_project,
     };
 
     _gl.enable(_gl.BLEND);
@@ -1477,31 +1482,84 @@ function matrix4_rotate_z(m: Matrix4, angle_in_radians: float): Matrix4 {
 function grid_position_center(grid_position: Vector2): Vector2 {
     return [grid_position[0]*GRID_SIZE, grid_position[1]*GRID_SIZE];
 }
-function push_message(message: string) {
-    fixed_array_add(game.messages, message);
-}
-function vector_to_direction(vec: Vector2): Direction_Orthogonal {
-    if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.NORTH])) { return Direction_Orthogonal.NORTH; }
-    if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.EAST])) { return Direction_Orthogonal.EAST; }
-    if (vector2_equal(vec, DIRECTIONS_ORTHOGONAL[Direction_Orthogonal.SOUTH])) { return Direction_Orthogonal.SOUTH; }
-    return Direction_Orthogonal.WEST;
+function vector_to_direction(vec: Vector2): Direction {
+    if (vector2_equal(vec, DIRECTIONS[Direction.NORTH])) { return Direction.NORTH; }
+    if (vector2_equal(vec, DIRECTIONS[Direction.EAST])) { return Direction.EAST; }
+    if (vector2_equal(vec, DIRECTIONS[Direction.SOUTH])) { return Direction.SOUTH; }
+    return Direction.WEST;
 }
 
 // :ui
-function ui_project_open(project_id: int) {
-    assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
-    assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
-    const project = game.projects.data[project_id];
-    game.renderer.project_container.classList.add("open");
-    game.renderer.project_container.querySelector(".content").innerHTML = project.name;
-    // FIXME: don't do this on open!
-    game.renderer.project_container.querySelector(".close").addEventListener("click", () => {
-        // TODO: change world_mode instead of just toggling the UI!
-        ui_project_close();
-    });
+type UI_Panel = {
+    opened:             boolean;
+    title:              string;
+    content:            string;
+    element_root:       HTMLElement;
+    element_close:      HTMLButtonElement;
+    element_content:    HTMLElement;
 }
-function ui_project_close() {
-    game.renderer.project_container.classList.remove("open");
+function ui_push_console_line(line: string) {
+    fixed_array_add(game.console_lines, line);
+}
+function ui_panel_open_node(node: Map_Node) {
+    switch (node.type) {
+        case Node_Type.EMPTY: { } break;
+        case Node_Type.START: {
+            game.renderer.ui_panel_project.element_content.innerHTML = `
+                < WEB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GAMES >
+            `;
+        } break;
+        case Node_Type.PROJECT: {
+            const project_id = node.project_id;
+            assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
+            assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
+            const project = game.projects.data[project_id];
+            game.renderer.ui_panel_project.element_content.innerHTML = project.name;
+            // TODO: on close?
+        } break;
+        case Node_Type.TELEPORT: {
+            game.renderer.ui_panel_project.element_content.innerHTML = `TELEPORT`;
+        } break;
+    }
+
+    game.renderer.ui_panel_project.opened = true;
+}
+function ui_panel_close() {
+    game.renderer.ui_panel_project.opened = false;
+}
+function ui_create_element<T>(ui_root: HTMLElement, html: string) {
+    const parent = document.createElement("div");
+    parent.innerHTML = html.trim();
+    return ui_root.appendChild(parent.firstChild) as T;
+}
+function ui_create_panel(ui_root: HTMLDivElement): UI_Panel {
+    const panel_root = ui_create_element<HTMLElement>(ui_root, `
+        <section class="project">
+            <button class="close">✕</button>
+            <div class="content"></div>
+        </section>
+    `);
+    console.log("panel_root", panel_root);
+    const panel: UI_Panel = {
+        opened:             false,
+        title:              "",
+        content:            "",
+        element_root:       panel_root,
+        element_close:      panel_root.querySelector(".close"),
+        element_content:    panel_root.querySelector(".content"),
+    };
+    panel.element_close.addEventListener("click", () => {
+        if (!panel.opened) { return; }
+        panel.opened = !panel.opened;
+    });
+    return panel;
+}
+function ui_set_element_class(element: HTMLElement, class_name: string, value: boolean) {
+    if (value) {
+        element.classList.add(class_name);
+    } else {
+        element.classList.remove(class_name);
+    }
 }
 
 type Project = {
@@ -1513,6 +1571,8 @@ type Project = {
     screenshots_prefix: string;
     screenshots_count:  int;
 }
+
+// :data
 const PROJECTS: Project[] = [
     {
         id: 0,

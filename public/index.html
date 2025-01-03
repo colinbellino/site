@@ -100,7 +100,7 @@
             right: 0px;
         }
 
-        .message_container {
+        .ui_console {
             display: none;
             box-sizing: border-box;
             position: absolute;
@@ -116,7 +116,7 @@
             color: #ffffff;
             background: rgba(0, 0, 0, 0.4);
         }
-        .message_container.open {
+        .ui_console.open {
             display: block;
         }
     </style>
@@ -124,12 +124,7 @@
 
 <body>
     <canvas></canvas>
-    <div id="ui_root" style="overflow: hidden;">
-        <section class="project">
-            <button class="close">✕</button>
-            <div class="content"></div>
-        </section>
-    </div>
+    <div id="ui_root" style="overflow: hidden;"></div>
     <script async src="./dist/game.js"></script>
 </body>
 
