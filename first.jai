@@ -122,16 +122,24 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     }
 
     {
-        #import "Hash_Table";
         #import,file "./src/ldtk.jai";
 
         GRID_SIZE : s32 : 16;
         LAYER_ENTITY :: 0;
-        LAYER_GRID :: 1;
-        Point :: struct {
-            grid_position: [2]s32;
-            neighbours:    [4]s32;
-            project_id:    s32;
+        LAYER_PATH :: 1;
+        LAYER_WORLD :: 2;
+        Node_Type :: enum {
+            EMPTY;
+            START;
+            PROJECT;
+            TELEPORT;
+        }
+        Node :: struct {
+            type:               Node_Type;
+            grid_position:      [2]s32;
+            neighbours:         [4]s32;
+            project_id:         s32;
+            teleport_target:    s32;
         }
 
         result := ldtk_load("./src/world.ldtk", temp);
@@ -140,42 +148,52 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         level := *result.levels[0];
 
         grid: [..]s32;
-        points: [..]Point;
-        project_id: s32;
-        for level.layerInstances[LAYER_GRID].intGridCsv {
+        nodes: [..]Node;
+        start_position: [2]s32;
+        for level.layerInstances[LAYER_WORLD].intGridCsv {
             array_add(*grid, it);
         }
         for entity_instance : level.layerInstances[LAYER_ENTITY].entityInstances {
-            neighbours := s32.[-1,-1,-1,-1];
-            for field_instance, field_index : entity_instance.fieldInstances {
+            node := Node.{
+                grid_position   = entity_instance.__grid,
+                neighbours      = .[-1,-1,-1,-1],
+                project_id      = 0,
+                teleport_target = 0,
+            };
+            for field_instance : entity_instance.fieldInstances {
                 if field_instance.__value.object == null { continue; }
 
                 if field_instance.__identifier == {
-                    case "NORTH"; #through;
-                    case "EAST"; #through;
-                    case "SOUTH"; #through;
-                    case "WEST"; {
-                        value, success := table_find(field_instance.__value.object, "entityIid");
-                        assert(success);
-                        target_entity_iid := value.str;
-                        for other, other_index : level.layerInstances[LAYER_ENTITY].entityInstances {
-                            if other.iid == target_entity_iid {
-                                neighbours[field_index] = cast(s32)other_index;
-                                break;
-                            }
-                        }
-                    }
                     case "project_id"; {
-                        project_id = cast(s32) field_instance.__value.number;
+                        node.project_id = cast(s32) field_instance.__value.number;
+                    }
+                    case "teleport_target"; {
+                        node.teleport_target = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances);
+                    }
+                    case "NORTH"; { node.neighbours[0] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
+                    case "EAST";  { node.neighbours[1] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
+                    case "SOUTH"; { node.neighbours[2] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
+                    case "WEST";  { node.neighbours[3] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
+                    case "type"; {
+                        if field_instance.__value.str == {
+                            case "EMPTY";    { node.type = .EMPTY; }
+                            case "START";    { node.type = .START; start_position = entity_instance.__grid; }
+                            case "PROJECT";  { node.type = .PROJECT; }
+                            case "TELEPORT"; { node.type = .TELEPORT; }
+                            case;            { assert(false, "Unknown node type value: %", field_instance.__value.str); }
+                        }
                     }
                 }
             }
-            array_add(*points, Point.{
-                grid_position = entity_instance.__grid,
-                neighbours    = neighbours,
-                project_id    = project_id,
-            });
+
+            if node.type == {
+                case .PROJECT;  { assert(node.project_id > 0, "Invalid project_id! %", node); }
+                case .TELEPORT; { assert(node.teleport_target > -1, "Invalid teleport_target! %", node); }
+            }
+            array_add(*nodes, node);
         }
+
+        assert(start_position[0] != 0 && start_position[1] != 0, "Missing start_position");
 
         world_str: String_Builder;
         append(*world_str, "{\n");
@@ -184,9 +202,10 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         append(*world_str, tprint("  grid:   ["));
         for grid { append(*world_str, tprint("%, ", it)); }
         append(*world_str, "],\n");
-        append(*world_str, tprint("  points:   ["));
-        for points { append(*world_str, tprint("{ grid_position: %, neighbours: %, project_id: % }, ", it.grid_position, it.neighbours, it.project_id)); }
+        append(*world_str, tprint("  nodes:   ["));
+        for nodes { append(*world_str, tprint("{ type: %, grid_position: %, neighbours: %, project_id: %, teleport_target: % }, ", cast(s32)it.type, it.grid_position, it.neighbours, it.project_id, it.teleport_target)); }
         append(*world_str, "],\n");
+        append(*world_str, tprint("  start_position: %,\n", start_position));
         append(*world_str, "}");
 
         world_js := tprint("\nconst WORLD = %;", builder_to_string(*world_str));

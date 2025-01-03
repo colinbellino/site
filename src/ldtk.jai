@@ -1,4 +1,5 @@
 #import,dir "jaison";
+#import "Hash_Table";
 
 LDTK_Root :: struct {
     iid:                string;
@@ -146,4 +147,16 @@ ldtk_load :: (path: string, allocator: Allocator, loc := #caller_location) -> re
     assert(parse_ok, "Couldn't parse ldtk file.", loc = loc);
 
     return result;
+}
+
+ldtk_get_entity_instance_index :: (object: *JSON_Object, entity_instances: []LDTK_Entity_Instance) -> s32 {
+    value, success := table_find(object, "entityIid");
+    assert(success);
+    target_entity_iid := value.str;
+    for other, other_index : entity_instances {
+        if other.iid == target_entity_iid {
+            return cast(s32)other_index;
+        }
+    }
+    return -1;
 }

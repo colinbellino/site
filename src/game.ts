@@ -28,9 +28,9 @@ type Game = {
     clear_color:            Color;
     player:                 Entity;
     projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
-    points:                 Fixed_Size_Array<Point, typeof MAX_POINTS>,
-    points_current:         int;
-    points_destination:     int;
+    nodes:                 Fixed_Size_Array<Map_Node, typeof MAX_POINTS>,
+    nodes_current:         int;
+    nodes_destination:     int;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
@@ -51,10 +51,11 @@ type Game = {
     inputs:                 Inputs;
 }
 type World = {
-    width:      int;
-    height:     int;
-    grid:       Tile_Value[];
-    points:     Point[];
+    width:          int;
+    height:         int;
+    grid:           Tile_Value[];
+    nodes:          Map_Node[];
+    start_position: Vector2;
 }
 type Message = string;
 type Cell = {
@@ -64,14 +65,18 @@ type Entity = {
     name:           string;
     sprite:         Sprite;
 }
-type Point = {
-    grid_position:  Vector2,
-    neighbours:     Vector4; // index into game.points (order: NESW)
-    project_id:     int;
+enum Node_Type {
+    EMPTY,
+    START,
+    PROJECT,
+    TELEPORT,
 }
-type Project = {
-    id:     int;
-    html:   string;
+type Map_Node = {
+    type:               Node_Type;
+    grid_position:      Vector2,
+    neighbours:         Vector4; // index into game.nodes (order: NESW)
+    project_id:         int;
+    teleport_target:    int; // index into game.nodes
 }
 
 // :constants
@@ -80,8 +85,8 @@ const GRID_SIZE = 48;
 const TILESET_POSITION = [0, 240];
 const MAX_MESSAGES : number = 128;
 const MAX_ENTITIES : number = 128;
-const MAX_PROJECTS : number = 32;
-const MAX_POINTS : number = 32;
+const MAX_PROJECTS : number = 16;
+const MAX_POINTS : number = 16;
 const MAX_SPRITES : number = 2048;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
@@ -128,7 +133,7 @@ function update() {
             game.messages = fixed_array_make(MAX_MESSAGES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
-            game.debug_draw_messages = !__RELEASE__;
+            game.debug_draw_messages = false;
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
             game.debug_draw_tile_grid = true;
@@ -152,34 +157,31 @@ function update() {
             game.inputs = inputs_init();
 
             game.projects = fixed_array_make(MAX_PROJECTS);
-            fixed_array_add(game.projects, { id: 0, html: "<PLACEHOLDER>" });
-            const project_elements = document.querySelectorAll(".projects > li");
-            for (let project_index = 0; project_index < project_elements.length; project_index++) {
-                const project_element = project_elements[project_index];
-                fixed_array_add(game.projects, { id: project_index+1, html: project_element.innerHTML });
+            for (let project_index = 0; project_index < PROJECTS.length; project_index++) {
+                fixed_array_add(game.projects, PROJECTS[project_index]);
             }
 
-            game.points = fixed_array_make(MAX_POINTS);
-            for (let point_index = 0; point_index < WORLD.points.length; point_index++) {
-                const point = WORLD.points[point_index];
-                assert(point.project_id <= game.projects.count-1, `Invalid project_id: ${point.project_id}`);
-                fixed_array_add(game.points, point);
+            game.nodes = fixed_array_make(MAX_POINTS);
+            for (let node_index = 0; node_index < WORLD.nodes.length; node_index++) {
+                const node = WORLD.nodes[node_index];
+                // assert(node.project_id <= game.projects.count-1, `Invalid project_id: ${node.project_id}`);
+                fixed_array_add(game.nodes, node);
+                if (vector2_equal(node.grid_position, WORLD.start_position)) {
+                    game.nodes_current = node_index;
+                }
             }
-            game.points_current = 2;
-
-            ui_project_open(game.points.data[game.points_current].project_id);
 
             game.player = fixed_array_add(game.entities, {
                 name: "PLAYER",
                 sprite: {
                     color: COLOR_WHITE(),
-                    position: grid_position_center(game.points.data[game.points_current].grid_position),
+                    position: grid_position_center(game.nodes.data[game.nodes_current].grid_position),
                     size: [16, 16],
                     scale: [1, 1],
                     offset: [0, -6],
                     rotation: 0,
                     texture_size: [16, 16],
-                    texture_position: [48, 0],
+                    texture_position: [32, 0],
                     z_index: 9,
                 },
             });
@@ -233,16 +235,16 @@ function update() {
             if (game.debug_draw_tile_grid) {
                 push_message("tiles_count:        " + game.tile_grid.length);
             }
-            push_message("points_current:     " + game.points_current);
-            push_message("points:             ");
-            for (let point_index = 0; point_index < game.points.count; point_index++) {
-                const point = game.points.data[point_index];
-                push_message(" - " + point_index + " " + JSON.stringify(point));
+            push_message("nodes_current:      " + game.nodes_current);
+            push_message("nodes:              ");
+            for (let node_index = 0; node_index < game.nodes.count; node_index++) {
+                const node = game.nodes.data[node_index];
+                push_message("  " + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node) + " " + (node_index === game.nodes_current ? "*" : ""));
             }
             push_message("projects:             ");
             for (let project_index = 0; project_index < game.projects.count; project_index++) {
                 const project = game.projects.data[project_index];
-                push_message(" - " + project_index + " project_id: " + project.id);
+                push_message("  " + project_index + " - " + project.id + " name: " + project.name);
             }
         }
 
@@ -302,10 +304,10 @@ function update() {
                 case World_Mode.IDLE: {
                     if (!vector2_equal(player_move_input, [0, 0])) {
                         const direction = vector_to_direction(player_move_input);
-                        const current_point = game.points.data[game.points_current];
-                        const destination = current_point.neighbours[direction];
+                        const current_node = game.nodes.data[game.nodes_current];
+                        const destination = current_node.neighbours[direction];
                         if (destination > -1) {
-                            game.points_destination = destination;
+                            game.nodes_destination = destination;
                             ui_project_close();
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
@@ -321,15 +323,27 @@ function update() {
                     const remaining = end - now;
                     const progress = clamp(1.0 - (1.0 / (DURATION / remaining)), 0, 1);
 
-                    const current_point = game.points.data[game.points_current];
-                    const destination_point = game.points.data[game.points_destination];
-                    game.player.sprite.position = vector2_lerp(grid_position_center(current_point.grid_position), grid_position_center(destination_point.grid_position), progress);
+                    const current_node = game.nodes.data[game.nodes_current];
+                    const destination_node = game.nodes.data[game.nodes_destination];
+                    game.player.sprite.position = vector2_lerp(grid_position_center(current_node.grid_position), grid_position_center(destination_node.grid_position), progress);
                     game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
                     if (progress === 1) {
-                        game.points_current = game.points_destination;
-                        const point = game.points.data[game.points_current];
-                        ui_project_open(point.project_id);
+                        game.nodes_current = game.nodes_destination;
+                        const node = game.nodes.data[game.nodes_current];
+                        switch (node.type) {
+                            case Node_Type.EMPTY: { } break;
+                            case Node_Type.START: { } break;
+                            case Node_Type.PROJECT: {
+                                ui_project_open(node.project_id);
+                            } break;
+                            case Node_Type.TELEPORT: {
+                                const teleport_target = game.nodes.data[node.teleport_target];
+                                game.nodes_current = node.teleport_target;
+                                game.player.sprite.position = grid_position_center(teleport_target.grid_position);
+                                game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
+                            } break;
+                        }
                         game.world_mode = World_Mode.IDLE;
                     }
                 } break;
@@ -349,23 +363,34 @@ function update() {
                     fixed_array_add(game.renderer.sprites, entity.sprite);
                 }
             }
-            // :render points
-            {
-                for (let point_index = 0; point_index < game.points.count; point_index++) {
-                    const point = game.points.data[point_index];
-                    const sprite: Sprite = {
-                        color:              COLOR_WHITE(),
-                        position:           grid_position_center(point.grid_position),
-                        offset:             [0, 0],
-                        size:               [16, 16],
-                        scale:              [1, 1],
-                        rotation:           0,
-                        texture_size:       [16, 16],
-                        texture_position:   [32, 0],
-                        z_index:            2,
-                    };
-                    fixed_array_add(game.renderer.sprites, sprite);
+            // :render nodes
+            for (let node_index = 0; node_index < game.nodes.count; node_index++) {
+                const node = game.nodes.data[node_index];
+                let texture_position: Vector2 = [48, 0];
+                let texture_size    : Vector2 = [16, 16];
+                switch (node.type) {
+                    case Node_Type.EMPTY: { } break;
+                    case Node_Type.START: { } break;
+                    case Node_Type.PROJECT: {
+                        texture_position = [64, 0];
+                    } break;
+                    case Node_Type.TELEPORT: {
+                        texture_position = [64, 16];
+                        texture_size     = [32, 32];
+                    } break;
                 }
+                const sprite: Sprite = {
+                    color:              COLOR_WHITE(),
+                    position:           grid_position_center(node.grid_position),
+                    offset:             [0, 0],
+                    size:               texture_size,
+                    scale:              [1, 1],
+                    rotation:           0,
+                    texture_size:       texture_size,
+                    texture_position:   texture_position,
+                    z_index:            2,
+                };
+                fixed_array_add(game.renderer.sprites, sprite);
             }
             // :render world
             if (game.debug_draw_world_grid) {
@@ -397,8 +422,8 @@ function update() {
                 for (let tile_cell_index = 0; tile_cell_index < TILE_GRID_SIZE; tile_cell_index++) {
                     const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
 
-                    let color: Vector4 = [1.0, 1.0, 1.0, 1.0];
-                    if ((tile_position[0]+tile_position[1]) % 2) { color = [0.95, 0.95, 0.95, 1.0]; }
+                    let color: Vector4 = COLOR_WHITE();
+                    // if ((tile_position[0]+tile_position[1]) % 2) { color = [0.95, 0.95, 0.95, 1.0]; }
                     // color[3] *= 0.8;
 
                     const tile_value = calculate_tile_value(tile_position);
@@ -432,6 +457,9 @@ function update() {
                 for (let message_index = 0; message_index < game.messages.count; message_index++) {
                     messages += game.messages.data[message_index] + "\n";
                 }
+                game.renderer.message_container.classList.add("open");
+            } else {
+                game.renderer.message_container.classList.remove("open");
             }
             game.renderer.message_container.innerHTML = messages;
 
@@ -514,9 +542,9 @@ function update() {
 function update_zoom() {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
     if (game.renderer.window_size[0] > game.renderer.window_size[1]) {
-        game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / 320);
+        game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / (320*2));
     } else {
-        game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / 180);
+        game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / (180*2));
     }
 }
 
@@ -624,6 +652,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         button_right.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowRight } as KeyboardEvent); });
     }
 
+    // TODO: disable this in __RELEASE__
     const message_container = document.createElement("pre");
     message_container.classList.add("message_container");
     ui_root.appendChild(message_container);
@@ -1460,11 +1489,11 @@ function vector_to_direction(vec: Vector2): Direction_Orthogonal {
 
 // :ui
 function ui_project_open(project_id: int) {
-    if (project_id === 0) { return; }
-    if (project_id > game.projects.count-1) { return; }
+    assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
+    assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
     const project = game.projects.data[project_id];
-    game.renderer.project_container.innerHTML = project.html;
     game.renderer.project_container.classList.add("open");
+    game.renderer.project_container.querySelector(".content").innerHTML = project.name;
     // FIXME: don't do this on open!
     game.renderer.project_container.querySelector(".close").addEventListener("click", () => {
         // TODO: change world_mode instead of just toggling the UI!
@@ -1474,3 +1503,131 @@ function ui_project_open(project_id: int) {
 function ui_project_close() {
     game.renderer.project_container.classList.remove("open");
 }
+
+type Project = {
+    id:                 int;
+    name:               string;
+    url:                string;
+    description:        string;
+    bullet_points:      string[];
+    screenshots_prefix: string;
+    screenshots_count:  int;
+}
+const PROJECTS: Project[] = [
+    {
+        id: 0,
+        name: "",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 1,
+        name: "Feast & Famine",
+        url: "https://colinbellino.itch.io/feast",
+        description: `
+            <p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>
+            <p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>
+        `,
+        bullet_points: [
+            `Engine: Unity`,
+            `Language: C#`,
+            `Duration: 72h`,
+            `<a href="https://github.com/colinbellino/ludum-dare-50" target="_blank" rel="noopener">Source code</a>`,
+        ],
+        screenshots_prefix: "feast",
+        screenshots_count: 4,
+    },
+    {
+        id: 2,
+        name: "Alteration",
+        url: "https://colinbellino.itch.io/alteration",
+        description: `
+            <p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.</p>
+            <p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach perfect balance, symbolized by the goal of each level. <br />
+            But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>
+        `,
+        bullet_points: [
+            `Engine: Unity`,
+            `Language: C#`,
+            `Duration: 72h (+ a couple of days after the jam)`,
+            `<a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source code</a>`,
+        ],
+        screenshots_prefix: "",
+        screenshots_count: 6,
+    },
+    {
+        id: 3,
+        name: "Project 3",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 4,
+        name: "Project 4",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 5,
+        name: "Project 5",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 6,
+        name: "Project 6",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 7,
+        name: "Project 7",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 8,
+        name: "Project 8",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 9,
+        name: "Project 9",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 10,
+        name: "Project 10",
+        url: "",
+        description: ``,
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+];
