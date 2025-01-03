@@ -130,8 +130,8 @@ LDTK_Bg_Contain     :: "Contain";
 LDTK_Bg_CoverDirty  :: "CoverDirty";
 LDTK_Bg_Unscaled    :: "Unscaled";
 
-no_warning_logger :: (message: string, data: *void, info: Log_Info) {
-    if (info.common_flags == .WARNING) { return; }
+suppress_error_logger :: (message: string, data: *void, info: Log_Info) {
+    if (info.common_flags == .ERROR) { return; }
     runtime_support_default_logger(message, data, info);
 }
 
@@ -142,7 +142,7 @@ ldtk_load :: (path: string, allocator: Allocator, loc := #caller_location) -> re
     file_data, success := read_entire_file(path);
     assert(success, tprint("Couldn't read file: %", path));
 
-    parse_ok, result := json_parse_string(file_data, *LDTK_Root,, allocator = allocator, logger = no_warning_logger);
+    parse_ok, result := json_parse_string(file_data, *LDTK_Root,, allocator = allocator, logger = suppress_error_logger);
     assert(parse_ok, "Couldn't parse ldtk file.", loc = loc);
 
     return result;
