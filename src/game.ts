@@ -37,10 +37,11 @@ type Game = {
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
 
-    debug_draw_console:    boolean;
+    debug_draw_console:     boolean;
     debug_draw_entities:    boolean;
-    debug_draw_world_grid:  boolean;
-    debug_draw_tile_grid:   boolean;
+    debug_draw_world_grid:       boolean; // TODO: do we still need this?
+    debug_draw_world_tile:        boolean;
+    debug_draw_tiles:     boolean;
 
     renderer:               Renderer;
     frame_count:            int;
@@ -54,9 +55,16 @@ type Game = {
 type World = {
     width:          int;
     height:         int;
-    grid:           Tile_Value[];
+    tiles:          Tile[];
+    grid:           Grid_Value[];
     nodes:          Map_Node[];
     start_position: Vector2;
+}
+type Tile = {
+    /* Pixel coordinates of the tile in the layer ([x,y] format). Don't forget optional layer offsets, if they exist! */
+    px:     Vector2;
+    /* Pixel coordinates of the tile in the tileset ([x,y] format) */
+    src:    Vector2;
 }
 type Message = string;
 type Cell = {
@@ -87,7 +95,7 @@ type Neighbour = {
 // :constants
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
-const TILESET_POSITION = [0, 240];
+const TILESET_POSITION : Vector2 = [0, 192];
 const MAX_CONSOLE_LINES : number = 128;
 const MAX_ENTITIES : number = 128;
 const MAX_PROJECTS : number = 16;
@@ -143,7 +151,8 @@ function update() {
             game.debug_draw_console = false;
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
-            game.debug_draw_tile_grid = true;
+            game.debug_draw_world_tile = true;
+            game.debug_draw_tiles = true;
             game.clear_color = hex_to_color(CLEAR_COLOR);
 
             const [renderer, renderer_ok] = renderer_init();
@@ -241,8 +250,8 @@ function update() {
             if (game.debug_draw_world_grid) {
                 ui_push_console_line("world_count:        " + game.world_grid.length);
             }
-            ui_push_console_line("tiles_draw:         " + game.debug_draw_tile_grid);
-            if (game.debug_draw_tile_grid) {
+            ui_push_console_line("tiles_draw:         " + game.debug_draw_world_tile);
+            if (game.debug_draw_world_tile) {
                 ui_push_console_line("tiles_count:        " + game.tile_grid.length);
             }
             ui_push_console_line("nodes_current:      " + game.nodes_current);
@@ -271,7 +280,7 @@ function update() {
                     game.debug_draw_world_grid = !game.debug_draw_world_grid;
                 }
                 if (game.inputs.keys["Digit2"].released) {
-                    game.debug_draw_tile_grid = !game.debug_draw_tile_grid;
+                    game.debug_draw_world_tile = !game.debug_draw_world_tile;
                 }
                 if (game.inputs.keys["Digit3"].released) {
                     game.debug_draw_entities = !game.debug_draw_entities;
@@ -421,7 +430,7 @@ function update() {
                         texture_position = [64, 0];
                     } break;
                     case Node_Type.WARP: {
-                        texture_position = [64, 16];
+                        texture_position = [0, 16];
                         texture_size     = [32, 32];
                     } break;
                 }
@@ -434,7 +443,7 @@ function update() {
                     rotation:           0,
                     texture_size:       texture_size,
                     texture_position:   texture_position,
-                    z_index:            2,
+                    z_index:            5,
                 };
                 fixed_array_add(game.renderer.sprites, sprite);
             }
@@ -464,7 +473,7 @@ function update() {
                 }
             }
             // :render tile
-            if (game.debug_draw_tile_grid) {
+            if (game.debug_draw_world_tile) {
                 for (let tile_cell_index = 0; tile_cell_index < TILE_GRID_SIZE; tile_cell_index++) {
                     const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
 
@@ -493,6 +502,26 @@ function update() {
                         texture_position:   texture_position,
                         z_index:            1,
                     }
+                    fixed_array_add(game.renderer.sprites, sprite);
+                }
+            }
+            // :render details
+            if (game.debug_draw_tiles) {
+                for (let tile_index = 0; tile_index < WORLD.tiles.length; tile_index++) {
+                    const tile = WORLD.tiles[tile_index];
+
+                    let color = COLOR_WHITE();
+                    const sprite: Sprite = {
+                        color:              color,
+                        position:           tile.px,
+                        offset:             [0, 0],
+                        size:               [GRID_SIZE, GRID_SIZE],
+                        scale:              [1, 1],
+                        rotation:           0,
+                        texture_size:       [GRID_SIZE, GRID_SIZE],
+                        texture_position:   tile.src,
+                        z_index:            3,
+                    };
                     fixed_array_add(game.renderer.sprites, sprite);
                 }
             }
@@ -1096,7 +1125,7 @@ function inputs_reset(inputs: Inputs) {
     - https://web.archive.org/web/20210909030608im_/https://i.stack.imgur.com/j3IXI.png
     - https://web.archive.org/web/20220226222317/https://twitter.com/OskSta/status/1448248658865049605
 */
-type Tile_Value = number;
+type Grid_Value = number;
 const TILE_VALUES = [
     0b0000, // 0 0
     0b1000, // 1 0
@@ -1128,12 +1157,12 @@ function is_same_tile(grid_position: Vector2): int {
     return game.world_grid[grid_index].value ? 1 : 0;
 }
 
-function calculate_tile_value(tile_position: Vector2): Tile_Value {
+function calculate_tile_value(tile_position: Vector2): Grid_Value {
     const tl = vector2_add(tile_position, [-1, -1]);
     const tr = vector2_add(tile_position, [+0, -1]);
     const bl = vector2_add(tile_position, [-1, +0]);
     const br = vector2_add(tile_position, [+0, +0]);
-    let tile_value: Tile_Value = 0;
+    let tile_value: Grid_Value = 0;
     if (is_in_bounds(tl, [WORLD.width, WORLD.height]))
         tile_value |= game.world_grid[grid_position_to_index(tl, WORLD.width)].value * (1 << 3);
     if (is_in_bounds(tr, [WORLD.width, WORLD.height]))

@@ -125,10 +125,9 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     {
         #import,file "./src/ldtk.jai";
 
-        GRID_SIZE : s32 : 16;
-        LAYER_ENTITY :: 0;
-        LAYER_PATH :: 1;
-        LAYER_WORLD :: 2;
+        LAYER_ENTITY  :: 0;
+        LAYER_TILES   :: 1;
+        LAYER_WORLD   :: 2;
         Node_Type :: enum {
             EMPTY;
             START;
@@ -153,10 +152,15 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         level := *root.levels[0];
 
         grid: [..]s32;
+        tiles: [..]LDTK_Tile_Instance;
         nodes: [..]Node;
         start_position: [2]float;
+        grid_size: s32 = level.layerInstances[LAYER_WORLD].__gridSize;
         for level.layerInstances[LAYER_WORLD].intGridCsv {
             array_add(*grid, it);
+        }
+        for level.layerInstances[LAYER_TILES].gridTiles {
+            array_add(*tiles, it);
         }
         entity_instances := level.layerInstances[LAYER_ENTITY].entityInstances;
         for entity_instance : level.layerInstances[LAYER_ENTITY].entityInstances {
@@ -228,10 +232,13 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
 
         world_str: String_Builder;
         append(*world_str, "\nconst WORLD = {\n");
-        append(*world_str, tprint("  width:  %,\n", level.pxWid / GRID_SIZE));
-        append(*world_str, tprint("  height: %,\n", level.pxHei / GRID_SIZE));
+        append(*world_str, tprint("  width:  %,\n", level.pxWid / grid_size));
+        append(*world_str, tprint("  height: %,\n", level.pxHei / grid_size));
         append(*world_str, tprint("  grid:   ["));
         for grid { append(*world_str, tprint("%, ", it)); }
+        append(*world_str, "],\n");
+        append(*world_str, tprint("  tiles:   ["));
+        for tiles { append(*world_str, tprint("{ px: %, src: % }, ", it.px, it.src)); }
         append(*world_str, "],\n");
         append(*world_str, tprint("  nodes:   ["));
         for nodes {

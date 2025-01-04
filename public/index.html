@@ -13,6 +13,11 @@
         html {
             font-size: 4vw;
         }
+        @media (min-width: 700px) {
+            html {
+                font-size: 2vh;
+            }
+        }
         body {
             background: #2080ff;
             overflow: hidden;
@@ -27,7 +32,7 @@
             right: 2vw;
             bottom: 2vw;
             left: 2vw;
-            border-radius: 1vw;
+            border-radius: 5px;
             font-family: "Arial";
             background: rgba(0, 0, 0, 0.8);
             color: rgba(255, 255, 255, 0.9);
@@ -77,9 +82,6 @@
             float: left;
         }
         @media (min-width: 700px) {
-            html {
-                font-size: 2vh;
-            }
             .project {
                 right: auto;
                 bottom: auto;
@@ -109,6 +111,11 @@
         .hud_button.right {
             top: 50%;
             right: 0px;
+        }
+        @media (min-width: 700px) {
+            .hud_button {
+                display: none;
+            }
         }
 
         .ui_console {

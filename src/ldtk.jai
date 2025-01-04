@@ -74,11 +74,11 @@ LDTK_Layer_Instance :: struct {
     iid:                    string;
     levelId:                LDTK_Level_Uid;
     layerDefUid:            LDTK_Layer_Uid;
-    gridSize:               s32;
     entityInstances:        []LDTK_Entity_Instance;
     intGridCsv:             []s32;
     autoLayerTiles:         []LDTK_Tile_Instance;
     gridTiles:              []LDTK_Tile_Instance;
+    __gridSize:             s32;
 }
 
 LDTK_Entity_Instance :: struct {
