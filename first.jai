@@ -130,7 +130,6 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         LAYER_WORLD   :: 2;
         Node_Type :: enum {
             EMPTY;
-            START;
             PROJECT;
             WARP;
         }
@@ -141,6 +140,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             project_id:         s32;
             warp_target:        s32;
             warp_camera:        [2]float;
+            tooltip:            string;
         }
         Path :: struct {
             node:               s32;
@@ -189,12 +189,9 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                             case "project_id"; {
                                 node.project_id = cast(s32) field_instance.__value.number;
                             }
-                            case "warp_target"; {
-                                node.warp_target = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances);
-                            }
-                            case "warp_camera"; {
-                                node.warp_camera = ldtk_get_grid_position(obj);
-                            }
+                            case "tooltip";         { node.tooltip = field_instance.__value.str; }
+                            case "warp_target";     { node.warp_target = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            case "warp_camera";     { node.warp_camera = ldtk_get_grid_position(obj); }
                             case "neighbour_north"; { node.neighbours[0].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
                             case "neighbour_east";  { node.neighbours[1].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
                             case "neighbour_south"; { node.neighbours[2].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
@@ -206,7 +203,6 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                             case "type"; {
                                 if field_instance.__value.str == {
                                     case "EMPTY";    { node.type = .EMPTY; }
-                                    case "START";    { node.type = .START; start_position = grid_position; }
                                     case "PROJECT";  { node.type = .PROJECT; }
                                     case "WARP";     { node.type = .WARP; }
                                     case;            { assert(false, "Unknown node type value: %", field_instance.__value.str); }
@@ -257,6 +253,8 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                 append(*world_str, tprint(" warp_target: %,", it.warp_target));
             if it.warp_camera[0] != 0 && it.warp_camera[1] != 0
                 append(*world_str, tprint(" warp_camera: %,", it.warp_camera));
+            if it.tooltip
+                append(*world_str, tprint(" tooltip: `%`,", it.tooltip));
             append(*world_str, " }, ");
         }
         append(*world_str, "],\n");

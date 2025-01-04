@@ -80,7 +80,6 @@ type Entity = {
 }
 enum Node_Type {
     EMPTY,
-    START,
     PROJECT,
     WARP,
 }
@@ -88,9 +87,10 @@ type Map_Node = {
     type:               Node_Type;
     grid_position:      Vector2;
     neighbours:         Static_Array<Neighbour, 4>;
-    project_id:         int;
+    project_id:         int | undefined;
     warp_target:        int; // index into game.nodes
-    warp_camera:        Vector2;
+    warp_camera:        Vector2 | undefined;
+    tooltip:            string | undefined;
 }
 type Neighbour = {
     node: int; // index into game.nodes, order = NESW
@@ -266,7 +266,7 @@ function update() {
             ui_push_console_line("nodes:              ");
             for (let node_index = 0; node_index < game.nodes.count; node_index++) {
                 const node = game.nodes.data[node_index];
-                ui_push_console_line("  " + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node) + " " + (node_index === game.nodes_current ? "*" : ""));
+                ui_push_console_line((node_index === game.nodes_current ? "* " : "  ") + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node));
             }
             ui_push_console_line("projects:             ");
             for (let project_index = 0; project_index < game.projects.count; project_index++) {
@@ -358,7 +358,6 @@ function update() {
                         const node = game.nodes.data[game.nodes_current];
                         switch (node.type) {
                             case Node_Type.EMPTY: { } break;
-                            case Node_Type.START:
                             case Node_Type.PROJECT: {
                                 ui_panel_node_open(node);
                             } break;
@@ -435,7 +434,6 @@ function update() {
                 let texture_size    : Vector2 = [16, 16];
                 switch (node.type) {
                     case Node_Type.EMPTY: { } break;
-                    case Node_Type.START: { } break;
                     case Node_Type.PROJECT: {
                         texture_position = [64, 0];
                     } break;
@@ -1645,26 +1643,24 @@ function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
 }
 function ui_panel_node_open(node: Map_Node) {
+    console.log("ui_panel_node_open", node);
     switch (node.type) {
         case Node_Type.EMPTY: {
-            game.renderer.ui_panel_node.element_content.innerHTML = ``;
-            game.renderer.ui_panel_node.opened = false;
-        } break;
-        case Node_Type.START: {
-            // TODO: add a new type of nodes for this!
-            game.renderer.ui_panel_node.element_content.innerHTML = `
-                < WEB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GAMES >
-            `;
-            game.renderer.ui_panel_node.opened = true;
+            if (node.tooltip) {
+                game.renderer.ui_panel_node.element_content.innerHTML = `Inspect`;
+                game.renderer.ui_panel_node.opened = true;
+            } else {
+                game.renderer.ui_panel_node.element_content.innerHTML = "";
+                game.renderer.ui_panel_node.opened = false;
+            }
         } break;
         case Node_Type.PROJECT: {
             const project_id = node.project_id;
             assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
             assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
             const project = game.projects.data[project_id];
-            game.renderer.ui_panel_node.element_content.innerHTML = project.name;
+            game.renderer.ui_panel_node.element_content.innerHTML = `${project.name}`;
             game.renderer.ui_panel_node.opened = true;
-            // TODO: on close?
         } break;
         case Node_Type.WARP: {
             game.renderer.ui_panel_node.element_content.innerHTML = `Enter`;

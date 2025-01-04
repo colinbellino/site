@@ -11,7 +11,7 @@
 	"iid": "20b4a0e0-c210-11ef-a872-334d9525beb2",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 46,
+	"nextUid": 48,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -627,6 +627,43 @@
 					"allowedRefsEntityUid": null,
 					"allowedRefTags": [],
 					"tilesetUid": null
+				},
+				{
+					"identifier": "tooltip",
+					"doc": null,
+					"__type": "String",
+					"uid": 47,
+					"type": "F_Text",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "Hidden",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
 				}
 			]
 		},
@@ -647,15 +684,15 @@
 			"maxHeight": null,
 			"keepAspectRatio": false,
 			"tileOpacity": 1,
-			"fillOpacity": 0.4,
-			"lineOpacity": 1,
+			"fillOpacity": 0.08,
+			"lineOpacity": 0,
 			"hollow": false,
 			"color": "#D30086",
-			"renderMode": "Ellipse",
+			"renderMode": "Tile",
 			"showName": true,
-			"tilesetId": null,
+			"tilesetId": 10,
 			"tileRenderMode": "FitInside",
-			"tileRect": null,
+			"tileRect": { "tilesetUid": 10, "x": 48, "y": 0, "w": 16, "h": 16 },
 			"uiTileRect": null,
 			"nineSliceBorders": [],
 			"maxCount": 0,
@@ -712,7 +749,6 @@
 		}
 	], "enums": [{ "identifier": "Node_Type", "uid": 30, "values": [
 		{ "id": "EMPTY", "tileRect": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 }, "color": 15389866 },
-		{ "id": "START", "tileRect": { "tilesetUid": 10, "x": 48, "y": 0, "w": 16, "h": 16 }, "color": 14330771 },
 		{ "id": "PROJECT", "tileRect": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "color": 12470831 },
 		{ "id": "WARP", "tileRect": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "color": 4446039 }
 	], "iconTilesetUid": 10, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }], "externalEnums": [], "levelFields": [] },
@@ -819,7 +855,8 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 4, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [4] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 288,
 							"__worldY": 336
@@ -881,7 +918,8 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 2, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [2] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 288,
 							"__worldY": 240
@@ -943,7 +981,8 @@
 								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [null] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 3, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [3] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 240,
 							"__worldY": 288
@@ -997,7 +1036,8 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 7, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [7] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1392,
 							"__worldY": 240
@@ -1051,7 +1091,8 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 6, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [6] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1296,
 							"__worldY": 240
@@ -1113,7 +1154,8 @@
 								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [null] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 336,
 							"__worldY": 288
@@ -1167,7 +1209,8 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 9, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [9] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1392,
 							"__worldY": 336
@@ -1229,7 +1272,8 @@
 								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 8, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [8] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1440,
 							"__worldY": 288
@@ -1283,7 +1327,8 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 10, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [10] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1296,
 							"__worldY": 336
@@ -1345,7 +1390,8 @@
 								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 5, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [5] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1248,
 							"__worldY": 288
@@ -1420,7 +1466,8 @@
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 17, "cy": 6 }, "__tile": null, "defUid": 45, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["17,6"]
-								}] }
+								}] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 288,
 							"__worldY": 288
@@ -1471,7 +1518,8 @@
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 28, "cy": 6 }, "__tile": null, "defUid": 45, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["28,6"]
-								}] }
+								}] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 864,
 							"__worldY": 288
@@ -1522,7 +1570,8 @@
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 17, "cy": 6 }, "__tile": null, "defUid": 45, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["17,6"]
-								}] }
+								}] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 1200,
 							"__worldY": 288
@@ -1573,7 +1622,8 @@
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 6, "cy": 6 }, "__tile": null, "defUid": 45, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["6,6"]
-								}] }
+								}] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 768,
 							"__worldY": 288
@@ -1629,7 +1679,11 @@
 								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Web <\n      > Games", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Web <\\n      > Games"]
+								}] }
 							],
 							"__worldX": 816,
 							"__worldY": 288
@@ -1677,10 +1731,8 @@
 									"id": "V_String",
 									"params": ["4eb21eb0-c210-11ef-9c94-ade415c4cdfc"]
 								}] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 17, "cy": 6 }, "__tile": null, "defUid": 45, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["17,6"]
-								}] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [null] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [null] }
 							],
 							"__worldX": 1488,
 							"__worldY": 288
@@ -1720,7 +1772,8 @@
 								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] }
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] }
 							],
 							"__worldX": 816,
 							"__worldY": 336
@@ -1730,7 +1783,7 @@
 							"__grid": [17,7],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": null,
+							"__tile": { "tilesetUid": 10, "x": 48, "y": 0, "w": 16, "h": 16 },
 							"__smartColor": "#D30086",
 							"iid": "0046f0d0-c210-11ef-9c94-c134c8a519a7",
 							"width": 48,
