@@ -199,7 +199,7 @@ function update() {
                     position: grid_position_center(game.nodes.data[game.nodes_current].grid_position),
                     size: [16, 16],
                     scale: [1, 1],
-                    offset: [0, -6],
+                    offset: [0, -2],
                     rotation: 0,
                     texture_size: [16, 16],
                     texture_position: [32, 0],
