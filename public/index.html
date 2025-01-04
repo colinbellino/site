@@ -46,12 +46,23 @@
         }
         .project .close {
             position: absolute;
-            top: 0;
-            right: 15px;
-            background: none;
+            top: 10px;
+            right: 10px;
+            padding: 0;
+            margin: 0;
             color: inherit;
-            font-size: 1.5em;
             border: none;
+            width: 32px;
+            height: 32px;
+            border-radius: 5px;
+            background-color: transparent;
+            background-image: url("/images/atlas.png");
+            background-position: calc(-16px * 7 * 2) 0px;
+            background-size: calc(512px * 2) calc(512px * 2);
+            image-rendering: pixelated;
+        }
+        .project .close:hover {
+            background-color: rgba(255, 255, 255, 0.1);
         }
         .project a {
             color: inherit
@@ -72,7 +83,7 @@
             .project {
                 right: auto;
                 bottom: auto;
-                min-width: 400px;
+                min-width: 300px;
             }
         }
 

@@ -1261,7 +1261,7 @@ function lerp_indices(length: number, t: float): [int, int, float] {
     const step_next = Math.min(step_current+1, length);
     const step_duration = 1/length;
     const step_progress = (t - step_current/length) / step_duration;
-    console.log({ t, step_current, step_next, step_duration, step_progress });
+    // console.log({ t, step_current, step_next, step_duration, step_progress });
     return [step_current, step_next, step_progress];
 }
 
@@ -1596,11 +1596,10 @@ function ui_create_element<T>(ui_root: HTMLElement, html: string) {
 function ui_create_panel(ui_root: HTMLDivElement): UI_Panel {
     const panel_root = ui_create_element<HTMLElement>(ui_root, `
         <section class="project">
-            <button class="close">✕</button>
+            <button class="close" aria-label="Close"></button>
             <div class="content"></div>
         </section>
     `);
-    console.log("panel_root", panel_root);
     const panel: UI_Panel = {
         opened:             false,
         title:              "",
