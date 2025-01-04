@@ -92,27 +92,42 @@
         .hud_button {
             z-index: 10;
             position: absolute;
-            width: 80px;
-            height: 80px;
-            font-size: 1rem;
+            width: 128px;
+            height: 128px;
+            padding: 0;
+            margin: 32px;
+            border: 0;
+            background-color: transparent;
+            background-image: url("/images/atlas.png");
+            background-position: -1024px 0px;
+            background-size: 4096px 4096px;
+            image-rendering: pixelated;
         }
         .hud_button.up {
-            top: 0px;
-            left: 50%;
-        }
-        .hud_button.down {
-            bottom: 0px;
-            left: 50%;
-        }
-        .hud_button.left {
-            top: 50%;
-            left: 0px;
+            left: 128px;
+            bottom: 256px;
         }
         .hud_button.right {
-            top: 50%;
-            right: 0px;
+            left: 256px;
+            bottom: 128px;
+            background-position-x: -1152px;
         }
-        @media (min-width: 700px) {
+        .hud_button.down {
+            left: 128px;
+            bottom: 0px;
+            background-position-x: -1280px;
+        }
+        .hud_button.left {
+            left: 0px;
+            bottom: 128px;
+            background-position-x: -1408px;
+        }
+        .hud_button.confirm {
+            right: 0px;
+            bottom: 128px;
+            background-position-x: -1536px;
+        }
+        @media (hover: hover) {
             .hud_button {
                 display: none;
             }

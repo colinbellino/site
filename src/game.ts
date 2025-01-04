@@ -712,27 +712,38 @@ function renderer_init(): [Renderer, true] | [null, false] {
     {
         const button_up = document.createElement("button");
         button_up.classList.add("hud_button", "up");
-        button_up.textContent = "↑";
+        button_up.ariaLabel = "Move: up";
         ui_root.appendChild(button_up);
         button_up.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowUp } as KeyboardEvent); });
 
         const button_down = document.createElement("button");
         button_down.classList.add("hud_button", "down");
-        button_down.textContent = "↓";
+        button_down.ariaLabel = "Move: down";
         ui_root.appendChild(button_down);
         button_down.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowDown } as KeyboardEvent); });
 
         const button_left = document.createElement("button");
         button_left.classList.add("hud_button", "left");
-        button_left.textContent = "←";
+        button_left.ariaLabel = "Move: left";
         ui_root.appendChild(button_left);
         button_left.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowLeft } as KeyboardEvent); });
 
         const button_right = document.createElement("button");
         button_right.classList.add("hud_button", "right");
-        button_right.textContent = "→";
+        button_right.ariaLabel = "Move: right";
         ui_root.appendChild(button_right);
         button_right.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowRight } as KeyboardEvent); });
+
+        const button_confirm = document.createElement("button");
+        button_confirm.classList.add("hud_button", "confirm");
+        button_confirm.ariaLabel = "Confirm";
+        ui_root.appendChild(button_confirm);
+        button_confirm.addEventListener("click", () => {
+            inputs_on_key({ type: "keydown", code: Keyboard_Key.Enter } as KeyboardEvent);
+            setTimeout(() => {
+                inputs_on_key({ type: "keyup", code: Keyboard_Key.Enter } as KeyboardEvent);
+            }, 10);
+        });
     }
 
     // TODO: disable this in __RELEASE__
