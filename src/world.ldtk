@@ -1442,15 +1442,7 @@
 									"id": "V_String",
 									"params": ["WARP"]
 								}] },
-								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
-									"entityIid": "54fcd670-c210-11ef-9c94-fb599354a5be",
-									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
-									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
-									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
-								}, "__tile": null, "defUid": 6, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["54fcd670-c210-11ef-9c94-fb599354a5be"]
-								}] },
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
 								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
 								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
 								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },

@@ -154,7 +154,7 @@ function update() {
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
             game.destination_path = fixed_array_make(MAX_PATH);
-            game.debug_draw_console = false;
+            game.debug_draw_console = location.search.includes("?console");
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
             game.debug_draw_world_tile = true;
@@ -231,6 +231,8 @@ function update() {
         const gl = game.renderer.gl;
         const now = performance.now();
 
+        inputs_prepare(game.inputs);
+
         game.renderer.sprites.count = 0;
         if (now >= game.fps_last_update + 1000) {
             game.fps = game.fps_count;
@@ -247,6 +249,7 @@ function update() {
         {
             ui_push_console_line("fps:                " + game.fps.toFixed(0));
             ui_push_console_line("window_size:        " + game.renderer.window_size);
+            ui_push_console_line("pixel_ratio:        " + game.renderer.pixel_ratio);
             ui_push_console_line("camera_position:    " + game.renderer.camera_main.position);
             ui_push_console_line("camera_zoom:        " + game.renderer.camera_main.zoom);
             ui_push_console_line("entities:           " + game.entities.count);
@@ -317,7 +320,7 @@ function update() {
                 player_input_move[1] = +1;
             } else if (game.inputs.keys["KeyA"].down || game.inputs.keys["ArrowLeft"].down) {
                 player_input_move[0] = -1;
-            } else if (game.inputs.keys["KeyD"].down || game.inputs.keys["ArrowRight"].released) {
+            } else if (game.inputs.keys["KeyD"].down || game.inputs.keys["ArrowRight"].down) {
                 player_input_move[0] = +1;
             }
 
@@ -347,7 +350,7 @@ function update() {
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
-                            console.warn("Can't move in this direction");
+                            console.warn("Can't move in this direction: " + direction);
                         }
                     }
 
@@ -546,7 +549,7 @@ function update() {
                 ui_set_element_class(game.renderer.ui_panel_node.element_root, "open", game.renderer.ui_panel_node.opened);
             }
 
-            gl.viewport(0, 0, game.renderer.window_size[0], game.renderer.window_size[1]);
+            gl.viewport(0, 0, game.renderer.window_size[0]*game.renderer.pixel_ratio[0], game.renderer.window_size[1]*game.renderer.pixel_ratio[1]);
 
             gl.clearColor(game.clear_color[0], game.clear_color[1], game.clear_color[2], game.clear_color[3]);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -630,7 +633,7 @@ function update_zoom() {
     // } else {
     //     game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / (180*2));
     // }
-    game.renderer.camera_main.zoom = 3;
+    game.renderer.camera_main.zoom = 2;
 }
 
 // :renderer
@@ -642,6 +645,7 @@ type Renderer = {
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
+    pixel_ratio:        Vector2;
     sprites:            Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
 }
 type Sprite_Pass = {
@@ -681,20 +685,30 @@ const CAMERA_DEFAULT: Camera_Orthographic = {
     view_projection_matrix: matrix4_identity(),
 };
 function renderer_resize_canvas() {
-    const width = window.innerWidth /* * window.devicePixelRatio */;
-    const height = window.innerHeight /* * window.devicePixelRatio */;
+    const width = window.innerWidth;
+    const height = window.innerHeight;
 
     let final_width = width;
     let final_height = height;
     if (width % 2)  { final_width -= 1; }
     if (height % 2) { final_height -= 1; }
 
+    game.renderer.pixel_ratio[0] = window.devicePixelRatio;
+    game.renderer.pixel_ratio[1] = window.devicePixelRatio;
+    if (!Number.isInteger(window.devicePixelRatio)) { // Default to pixel_ratio of 2 in case we have some fucky wucky floating number ratio for now...
+        game.renderer.pixel_ratio[0] = 2;
+        game.renderer.pixel_ratio[1] = 2;
+        // game.renderer.pixel_ratio[0] *= (window.innerWidth / window.screen.availWidth);
+        // game.renderer.pixel_ratio[1] *= (window.innerHeight / window.screen.availHeight);
+    }
     game.renderer.window_size[0] = final_width;
     game.renderer.window_size[1] = final_height;
-    game.renderer.gl.canvas.width = final_width;
-    game.renderer.gl.canvas.height = final_height;
+    (game.renderer.gl.canvas as HTMLCanvasElement).style.width = `${final_width}px`;
+    (game.renderer.gl.canvas as HTMLCanvasElement).style.height = `${final_height}px`;
+    game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio[0];
+    game.renderer.gl.canvas.height = final_height * game.renderer.pixel_ratio[1];
 
-    console.log("window_size", game.renderer.window_size);
+    console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
     const canvas = document.querySelector("canvas");
@@ -708,42 +722,17 @@ function renderer_init(): [Renderer, true] | [null, false] {
     const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
     assert(ui_root !== undefined);
 
-    // TODO: clean this up
     {
-        const button_up = document.createElement("button");
-        button_up.classList.add("hud_button", "up");
-        button_up.ariaLabel = "Move: up";
-        ui_root.appendChild(button_up);
-        button_up.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowUp } as KeyboardEvent); });
-
-        const button_down = document.createElement("button");
-        button_down.classList.add("hud_button", "down");
-        button_down.ariaLabel = "Move: down";
-        ui_root.appendChild(button_down);
-        button_down.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowDown } as KeyboardEvent); });
-
-        const button_left = document.createElement("button");
-        button_left.classList.add("hud_button", "left");
-        button_left.ariaLabel = "Move: left";
-        ui_root.appendChild(button_left);
-        button_left.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowLeft } as KeyboardEvent); });
-
-        const button_right = document.createElement("button");
-        button_right.classList.add("hud_button", "right");
-        button_right.ariaLabel = "Move: right";
-        ui_root.appendChild(button_right);
-        button_right.addEventListener("click", () => { inputs_on_key({ type: "keyup", code: Keyboard_Key.ArrowRight } as KeyboardEvent); });
-
-        const button_confirm = document.createElement("button");
-        button_confirm.classList.add("hud_button", "confirm");
-        button_confirm.ariaLabel = "Confirm";
-        ui_root.appendChild(button_confirm);
-        button_confirm.addEventListener("click", () => {
-            inputs_on_key({ type: "keydown", code: Keyboard_Key.Enter } as KeyboardEvent);
-            setTimeout(() => {
-                inputs_on_key({ type: "keyup", code: Keyboard_Key.Enter } as KeyboardEvent);
-            }, 10);
-        });
+        const button_up = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button up" aria-label="Move: up"></button>`);
+        button_up.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp));
+        const button_right = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button right" aria-label="Move: right"></button>`);
+        button_right.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight));
+        const button_down = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button down" aria-label="Move: down"></button>`);
+        button_down.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown));
+        const button_left = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button left" aria-label="Move: left"></button>`);
+        button_left.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft));
+        const button_confirm = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button confirm" aria-label="Confirm"></button>`);
+        button_confirm.addEventListener("click", () => { input_send_key(Keyboard_Key.Enter); });
     }
 
     // TODO: disable this in __RELEASE__
@@ -756,6 +745,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         camera_main:        CAMERA_DEFAULT,
         sprites:            fixed_array_make(MAX_SPRITES),
         window_size:        [0, 0],
+        pixel_ratio:        [1, 1],
         gl:                 _gl,
         ui_root:            ui_root,
         ui_console:         ui_console,
@@ -967,9 +957,11 @@ type Inputs = {
     // controllers:                [MAX_CONTROLLERS]Controller_State;
 }
 type Key_State = {
-    pressed:        boolean; // The key was pressed this frame
-    down:           boolean; // The key is down
-    released:       boolean; // The key was released this frame
+    pressed:            boolean; // The key was pressed this frame
+    down:               boolean; // The key is down
+    released:           boolean; // The key was released this frame
+    triggered:          boolean; // The key was triggered from an external event (ie: DOM event)
+    reset_next_frame:   boolean; // The key will be reset at the end of the frame
 }
 // I really hate that i have to do this, but this is JavaScript so here we go...
 enum Keyboard_Key {
@@ -1034,7 +1026,6 @@ enum Keyboard_Key {
     "ArrowRight" = "ArrowRight",
     "ArrowUp" = "ArrowUp",
 };
-// FIXME: handle non ZQSD keyboard layouts
 enum Mouse_Key {
     NONE,
     LEFT,
@@ -1042,21 +1033,31 @@ enum Mouse_Key {
     RIGHT,
     COUNT,
 }
-
 function inputs_init(): Inputs {
-    // @ts-ignore
-    const inputs: Inputs = { keys: {}, mouse_keys: {} };
+    const inputs: Inputs = {
+        quit_requested: false,
+        window_resized: false,
+        window_is_focused: true,
+        keyboard_was_used: false,
+        controller_was_used: false,
+        mouse_was_used: false,
+        mouse_moved: false,
+        mouse_position: [0, 0],
+        mouse_wheel: [0, 0],
+        keys: {} as any,
+        mouse_keys: {} as any,
+    };
     inputs.mouse_position = [0,0];
     inputs.mouse_wheel = [0,0];
     const keys = Object.values(Keyboard_Key);
     for (let key_index = 0; key_index < keys.length; key_index++) {
         const key = keys[key_index] as Keyboard_Key;
-        inputs.keys[key] = { pressed: false, down: false, released: false };
+        inputs.keys[key] = { pressed: false, down: false, released: false, triggered: false, reset_next_frame: false };
     }
     const mouse_keys = Object.values(Mouse_Key);
     for (let key_index = 0; key_index < mouse_keys.length; key_index++) {
         const key = mouse_keys[key_index] as Mouse_Key;
-        inputs.mouse_keys[key] = { pressed: false, down: false, released: false };
+        inputs.mouse_keys[key] = { pressed: false, down: false, released: false, triggered: false, reset_next_frame: false };
     }
     return inputs;
 }
@@ -1074,25 +1075,27 @@ function inputs_on_key(event: KeyboardEvent) {
     key_state.released = event.type === "keyup";
     key_state.pressed = event.type === "keydown";
 }
-function inputs_reset(inputs: Inputs) {
-    inputs.mouse_wheel[0] = 0;
-    inputs.mouse_wheel[1] = 0;
-    inputs.mouse_moved = false;
-    inputs.quit_requested = false;
-    inputs.window_resized = false;
-
+function inputs_prepare(inputs: Inputs) {
     inputs.keyboard_was_used = false;
     for (const key_state of Object.values(inputs.keys)) {
         if (key_state.pressed || key_state.down || key_state.released) {
             inputs.keyboard_was_used = true;
-            break;
+        }
+        if (key_state.triggered) {
+            key_state.down = true;
+            key_state.triggered = false;
+            key_state.reset_next_frame = true;
         }
     }
     inputs.mouse_was_used = false;
     for (const key_state of Object.values(inputs.mouse_keys)) {
         if (key_state.pressed || key_state.down || key_state.released) {
             inputs.mouse_was_used = true;
-            break;
+        }
+        if (key_state.triggered) {
+            key_state.down = true;
+            key_state.triggered = false;
+            key_state.reset_next_frame = true;
         }
     }
     inputs.controller_was_used = false;
@@ -1110,14 +1113,30 @@ function inputs_reset(inputs: Inputs) {
     //         }
     //     }
     // }
+}
+
+function inputs_reset(inputs: Inputs): void {
+    inputs.mouse_wheel[0] = 0;
+    inputs.mouse_wheel[1] = 0;
+    inputs.mouse_moved = false;
+    inputs.quit_requested = false;
+    inputs.window_resized = false;
 
     for (const key_state of Object.values(inputs.keys)) {
         key_state.pressed = false;
         key_state.released = false;
+        if (key_state.reset_next_frame) {
+            key_state.down = false;
+            key_state.reset_next_frame = false;
+        }
     }
     for (const key_state of Object.values(inputs.mouse_keys)) {
         key_state.pressed = false;
         key_state.released = false;
+        if (key_state.reset_next_frame) {
+            key_state.down = false;
+            key_state.reset_next_frame = false;
+        }
     }
     // for controller_state : inputs.controllers {
     //     for *key_state : controller_state.buttons {
@@ -1125,6 +1144,10 @@ function inputs_reset(inputs: Inputs) {
     //         key_state.released = false;
     //     }
     // }
+}
+function input_send_key(key: Keyboard_Key): void {
+    game.inputs.keys[key].triggered = true;
+    console.log(key, game.inputs.keys[key]);
 }
 
 // :auto_tile
