@@ -556,9 +556,7 @@ function update() {
                 for (let sprite_index = 0; sprite_index < game.sorted_sprites.count; sprite_index++) {
                     game.sorted_sprites.data[sprite_index] = game.renderer.sprites.data[sprite_index];
                 }
-                game.sorted_sprites.data.sort(function sort_by_z_index(a, b) {
-                    return a.z_index - b.z_index;
-                });
+                game.sorted_sprites.data.sort(sort_by_z_index);
 
                 // TODO: Don't recreate this every frame
                 game.sprite_data = new Float32Array(MAX_SPRITES * SPRITE_PASS_INSTANCE_DATA_SIZE);
@@ -576,9 +574,9 @@ function update() {
                     offset += 4;
 
                     let matrix = matrix4_identity();
-                    matrix = matrix4_multiply(matrix4_make_scale(sprite.size[0], sprite.size[1], 0), matrix);
-                    matrix = matrix4_multiply(matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0), matrix);
-                    matrix = matrix4_multiply(matrix4_make_translation(sprite.position[0] + sprite.offset[0], sprite.position[1] + sprite.offset[1], 0), matrix);
+                    matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0], sprite.size[1], 0));
+                    matrix4_multiply(matrix, matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0));
+                    matrix4_multiply(matrix, matrix4_make_translation(sprite.position[0] + sprite.offset[0], sprite.position[1] + sprite.offset[1], 0));
                     // matrix = matrix4_rotate_z(matrix, sprite.rotation);
                     game.sprite_data.set(matrix, offset);
                     offset += 16;
@@ -944,11 +942,13 @@ function renderer_update_camera_matrix_main(camera: Camera_Orthographic): void {
     );
 
     camera.transform_matrix = matrix4_identity();
-    camera.transform_matrix = matrix4_multiply((matrix4_make_translation(-camera.position[0], -camera.position[1], 0)), camera.transform_matrix);
-    camera.transform_matrix = matrix4_multiply(matrix4_make_scale(camera.zoom, camera.zoom, 0), camera.transform_matrix);
+    matrix4_multiply(camera.transform_matrix, matrix4_make_translation(-camera.position[0], -camera.position[1], 0));
+    matrix4_multiply(camera.transform_matrix, matrix4_make_scale(camera.zoom, camera.zoom, 0));
 
     camera.view_matrix = (camera.transform_matrix);
-    camera.view_projection_matrix = matrix4_multiply(camera.projection_matrix, camera.view_matrix);
+    camera.view_projection_matrix = matrix4_identity();
+    matrix4_multiply(camera.view_projection_matrix, camera.view_matrix);
+    matrix4_multiply(camera.view_projection_matrix, camera.projection_matrix);
 }
 
 // :inputs
@@ -1251,6 +1251,10 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
         }
     }
 }
+function sort_by_z_index(a: Sprite, b: Sprite) {
+    return a.z_index - b.z_index;
+}
+
 // :debug
 function number_to_binary_string(dec: number, size: number = 4): string {
     return (dec >>> 0).toString(2).padStart(size, "0");
@@ -1357,61 +1361,67 @@ function matrix4_make_orthographic_projection(left: float, right: float, bottom:
 
     return result;
 }
-function matrix4_multiply(m: Matrix4, n: Matrix4): Matrix4 {
+// const a = matrix4_identity();
+// const b = [
+//     2, 0, 0, 0,
+//     0, 2, 0, 0,
+//     0, 0, 2, 0,
+//     0, 0, 0, 2,
+// ];
+// matrix4_multiply(a, b);
+// log_matrix(a);
+function matrix4_multiply(m: Matrix4, n: Matrix4): void {
     assert(m.length === n.length);
     assert(m.length === 16);
-    const result = matrix4_zero();
 
-    var b00 = n[0 * 4 + 0];
-    var b01 = n[0 * 4 + 1];
-    var b02 = n[0 * 4 + 2];
-    var b03 = n[0 * 4 + 3];
-    var b10 = n[1 * 4 + 0];
-    var b11 = n[1 * 4 + 1];
-    var b12 = n[1 * 4 + 2];
-    var b13 = n[1 * 4 + 3];
-    var b20 = n[2 * 4 + 0];
-    var b21 = n[2 * 4 + 1];
-    var b22 = n[2 * 4 + 2];
-    var b23 = n[2 * 4 + 3];
-    var b30 = n[3 * 4 + 0];
-    var b31 = n[3 * 4 + 1];
-    var b32 = n[3 * 4 + 2];
-    var b33 = n[3 * 4 + 3];
-    var a00 = m[0 * 4 + 0];
-    var a01 = m[0 * 4 + 1];
-    var a02 = m[0 * 4 + 2];
-    var a03 = m[0 * 4 + 3];
-    var a10 = m[1 * 4 + 0];
-    var a11 = m[1 * 4 + 1];
-    var a12 = m[1 * 4 + 2];
-    var a13 = m[1 * 4 + 3];
-    var a20 = m[2 * 4 + 0];
-    var a21 = m[2 * 4 + 1];
-    var a22 = m[2 * 4 + 2];
-    var a23 = m[2 * 4 + 3];
-    var a30 = m[3 * 4 + 0];
-    var a31 = m[3 * 4 + 1];
-    var a32 = m[3 * 4 + 2];
-    var a33 = m[3 * 4 + 3];
-    result[ 0] = b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30;
-    result[ 1] = b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31;
-    result[ 2] = b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32;
-    result[ 3] = b00 * a03 + b01 * a13 + b02 * a23 + b03 * a33;
-    result[ 4] = b10 * a00 + b11 * a10 + b12 * a20 + b13 * a30;
-    result[ 5] = b10 * a01 + b11 * a11 + b12 * a21 + b13 * a31;
-    result[ 6] = b10 * a02 + b11 * a12 + b12 * a22 + b13 * a32;
-    result[ 7] = b10 * a03 + b11 * a13 + b12 * a23 + b13 * a33;
-    result[ 8] = b20 * a00 + b21 * a10 + b22 * a20 + b23 * a30;
-    result[ 9] = b20 * a01 + b21 * a11 + b22 * a21 + b23 * a31;
-    result[10] = b20 * a02 + b21 * a12 + b22 * a22 + b23 * a32;
-    result[11] = b20 * a03 + b21 * a13 + b22 * a23 + b23 * a33;
-    result[12] = b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30;
-    result[13] = b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31;
-    result[14] = b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32;
-    result[15] = b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33;
-
-    return result;
+    var b00 = m[0 * 4 + 0];
+    var b01 = m[0 * 4 + 1];
+    var b02 = m[0 * 4 + 2];
+    var b03 = m[0 * 4 + 3];
+    var b10 = m[1 * 4 + 0];
+    var b11 = m[1 * 4 + 1];
+    var b12 = m[1 * 4 + 2];
+    var b13 = m[1 * 4 + 3];
+    var b20 = m[2 * 4 + 0];
+    var b21 = m[2 * 4 + 1];
+    var b22 = m[2 * 4 + 2];
+    var b23 = m[2 * 4 + 3];
+    var b30 = m[3 * 4 + 0];
+    var b31 = m[3 * 4 + 1];
+    var b32 = m[3 * 4 + 2];
+    var b33 = m[3 * 4 + 3];
+    var a00 = n[0 * 4 + 0];
+    var a01 = n[0 * 4 + 1];
+    var a02 = n[0 * 4 + 2];
+    var a03 = n[0 * 4 + 3];
+    var a10 = n[1 * 4 + 0];
+    var a11 = n[1 * 4 + 1];
+    var a12 = n[1 * 4 + 2];
+    var a13 = n[1 * 4 + 3];
+    var a20 = n[2 * 4 + 0];
+    var a21 = n[2 * 4 + 1];
+    var a22 = n[2 * 4 + 2];
+    var a23 = n[2 * 4 + 3];
+    var a30 = n[3 * 4 + 0];
+    var a31 = n[3 * 4 + 1];
+    var a32 = n[3 * 4 + 2];
+    var a33 = n[3 * 4 + 3];
+    m[ 0] = b00 * a00 + b01 * a10 + b02 * a20 + b03 * a30;
+    m[ 1] = b00 * a01 + b01 * a11 + b02 * a21 + b03 * a31;
+    m[ 2] = b00 * a02 + b01 * a12 + b02 * a22 + b03 * a32;
+    m[ 3] = b00 * a03 + b01 * a13 + b02 * a23 + b03 * a33;
+    m[ 4] = b10 * a00 + b11 * a10 + b12 * a20 + b13 * a30;
+    m[ 5] = b10 * a01 + b11 * a11 + b12 * a21 + b13 * a31;
+    m[ 6] = b10 * a02 + b11 * a12 + b12 * a22 + b13 * a32;
+    m[ 7] = b10 * a03 + b11 * a13 + b12 * a23 + b13 * a33;
+    m[ 8] = b20 * a00 + b21 * a10 + b22 * a20 + b23 * a30;
+    m[ 9] = b20 * a01 + b21 * a11 + b22 * a21 + b23 * a31;
+    m[10] = b20 * a02 + b21 * a12 + b22 * a22 + b23 * a32;
+    m[11] = b20 * a03 + b21 * a13 + b22 * a23 + b23 * a33;
+    m[12] = b30 * a00 + b31 * a10 + b32 * a20 + b33 * a30;
+    m[13] = b30 * a01 + b31 * a11 + b32 * a21 + b33 * a31;
+    m[14] = b30 * a02 + b31 * a12 + b32 * a22 + b33 * a32;
+    m[15] = b30 * a03 + b31 * a13 + b32 * a23 + b33 * a33;
 }
 function matrix4_zero(): Matrix4 {
     return [
