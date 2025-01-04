@@ -33,6 +33,8 @@ type Game = {
     destination_node:       int;
     destination_path:       Fixed_Size_Array<Vector2, typeof MAX_PATH>;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
+    sorted_sprites:         Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
+    sprite_data:            Float32Array;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
@@ -41,9 +43,9 @@ type Game = {
 
     debug_draw_console:     boolean;
     debug_draw_entities:    boolean;
-    debug_draw_world_grid:       boolean; // TODO: do we still need this?
-    debug_draw_world_tile:        boolean;
-    debug_draw_tiles:     boolean;
+    debug_draw_world_grid:  boolean;
+    debug_draw_world_tile:  boolean;
+    debug_draw_tiles:       boolean;
 
     renderer:               Renderer;
     frame_count:            int;
@@ -103,7 +105,7 @@ const MAX_CONSOLE_LINES : number = 128;
 const MAX_ENTITIES : number = 128;
 const MAX_PROJECTS : number = 16;
 const MAX_NODES : number = 32;
-const MAX_SPRITES : number = 2048;
+const MAX_SPRITES : number = 1024;
 const MAX_PATH: number = 3;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
@@ -147,6 +149,7 @@ function update() {
             game.fps_last_update = 0;
             game.fps_count = 0;
             game.entities = fixed_array_make(MAX_ENTITIES);
+            game.sorted_sprites = fixed_array_make(MAX_SPRITES);
             game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
@@ -215,7 +218,7 @@ function update() {
             assert(WORLD.grid.length > 0 && WORLD.grid.length === WORLD.height * WORLD.width, "Invalid world!");
             for (let y = 0; y < WORLD.height; y++) {
                 for (let x = 0; x < WORLD.width; x++) {
-                    const grid_index = grid_position_to_index([x, y], WORLD.width);
+                    const grid_index = grid_position_to_index(x, y, WORLD.width);
                     game.world_grid[grid_index] = { value: WORLD.grid[grid_index] };
                 }
             }
@@ -308,14 +311,13 @@ function update() {
             }
         } else {
             // :player inputs
-            // FIXME: prevent input during movement and use .down events again
-            if (game.inputs.keys["KeyW"].released || game.inputs.keys["ArrowUp"].released) {
+            if (game.inputs.keys["KeyW"].down || game.inputs.keys["ArrowUp"].down) {
                 player_input_move[1] = -1;
-            } else if (game.inputs.keys["KeyS"].released || game.inputs.keys["ArrowDown"].released) {
+            } else if (game.inputs.keys["KeyS"].down || game.inputs.keys["ArrowDown"].down) {
                 player_input_move[1] = +1;
-            } else if (game.inputs.keys["KeyA"].released || game.inputs.keys["ArrowLeft"].released) {
+            } else if (game.inputs.keys["KeyA"].down || game.inputs.keys["ArrowLeft"].down) {
                 player_input_move[0] = -1;
-            } else if (game.inputs.keys["KeyD"].released || game.inputs.keys["ArrowRight"].released) {
+            } else if (game.inputs.keys["KeyD"].down || game.inputs.keys["ArrowRight"].released) {
                 player_input_move[0] = +1;
             }
 
@@ -382,11 +384,10 @@ function update() {
                     const destination_node = game.nodes.data[game.destination_node];
                     const is_warp = current_node.type === Node_Type.WARP && destination_node.type == Node_Type.WARP;
 
-                    let duration = 200 * game.destination_path.count;
-                    if (is_warp) { duration *= 4; /* TODO: calculate the actual node distance instead of hardcoding the multiplier */ }
+                    const distance = manhathan_distance(game.destination_path.data[0], game.destination_path.data[game.destination_path.count-1]);
+                    let duration = 200 * distance;
                     const end = game.world_mode_timer + duration;
                     const remaining = end - now;
-                    // FIXME: make this this is framerate independent!
                     const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
 
                     const [current, next, step_progress] = lerp_indices(game.destination_path.count-1, progress);
@@ -480,12 +481,10 @@ function update() {
             }
             // :render tile
             if (game.debug_draw_world_tile) {
+                let color: Vector4 = COLOR_WHITE();
+
                 for (let tile_cell_index = 0; tile_cell_index < TILE_GRID_SIZE; tile_cell_index++) {
                     const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
-
-                    let color: Vector4 = COLOR_WHITE();
-                    // if ((tile_position[0]+tile_position[1]) % 2) { color = [0.95, 0.95, 0.95, 1.0]; }
-                    // color[3] *= 0.8;
 
                     const tile_value = calculate_tile_value(tile_position);
                     const tile_index = TILE_VALUES.indexOf(tile_value);
@@ -553,46 +552,49 @@ function update() {
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
             {
-                // TODO: Don't allocate this every frame!
-                const sorted_sprites = game.renderer.sprites.data.slice(0, game.renderer.sprites.count);
-                sorted_sprites.sort(function sort_by_z_index(a, b) {
+                game.sorted_sprites.count = game.renderer.sprites.count;
+                for (let sprite_index = 0; sprite_index < game.sorted_sprites.count; sprite_index++) {
+                    game.sorted_sprites.data[sprite_index] = game.renderer.sprites.data[sprite_index];
+                }
+                game.sorted_sprites.data.sort(function sort_by_z_index(a, b) {
                     return a.z_index - b.z_index;
                 });
+
                 // TODO: Don't recreate this every frame
-                let instance_data = new Float32Array(sorted_sprites.length * SPRITE_PASS_INSTANCE_DATA_SIZE);
+                game.sprite_data = new Float32Array(MAX_SPRITES * SPRITE_PASS_INSTANCE_DATA_SIZE);
                 const pixel_size : Vector2 = [
                     1 / ATLAS_SIZE[0],
                     1 / ATLAS_SIZE[1],
                 ];
                 // :render sprites
-                for (let sprite_index = 0; sprite_index < sorted_sprites.length; sprite_index++) {
-                    const sprite = sorted_sprites[sprite_index];
+                for (let sprite_index = 0; sprite_index < game.sorted_sprites.count; sprite_index++) {
+                    const sprite = game.sorted_sprites.data[sprite_index];
                     if (sprite === undefined) { break; } // We have reached the end of the sprites (uninitialized are at the bottom)
                     let offset = SPRITE_PASS_INSTANCE_DATA_SIZE * sprite_index;
 
-                    instance_data.set(sprite.color, offset);
+                    game.sprite_data.set(sprite.color, offset);
                     offset += 4;
 
                     let matrix = matrix4_identity();
                     matrix = matrix4_multiply(matrix4_make_scale(sprite.size[0], sprite.size[1], 0), matrix);
                     matrix = matrix4_multiply(matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0), matrix);
                     matrix = matrix4_multiply(matrix4_make_translation(sprite.position[0] + sprite.offset[0], sprite.position[1] + sprite.offset[1], 0), matrix);
-                    matrix = matrix4_rotate_z(matrix, sprite.rotation);
-                    instance_data.set(matrix, offset);
+                    // matrix = matrix4_rotate_z(matrix, sprite.rotation);
+                    game.sprite_data.set(matrix, offset);
                     offset += 16;
 
                     const texture_position = [
                         sprite.texture_position[0] * pixel_size[0],
                         sprite.texture_position[1] * pixel_size[1],
                     ];
-                    instance_data.set(texture_position, offset);
+                    game.sprite_data.set(texture_position, offset);
                     offset += 2;
 
                     const texture_size = [
                         sprite.texture_size[0] * pixel_size[0],
                         sprite.texture_size[1] * pixel_size[1],
                     ];
-                    instance_data.set(texture_size, offset);
+                    game.sprite_data.set(texture_size, offset);
                     offset += 2;
                 }
 
@@ -601,8 +603,8 @@ function update() {
                 gl.bindVertexArray(game.renderer.sprite_pass.vao);
                 gl.bindTexture(gl.TEXTURE_2D, game.texture0);
                 gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
-                gl.bufferData(gl.ARRAY_BUFFER, instance_data, gl.STREAM_DRAW);
-                gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, sorted_sprites.length);
+                gl.bufferData(gl.ARRAY_BUFFER, game.sprite_data, gl.STREAM_DRAW);
+                gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, game.sorted_sprites.count);
             }
         }
 
@@ -1062,6 +1064,7 @@ function window_on_resize(_event: Event) {
     game.inputs.window_resized = true;
 }
 function inputs_on_key(event: KeyboardEvent) {
+    // console.log("inputs_on_key", event.type, event.code);
     if (!game.inputs.keys.hasOwnProperty(event.code)) {
         console.warn("Unrecognized key:", event.code);
         return;
@@ -1168,27 +1171,31 @@ const TILE_VALUES = [
 ];
 const AUTO_TILE_SIZE: Vector2 = [5, 4];
 function is_same_tile(grid_position: Vector2): int {
-    const grid_index = grid_position_to_index(grid_position, WORLD.width);
-    if (!is_in_bounds(grid_position, [WORLD.width, WORLD.height])) {
+    const grid_index = grid_position_to_index(grid_position[0], grid_position[1], WORLD.width);
+    if (!is_in_bounds(grid_position[0], grid_position[1], WORLD.width, WORLD.height)) {
         return 0;
     }
     return game.world_grid[grid_index].value ? 1 : 0;
 }
 
 function calculate_tile_value(tile_position: Vector2): Grid_Value {
-    const tl = vector2_add(tile_position, [-1, -1]);
-    const tr = vector2_add(tile_position, [+0, -1]);
-    const bl = vector2_add(tile_position, [-1, +0]);
-    const br = vector2_add(tile_position, [+0, +0]);
+    const tl_x = tile_position[0] - 1;
+    const tl_y = tile_position[1] - 1;
+    const tr_x = tile_position[0] + 0;
+    const tr_y = tile_position[1] - 1;
+    const bl_x = tile_position[0] - 1;
+    const bl_y = tile_position[1] + 0;
+    const br_x = tile_position[0] + 0;
+    const br_y = tile_position[1] + 0;
     let tile_value: Grid_Value = 0;
-    if (is_in_bounds(tl, [WORLD.width, WORLD.height]))
-        tile_value |= game.world_grid[grid_position_to_index(tl, WORLD.width)].value * (1 << 3);
-    if (is_in_bounds(tr, [WORLD.width, WORLD.height]))
-        tile_value |= game.world_grid[grid_position_to_index(tr, WORLD.width)].value * (1 << 2);
-    if (is_in_bounds(bl, [WORLD.width, WORLD.height]))
-        tile_value |= game.world_grid[grid_position_to_index(bl, WORLD.width)].value * (1 << 1);
-    if (is_in_bounds(br, [WORLD.width, WORLD.height]))
-        tile_value |= game.world_grid[grid_position_to_index(br, WORLD.width)].value * (1 << 0);
+    if (is_in_bounds(tl_x, tl_y, WORLD.width, WORLD.height))
+        tile_value |= game.world_grid[grid_position_to_index(tl_x, tl_y, WORLD.width)].value * (1 << 3);
+    if (is_in_bounds(tr_x, tr_y, WORLD.width, WORLD.height))
+        tile_value |= game.world_grid[grid_position_to_index(tr_x, tr_y, WORLD.width)].value * (1 << 2);
+    if (is_in_bounds(bl_x, bl_y, WORLD.width, WORLD.height))
+        tile_value |= game.world_grid[grid_position_to_index(bl_x, bl_y, WORLD.width)].value * (1 << 1);
+    if (is_in_bounds(br_x, br_y, WORLD.width, WORLD.height))
+        tile_value |= game.world_grid[grid_position_to_index(br_x, br_y, WORLD.width)].value * (1 << 0);
     return tile_value;
 }
 
@@ -1250,6 +1257,9 @@ function number_to_binary_string(dec: number, size: number = 4): string {
 }
 
 // :math
+function manhathan_distance(a: Vector2, b: Vector2): int {
+    return (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]));
+}
 function hex_to_color(hex_value: number): Color {
     const color = new Array(4) as Color;
     color[0] = ((hex_value >> 24) & 0xff) / 255;
@@ -1285,8 +1295,8 @@ function vector2_lerp(a: Vector2, b: Vector2, t: float): Vector2 {
 function grid_index_to_position(grid_index: int, grid_width: int): Vector2 {
     return [ grid_index % grid_width, Math.floor(grid_index / grid_width) ];
 }
-function grid_position_to_index(grid_position: Vector2, grid_width: int): int {
-    return (grid_position[1] * grid_width) + grid_position[0];
+function grid_position_to_index(x: int, y: int, w: int): int {
+    return (y * w) + x;
 }
 function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
@@ -1294,8 +1304,8 @@ function clamp(value: number, min: number, max: number): number {
 function sin_01(time: float, frequency: float = 1.0): float {
     return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
 }
-function is_in_bounds(grid_position: Vector2, grid_size: Vector2): boolean {
-    return grid_position[0] >= 0 && grid_position[0] < grid_size[0] && grid_position[1] >= 0 && grid_position[1] < grid_size[1];
+function is_in_bounds(x: int, y: int, w: int, h: int): boolean {
+    return x >= 0 && x < w && y >= 0 && y < h;
 }
 function lerp_indices(length: number, t: float): [int, int, float] {
     let step_current = 0;
