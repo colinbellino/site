@@ -11,7 +11,7 @@
 	"iid": "20b4a0e0-c210-11ef-a872-334d9525beb2",
 	"jsonVersion": "1.5.3",
 	"appBuildId": 473703,
-	"nextUid": 32,
+	"nextUid": 42,
 	"identifierStyle": "Capitalize",
 	"toc": [],
 	"worldLayout": "Free",
@@ -164,15 +164,15 @@
 			"maxHeight": null,
 			"keepAspectRatio": false,
 			"tileOpacity": 1,
-			"fillOpacity": 0.08,
-			"lineOpacity": 0,
+			"fillOpacity": 0.2,
+			"lineOpacity": 1,
 			"hollow": false,
 			"color": "#BE4A2F",
-			"renderMode": "Tile",
+			"renderMode": "Ellipse",
 			"showName": false,
-			"tilesetId": 10,
+			"tilesetId": null,
 			"tileRenderMode": "FitInside",
-			"tileRect": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+			"tileRect": null,
 			"uiTileRect": null,
 			"nineSliceBorders": [],
 			"maxCount": 0,
@@ -191,7 +191,7 @@
 					"canBeNull": false,
 					"arrayMinLength": null,
 					"arrayMaxLength": null,
-					"editorDisplayMode": "ValueOnly",
+					"editorDisplayMode": "EntityTile",
 					"editorDisplayScale": 1,
 					"editorDisplayPos": "Above",
 					"editorLinkStyle": "StraightArrow",
@@ -208,7 +208,10 @@
 					"max": null,
 					"regex": null,
 					"acceptFileTypes": null,
-					"defaultOverride": null,
+					"defaultOverride": {
+						"id": "V_String",
+						"params": ["EMPTY"]
+					},
 					"textLanguageMode": null,
 					"symmetricalRef": false,
 					"autoChainRef": true,
@@ -219,7 +222,7 @@
 					"tilesetUid": null
 				},
 				{
-					"identifier": "NORTH",
+					"identifier": "neighbour_north",
 					"doc": null,
 					"__type": "EntityRef",
 					"uid": 6,
@@ -256,7 +259,44 @@
 					"tilesetUid": null
 				},
 				{
-					"identifier": "EAST",
+					"identifier": "path_north",
+					"doc": null,
+					"__type": "Point",
+					"uid": 36,
+					"type": "F_Point",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "PointPath",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "neighbour_east",
 					"doc": null,
 					"__type": "EntityRef",
 					"uid": 9,
@@ -293,7 +333,44 @@
 					"tilesetUid": null
 				},
 				{
-					"identifier": "SOUTH",
+					"identifier": "path_east",
+					"doc": null,
+					"__type": "Point",
+					"uid": 39,
+					"type": "F_Point",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "PointPath",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "neighbour_south",
 					"doc": null,
 					"__type": "EntityRef",
 					"uid": 8,
@@ -330,7 +407,44 @@
 					"tilesetUid": null
 				},
 				{
-					"identifier": "WEST",
+					"identifier": "path_south",
+					"doc": null,
+					"__type": "Point",
+					"uid": 38,
+					"type": "F_Point",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "PointPath",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "neighbour_west",
 					"doc": null,
 					"__type": "EntityRef",
 					"uid": 7,
@@ -344,6 +458,43 @@
 					"editorDisplayPos": "Above",
 					"editorLinkStyle": "CurvedArrow",
 					"editorDisplayColor": "#392C00",
+					"editorAlwaysShow": false,
+					"editorShowInWorld": true,
+					"editorCutLongValues": true,
+					"editorTextSuffix": null,
+					"editorTextPrefix": null,
+					"useForSmartColor": false,
+					"exportToToc": false,
+					"searchable": false,
+					"min": null,
+					"max": null,
+					"regex": null,
+					"acceptFileTypes": null,
+					"defaultOverride": null,
+					"textLanguageMode": null,
+					"symmetricalRef": false,
+					"autoChainRef": true,
+					"allowOutOfLevelRef": true,
+					"allowedRefs": "OnlySame",
+					"allowedRefsEntityUid": null,
+					"allowedRefTags": [],
+					"tilesetUid": null
+				},
+				{
+					"identifier": "path_west",
+					"doc": null,
+					"__type": "Point",
+					"uid": 37,
+					"type": "F_Point",
+					"isArray": false,
+					"canBeNull": true,
+					"arrayMinLength": null,
+					"arrayMaxLength": null,
+					"editorDisplayMode": "PointPath",
+					"editorDisplayScale": 1,
+					"editorDisplayPos": "Above",
+					"editorLinkStyle": "StraightArrow",
+					"editorDisplayColor": null,
 					"editorAlwaysShow": false,
 					"editorShowInWorld": true,
 					"editorCutLongValues": true,
@@ -404,7 +555,7 @@
 					"tilesetUid": null
 				},
 				{
-					"identifier": "teleport_target",
+					"identifier": "warp_target",
 					"doc": null,
 					"__type": "EntityRef",
 					"uid": 29,
@@ -433,7 +584,7 @@
 					"defaultOverride": null,
 					"textLanguageMode": null,
 					"symmetricalRef": false,
-					"autoChainRef": true,
+					"autoChainRef": false,
 					"allowOutOfLevelRef": false,
 					"allowedRefs": "OnlySame",
 					"allowedRefsEntityUid": 5,
@@ -441,6 +592,41 @@
 					"tilesetUid": null
 				}
 			]
+		},
+		{
+			"identifier": "Start_Position",
+			"uid": 40,
+			"tags": [],
+			"exportToToc": false,
+			"allowOutOfBounds": false,
+			"doc": null,
+			"width": 16,
+			"height": 16,
+			"resizableX": false,
+			"resizableY": false,
+			"minWidth": null,
+			"maxWidth": null,
+			"minHeight": null,
+			"maxHeight": null,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 0.4,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#D30086",
+			"renderMode": "Ellipse",
+			"showName": true,
+			"tilesetId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"uiTileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
 		}
 	], "tilesets": [
 		{
@@ -466,11 +652,11 @@
 			}
 		}
 	], "enums": [{ "identifier": "Node_Type", "uid": 30, "values": [
-		{ "id": "EMPTY", "tileRect": null, "color": 15389866 },
-		{ "id": "START", "tileRect": null, "color": 14330771 },
-		{ "id": "PROJECT", "tileRect": null, "color": 12470831 },
-		{ "id": "TELEPORT", "tileRect": null, "color": 4446039 }
-	], "iconTilesetUid": null, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }], "externalEnums": [], "levelFields": [] },
+		{ "id": "EMPTY", "tileRect": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 }, "color": 15389866 },
+		{ "id": "START", "tileRect": { "tilesetUid": 10, "x": 48, "y": 0, "w": 16, "h": 16 }, "color": 14330771 },
+		{ "id": "PROJECT", "tileRect": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "color": 12470831 },
+		{ "id": "WARP", "tileRect": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "color": 4446039 }
+	], "iconTilesetUid": 10, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }], "externalEnums": [], "levelFields": [] },
 	"levels": [
 		{
 			"identifier": "Level_0",
@@ -522,7 +708,7 @@
 							"__grid": [5,6],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
 							"width": 16,
@@ -530,11 +716,11 @@
 							"defUid": 5,
 							"px": [80,96],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "1eaf8e90-c210-11ef-a872-0f7d910e36bf",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -543,7 +729,8 @@
 									"id": "V_String",
 									"params": ["1eaf8e90-c210-11ef-a872-0f7d910e36bf"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "3fed0980-c210-11ef-a872-179248c84351",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -552,8 +739,13 @@
 									"id": "V_String",
 									"params": ["3fed0980-c210-11ef-a872-179248c84351"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [null] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": { "cx": 6, "cy": 6 }, "__tile": null, "defUid": 39, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["6,6"]
+								}] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [null] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -562,45 +754,14 @@
 									"id": "V_String",
 									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": { "cx": 4, "cy": 6 }, "__tile": null, "defUid": 37, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["4,6"]
+								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 4, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [4] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 96,
-							"__worldY": 112
-						},
-						{
-							"__identifier": "Node",
-							"__grid": [19,6],
-							"__pivot": [0,0],
-							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
-							"__smartColor": "#DAAB93",
-							"iid": "7ebae910-c210-11ef-a872-5fae80970927",
-							"width": 16,
-							"height": 16,
-							"defUid": 5,
-							"px": [304,96],
-							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "START", "__tile": null, "defUid": 31, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["START"]
-								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
-									"entityIid": "1fb1fe10-c210-11ef-a44b-df68b8da3a6c",
-									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
-									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
-									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
-								}, "__tile": null, "defUid": 6, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["1fb1fe10-c210-11ef-a44b-df68b8da3a6c"]
-								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [null] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [null] },
-								{ "__identifier": "project_id", "__type": "Int", "__value": -1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [-1] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
-							],
-							"__worldX": 320,
 							"__worldY": 112
 						},
 						{
@@ -608,7 +769,7 @@
 							"__grid": [5,4],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
 							"width": 16,
@@ -616,12 +777,13 @@
 							"defUid": 5,
 							"px": [80,64],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "3fed0980-c210-11ef-a872-179248c84351",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -630,7 +792,11 @@
 									"id": "V_String",
 									"params": ["3fed0980-c210-11ef-a872-179248c84351"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": { "cx": 6, "cy": 4 }, "__tile": null, "defUid": 39, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["6,4"]
+								}] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
 									"entityIid": "1eaf8e90-c210-11ef-a872-0f7d910e36bf",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -639,7 +805,8 @@
 									"id": "V_String",
 									"params": ["1eaf8e90-c210-11ef-a872-0f7d910e36bf"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -648,8 +815,12 @@
 									"id": "V_String",
 									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": { "cx": 4, "cy": 4 }, "__tile": null, "defUid": 37, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["4,4"]
+								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 2, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [2] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 96,
 							"__worldY": 80
@@ -659,7 +830,7 @@
 							"__grid": [4,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
 							"width": 16,
@@ -667,11 +838,11 @@
 							"defUid": 5,
 							"px": [64,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -680,7 +851,11 @@
 									"id": "V_String",
 									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": { "cx": 4, "cy": 4 }, "__tile": null, "defUid": 36, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["4,4"]
+								}] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "1eaf8e90-c210-11ef-a872-0f7d910e36bf",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -689,7 +864,8 @@
 									"id": "V_String",
 									"params": ["1eaf8e90-c210-11ef-a872-0f7d910e36bf"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
 									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -698,9 +874,14 @@
 									"id": "V_String",
 									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": { "cx": 4, "cy": 6 }, "__tile": null, "defUid": 38, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["4,6"]
+								}] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 3, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [3] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 80,
 							"__worldY": 96
@@ -710,7 +891,7 @@
 							"__grid": [35,4],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "08a597b0-c210-11ef-82b7-c3d9d21c7e94",
 							"width": 16,
@@ -718,12 +899,13 @@
 							"defUid": 5,
 							"px": [560,64],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "99533cb0-c210-11ef-a872-b503b67aec6b",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -732,8 +914,13 @@
 									"id": "V_String",
 									"params": ["99533cb0-c210-11ef-a872-b503b67aec6b"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [null] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": { "cx": 36, "cy": 4 }, "__tile": null, "defUid": 39, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["36,4"]
+								}] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [null] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "12d88620-c210-11ef-82b7-7900e60c6d0f",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -742,8 +929,12 @@
 									"id": "V_String",
 									"params": ["12d88620-c210-11ef-82b7-7900e60c6d0f"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": { "cx": 34, "cy": 4 }, "__tile": null, "defUid": 37, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["34,4"]
+								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 7, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [7] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 576,
 							"__worldY": 80
@@ -753,7 +944,7 @@
 							"__grid": [33,4],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "12d88620-c210-11ef-82b7-7900e60c6d0f",
 							"width": 16,
@@ -761,12 +952,13 @@
 							"defUid": 5,
 							"px": [528,64],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "08a597b0-c210-11ef-82b7-c3d9d21c7e94",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -775,8 +967,13 @@
 									"id": "V_String",
 									"params": ["08a597b0-c210-11ef-82b7-c3d9d21c7e94"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [null] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": { "cx": 34, "cy": 4 }, "__tile": null, "defUid": 39, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["34,4"]
+								}] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [null] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "a4056d40-c210-11ef-a872-ad4940b022df",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -785,8 +982,12 @@
 									"id": "V_String",
 									"params": ["a4056d40-c210-11ef-a872-ad4940b022df"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": { "cx": 32, "cy": 4 }, "__tile": null, "defUid": 37, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["32,4"]
+								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 6, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [6] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 544,
 							"__worldY": 80
@@ -796,7 +997,7 @@
 							"__grid": [6,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "3fed0980-c210-11ef-a872-179248c84351",
 							"width": 16,
@@ -804,11 +1005,11 @@
 							"defUid": 5,
 							"px": [96,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -817,8 +1018,13 @@
 									"id": "V_String",
 									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": { "cx": 6, "cy": 4 }, "__tile": null, "defUid": 36, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["6,4"]
+								}] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
 									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -827,7 +1033,11 @@
 									"id": "V_String",
 									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_south", "__type": "Point", "__value": { "cx": 6, "cy": 6 }, "__tile": null, "defUid": 38, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["6,6"]
+								}] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "1eaf8e90-c210-11ef-a872-0f7d910e36bf",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -836,8 +1046,9 @@
 									"id": "V_String",
 									"params": ["1eaf8e90-c210-11ef-a872-0f7d910e36bf"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 112,
 							"__worldY": 96
@@ -847,7 +1058,7 @@
 							"__grid": [35,6],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "6172bb90-c210-11ef-a872-3b9a08dcb39f",
 							"width": 16,
@@ -855,12 +1066,13 @@
 							"defUid": 5,
 							"px": [560,96],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "99533cb0-c210-11ef-a872-b503b67aec6b",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -869,8 +1081,13 @@
 									"id": "V_String",
 									"params": ["99533cb0-c210-11ef-a872-b503b67aec6b"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": { "cx": 36, "cy": 6 }, "__tile": null, "defUid": 39, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["36,6"]
+								}] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "9b303a10-c210-11ef-a872-276c2a8e4da6",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -879,8 +1096,12 @@
 									"id": "V_String",
 									"params": ["9b303a10-c210-11ef-a872-276c2a8e4da6"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": { "cx": 34, "cy": 6 }, "__tile": null, "defUid": 37, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["34,6"]
+								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 9, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [9] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 576,
 							"__worldY": 112
@@ -890,7 +1111,7 @@
 							"__grid": [36,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "99533cb0-c210-11ef-a872-b503b67aec6b",
 							"width": 16,
@@ -898,11 +1119,11 @@
 							"defUid": 5,
 							"px": [576,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "08a597b0-c210-11ef-82b7-c3d9d21c7e94",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -911,7 +1132,11 @@
 									"id": "V_String",
 									"params": ["08a597b0-c210-11ef-82b7-c3d9d21c7e94"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": { "cx": 36, "cy": 4 }, "__tile": null, "defUid": 36, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["36,4"]
+								}] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "ff13d060-c210-11ef-a44b-63281ecfece8",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -920,7 +1145,8 @@
 									"id": "V_String",
 									"params": ["ff13d060-c210-11ef-a44b-63281ecfece8"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
 									"entityIid": "6172bb90-c210-11ef-a872-3b9a08dcb39f",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -929,9 +1155,14 @@
 									"id": "V_String",
 									"params": ["6172bb90-c210-11ef-a872-3b9a08dcb39f"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": { "cx": 36, "cy": 6 }, "__tile": null, "defUid": 38, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["36,6"]
+								}] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 8, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [8] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 592,
 							"__worldY": 96
@@ -941,7 +1172,7 @@
 							"__grid": [33,6],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "9b303a10-c210-11ef-a872-276c2a8e4da6",
 							"width": 16,
@@ -949,12 +1180,13 @@
 							"defUid": 5,
 							"px": [528,96],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [null] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "6172bb90-c210-11ef-a872-3b9a08dcb39f",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -963,8 +1195,13 @@
 									"id": "V_String",
 									"params": ["6172bb90-c210-11ef-a872-3b9a08dcb39f"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": { "cx": 34, "cy": 6 }, "__tile": null, "defUid": 39, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["34,6"]
+								}] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "a4056d40-c210-11ef-a872-ad4940b022df",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -973,8 +1210,12 @@
 									"id": "V_String",
 									"params": ["a4056d40-c210-11ef-a872-ad4940b022df"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": { "cx": 32, "cy": 6 }, "__tile": null, "defUid": 37, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["32,6"]
+								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 10, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [10] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 544,
 							"__worldY": 112
@@ -984,7 +1225,7 @@
 							"__grid": [32,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#BE4A2F",
 							"iid": "a4056d40-c210-11ef-a872-ad4940b022df",
 							"width": 16,
@@ -992,11 +1233,11 @@
 							"defUid": 5,
 							"px": [512,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "12d88620-c210-11ef-82b7-7900e60c6d0f",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1005,8 +1246,13 @@
 									"id": "V_String",
 									"params": ["12d88620-c210-11ef-82b7-7900e60c6d0f"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [null] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": { "cx": 32, "cy": 4 }, "__tile": null, "defUid": 36, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["32,4"]
+								}] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [null] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
 									"entityIid": "9b303a10-c210-11ef-a872-276c2a8e4da6",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1015,7 +1261,11 @@
 									"id": "V_String",
 									"params": ["9b303a10-c210-11ef-a872-276c2a8e4da6"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_south", "__type": "Point", "__value": { "cx": 32, "cy": 6 }, "__tile": null, "defUid": 38, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["32,6"]
+								}] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "54fcd670-c210-11ef-9c94-fb599354a5be",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1024,8 +1274,9 @@
 									"id": "V_String",
 									"params": ["54fcd670-c210-11ef-9c94-fb599354a5be"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 5, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [5] }] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 528,
 							"__worldY": 96
@@ -1035,7 +1286,7 @@
 							"__grid": [5,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#43D757",
 							"iid": "1eaf8e90-c210-11ef-a872-0f7d910e36bf",
 							"width": 16,
@@ -1043,11 +1294,11 @@
 							"defUid": 5,
 							"px": [80,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "TELEPORT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["TELEPORT"]
+									"params": ["WARP"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1056,7 +1307,8 @@
 									"id": "V_String",
 									"params": ["7f11e2b0-c210-11ef-a872-1b1ba9cb3fb3"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "3fed0980-c210-11ef-a872-179248c84351",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1065,7 +1317,8 @@
 									"id": "V_String",
 									"params": ["3fed0980-c210-11ef-a872-179248c84351"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
 									"entityIid": "7d58e810-c210-11ef-a872-0d5f518c48ff",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1074,7 +1327,8 @@
 									"id": "V_String",
 									"params": ["7d58e810-c210-11ef-a872-0d5f518c48ff"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "f6811f50-c210-11ef-82b7-37ab8b0a8f7d",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1083,8 +1337,9 @@
 									"id": "V_String",
 									"params": ["f6811f50-c210-11ef-82b7-37ab8b0a8f7d"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": {
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
 									"entityIid": "c8af5d30-c210-11ef-9c94-879a64e02c04",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1102,7 +1357,7 @@
 							"__grid": [20,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#43D757",
 							"iid": "4eb21eb0-c210-11ef-9c94-ade415c4cdfc",
 							"width": 16,
@@ -1110,11 +1365,11 @@
 							"defUid": 5,
 							"px": [320,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "TELEPORT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["TELEPORT"]
+									"params": ["WARP"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
 									"entityIid": "54fcd670-c210-11ef-9c94-fb599354a5be",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1123,9 +1378,12 @@
 									"id": "V_String",
 									"params": ["54fcd670-c210-11ef-9c94-fb599354a5be"]
 								}] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "1fb1fe10-c210-11ef-a44b-df68b8da3a6c",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1134,8 +1392,9 @@
 									"id": "V_String",
 									"params": ["1fb1fe10-c210-11ef-a44b-df68b8da3a6c"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": {
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
 									"entityIid": "54fcd670-c210-11ef-9c94-fb599354a5be",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1153,7 +1412,7 @@
 							"__grid": [31,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#43D757",
 							"iid": "54fcd670-c210-11ef-9c94-fb599354a5be",
 							"width": 16,
@@ -1161,12 +1420,13 @@
 							"defUid": 5,
 							"px": [496,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "TELEPORT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["TELEPORT"]
+									"params": ["WARP"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "a4056d40-c210-11ef-a872-ad4940b022df",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1175,10 +1435,13 @@
 									"id": "V_String",
 									"params": ["a4056d40-c210-11ef-a872-ad4940b022df"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": {
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
 									"entityIid": "4eb21eb0-c210-11ef-9c94-ade415c4cdfc",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1196,7 +1459,7 @@
 							"__grid": [18,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#43D757",
 							"iid": "c8af5d30-c210-11ef-9c94-879a64e02c04",
 							"width": 16,
@@ -1204,12 +1467,13 @@
 							"defUid": 5,
 							"px": [288,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "TELEPORT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["TELEPORT"]
+									"params": ["WARP"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "1fb1fe10-c210-11ef-a44b-df68b8da3a6c",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1218,10 +1482,13 @@
 									"id": "V_String",
 									"params": ["1fb1fe10-c210-11ef-a44b-df68b8da3a6c"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": {
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
 									"entityIid": "1eaf8e90-c210-11ef-a872-0f7d910e36bf",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1239,7 +1506,7 @@
 							"__grid": [19,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 },
 							"__smartColor": "#EAD4AA",
 							"iid": "1fb1fe10-c210-11ef-a44b-df68b8da3a6c",
 							"width": 16,
@@ -1247,12 +1514,13 @@
 							"defUid": 5,
 							"px": [304,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "EMPTY", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "EMPTY", "__tile": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["EMPTY"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": {
 									"entityIid": "4eb21eb0-c210-11ef-9c94-ade415c4cdfc",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1261,16 +1529,18 @@
 									"id": "V_String",
 									"params": ["4eb21eb0-c210-11ef-9c94-ade415c4cdfc"]
 								}] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": {
-									"entityIid": "7ebae910-c210-11ef-a872-5fae80970927",
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": {
+									"entityIid": "5d431170-c210-11ef-9c94-e37473e498d6",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
 									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
 								}, "__tile": null, "defUid": 8, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["7ebae910-c210-11ef-a872-5fae80970927"]
+									"params": ["5d431170-c210-11ef-9c94-e37473e498d6"]
 								}] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "c8af5d30-c210-11ef-9c94-879a64e02c04",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1279,8 +1549,9 @@
 									"id": "V_String",
 									"params": ["c8af5d30-c210-11ef-9c94-879a64e02c04"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
 							],
 							"__worldX": 320,
 							"__worldY": 96
@@ -1290,7 +1561,7 @@
 							"__grid": [37,5],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 416, "y": 16, "w": 16, "h": 16 },
+							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
 							"__smartColor": "#43D757",
 							"iid": "ff13d060-c210-11ef-a44b-63281ecfece8",
 							"width": 16,
@@ -1298,14 +1569,17 @@
 							"defUid": 5,
 							"px": [592,80],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "TELEPORT", "__tile": null, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["TELEPORT"]
+									"params": ["WARP"]
 								}] },
-								{ "__identifier": "NORTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
-								{ "__identifier": "EAST", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
-								{ "__identifier": "SOUTH", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
-								{ "__identifier": "WEST", "__type": "EntityRef", "__value": {
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 6, "realEditorValues": [] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": {
 									"entityIid": "99533cb0-c210-11ef-a872-b503b67aec6b",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1314,8 +1588,9 @@
 									"id": "V_String",
 									"params": ["99533cb0-c210-11ef-a872-b503b67aec6b"]
 								}] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
-								{ "__identifier": "teleport_target", "__type": "EntityRef", "__value": {
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
 									"entityIid": "4eb21eb0-c210-11ef-9c94-ade415c4cdfc",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
@@ -1327,6 +1602,61 @@
 							],
 							"__worldX": 608,
 							"__worldY": 96
+						},
+						{
+							"__identifier": "Node",
+							"__grid": [19,6],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 },
+							"__smartColor": "#EAD4AA",
+							"iid": "5d431170-c210-11ef-9c94-e37473e498d6",
+							"width": 16,
+							"height": 16,
+							"defUid": 5,
+							"px": [304,96],
+							"fieldInstances": [
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "EMPTY", "__tile": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["EMPTY"]
+								}] },
+								{ "__identifier": "neighbour_north", "__type": "EntityRef", "__value": {
+									"entityIid": "1fb1fe10-c210-11ef-a44b-df68b8da3a6c",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 6, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["1fb1fe10-c210-11ef-a44b-df68b8da3a6c"]
+								}] },
+								{ "__identifier": "path_north", "__type": "Point", "__value": null, "__tile": null, "defUid": 36, "realEditorValues": [] },
+								{ "__identifier": "neighbour_east", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 9, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Point", "__value": null, "__tile": null, "defUid": 39, "realEditorValues": [] },
+								{ "__identifier": "neighbour_south", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 8, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Point", "__value": null, "__tile": null, "defUid": 38, "realEditorValues": [] },
+								{ "__identifier": "neighbour_west", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 7, "realEditorValues": [] },
+								{ "__identifier": "path_west", "__type": "Point", "__value": null, "__tile": null, "defUid": 37, "realEditorValues": [] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] }
+							],
+							"__worldX": 320,
+							"__worldY": 112
+						},
+						{
+							"__identifier": "Start_Position",
+							"__grid": [19,6],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": null,
+							"__smartColor": "#D30086",
+							"iid": "0046f0d0-c210-11ef-9c94-c134c8a519a7",
+							"width": 16,
+							"height": 16,
+							"defUid": 40,
+							"px": [304,96],
+							"fieldInstances": [],
+							"__worldX": 320,
+							"__worldY": 112
 						}
 					]
 				},
@@ -1391,8 +1721,8 @@
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,
 						0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,
 						0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,1,1,0,0,0,0,1,1,1,1,1,0,0,0,
 						0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,

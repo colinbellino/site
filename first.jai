@@ -4,6 +4,7 @@
 #import "String";
 #import "File_Watcher";
 #import "Thread";
+#import "Math";
 
 watcher: File_Watcher(void);
 config: Config;
@@ -132,84 +133,124 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             EMPTY;
             START;
             PROJECT;
-            TELEPORT;
+            WARP;
         }
         Node :: struct {
             type:               Node_Type;
-            grid_position:      [2]s32;
-            neighbours:         [4]s32;
+            grid_position:      [2]float;
+            neighbours:         [4]Path;
             project_id:         s32;
-            teleport_target:    s32;
+            warp_target:        s32;
+        }
+        Path :: struct {
+            node:               s32;
+            path:               [2]float;
         }
 
-        result := ldtk_load("./src/world.ldtk", temp);
-        assert(result != null);
+        root := ldtk_load("./src/world.ldtk", temp);
+        assert(root != null);
 
-        level := *result.levels[0];
+        level := *root.levels[0];
 
         grid: [..]s32;
         nodes: [..]Node;
-        start_position: [2]s32;
+        start_position: [2]float;
         for level.layerInstances[LAYER_WORLD].intGridCsv {
             array_add(*grid, it);
         }
+        entity_instances := level.layerInstances[LAYER_ENTITY].entityInstances;
         for entity_instance : level.layerInstances[LAYER_ENTITY].entityInstances {
-            node := Node.{
-                grid_position   = entity_instance.__grid,
-                neighbours      = .[-1,-1,-1,-1],
-                project_id      = 0,
-                teleport_target = 0,
-            };
-            for field_instance : entity_instance.fieldInstances {
-                if field_instance.__value.object == null { continue; }
-
-                if field_instance.__identifier == {
-                    case "project_id"; {
-                        node.project_id = cast(s32) field_instance.__value.number;
-                    }
-                    case "teleport_target"; {
-                        node.teleport_target = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances);
-                    }
-                    case "NORTH"; { node.neighbours[0] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
-                    case "EAST";  { node.neighbours[1] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
-                    case "SOUTH"; { node.neighbours[2] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
-                    case "WEST";  { node.neighbours[3] = ldtk_get_entity_instance_index(field_instance.__value.object, level.layerInstances[LAYER_ENTITY].entityInstances); }
-                    case "type"; {
-                        if field_instance.__value.str == {
-                            case "EMPTY";    { node.type = .EMPTY; }
-                            case "START";    { node.type = .START; start_position = entity_instance.__grid; }
-                            case "PROJECT";  { node.type = .PROJECT; }
-                            case "TELEPORT"; { node.type = .TELEPORT; }
-                            case;            { assert(false, "Unknown node type value: %", field_instance.__value.str); }
-                        }
-                    }
+            entity_def: LDTK_Entity_Def;
+            for root.defs.entities {
+                if it.uid == entity_instance.defUid {
+                    entity_def = it;
+                    break;
                 }
             }
 
-            if node.type == {
-                case .PROJECT;  { assert(node.project_id > 0, "Invalid project_id! %", node); }
-                case .TELEPORT; { assert(node.teleport_target > -1, "Invalid teleport_target! %", node); }
+            grid_position := float.[ cast(float)entity_instance.__grid[0], cast(float)entity_instance.__grid[1] ];
+
+            if entity_def.identifier == {
+                case "Node"; {
+                    node := Node.{
+                        grid_position   = grid_position,
+                        neighbours      = .[.{ node = -1 }, .{ node = -1 }, .{ node = -1 }, .{ node = -1 }],
+                        project_id      = 0,
+                        warp_target     = 0,
+                    };
+                    for field_instance : entity_instance.fieldInstances {
+                        obj := field_instance.__value.object;
+                        if obj == null { continue; }
+
+                        if field_instance.__identifier == {
+                            case "project_id"; {
+                                node.project_id = cast(s32) field_instance.__value.number;
+                            }
+                            case "warp_target"; {
+                                node.warp_target = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances);
+                            }
+                            case "neighbour_north"; { node.neighbours[0].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            case "neighbour_east";  { node.neighbours[1].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            case "neighbour_south"; { node.neighbours[2].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            case "neighbour_west";  { node.neighbours[3].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            case "path_north";      { node.neighbours[0].path = ldtk_get_grid_position(obj); }
+                            case "path_east";       { node.neighbours[1].path = ldtk_get_grid_position(obj); }
+                            case "path_south";      { node.neighbours[2].path = ldtk_get_grid_position(obj); }
+                            case "path_west";       { node.neighbours[3].path = ldtk_get_grid_position(obj); }
+                            case "type"; {
+                                if field_instance.__value.str == {
+                                    case "EMPTY";    { node.type = .EMPTY; }
+                                    case "START";    { node.type = .START; start_position = grid_position; }
+                                    case "PROJECT";  { node.type = .PROJECT; }
+                                    case "WARP";     { node.type = .WARP; }
+                                    case;            { assert(false, "Unknown node type value: %", field_instance.__value.str); }
+                                }
+                            }
+                            case; {
+                                assert(false, "Unknown field_instance: %", field_instance.__identifier);
+                            }
+                        }
+                    }
+
+                    if node.type == {
+                        case .PROJECT; { assert(node.project_id > 0, "Invalid project_id! %", node); }
+                        case .WARP;    { assert(node.warp_target > -1, "Invalid warp_target! %", node); }
+                    }
+                    array_add(*nodes, node);
+                }
+                case "Start_Position"; {
+                    start_position = grid_position;
+                }
             }
-            array_add(*nodes, node);
         }
 
         assert(start_position[0] != 0 && start_position[1] != 0, "Missing start_position");
 
         world_str: String_Builder;
-        append(*world_str, "{\n");
+        append(*world_str, "\nconst WORLD = {\n");
         append(*world_str, tprint("  width:  %,\n", level.pxWid / GRID_SIZE));
         append(*world_str, tprint("  height: %,\n", level.pxHei / GRID_SIZE));
         append(*world_str, tprint("  grid:   ["));
         for grid { append(*world_str, tprint("%, ", it)); }
         append(*world_str, "],\n");
         append(*world_str, tprint("  nodes:   ["));
-        for nodes { append(*world_str, tprint("{ type: %, grid_position: %, neighbours: %, project_id: %, teleport_target: % }, ", cast(s32)it.type, it.grid_position, it.neighbours, it.project_id, it.teleport_target)); }
+        for nodes {
+            append(*world_str, tprint("{ type: %,", cast(s32)it.type));
+            append(*world_str, tprint(" grid_position: %,", it.grid_position));
+            append(*world_str, tprint(" neighbours: ["));
+            for neighbour : it.neighbours {
+                append(*world_str, tprint("{ node: %, path: % }, ", neighbour.node, neighbour.path));
+            }
+            append(*world_str, tprint(" ],"));
+            append(*world_str, tprint(" project_id: %,", it.project_id));
+            append(*world_str, tprint(" warp_target: %,", it.warp_target));
+            append(*world_str, " }, ");
+        }
         append(*world_str, "],\n");
         append(*world_str, tprint("  start_position: %,\n", start_position));
-        append(*world_str, "}");
+        append(*world_str, "};");
 
-        world_js := tprint("\nconst WORLD = %;", builder_to_string(*world_str));
-        inject_js(world_js);
+        inject_js(builder_to_string(*world_str));
         // log("---- world_js injected");
     }
 }
@@ -217,25 +258,12 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
 inject_js :: (text: string) {
     path := "./public/dist/game.js";
 
-    // js_file_data, js_file_ok := read_entire_file(path);
-    // if !js_file_ok {
-    //     log_error("Couldn't open js file to append code.");
-    //     return;
-    // }
-    // new_data := join(text, "\n", js_file_data);
-    // write_ok := write_entire_file(path, new_data);
-    // if !write_ok {
-    //     log_error("Couldn't write to js file to append code.");
-    //     return;
-    // }
-
     js_file, js_file_ok := file_open(path, for_writing = true, keep_existing_content = true);
     if !js_file_ok {
         log_error("Couldn't open js file to append code.");
         return;
     }
     defer file_close(*js_file);
-    // ok, bytes_read := file_read(user_data.file, contents, cast(s64) total_size);
     file_set_position(js_file, file_length(js_file));
     file_write(*js_file, text.data, text.count);
 }

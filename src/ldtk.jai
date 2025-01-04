@@ -1,5 +1,6 @@
 #import,dir "jaison";
 #import "Hash_Table";
+#import "Math";
 
 LDTK_Root :: struct {
     iid:                string;
@@ -149,14 +150,23 @@ ldtk_load :: (path: string, allocator: Allocator, loc := #caller_location) -> re
     return result;
 }
 
-ldtk_get_entity_instance_index :: (object: *JSON_Object, entity_instances: []LDTK_Entity_Instance) -> s32 {
-    value, success := table_find(object, "entityIid");
-    assert(success);
-    target_entity_iid := value.str;
-    for other, other_index : entity_instances {
+ldtk_get_node_index :: (object: *JSON_Object, node_uid: LDTK_Entity_Uid, entity_instances: []LDTK_Entity_Instance) -> s32 {
+    entity_iid, entity_iid_success := table_find(object, "entityIid");
+    assert(entity_iid_success);
+    target_entity_iid := entity_iid.str;
+    node_index: s32;
+    for other : entity_instances {
+        defer { if other.defUid == node_uid node_index += 1; }
         if other.iid == target_entity_iid {
-            return cast(s32)other_index;
+            return node_index;
         }
     }
     return -1;
+}
+ldtk_get_grid_position :: (object: *JSON_Object) -> [2]float {
+    cx, cx_success := table_find(object, "cx");
+    assert(cx_success);
+    cy, cy_success := table_find(object, "cy");
+    assert(cy_success);
+    return .[ cast(float)cx.number, cast(float)cy.number ];
 }

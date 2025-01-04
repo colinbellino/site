@@ -28,9 +28,10 @@ type Game = {
     clear_color:            Color;
     player:                 Entity;
     projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
-    nodes:                 Fixed_Size_Array<Map_Node, typeof MAX_NODES>,
-    nodes_current:         int;
-    nodes_destination:     int;
+    nodes:                  Fixed_Size_Array<Map_Node, typeof MAX_NODES>,
+    nodes_current:          int;
+    destination_node:       int;
+    destination_path:       Fixed_Size_Array<Vector2, typeof MAX_PATH>;
     entities:               Fixed_Size_Array<Entity, typeof MAX_ENTITIES>;
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
@@ -69,14 +70,18 @@ enum Node_Type {
     EMPTY,
     START,
     PROJECT,
-    TELEPORT,
+    WARP,
 }
 type Map_Node = {
     type:               Node_Type;
-    grid_position:      Vector2,
-    neighbours:         Vector4; // index into game.nodes (order: NESW)
+    grid_position:      Vector2;
+    neighbours:         Static_Array<Neighbour, 4>;
     project_id:         int;
-    teleport_target:    int; // index into game.nodes
+    warp_target:        int; // index into game.nodes
+}
+type Neighbour = {
+    node: int; // index into game.nodes, order = NESW
+    path: Vector2;
 }
 
 // :constants
@@ -88,6 +93,7 @@ const MAX_ENTITIES : number = 128;
 const MAX_PROJECTS : number = 16;
 const MAX_NODES : number = 32;
 const MAX_SPRITES : number = 2048;
+const MAX_PATH: number = 3;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
 const DIRECTIONS : Vector2[] = [
@@ -133,6 +139,7 @@ function update() {
             game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
             game.world_grid = Array(WORLD_GRID_SIZE);
             game.tile_grid = Array(TILE_GRID_SIZE);
+            game.destination_path = fixed_array_make(MAX_PATH);
             game.debug_draw_console = false;
             game.debug_draw_entities = true;
             game.debug_draw_world_grid = false;
@@ -164,8 +171,9 @@ function update() {
             game.nodes = fixed_array_make(MAX_NODES);
             for (let node_index = 0; node_index < WORLD.nodes.length; node_index++) {
                 const node = WORLD.nodes[node_index];
-                // assert(node.project_id <= game.projects.count-1, `Invalid project_id: ${node.project_id}`);
+                assert(node.project_id <= game.projects.count-1, `Invalid project_id: ${node.project_id}`);
                 fixed_array_add(game.nodes, node);
+
                 if (vector2_equal(node.grid_position, WORLD.start_position)) {
                     game.nodes_current = node_index;
                 }
@@ -313,9 +321,16 @@ function update() {
                         const direction = vector_to_direction(player_input_move);
                         const current_node = game.nodes.data[game.nodes_current];
                         const destination = current_node.neighbours[direction];
-                        if (destination > -1) {
+                        const destination_node = game.nodes.data[destination.node];
+                        if (destination.node > -1) {
                             ui_panel_close();
-                            game.nodes_destination = destination;
+                            game.destination_node = destination.node;
+                            game.destination_path.count = 0;
+                            fixed_array_add(game.destination_path, current_node.grid_position);
+                            if (!vector2_equal(destination.path, [0, 0])) {
+                                fixed_array_add(game.destination_path, destination.path);
+                            }
+                            fixed_array_add(game.destination_path, destination_node.grid_position);
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
@@ -331,10 +346,15 @@ function update() {
                             case Node_Type.PROJECT: {
                                 ui_panel_node_open(node);
                             } break;
-                            case Node_Type.TELEPORT: {
+                            case Node_Type.WARP: {
                                 ui_panel_close();
-                                const destination = node.teleport_target;
-                                game.nodes_destination = destination;
+                                const destination = node.warp_target;
+                                const current_node = game.nodes.data[game.nodes_current];
+                                const destination_node = game.nodes.data[destination];
+                                game.destination_node = destination;
+                                game.destination_path.count = 0;
+                                fixed_array_add(game.destination_path, current_node.grid_position);
+                                fixed_array_add(game.destination_path, destination_node.grid_position);
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
                             } break;
@@ -343,23 +363,30 @@ function update() {
                 } break;
                 // :world MOVING
                 case World_Mode.MOVING: {
-                    const DURATION = 1000;
-                    const end = game.world_mode_timer + DURATION;
-                    const remaining = end - now;
-                    const progress = clamp(1.0 - (1.0 / (DURATION / remaining)), 0, 1);
-
                     const current_node = game.nodes.data[game.nodes_current];
-                    const destination_node = game.nodes.data[game.nodes_destination];
-                    if (current_node.type === Node_Type.TELEPORT && destination_node.type == Node_Type.TELEPORT) {
+                    const destination_node = game.nodes.data[game.destination_node];
+                    const is_warp = current_node.type === Node_Type.WARP && destination_node.type == Node_Type.WARP;
+
+                    let duration = 200 * game.destination_path.count;
+                    if (is_warp) { duration *= 4; /* TODO: calculate the actual node distance instead of hardcoding the multiplier */ }
+                    const end = game.world_mode_timer + duration;
+                    const remaining = end - now;
+                    // FIXME: make this this is framerate independent!
+                    const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
+
+                    if (is_warp) {
+                        // TODO: better animation
                         game.player.sprite.scale = [0, 0];
                     }
-                    game.player.sprite.position = vector2_lerp(grid_position_center(current_node.grid_position), grid_position_center(destination_node.grid_position), progress);
+
+                    const [current, next, step_progress] = lerp_indices(game.destination_path.count-1, progress);
+                    game.player.sprite.position = vector2_lerp(grid_position_center(game.destination_path.data[current]), grid_position_center(game.destination_path.data[next]), step_progress);
                     game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
 
                     if (progress === 1) {
-                        game.nodes_current = game.nodes_destination;
+                        game.nodes_current = game.destination_node;
                         const node = game.nodes.data[game.nodes_current];
-                        if (current_node.type === Node_Type.TELEPORT && destination_node.type == Node_Type.TELEPORT) {
+                        if (is_warp) {
                             game.player.sprite.scale = [1, 1];
                         }
                         ui_panel_node_open(node);
@@ -393,7 +420,7 @@ function update() {
                     case Node_Type.PROJECT: {
                         texture_position = [64, 0];
                     } break;
-                    case Node_Type.TELEPORT: {
+                    case Node_Type.WARP: {
                         texture_position = [64, 16];
                         texture_size     = [32, 32];
                     } break;
@@ -1223,6 +1250,20 @@ function sin_01(time: float, frequency: float = 1.0): float {
 function is_in_bounds(grid_position: Vector2, grid_size: Vector2): boolean {
     return grid_position[0] >= 0 && grid_position[0] < grid_size[0] && grid_position[1] >= 0 && grid_position[1] < grid_size[1];
 }
+function lerp_indices(length: number, t: float): [int, int, float] {
+    let step_current = 0;
+    for (let i = 0; i < length; i++) {
+        if (t > i/length) {
+            step_current = i;
+        }
+    }
+
+    const step_next = Math.min(step_current+1, length);
+    const step_duration = 1/length;
+    const step_progress = (t - step_current/length) / step_duration;
+    console.log({ t, step_current, step_next, step_duration, step_progress });
+    return [step_current, step_next, step_progress];
+}
 
 // :matrix
 /*
@@ -1518,11 +1559,16 @@ function ui_push_console_line(line: string) {
 }
 function ui_panel_node_open(node: Map_Node) {
     switch (node.type) {
-        case Node_Type.EMPTY: { } break;
+        case Node_Type.EMPTY: {
+            game.renderer.ui_panel_node.element_content.innerHTML = ``;
+            game.renderer.ui_panel_node.opened = false;
+        } break;
         case Node_Type.START: {
+            // TODO: add a new type of nodes for this!
             game.renderer.ui_panel_node.element_content.innerHTML = `
                 < WEB&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;GAMES >
             `;
+            game.renderer.ui_panel_node.opened = true;
         } break;
         case Node_Type.PROJECT: {
             const project_id = node.project_id;
@@ -1530,14 +1576,14 @@ function ui_panel_node_open(node: Map_Node) {
             assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
             const project = game.projects.data[project_id];
             game.renderer.ui_panel_node.element_content.innerHTML = project.name;
+            game.renderer.ui_panel_node.opened = true;
             // TODO: on close?
         } break;
-        case Node_Type.TELEPORT: {
-            game.renderer.ui_panel_node.element_content.innerHTML = `TELEPORT`;
+        case Node_Type.WARP: {
+            game.renderer.ui_panel_node.element_content.innerHTML = `Enter`;
+            game.renderer.ui_panel_node.opened = true;
         } break;
     }
-
-    game.renderer.ui_panel_node.opened = true;
 }
 function ui_panel_close() {
     game.renderer.ui_panel_node.opened = false;
