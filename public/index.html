@@ -2,6 +2,7 @@
 <html>
 
 <head>
+    <meta name="viewport" content="width=device-width, user-scalable=no">
     <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png" />
     <style>
         html,body {
@@ -11,12 +12,8 @@
             width: 100%;
         }
         html {
-            font-size: 4vw;
-        }
-        @media (min-width: 700px) {
-            html {
-                font-size: 2vh;
-            }
+            font-size: 20px;
+            font-family: "Arial";
         }
         body {
             background: #2080ff;
@@ -28,15 +25,12 @@
             z-index: 2;
             padding: 15px;
             box-sizing: border-box;
-            top: 2vw;
-            right: 2vw;
-            bottom: 2vw;
-            left: 2vw;
             border-radius: 5px;
-            font-family: "Arial";
             background: rgba(0, 0, 0, 0.8);
             color: rgba(255, 255, 255, 0.9);
-
+            top: 10px;
+            left: 10px;
+            min-width: 300px;
             opacity: 0;
             transition: opacity linear 50ms;
         }
@@ -85,47 +79,47 @@
             .project {
                 right: auto;
                 bottom: auto;
-                min-width: 300px;
             }
         }
 
         .hud_button {
             z-index: 10;
             position: absolute;
-            width: 128px;
-            height: 128px;
+            width: 32px;
+            height: 32px;
             padding: 0;
             margin: 32px;
             border: 0;
             background-color: transparent;
             background-image: url("/images/atlas.png");
-            background-position: -1024px 0px;
-            background-size: 4096px 4096px;
+            background-position-y: 0px;
+            background-position-x: -256px;
+            background-size: 1024px 1024px;
             image-rendering: pixelated;
         }
         .hud_button.up {
-            left: 128px;
-            bottom: 256px;
+            left: 32px;
+            bottom: 64px;
         }
         .hud_button.right {
-            left: 256px;
-            bottom: 128px;
-            background-position-x: -1152px;
+            left: 64px;
+            bottom: 32px;
+            background-position-x: -288px;
         }
         .hud_button.down {
-            left: 128px;
+            left: 32px;
             bottom: 0px;
-            background-position-x: -1280px;
+            background-position-x: -320px;
         }
         .hud_button.left {
             left: 0px;
-            bottom: 128px;
-            background-position-x: -1408px;
+            bottom: 32px;
+            background-position-x: -352px;
         }
         .hud_button.confirm {
             right: 0px;
-            bottom: 128px;
-            background-position-x: -1536px;
+            bottom: 32px;
+            background-position-x: -384px;
         }
         @media (hover: hover) {
             .hud_button {

@@ -549,7 +549,7 @@ function update() {
                 ui_set_element_class(game.renderer.ui_panel_node.element_root, "open", game.renderer.ui_panel_node.opened);
             }
 
-            gl.viewport(0, 0, game.renderer.window_size[0]*game.renderer.pixel_ratio[0], game.renderer.window_size[1]*game.renderer.pixel_ratio[1]);
+            gl.viewport(0, 0, game.renderer.window_size[0]*game.renderer.pixel_ratio, game.renderer.window_size[1]*game.renderer.pixel_ratio);
 
             gl.clearColor(game.clear_color[0], game.clear_color[1], game.clear_color[2], game.clear_color[3]);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -628,12 +628,13 @@ function update() {
 
 function update_zoom() {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
-    // if (game.renderer.window_size[0] > game.renderer.window_size[1]) {
-    //     game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / (320*2));
-    // } else {
-    //     game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / (180*2));
-    // }
-    game.renderer.camera_main.zoom = 2;
+    game.renderer.camera_main.zoom = 1;
+    if (game.renderer.window_size[0] > 480) {
+        game.renderer.camera_main.zoom = 2;
+    }
+    if (game.renderer.window_size[0] > 960) {
+        game.renderer.camera_main.zoom = 3;
+    }
 }
 
 // :renderer
@@ -645,7 +646,7 @@ type Renderer = {
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
-    pixel_ratio:        Vector2;
+    pixel_ratio:        float;
     sprites:            Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
 }
 type Sprite_Pass = {
@@ -693,20 +694,16 @@ function renderer_resize_canvas() {
     if (width % 2)  { final_width -= 1; }
     if (height % 2) { final_height -= 1; }
 
-    game.renderer.pixel_ratio[0] = window.devicePixelRatio;
-    game.renderer.pixel_ratio[1] = window.devicePixelRatio;
+    game.renderer.pixel_ratio = window.devicePixelRatio;
     if (!Number.isInteger(window.devicePixelRatio)) { // Default to pixel_ratio of 2 in case we have some fucky wucky floating number ratio for now...
-        game.renderer.pixel_ratio[0] = 2;
-        game.renderer.pixel_ratio[1] = 2;
-        // game.renderer.pixel_ratio[0] *= (window.innerWidth / window.screen.availWidth);
-        // game.renderer.pixel_ratio[1] *= (window.innerHeight / window.screen.availHeight);
+        game.renderer.pixel_ratio = 2;
     }
     game.renderer.window_size[0] = final_width;
     game.renderer.window_size[1] = final_height;
     (game.renderer.gl.canvas as HTMLCanvasElement).style.width = `${final_width}px`;
     (game.renderer.gl.canvas as HTMLCanvasElement).style.height = `${final_height}px`;
-    game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio[0];
-    game.renderer.gl.canvas.height = final_height * game.renderer.pixel_ratio[1];
+    game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio;
+    game.renderer.gl.canvas.height = final_height * game.renderer.pixel_ratio;
 
     console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
@@ -745,7 +742,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         camera_main:        CAMERA_DEFAULT,
         sprites:            fixed_array_make(MAX_SPRITES),
         window_size:        [0, 0],
-        pixel_ratio:        [1, 1],
+        pixel_ratio:        1.0,
         gl:                 _gl,
         ui_root:            ui_root,
         ui_console:         ui_console,
