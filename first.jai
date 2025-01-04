@@ -140,6 +140,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             neighbours:         [4]Path;
             project_id:         s32;
             warp_target:        s32;
+            warp_camera:        [2]float;
         }
         Path :: struct {
             node:               s32;
@@ -179,8 +180,6 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                     node := Node.{
                         grid_position   = grid_position,
                         neighbours      = .[.{ node = -1 }, .{ node = -1 }, .{ node = -1 }, .{ node = -1 }],
-                        project_id      = 0,
-                        warp_target     = 0,
                     };
                     for field_instance : entity_instance.fieldInstances {
                         obj := field_instance.__value.object;
@@ -192,6 +191,9 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                             }
                             case "warp_target"; {
                                 node.warp_target = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances);
+                            }
+                            case "warp_camera"; {
+                                node.warp_camera = ldtk_get_grid_position(obj);
                             }
                             case "neighbour_north"; { node.neighbours[0].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
                             case "neighbour_east";  { node.neighbours[1].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
@@ -249,8 +251,12 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                 append(*world_str, tprint("{ node: %, path: % }, ", neighbour.node, neighbour.path));
             }
             append(*world_str, tprint(" ],"));
-            append(*world_str, tprint(" project_id: %,", it.project_id));
-            append(*world_str, tprint(" warp_target: %,", it.warp_target));
+            if it.project_id
+                append(*world_str, tprint(" project_id: %,", it.project_id));
+            if it.warp_target
+                append(*world_str, tprint(" warp_target: %,", it.warp_target));
+            if it.warp_camera[0] != 0 && it.warp_camera[1] != 0
+                append(*world_str, tprint(" warp_camera: %,", it.warp_camera));
             append(*world_str, " }, ");
         }
         append(*world_str, "],\n");

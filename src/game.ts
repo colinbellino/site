@@ -36,6 +36,8 @@ type Game = {
     world_grid:             Static_Array<Cell, typeof WORLD_GRID_SIZE>;
     tile_grid:              Static_Array<int, typeof TILE_GRID_SIZE>;
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
+    camera_move_start:      Vector2;
+    camera_move_end:        Vector2;
 
     debug_draw_console:     boolean;
     debug_draw_entities:    boolean;
@@ -86,6 +88,7 @@ type Map_Node = {
     neighbours:         Static_Array<Neighbour, 4>;
     project_id:         int;
     warp_target:        int; // index into game.nodes
+    warp_camera:        Vector2;
 }
 type Neighbour = {
     node: int; // index into game.nodes, order = NESW
@@ -180,7 +183,6 @@ function update() {
             game.nodes = fixed_array_make(MAX_NODES);
             for (let node_index = 0; node_index < WORLD.nodes.length; node_index++) {
                 const node = WORLD.nodes[node_index];
-                assert(node.project_id <= game.projects.count-1, `Invalid project_id: ${node.project_id}`);
                 fixed_array_add(game.nodes, node);
 
                 if (vector2_equal(node.grid_position, WORLD.start_position)) {
@@ -205,7 +207,7 @@ function update() {
                 },
             });
 
-            game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
+            game.renderer.camera_main.position = vector2_multiply_float([17, 6], GRID_SIZE);
             renderer_resize_canvas();
             update_zoom();
 
@@ -364,6 +366,10 @@ function update() {
                                 game.destination_path.count = 0;
                                 fixed_array_add(game.destination_path, current_node.grid_position);
                                 fixed_array_add(game.destination_path, destination_node.grid_position);
+
+                                game.camera_move_start = game.renderer.camera_main.position;
+                                game.camera_move_end   = vector2_multiply_float(current_node.warp_camera, GRID_SIZE);
+
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
                             } break;
@@ -383,14 +389,14 @@ function update() {
                     // FIXME: make this this is framerate independent!
                     const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
 
-                    if (is_warp) {
-                        // TODO: better animation
-                        game.player.sprite.scale = [0, 0];
-                    }
-
                     const [current, next, step_progress] = lerp_indices(game.destination_path.count-1, progress);
                     game.player.sprite.position = vector2_lerp(grid_position_center(game.destination_path.data[current]), grid_position_center(game.destination_path.data[next]), step_progress);
-                    game.renderer.camera_main.position = vector2_copy(game.player.sprite.position);
+
+                    if (is_warp) {
+                        // TODO: better player animation
+                        game.player.sprite.scale = [0, 0];
+                        game.renderer.camera_main.position = vector2_lerp(game.camera_move_start, game.camera_move_end, progress);
+                    }
 
                     if (progress === 1) {
                         game.nodes_current = game.destination_node;
@@ -619,11 +625,12 @@ function update() {
 
 function update_zoom() {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
-    if (game.renderer.window_size[0] > game.renderer.window_size[1]) {
-        game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / (320*2));
-    } else {
-        game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / (180*2));
-    }
+    // if (game.renderer.window_size[0] > game.renderer.window_size[1]) {
+    //     game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[0] / (320*2));
+    // } else {
+    //     game.renderer.camera_main.zoom = Math.round(game.renderer.window_size[1] / (180*2));
+    // }
+    game.renderer.camera_main.zoom = 3;
 }
 
 // :renderer
