@@ -144,7 +144,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         }
         Path :: struct {
             node:               s32;
-            path:               [2]float;
+            path:               [..][2]float;
         }
 
         root := ldtk_load("./src/world.ldtk", temp);
@@ -192,14 +192,18 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                             case "tooltip";         { node.tooltip = field_instance.__value.str; }
                             case "warp_target";     { node.warp_target = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
                             case "warp_camera";     { node.warp_camera = ldtk_get_grid_position(obj); }
-                            case "neighbour_north"; { node.neighbours[0].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            case "neighbour_east";  { node.neighbours[1].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            case "neighbour_south"; { node.neighbours[2].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            case "neighbour_west";  { node.neighbours[3].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            case "path_north";      { node.neighbours[0].path = ldtk_get_grid_position(obj); }
-                            case "path_east";       { node.neighbours[1].path = ldtk_get_grid_position(obj); }
-                            case "path_south";      { node.neighbours[2].path = ldtk_get_grid_position(obj); }
-                            case "path_west";       { node.neighbours[3].path = ldtk_get_grid_position(obj); }
+                            // case "neighbour_north"; { node.neighbours[0].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            // case "neighbour_east";  { node.neighbours[1].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            // case "neighbour_south"; { node.neighbours[2].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            // case "neighbour_west";  { node.neighbours[3].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
+                            // case "path_north";      { /* array_add(*node.neighbours[0].path, ldtk_get_grid_position(obj)); */ }
+                            // case "path_east";       { /* array_add(*node.neighbours[1].path, ldtk_get_grid_position(obj)); */ }
+                            // case "path_south";      { /* array_add(*node.neighbours[2].path, ldtk_get_grid_position(obj)); */ }
+                            // case "path_west";       { /* array_add(*node.neighbours[3].path, ldtk_get_grid_position(obj)); */ }
+                            case "path_north";    { for field_instance.__value.array { array_add(*node.neighbours[0].path, ldtk_get_grid_position(it.object)); } }
+                            case "path_east";     { for field_instance.__value.array { array_add(*node.neighbours[1].path, ldtk_get_grid_position(it.object)); } }
+                            case "path_south";    { for field_instance.__value.array { array_add(*node.neighbours[2].path, ldtk_get_grid_position(it.object)); } }
+                            case "path_west";     { for field_instance.__value.array { array_add(*node.neighbours[3].path, ldtk_get_grid_position(it.object)); } }
                             case "type"; {
                                 if field_instance.__value.str == {
                                     case "EMPTY";    { node.type = .EMPTY; }
@@ -244,7 +248,11 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             append(*world_str, tprint(" grid_position: %,", it.grid_position));
             append(*world_str, tprint(" neighbours: ["));
             for neighbour : it.neighbours {
-                append(*world_str, tprint("{ node: %, path: % }, ", neighbour.node, neighbour.path));
+                append(*world_str, tprint("{ node: %, path: [", neighbour.node));
+                for point : neighbour.path {
+                    append(*world_str, tprint("%, ", point));
+                }
+                append(*world_str, tprint("] }, "));
             }
             append(*world_str, tprint(" ],"));
             if it.project_id

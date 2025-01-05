@@ -93,11 +93,12 @@ type Map_Node = {
     tooltip:            string | undefined;
 }
 type Neighbour = {
-    node: int; // index into game.nodes, order = NESW
-    path: Vector2;
+    // node: int; // index into game.nodes, order = NESW
+    path: Vector2[];
 }
 
 // :constants
+const CAMERA_START_POSITION: Vector2 = [24, 9];
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION : Vector2 = [0, 192];
@@ -105,8 +106,8 @@ const MAX_CONSOLE_LINES : number = 128;
 const MAX_ENTITIES : number = 128;
 const MAX_PROJECTS : number = 16;
 const MAX_NODES : number = 32;
-const MAX_SPRITES : number = 1024;
-const MAX_PATH: number = 3;
+const MAX_SPRITES : number = 2048;
+const MAX_PATH: number = 8;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
 const DIRECTIONS : Vector2[] = [
@@ -210,7 +211,7 @@ function update() {
                 },
             });
 
-            game.renderer.camera_main.position = vector2_multiply_float([17, 6], GRID_SIZE);
+            game.renderer.camera_main.position = vector2_multiply_float(CAMERA_START_POSITION, GRID_SIZE);
             renderer_resize_canvas();
             update_zoom();
 
@@ -337,16 +338,17 @@ function update() {
                         const direction = vector_to_direction(player_input_move);
                         const current_node = game.nodes.data[game.nodes_current];
                         const destination = current_node.neighbours[direction];
-                        const destination_node = game.nodes.data[destination.node];
-                        if (destination.node > -1) {
+                        if (destination.path.length > 0) {
                             ui_panel_close();
-                            game.destination_node = destination.node;
+                            game.destination_node = find_node_at_position(destination.path[destination.path.length-1]);
+                            assert(game.destination_node != -1);
                             game.destination_path.count = 0;
                             fixed_array_add(game.destination_path, current_node.grid_position);
-                            if (!vector2_equal(destination.path, [0, 0])) {
-                                fixed_array_add(game.destination_path, destination.path);
+                            if (destination.path.length > 0) {
+                                for (let point_index = 0; point_index < destination.path.length; point_index++) {
+                                    fixed_array_add(game.destination_path, destination.path[point_index]);
+                                }
                             }
-                            fixed_array_add(game.destination_path, destination_node.grid_position);
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
@@ -363,10 +365,9 @@ function update() {
                             } break;
                             case Node_Type.WARP: {
                                 ui_panel_close();
-                                const destination = node.warp_target;
                                 const current_node = game.nodes.data[game.nodes_current];
-                                const destination_node = game.nodes.data[destination];
-                                game.destination_node = destination;
+                                const destination_node = game.nodes.data[node.warp_target];
+                                game.destination_node = node.warp_target;
                                 game.destination_path.count = 0;
                                 fixed_array_add(game.destination_path, current_node.grid_position);
                                 fixed_array_add(game.destination_path, destination_node.grid_position);
@@ -1272,6 +1273,15 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
 function sort_by_z_index(a: Sprite, b: Sprite) {
     return a.z_index - b.z_index;
 }
+function find_node_at_position(position: Vector2) {
+    for (let node_index = 0; node_index < game.nodes.count; node_index++) {
+        const node = game.nodes.data[node_index];
+        if (vector2_equal(node.grid_position, position)) {
+            return node_index;
+        }
+    }
+    return -1;
+}
 
 // :debug
 function number_to_binary_string(dec: number, size: number = 4): string {
@@ -1332,7 +1342,8 @@ function is_in_bounds(x: int, y: int, w: int, h: int): boolean {
 function lerp_indices(length: number, t: float): [int, int, float] {
     let step_current = 0;
     for (let i = 0; i < length; i++) {
-        if (t > i/length) {
+        const threshold = i/length;
+        if (t > threshold) {
             step_current = i;
         }
     }
@@ -1643,7 +1654,6 @@ function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
 }
 function ui_panel_node_open(node: Map_Node) {
-    console.log("ui_panel_node_open", node);
     switch (node.type) {
         case Node_Type.EMPTY: {
             if (node.tooltip) {
