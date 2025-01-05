@@ -103,10 +103,10 @@ const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION : Vector2 = [0, 192];
 const MAX_CONSOLE_LINES : number = 128;
-const MAX_ENTITIES : number = 128;
+const MAX_ENTITIES : number = 16;
 const MAX_PROJECTS : number = 16;
 const MAX_NODES : number = 32;
-const MAX_SPRITES : number = 2048;
+const MAX_SPRITES : number = 1024;
 const MAX_PATH: number = 8;
 const ATLAS_SIZE : Vector2 = [512, 512];
 const SPRITE_PASS_INSTANCE_DATA_SIZE = 24;
@@ -244,36 +244,6 @@ function update() {
         if (game.inputs.window_resized) {
             renderer_resize_canvas();
             update_zoom();
-        }
-
-        game.console_lines.count = 0;
-        {
-            ui_push_console_line("fps:                " + game.fps.toFixed(0));
-            ui_push_console_line("window_size:        " + game.renderer.window_size);
-            ui_push_console_line("pixel_ratio:        " + game.renderer.pixel_ratio);
-            ui_push_console_line("camera_position:    " + game.renderer.camera_main.position);
-            ui_push_console_line("camera_zoom:        " + game.renderer.camera_main.zoom);
-            ui_push_console_line("entities:           " + game.entities.count);
-            ui_push_console_line("player_position:    " + game.player.sprite.position);
-            ui_push_console_line("world_draw:         " + game.debug_draw_world_grid);
-            if (game.debug_draw_world_grid) {
-                ui_push_console_line("world_count:        " + game.world_grid.length);
-            }
-            ui_push_console_line("tiles_draw:         " + game.debug_draw_world_tile);
-            if (game.debug_draw_world_tile) {
-                ui_push_console_line("tiles_count:        " + game.tile_grid.length);
-            }
-            ui_push_console_line("nodes_current:      " + game.nodes_current);
-            ui_push_console_line("nodes:              ");
-            for (let node_index = 0; node_index < game.nodes.count; node_index++) {
-                const node = game.nodes.data[node_index];
-                ui_push_console_line((node_index === game.nodes_current ? "* " : "  ") + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node));
-            }
-            ui_push_console_line("projects:             ");
-            for (let project_index = 0; project_index < game.projects.count; project_index++) {
-                const project = game.projects.data[project_index];
-                ui_push_console_line("  " + project_index + " - " + project.id + " name: " + project.name);
-            }
         }
 
         let player_input_move: Vector2 = [0, 0];
@@ -489,6 +459,8 @@ function update() {
                     const tile_position = grid_index_to_position(tile_cell_index, TILE_GRID_WIDTH);
 
                     const tile_value = calculate_tile_value(tile_position);
+                    if (tile_value === 0) { continue; }
+
                     const tile_index = TILE_VALUES.indexOf(tile_value);
                     assert(tile_index > -1, "Invalid tile_index.");
                     const tile_texture_position = grid_index_to_position(tile_index, AUTO_TILE_SIZE[0]);
@@ -517,9 +489,8 @@ function update() {
                 for (let tile_index = 0; tile_index < WORLD.tiles.length; tile_index++) {
                     const tile = WORLD.tiles[tile_index];
 
-                    let color = COLOR_WHITE();
                     const sprite: Sprite = {
-                        color:              color,
+                        color:              COLOR_WHITE(),
                         position:           tile.px,
                         offset:             [0, 0],
                         size:               [GRID_SIZE, GRID_SIZE],
@@ -534,6 +505,36 @@ function update() {
             }
             // :render console lines
             // FIXME: don't do this in __RELEASE__
+            game.console_lines.count = 0;
+            {
+                ui_push_console_line("fps:                " + game.fps.toFixed(0));
+                ui_push_console_line("window_size:        " + game.renderer.window_size);
+                ui_push_console_line("pixel_ratio:        " + game.renderer.pixel_ratio);
+                ui_push_console_line("camera_position:    " + game.renderer.camera_main.position);
+                ui_push_console_line("camera_zoom:        " + game.renderer.camera_main.zoom);
+                ui_push_console_line("entities:           " + game.entities.count);
+                ui_push_console_line("player_position:    " + game.player.sprite.position);
+                ui_push_console_line("world_draw:         " + game.debug_draw_world_grid);
+                if (game.debug_draw_world_grid) {
+                    ui_push_console_line("world_count:        " + game.world_grid.length);
+                }
+                ui_push_console_line("sprites_count:      " + game.renderer.sprites.count);
+                ui_push_console_line("tiles_draw:         " + game.debug_draw_world_tile);
+                if (game.debug_draw_world_tile) {
+                    ui_push_console_line("tiles_count:        " + game.tile_grid.length);
+                }
+                ui_push_console_line("nodes_current:      " + game.nodes_current);
+                ui_push_console_line("nodes:              ");
+                for (let node_index = 0; node_index < game.nodes.count; node_index++) {
+                    const node = game.nodes.data[node_index];
+                    ui_push_console_line((node_index === game.nodes_current ? "* " : "  ") + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node));
+                }
+                ui_push_console_line("projects:             ");
+                for (let project_index = 0; project_index < game.projects.count; project_index++) {
+                    const project = game.projects.data[project_index];
+                    ui_push_console_line("  " + project_index + " - " + project.id + " name: " + project.name);
+                }
+            }
             let console_lines = "";
             if (game.debug_draw_console) {
                 for (let line_index = 0; line_index < game.console_lines.count; line_index++) {
