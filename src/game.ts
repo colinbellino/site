@@ -1271,10 +1271,10 @@ function assert(condition: Boolean, message: string | null = ""): asserts condit
         }
     }
 }
-function sort_by_z_index(a: Sprite, b: Sprite) {
+function sort_by_z_index(a: Sprite, b: Sprite): int {
     return a.z_index - b.z_index;
 }
-function find_node_at_position(position: Vector2) {
+function find_node_at_position(position: Vector2): int {
     for (let node_index = 0; node_index < game.nodes.count; node_index++) {
         const node = game.nodes.data[node_index];
         if (vector2_equal(node.grid_position, position)) {

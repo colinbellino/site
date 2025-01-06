@@ -143,8 +143,16 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             tooltip:            string;
         }
         Path :: struct {
-            node:               s32;
             path:               [..][2]float;
+        }
+
+        find_node_at_position :: (position: [2]float, nodes: []Node) -> int {
+            for node, node_index : nodes {
+                if node.grid_position[0] == position[0] && node.grid_position[1] == position[1] {
+                    return node_index;
+                }
+            }
+            return -1;
         }
 
         root := ldtk_load("./src/world.ldtk", temp);
@@ -179,7 +187,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                 case "Node"; {
                     node := Node.{
                         grid_position   = grid_position,
-                        neighbours      = .[.{ node = -1 }, .{ node = -1 }, .{ node = -1 }, .{ node = -1 }],
+                        neighbours      = .[.{}, .{}, .{}, .{}],
                     };
                     for field_instance : entity_instance.fieldInstances {
                         obj := field_instance.__value.object;
@@ -192,14 +200,6 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                             case "tooltip";         { node.tooltip = field_instance.__value.str; }
                             case "warp_target";     { node.warp_target = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
                             case "warp_camera";     { node.warp_camera = ldtk_get_grid_position(obj); }
-                            // case "neighbour_north"; { node.neighbours[0].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            // case "neighbour_east";  { node.neighbours[1].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            // case "neighbour_south"; { node.neighbours[2].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            // case "neighbour_west";  { node.neighbours[3].node = ldtk_get_node_index(obj, entity_instance.defUid, entity_instances); }
-                            // case "path_north";      { /* array_add(*node.neighbours[0].path, ldtk_get_grid_position(obj)); */ }
-                            // case "path_east";       { /* array_add(*node.neighbours[1].path, ldtk_get_grid_position(obj)); */ }
-                            // case "path_south";      { /* array_add(*node.neighbours[2].path, ldtk_get_grid_position(obj)); */ }
-                            // case "path_west";       { /* array_add(*node.neighbours[3].path, ldtk_get_grid_position(obj)); */ }
                             case "path_north";    { for field_instance.__value.array { array_add(*node.neighbours[0].path, ldtk_get_grid_position(it.object)); } }
                             case "path_east";     { for field_instance.__value.array { array_add(*node.neighbours[1].path, ldtk_get_grid_position(it.object)); } }
                             case "path_south";    { for field_instance.__value.array { array_add(*node.neighbours[2].path, ldtk_get_grid_position(it.object)); } }
@@ -217,15 +217,26 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                             }
                         }
                     }
-
-                    if node.type == {
-                        case .PROJECT; { assert(node.project_id > 0, "Invalid project_id! %", node); }
-                        case .WARP;    { assert(node.warp_target > -1, "Invalid warp_target! %", node); }
-                    }
                     array_add(*nodes, node);
                 }
                 case "Start_Position"; {
                     start_position = grid_position;
+                }
+            }
+        }
+
+        for node : nodes {
+            if node.type == {
+                case .PROJECT; { assert(node.project_id > 0, "Invalid project_id! %", node); }
+                case .WARP;    {
+                    assert(node.warp_target > -1, "Invalid warp_target! %", node);
+                    assert(node.warp_camera[0] != 0 && node.warp_camera[1] != 0, "Invalid warp_camera! %", node);
+                }
+            }
+            for neighbour, neighbour_index : node.neighbours {
+                if neighbour.path.count > 0 {
+                    point := neighbour.path[neighbour.path.count-1];
+                    assert(find_node_at_position(point, nodes) > -1, "Invalid path! % (neighbour: %)", node, neighbour_index);
                 }
             }
         }
@@ -248,7 +259,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             append(*world_str, tprint(" grid_position: %,", it.grid_position));
             append(*world_str, tprint(" neighbours: ["));
             for neighbour : it.neighbours {
-                append(*world_str, tprint("{ node: %, path: [", neighbour.node));
+                append(*world_str, tprint("{ path: [",));
                 for point : neighbour.path {
                     append(*world_str, tprint("%, ", point));
                 }
