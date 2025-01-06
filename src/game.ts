@@ -245,7 +245,10 @@ function update() {
                 player_input_move[0] = +1;
             }
 
-            if (game.inputs.keys["Space"].down || game.inputs.keys["Enter"].down) {
+            if (
+                (game.inputs.keys["Space"].released || (game.inputs.keys["Space"].down && game.inputs.keys["Space"].reset_next_frame)) ||
+                (game.inputs.keys["Enter"].released || (game.inputs.keys["Enter"].down && game.inputs.keys["Enter"].reset_next_frame))
+            ) {
                 player_input_confirm = true;
             }
         }
@@ -309,22 +312,23 @@ function update() {
             // :game RUNNING
             case Game_Mode.RUNNING: {
                 {
-                    const player_window_position = world_to_window_position(game.player.sprite.position);
-                    const x = player_window_position[0] - game.renderer.ui_node_action.element_root.clientWidth*0.5;
-                    const y = player_window_position[1] - (56 + 8*game.renderer.camera_main.zoom);
-                    game.renderer.ui_node_action.element_root.style.left = `${x}px`;
-                    game.renderer.ui_node_action.element_root.style.top  = `${y}px`;
+                    const current_node = game.nodes.data[game.nodes_current];
+                    const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
+                    const root = game.renderer.ui_node_action.element_root;
+                    const x = clamp(window_position[0] - root.clientWidth*0.5, 10, game.renderer.window_size[0] - root.clientWidth*1.0 - 10);
+                    const y = clamp(window_position[1] - (56 + 8*game.renderer.camera_main.zoom), 10, game.renderer.window_size[1] - root.clientHeight*1.0 - 10);
+                    root.style.left = `${x}px`;
+                    root.style.top  = `${y}px`;
                 }
 
                 switch (game.world_mode) {
                     // :world IDLE
                     case World_Mode.IDLE: {
                         if (!vector2_equal(player_input_move, [0, 0])) {
-                            const direction = vector_to_direction(player_input_move);
                             const current_node = game.nodes.data[game.nodes_current];
+                            const direction = vector_to_direction(player_input_move);
                             const destination = current_node.neighbours[direction];
                             if (destination.path.length > 0) {
-                                ui_panel_close();
                                 game.destination_node = find_node_at_position(destination.path[destination.path.length-1]);
                                 assert(game.destination_node != -1);
                                 game.destination_path.count = 0;
@@ -334,6 +338,7 @@ function update() {
                                         fixed_array_add(game.destination_path, destination.path[point_index]);
                                     }
                                 }
+                                ui_panel_hide(game.renderer.ui_node_project);
                                 ui_button_hide(game.renderer.ui_confirm);
                                 ui_button_hide(game.renderer.ui_node_action);
                                 game.world_mode = World_Mode.MOVING;
@@ -348,10 +353,23 @@ function update() {
                             switch (node.type) {
                                 case Node_Type.EMPTY: { } break;
                                 case Node_Type.PROJECT: {
-                                    // ui_panel_node_open(node);
+                                    const project = game.projects.data[node.project_id];
+                                    const is_hidden = game.renderer.ui_node_project.element_root.classList.contains("hide");
+                                    if (is_hidden) {
+                                        const content = [
+                                            `<h2>${project.name}</h2>`,
+                                            ...project.description,
+                                        ].join("");
+                                        ui_panel_show(game.renderer.ui_node_project, content);
+                                        ui_button_hide(game.renderer.ui_node_action);
+                                        ui_button_show(game.renderer.ui_confirm, "Close");
+                                    } else {
+                                        ui_panel_hide(game.renderer.ui_node_project);
+                                        ui_button_show(game.renderer.ui_node_action, "Open");
+                                        ui_button_show(game.renderer.ui_confirm, "Open");
+                                    }
                                 } break;
                                 case Node_Type.WARP: {
-                                    // ui_panel_close();
                                     const current_node = game.nodes.data[game.nodes_current];
                                     const destination_node = game.nodes.data[node.warp_target];
                                     game.destination_node = node.warp_target;
@@ -397,11 +415,10 @@ function update() {
                             if (is_warp) {
                                 game.player.sprite.scale = [1, 1];
                             }
-                            // ui_panel_node_open(node);
 
                             let label = "";
                             switch (node.type) {
-                                case Node_Type.PROJECT: { label = "Inspect"; } break;
+                                case Node_Type.PROJECT: { label = "Open"; } break;
                                 case Node_Type.WARP:    { label = "Warp"; } break;
                             }
                             if (label !== "") {
@@ -583,11 +600,6 @@ function update() {
             ui_set_element_class(game.renderer.ui_console, "open", game.draw_console);
             game.renderer.ui_console.innerHTML = console_lines;
 
-            // :render panel project
-            {
-                ui_set_element_class(game.renderer.ui_panel_node.element_root, "open", game.renderer.ui_panel_node.opened);
-            }
-
             gl.viewport(0, 0, game.renderer.window_size[0]*game.renderer.pixel_ratio, game.renderer.window_size[1]*game.renderer.pixel_ratio);
 
             gl.clearColor(game.clear_color[0], game.clear_color[1], game.clear_color[2], game.clear_color[3]);
@@ -678,7 +690,7 @@ function load_world(): Promise<World> {
 function update_zoom(): void {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
     const smallest = Math.min(game.renderer.window_size[0], game.renderer.window_size[1]);
-    const threshold = 380;
+    const threshold = 360;
     game.renderer.camera_main.zoom = Math.max(0.5, Math.floor(smallest / threshold));
 }
 
@@ -687,7 +699,7 @@ type Renderer = {
     gl:                 WebGL2RenderingContext;
     ui_root:            HTMLDivElement;
     ui_console:         HTMLPreElement;
-    ui_panel_node:      UI_Panel;
+    ui_node_project:    UI_Panel;
     ui_up:              UI_Label;
     ui_right:           UI_Label;
     ui_down:            UI_Label;
@@ -818,7 +830,10 @@ function renderer_init(): [Renderer, true] | [null, false] {
     // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
 
-    const ui_panel_node = ui_create_panel(ui_root);
+    const ui_node_project = ui_create_panel(ui_root, function ui_node_project_close() {
+        ui_panel_hide(ui_node_project);
+        this.blur();
+    });
 
     const renderer: Renderer = {
         sprite_pass:        {} as Sprite_Pass,
@@ -829,7 +844,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         gl:                 _gl,
         ui_root:            ui_root,
         ui_console:         ui_console,
-        ui_panel_node:      ui_panel_node,
+        ui_node_project:    ui_node_project,
         ui_up:              ui_up,
         ui_right:           ui_right,
         ui_down:            ui_down,
@@ -1745,9 +1760,6 @@ type UI_Label = {
     element_button:     HTMLButtonElement;
 }
 type UI_Panel = {
-    opened:             boolean;
-    title:              string;
-    content:            string;
     element_root:       HTMLElement;
     element_close:      HTMLButtonElement;
     element_content:    HTMLElement;
@@ -1755,31 +1767,6 @@ type UI_Panel = {
 function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
 }
-// function ui_panel_node_open(node: Map_Node) {
-//     switch (node.type) {
-//         case Node_Type.EMPTY: {
-//             if (node.tooltip) {
-//                 game.renderer.ui_panel_node.element_content.innerHTML = `Inspect`;
-//                 game.renderer.ui_panel_node.opened = true;
-//             } else {
-//                 game.renderer.ui_panel_node.element_content.innerHTML = "";
-//                 game.renderer.ui_panel_node.opened = false;
-//             }
-//         } break;
-//         case Node_Type.PROJECT: {
-//             const project_id = node.project_id;
-//             assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
-//             assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
-//             const project = game.projects.data[project_id];
-//             game.renderer.ui_panel_node.element_content.innerHTML = `${project.name}`;
-//             game.renderer.ui_panel_node.opened = true;
-//         } break;
-//         case Node_Type.WARP: {
-//             game.renderer.ui_panel_node.element_content.innerHTML = `Enter`;
-//             game.renderer.ui_panel_node.opened = true;
-//         } break;
-//     }
-// }
 function ui_button_show(button: UI_Label, label: string = ""): void {
     button.element_label.innerHTML = label;
     button.element_root.classList.remove("hide");
@@ -1787,33 +1774,31 @@ function ui_button_show(button: UI_Label, label: string = ""): void {
 function ui_button_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
 }
-function ui_panel_close(): void {
-    game.renderer.ui_panel_node.opened = false;
+function ui_panel_show(button: UI_Panel, label: string = ""): void {
+    button.element_content.innerHTML = label;
+    button.element_root.classList.remove("hide");
+}
+function ui_panel_hide(button: UI_Panel): void {
+    button.element_root.classList.add("hide");
 }
 function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
     const parent = document.createElement("div");
     parent.innerHTML = html.trim();
     return ui_root.appendChild(parent.firstChild) as T;
 }
-function ui_create_panel(ui_root: HTMLDivElement): UI_Panel {
+function ui_create_panel(ui_root: HTMLDivElement, close_fn: (this: HTMLButtonElement, ev: MouseEvent) => any): UI_Panel {
     const panel_root = ui_create_element<HTMLElement>(ui_root, `
-        <section class="project">
+        <section class="panel hide">
             <button class="close" aria-label="Close"></button>
             <div class="content"></div>
         </section>
     `);
     const panel: UI_Panel = {
-        opened:             false,
-        title:              "",
-        content:            "",
         element_root:       panel_root,
         element_close:      panel_root.querySelector(".close"),
         element_content:    panel_root.querySelector(".content"),
     };
-    panel.element_close.addEventListener("click", () => {
-        if (!panel.opened) { return; }
-        panel.opened = !panel.opened;
-    });
+    panel.element_close.addEventListener("click", close_fn);
     return panel;
 }
 function ui_set_element_class(element: HTMLElement, class_name: string, value: boolean) {
@@ -1828,7 +1813,7 @@ type Project = {
     id:                 int;
     name:               string;
     url:                string;
-    description:        string;
+    description:        string[];
     bullet_points:      string[];
     screenshots_prefix: string;
     screenshots_count:  int;
@@ -1840,7 +1825,10 @@ const PROJECTS: Project[] = [
         id: 0,
         name: "",
         url: "",
-        description: ``,
+        description: [
+            `<p>Ea officia laboris sit nisi anim pariatur voluptate quis sint consequat dolor. Fugiat consequat qui amet ipsum enim. Nostrud et quis nostrud nisi cupidatat dolore sunt fugiat do sit ipsum exercitation est.</p>`,
+            `<p>Laboris enim in velit ea sunt veniam anim incididunt proident dolor ad proident irure id. Excepteur ex proident tempor et. Cillum sint ullamco ullamco voluptate dolor irure est aliquip. Cillum quis cillum dolore do deserunt eiusmod voluptate. Anim eu et ad laborum proident. Elit anim nisi aute ipsum incididunt non consequat officia.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1849,10 +1837,10 @@ const PROJECTS: Project[] = [
         id: 1,
         name: "Feast & Famine",
         url: "https://colinbellino.itch.io/feast",
-        description: `
-            <p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>
-            <p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>
-        `,
+        description: [
+            `<p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>`,
+            `<p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>`,
+        ],
         bullet_points: [
             `Engine: Unity`,
             `Language: C#`,
@@ -1866,11 +1854,10 @@ const PROJECTS: Project[] = [
         id: 2,
         name: "Alteration",
         url: "https://colinbellino.itch.io/alteration",
-        description: `
-            <p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.</p>
-            <p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach perfect balance, symbolized by the goal of each level. <br />
-            But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>
-        `,
+        description: [
+            `<p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.</p>`,
+            `<p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach perfect balance, symbolized by the goal of each level. <br />But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>`,
+        ],
         bullet_points: [
             `Engine: Unity`,
             `Language: C#`,
@@ -1884,7 +1871,10 @@ const PROJECTS: Project[] = [
         id: 3,
         name: "Project 3",
         url: "",
-        description: ``,
+        description: [
+            `<p>Reprehenderit ex ad sint culpa ea culpa aliqua culpa. Irure mollit cillum officia laboris magna culpa exercitation ipsum deserunt sunt magna dolor. Est laboris eiusmod deserunt amet exercitation velit nostrud ea amet aute commodo. Lorem cillum cupidatat duis velit. Sunt dolore minim esse laborum minim sit veniam cupidatat commodo proident sunt. Lorem quis Lorem officia dolore proident laboris ad sunt.</p>`,
+            `<p>Sint pariatur veniam irure nulla fugiat enim sit sunt aliquip anim quis duis anim. Voluptate culpa anim consectetur non sit irure. Consectetur exercitation sint consequat incididunt non ut dolor ex non aliquip dolore occaecat dolore pariatur. Nulla do pariatur minim qui quis aliquip fugiat duis ullamco commodo nostrud Lorem magna ex. Voluptate aliqua et voluptate sint Lorem laboris velit mollit ullamco. Elit do elit fugiat aliqua sint qui laboris.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1893,7 +1883,10 @@ const PROJECTS: Project[] = [
         id: 4,
         name: "Project 4",
         url: "",
-        description: ``,
+        description: [
+            `<p>Deserunt consectetur do qui nostrud. Duis qui eu do excepteur occaecat tempor consectetur. Deserunt deserunt laboris non minim ex. Irure ut officia occaecat ad aliquip ea dolore in exercitation proident enim Lorem officia minim. Exercitation in Lorem veniam occaecat ex ullamco sit elit eiusmod Lorem et sunt ea incididunt.</p>`,
+            `<p>Pariatur enim voluptate irure sunt nostrud. Ipsum pariatur fugiat adipisicing occaecat qui deserunt. Aliquip irure sint non sint ut adipisicing ullamco deserunt non consequat veniam pariatur. Sit amet deserunt ut velit eu. Non consequat ad reprehenderit officia anim cillum Lorem. Quis enim voluptate aliqua anim cupidatat quis.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1902,7 +1895,10 @@ const PROJECTS: Project[] = [
         id: 5,
         name: "Project 5",
         url: "",
-        description: ``,
+        description: [
+            `<p>Exercitation quis cillum nisi duis anim ad eu exercitation consequat elit ullamco ad. Dolor dolore reprehenderit est enim adipisicing. Minim nisi eiusmod do ullamco ea anim fugiat anim velit ipsum minim Lorem. Commodo ex aliqua sint cillum amet do. Ullamco cupidatat dolore sint incididunt et ipsum.</p>`,
+            `<p>Culpa pariatur id do non enim ut tempor cillum nostrud eu qui pariatur sit eiusmod. Ipsum elit enim deserunt occaecat cupidatat. Laboris veniam cupidatat voluptate amet enim ullamco mollit mollit ea adipisicing consectetur eiusmod esse do. Aliqua officia qui ex adipisicing esse esse qui aute pariatur veniam. Occaecat aute anim nulla in laboris deserunt irure et. Ut enim excepteur enim dolor proident non reprehenderit.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1911,7 +1907,10 @@ const PROJECTS: Project[] = [
         id: 6,
         name: "Project 6",
         url: "",
-        description: ``,
+        description: [
+            `<p>Eu occaecat velit enim labore duis labore in ex ullamco officia excepteur. Laboris adipisicing nostrud non dolore minim laboris et voluptate non fugiat cupidatat. Ullamco quis minim magna elit cillum deserunt aliqua. Eu sit nisi ea fugiat nostrud anim.</p>`,
+            `<p>Amet proident amet ut excepteur dolore esse cillum veniam ea quis aute exercitation in. Ad ut eiusmod nulla quis quis eu minim tempor aute excepteur minim aliquip mollit. Proident fugiat pariatur commodo labore fugiat.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1920,7 +1919,10 @@ const PROJECTS: Project[] = [
         id: 7,
         name: "Project 7",
         url: "",
-        description: ``,
+        description: [
+            `<p>Reprehenderit officia minim fugiat velit non. Et qui adipisicing sunt ex occaecat amet non. Sunt reprehenderit velit elit proident fugiat irure dolor laborum.</p>`,
+            `<p>Consectetur nulla adipisicing et duis irure in voluptate in nostrud elit excepteur sint officia et. Incididunt reprehenderit fugiat laborum aliqua nostrud dolor quis in dolor ea. Culpa duis dolor cupidatat deserunt in nulla cillum consectetur cillum nisi et duis laboris esse.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1929,7 +1931,10 @@ const PROJECTS: Project[] = [
         id: 8,
         name: "Project 8",
         url: "",
-        description: ``,
+        description: [
+            `<p>Nulla nulla irure sunt laborum laborum. Magna qui eu quis mollit proident aliquip consectetur labore sunt amet amet Lorem occaecat duis. Qui commodo qui tempor ullamco qui do anim. Eiusmod irure quis officia laboris sunt deserunt nisi enim excepteur. Ad irure cupidatat id amet nisi.</p>`,
+            `<p>Tempor aute nulla occaecat eiusmod duis cillum sint ullamco mollit nulla. Ipsum minim ea nulla cupidatat nisi dolor do est excepteur excepteur cillum ipsum. Velit pariatur culpa incididunt irure cillum incididunt cupidatat voluptate id velit. Duis id officia aliquip nulla. Ut ullamco proident amet elit quis pariatur.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1938,7 +1943,10 @@ const PROJECTS: Project[] = [
         id: 9,
         name: "Project 9",
         url: "",
-        description: ``,
+        description: [
+            `<p>Elit dolor occaecat tempor adipisicing tempor ea consectetur cupidatat velit anim. Qui nostrud ea tempor enim dolore occaecat pariatur. Ex ipsum occaecat et nostrud reprehenderit ipsum enim nostrud nostrud sit. Tempor anim dolore et voluptate dolore cillum amet ad consequat eu dolore. Cupidatat sit minim in minim anim sit aliqua ipsum pariatur aliquip. Amet do aliqua tempor occaecat tempor excepteur officia nulla deserunt deserunt exercitation esse. Fugiat duis sunt adipisicing ut cillum officia dolore et labore proident id ea officia.</p>`,
+            `<p>Enim ex sunt velit culpa exercitation consequat non incididunt magna quis cupidatat. Minim nulla ullamco ut quis laboris tempor duis sunt. Laborum proident aliqua ipsum proident aliqua. Duis commodo proident eiusmod velit proident laborum duis ut do tempor sint labore voluptate. Sint exercitation cupidatat adipisicing cupidatat id aliquip est cillum id tempor exercitation nisi dolor consequat. In eu laborum cupidatat consectetur ad nulla magna consequat commodo do incididunt ullamco adipisicing nulla. Est in dolor esse velit excepteur Lorem qui adipisicing.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1947,7 +1955,10 @@ const PROJECTS: Project[] = [
         id: 10,
         name: "Project 10",
         url: "",
-        description: ``,
+        description: [
+            `<p>Dolor proident velit Lorem ipsum ea non irure ad commodo. Nulla esse non nisi laboris esse nisi officia irure. Proident qui ipsum incididunt Lorem incididunt. Duis excepteur do amet enim occaecat sunt duis esse adipisicing velit Lorem mollit. Sint quis reprehenderit nisi reprehenderit culpa nostrud laborum occaecat deserunt voluptate dolore ipsum enim.</p>`,
+            `<p>Eu dolore eu sit consequat in dolore ad quis adipisicing Lorem aliqua minim. Proident Lorem non incididunt deserunt nisi et. Laborum excepteur reprehenderit velit et nisi ex ullamco aliqua occaecat. Nostrud ex elit aute non quis ipsum occaecat nulla dolore cupidatat ea ut. Eiusmod minim exercitation pariatur exercitation cillum deserunt exercitation est duis Lorem id culpa reprehenderit. In irure tempor nostrud anim aute anim. Excepteur dolor magna voluptate consectetur est ea occaecat laboris.</p>`,
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,

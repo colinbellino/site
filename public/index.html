@@ -20,7 +20,7 @@
             overflow: hidden;
         }
 
-        .project {
+        .panel {
             position: absolute;
             z-index: 2;
             padding: 15px;
@@ -29,18 +29,31 @@
             background: rgba(0, 0, 0, 0.8);
             color: rgba(255, 255, 255, 0.9);
             top: 10px;
+            right: 10px;
             left: 10px;
             min-width: 300px;
-            opacity: 0;
+            opacity: 1;
             transition: opacity linear 50ms;
         }
-        .project.open {
-            opacity: 1;
+        @media (min-width: 760px) {
+            .panel {
+                max-width: 740px;
+                left: calc(100%/2 - 740px/2);
+                right: auto;
+                margin: 0 auto;
+            }
         }
-        .project .content {
-            white-space: pre;
+        .panel.hide {
+            opacity: 0;
         }
-        .project .close {
+        .panel h2 {
+            font-size: 1.5em;
+            margin: 0;
+        }
+        .panel p:last-of-type {
+            margin-bottom: 0;
+        }
+        .panel .close {
             position: absolute;
             top: 10px;
             right: 10px;
@@ -57,26 +70,20 @@
             background-size: calc(512px * 2) calc(512px * 2);
             image-rendering: pixelated;
         }
-        .project .close:hover {
+        .panel .close:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
-        .project a {
+        .panel a {
             color: inherit
         }
-        .project ul {
+        .panel ul {
             margin: 0;
             padding: 0;
             list-style-position: inside;
         }
-        .project .screenshots li {
+        .panel li {
             list-style: none;
             float: left;
-        }
-        @media (min-width: 700px) {
-            .project {
-                right: auto;
-                bottom: auto;
-            }
         }
 
         .hud_label {
@@ -93,6 +100,7 @@
             opacity: 1;
             transform: translate(0px, 0px);
             transition: 100ms ease-in opacity, 100ms ease-in transform;
+            user-select: none;
         }
         .hud_label.node_action {
             background: rgba(0, 0, 0, 0.5);
