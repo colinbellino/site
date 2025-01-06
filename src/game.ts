@@ -628,13 +628,9 @@ function update() {
 
 function update_zoom() {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
-    game.renderer.camera_main.zoom = 1;
-    if (game.renderer.window_size[0] > 480) {
-        game.renderer.camera_main.zoom = 2;
-    }
-    if (game.renderer.window_size[0] > 960) {
-        game.renderer.camera_main.zoom = 3;
-    }
+    const smallest = Math.min(game.renderer.window_size[0], game.renderer.window_size[1]);
+    const threshold = 380;
+    game.renderer.camera_main.zoom = Math.max(0.5, Math.floor(smallest / threshold));
 }
 
 // :renderer
