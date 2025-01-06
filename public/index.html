@@ -82,7 +82,7 @@
         .hud_label {
             z-index: 10;
             position: absolute;
-            margin: 32px;
+            margin: 0;
             padding: 5px;
             text-align: right;
             color: rgba(255, 255, 255, 0.9);
@@ -92,7 +92,34 @@
             border-radius: 25px;
             opacity: 1;
             transform: translate(0px, 0px);
-            transition: 100ms ease-in all;
+            transition: 100ms ease-in opacity, 100ms ease-in transform;
+        }
+        .hud_label.node_action {
+            background: rgba(0, 0, 0, 0.5);
+        }
+        .hud_label.up {
+            left: 64px;
+            bottom: 96px;
+        }
+        .hud_label.right {
+            left: 96px;
+            bottom: 64px;
+        }
+        .hud_label.down {
+            left: 64px;
+            bottom: 32px;
+        }
+        .hud_label.left {
+            left: 32px;
+            bottom: 64px;
+        }
+        .hud_label.confirm {
+            right: 32px;
+            bottom: 32px;
+        }
+        .hud_label.cancel {
+            right: 32px;
+            bottom: 64px;
         }
         .hud_label.hide {
             opacity: 0;
@@ -104,17 +131,12 @@
         .hud_label.no_label span {
             display: none;
         }
-        /* @media (hover: hover) {
-            .hud_label {
-                display: none;
-            }
-        } */
         .hud_label span {
             margin-right: 10px;
             margin-left: 10px;
             margin-bottom: 1px;
         }
-        .hud_button {
+        .hud_icon {
             width: 32px;
             height: 32px;
             border: 0;
@@ -125,45 +147,11 @@
             background-size: 1024px 1024px;
             image-rendering: pixelated;
         }
-        .hud_label.up {
-            left: 32px;
-            bottom: 64px;
-        }
-        .hud_label.right {
-            left: 64px;
-            bottom: 32px;
-        }
-        .hud_button.right {
-            background-position-x: -288px;
-        }
-        .hud_label.down {
-            left: 32px;
-            bottom: 0px;
-        }
-        .hud_button.down {
-            background-position-x: -320px;
-        }
-        .hud_label.left {
-            left: 0px;
-            bottom: 32px;
-        }
-        .hud_button.left {
-            background-position-x: -352px;
-        }
-        .hud_label.confirm {
-            right: 0px;
-            bottom: 32px;
-        }
-        .hud_button.confirm {
-            background-position-x: -384px;
-        }
-        .hud_label.cancel {
-            right: 32px;
-            bottom: 0px;
-        }
-        .hud_button.cancel {
-            background-position-x: -384px;
-        }
+        .hud_icon.icon_right { background-position-x: -288px; }
+        .hud_icon.icon_down { background-position-x: -320px; }
+        .hud_icon.icon_left { background-position-x: -352px; }
+        .hud_icon.icon_confirm { background-position-x: -384px; }
+        .hud_icon.icon_cancel { background-position-x: -384px; }
 
         .ui_console {
             display: none;

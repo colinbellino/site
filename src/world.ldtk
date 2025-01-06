@@ -1471,19 +1471,19 @@
 							"__grid": [24,11],
 							"__pivot": [0,0],
 							"__tags": [],
-							"__tile": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 },
-							"__smartColor": "#EAD4AA",
+							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
+							"__smartColor": "#BE4A2F",
 							"iid": "5d431170-c210-11ef-9c94-e37473e498d6",
 							"width": 48,
 							"height": 48,
 							"defUid": 5,
 							"px": [1152,528],
 							"fieldInstances": [
-								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "EMPTY", "__tile": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["EMPTY"]
+									"params": ["PROJECT"]
 								}] },
-								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
 								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
