@@ -194,7 +194,11 @@ function update() {
                 }
             }
 
-            ui_panel_node_open(game.nodes.data[game.nodes_current]);
+            // ui_panel_node_open(game.nodes.data[game.nodes_current]);
+            ui_button_show(game.renderer.ui_up);
+            ui_button_show(game.renderer.ui_right);
+            ui_button_show(game.renderer.ui_down);
+            ui_button_show(game.renderer.ui_left);
 
             game.player = fixed_array_add(game.entities, {
                 name: "PLAYER",
@@ -319,6 +323,7 @@ function update() {
                                     fixed_array_add(game.destination_path, destination.path[point_index]);
                                 }
                             }
+                            ui_button_hide(game.renderer.ui_confirm);
                             game.world_mode = World_Mode.MOVING;
                             game.world_mode_timer = now;
                         } else {
@@ -331,10 +336,10 @@ function update() {
                         switch (node.type) {
                             case Node_Type.EMPTY: { } break;
                             case Node_Type.PROJECT: {
-                                ui_panel_node_open(node);
+                                // ui_panel_node_open(node);
                             } break;
                             case Node_Type.WARP: {
-                                ui_panel_close();
+                                // ui_panel_close();
                                 const current_node = game.nodes.data[game.nodes_current];
                                 const destination_node = game.nodes.data[node.warp_target];
                                 game.destination_node = node.warp_target;
@@ -344,6 +349,7 @@ function update() {
 
                                 game.camera_move_start = game.renderer.camera_main.position;
                                 game.camera_move_end   = vector2_multiply_float(current_node.warp_camera, GRID_SIZE);
+                                ui_button_hide(game.renderer.ui_confirm);
 
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
@@ -378,7 +384,16 @@ function update() {
                         if (is_warp) {
                             game.player.sprite.scale = [1, 1];
                         }
-                        ui_panel_node_open(node);
+                        // ui_panel_node_open(node);
+
+                        let label = "";
+                        switch (node.type) {
+                            case Node_Type.PROJECT: { label = "Inspect"; } break;
+                            case Node_Type.WARP:    { label = "Warp"; } break;
+                        }
+                        if (label !== "") {
+                            ui_button_show(game.renderer.ui_confirm, label);
+                        }
                         game.world_mode = World_Mode.IDLE;
                     }
                 } break;
@@ -639,6 +654,12 @@ type Renderer = {
     ui_root:            HTMLDivElement;
     ui_console:         HTMLPreElement;
     ui_panel_node:      UI_Panel;
+    ui_up:              UI_Button;
+    ui_right:           UI_Button;
+    ui_down:            UI_Button;
+    ui_left:            UI_Button;
+    ui_confirm:         UI_Button;
+    ui_cancel:          UI_Button;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
@@ -715,18 +736,41 @@ function renderer_init(): [Renderer, true] | [null, false] {
     const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
     assert(ui_root !== undefined);
 
-    {
-        const button_up = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button up" aria-label="Move: up"></button>`);
-        button_up.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp));
-        const button_right = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button right" aria-label="Move: right"></button>`);
-        button_right.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight));
-        const button_down = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button down" aria-label="Move: down"></button>`);
-        button_down.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown));
-        const button_left = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button left" aria-label="Move: left"></button>`);
-        button_left.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft));
-        const button_confirm = ui_create_element<HTMLButtonElement>(ui_root, `<button class="hud_button confirm" aria-label="Confirm"></button>`);
-        button_confirm.addEventListener("click", () => { input_send_key(Keyboard_Key.Enter); });
-    }
+    const up_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide up" for="up"></label>`);
+    const up_label = ui_create_element<HTMLSpanElement>(up_root, `<span></span>`);
+    const up_button = ui_create_element<HTMLButtonElement>(up_root, `<button class="hud_button up" aria-label="Move: up"></button>`);
+    up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp));
+    const ui_up: UI_Button = { element_root: up_root, element_button: up_button, element_label: up_label };
+
+    const right_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide right" for="right"></label>`);
+    const right_label = ui_create_element<HTMLSpanElement>(right_root, `<span></span>`);
+    const right_button = ui_create_element<HTMLButtonElement>(right_root, `<button class="hud_button right" aria-label="Move: right"></button>`);
+    right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight));
+    const ui_right: UI_Button = { element_root: right_root, element_button: right_button, element_label: right_label };
+
+    const down_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide down" for="down"></label>`);
+    const down_label = ui_create_element<HTMLSpanElement>(down_root, `<span></span>`);
+    const down_button = ui_create_element<HTMLButtonElement>(down_root, `<button class="hud_button down" aria-label="Move: down"></button>`);
+    down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown));
+    const ui_down: UI_Button = { element_root: down_root, element_button: down_button, element_label: down_label };
+
+    const left_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide left" for="left"></label>`);
+    const left_label = ui_create_element<HTMLSpanElement>(left_root, `<span></span>`);
+    const left_button = ui_create_element<HTMLButtonElement>(left_root, `<button class="hud_button left" aria-label="Move: left"></button>`);
+    left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft));
+    const ui_left: UI_Button = { element_root: left_root, element_button: left_button, element_label: left_label };
+
+    const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide confirm" for="confirm"></label>`);
+    const confirm_label = ui_create_element<HTMLSpanElement>(confirm_root, `<span></span>`);
+    const confirm_button = ui_create_element<HTMLButtonElement>(confirm_root, `<button class="hud_button confirm" aria-label="Confirm" id="confirm"></button>`);
+    confirm_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Enter); });
+    const ui_confirm: UI_Button = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_label };
+
+    const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide cancel" for="cancel"></label>`);
+    const cancel_label = ui_create_element<HTMLSpanElement>(cancel_root, `<span>x</span>`);
+    const cancel_button = ui_create_element<HTMLButtonElement>(cancel_root, `<button class="hud_button cancel" aria-label="Confirm" id="cancel"></button>`);
+    cancel_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Escape); });
+    const ui_cancel: UI_Button = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_label };
 
     // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
@@ -743,6 +787,12 @@ function renderer_init(): [Renderer, true] | [null, false] {
         ui_root:            ui_root,
         ui_console:         ui_console,
         ui_panel_node:      ui_panel_node,
+        ui_up:              ui_up,
+        ui_right:           ui_right,
+        ui_down:            ui_down,
+        ui_left:            ui_left,
+        ui_confirm:         ui_confirm,
+        ui_cancel:          ui_cancel,
     };
 
     _gl.enable(_gl.BLEND);
@@ -996,6 +1046,7 @@ enum Keyboard_Key {
     "KeyZ" = "KeyZ",
     "Enter" = "Enter",
     "Space" = "Space",
+    "Escape" = "Escape",
     "Backquote" = "Backquote",
     "IntlBackslash" = "IntlBackslash",
     "F1" = "F1",
@@ -1639,6 +1690,11 @@ function vector_to_direction(vec: Vector2): Direction {
 }
 
 // :ui
+type UI_Button = {
+    element_root:       HTMLElement;
+    element_label:      HTMLSpanElement;
+    element_button:     HTMLButtonElement;
+}
 type UI_Panel = {
     opened:             boolean;
     title:              string;
@@ -1650,35 +1706,42 @@ type UI_Panel = {
 function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
 }
-function ui_panel_node_open(node: Map_Node) {
-    switch (node.type) {
-        case Node_Type.EMPTY: {
-            if (node.tooltip) {
-                game.renderer.ui_panel_node.element_content.innerHTML = `Inspect`;
-                game.renderer.ui_panel_node.opened = true;
-            } else {
-                game.renderer.ui_panel_node.element_content.innerHTML = "";
-                game.renderer.ui_panel_node.opened = false;
-            }
-        } break;
-        case Node_Type.PROJECT: {
-            const project_id = node.project_id;
-            assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
-            assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
-            const project = game.projects.data[project_id];
-            game.renderer.ui_panel_node.element_content.innerHTML = `${project.name}`;
-            game.renderer.ui_panel_node.opened = true;
-        } break;
-        case Node_Type.WARP: {
-            game.renderer.ui_panel_node.element_content.innerHTML = `Enter`;
-            game.renderer.ui_panel_node.opened = true;
-        } break;
-    }
+// function ui_panel_node_open(node: Map_Node) {
+//     switch (node.type) {
+//         case Node_Type.EMPTY: {
+//             if (node.tooltip) {
+//                 game.renderer.ui_panel_node.element_content.innerHTML = `Inspect`;
+//                 game.renderer.ui_panel_node.opened = true;
+//             } else {
+//                 game.renderer.ui_panel_node.element_content.innerHTML = "";
+//                 game.renderer.ui_panel_node.opened = false;
+//             }
+//         } break;
+//         case Node_Type.PROJECT: {
+//             const project_id = node.project_id;
+//             assert(project_id > 0, `Invalid project_id (zero): ${project_id}`);
+//             assert(project_id <= game.projects.count-1, `Invalid project_id (out of bounds): ${project_id}`);
+//             const project = game.projects.data[project_id];
+//             game.renderer.ui_panel_node.element_content.innerHTML = `${project.name}`;
+//             game.renderer.ui_panel_node.opened = true;
+//         } break;
+//         case Node_Type.WARP: {
+//             game.renderer.ui_panel_node.element_content.innerHTML = `Enter`;
+//             game.renderer.ui_panel_node.opened = true;
+//         } break;
+//     }
+// }
+function ui_button_show(button: UI_Button, label: string = ""): void {
+    button.element_label.innerHTML = label;
+    button.element_root.classList.remove("hide");
 }
-function ui_panel_close() {
+function ui_button_hide(button: UI_Button): void {
+    button.element_root.classList.add("hide");
+}
+function ui_panel_close(): void {
     game.renderer.ui_panel_node.opened = false;
 }
-function ui_create_element<T>(ui_root: HTMLElement, html: string) {
+function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
     const parent = document.createElement("div");
     parent.innerHTML = html.trim();
     return ui_root.appendChild(parent.firstChild) as T;
