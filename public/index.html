@@ -82,14 +82,26 @@
         .hud_label {
             z-index: 10;
             position: absolute;
-            padding: 0;
             margin: 32px;
+            padding: 5px;
             text-align: right;
             color: rgba(255, 255, 255, 0.9);
             display: flex;
             align-items: center;
+            background: rgba(0, 0, 0, 0.2);
+            border-radius: 25px;
+            opacity: 1;
+            transform: translate(0px, 0px);
+            transition: 100ms ease-in all;
         }
         .hud_label.hide {
+            opacity: 0;
+            transform: translate(20px, 0px);
+        }
+        .hud_label.anchor_bottom.hide {
+            transform: translate(0px, 20px);
+        }
+        .hud_label.no_label span {
             display: none;
         }
         /* @media (hover: hover) {
@@ -99,6 +111,7 @@
         } */
         .hud_label span {
             margin-right: 10px;
+            margin-left: 10px;
             margin-bottom: 1px;
         }
         .hud_button {
