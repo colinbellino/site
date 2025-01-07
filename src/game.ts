@@ -196,6 +196,7 @@ function update() {
 
         let player_input_move: Vector2 = [0, 0];
         let player_input_confirm = false;
+        let player_input_cancel = false;
 
         // :debug inputs
         if (game.inputs.keys["ShiftLeft"].down) {
@@ -252,6 +253,13 @@ function update() {
                 (game.inputs.keys["Enter"].released || (game.inputs.keys["Enter"].down && game.inputs.keys["Enter"].reset_next_frame))
             ) {
                 player_input_confirm = true;
+            }
+
+            if (
+                (game.inputs.keys["Escape"].released || (game.inputs.keys["Escape"].down && game.inputs.keys["Space"].reset_next_frame)) ||
+                (game.inputs.keys["Backspace"].released || (game.inputs.keys["Backspace"].down && game.inputs.keys["Enter"].reset_next_frame))
+            ) {
+                player_input_cancel = true;
             }
         }
 
@@ -357,15 +365,27 @@ function update() {
                             }
                         }
 
+                        const node = game.nodes.data[game.nodes_current];
+                        const project = game.projects.data[node.project_id];
+                        const project_panel_opened = !game.renderer.ui_node_project.element_root.classList.contains("hide");
+
+                        if (player_input_cancel) {
+                            if (project_panel_opened) {
+                                ui_panel_hide(game.renderer.ui_node_project);
+                                ui_label_show(game.renderer.ui_node_action);
+                                ui_label_show(game.renderer.ui_confirm, ui_get_node_label(node));
+                            }
+                        }
+
                         if (player_input_confirm) {
-                            const node = game.nodes.data[game.nodes_current];
                             switch (node.type) {
                                 case Node_Type.EMPTY: { } break;
                                 case Node_Type.PROJECT: {
-                                    const project = game.projects.data[node.project_id];
-                                    const is_hidden = game.renderer.ui_node_project.element_root.classList.contains("hide");
-                                    if (is_hidden) {
-                                        // TODO: perf
+                                    if (project_panel_opened) {
+                                        ui_panel_hide(game.renderer.ui_node_project);
+                                        ui_label_show(game.renderer.ui_node_action);
+                                        ui_label_show(game.renderer.ui_confirm, ui_get_node_label(node));
+                                    } else {
                                         const content = [];
                                         for (let i = 0; i < project.screenshots_count; i++) {
                                             content.push(`<img src="${generate_project_image_url(project, i+1)}" alt="A Screenshot of the app (${i+1} of ${project.screenshots_count})." />`);
@@ -382,11 +402,6 @@ function update() {
                                         ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""));
                                         ui_label_hide(game.renderer.ui_node_action);
                                         ui_label_show(game.renderer.ui_confirm, "Close");
-                                    } else {
-                                        ui_panel_hide(game.renderer.ui_node_project);
-                                        const label = ui_get_node_label(node);
-                                        ui_label_show(game.renderer.ui_node_action);
-                                        ui_label_show(game.renderer.ui_confirm, label);
                                     }
                                 } break;
                                 case Node_Type.WARP: {
@@ -884,6 +899,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         </label>
     `);
     const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
+    cancel_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Escape); });
     const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
 
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1186,6 +1202,7 @@ enum Keyboard_Key {
     "Enter" = "Enter",
     "Space" = "Space",
     "Escape" = "Escape",
+    "Backspace" = "Backspace",
     "Backquote" = "Backquote",
     "IntlBackslash" = "IntlBackslash",
     "F1" = "F1",
