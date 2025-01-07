@@ -356,11 +356,12 @@ function update() {
                                     const project = game.projects.data[node.project_id];
                                     const is_hidden = game.renderer.ui_node_project.element_root.classList.contains("hide");
                                     if (is_hidden) {
+                                        // TODO: perf
                                         const content = [
-                                            `<h2>${project.name}</h2>`,
                                             ...project.description,
+                                            `<ul>${project.bullet_points.map((item) => `<li> - ${item}</li>`).join("")}</ul>`,
                                         ].join("");
-                                        ui_panel_show(game.renderer.ui_node_project, content);
+                                        ui_panel_show(game.renderer.ui_node_project, project.name, content);
                                         ui_button_hide(game.renderer.ui_node_action);
                                         ui_button_show(game.renderer.ui_confirm, "Close");
                                     } else {
@@ -396,6 +397,7 @@ function update() {
 
                         const distance = manhathan_distance(game.destination_path.data[0], game.destination_path.data[game.destination_path.count-1]);
                         let duration = 200 * distance;
+                        if (is_warp) { duration *= 0.5; }
                         const end = game.world_mode_timer + duration;
                         const remaining = end - now;
                         const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
@@ -1761,8 +1763,9 @@ type UI_Label = {
 }
 type UI_Panel = {
     element_root:       HTMLElement;
+    element_title:      HTMLDivElement;
     element_close:      HTMLButtonElement;
-    element_content:    HTMLElement;
+    element_content:    HTMLDivElement;
 }
 function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
@@ -1774,8 +1777,9 @@ function ui_button_show(button: UI_Label, label: string = ""): void {
 function ui_button_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
 }
-function ui_panel_show(button: UI_Panel, label: string = ""): void {
-    button.element_content.innerHTML = label;
+function ui_panel_show(button: UI_Panel, title: string, content: string): void {
+    button.element_title.innerHTML = title;
+    button.element_content.innerHTML = content;
     button.element_root.classList.remove("hide");
 }
 function ui_panel_hide(button: UI_Panel): void {
@@ -1789,12 +1793,16 @@ function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
 function ui_create_panel(ui_root: HTMLDivElement, close_fn: (this: HTMLButtonElement, ev: MouseEvent) => any): UI_Panel {
     const panel_root = ui_create_element<HTMLElement>(ui_root, `
         <section class="panel hide">
-            <button class="close" aria-label="Close"></button>
+            <header>
+                <h2></h2>
+                <button class="close" aria-label="Close"></button>
+            </header>
             <div class="content"></div>
         </section>
     `);
     const panel: UI_Panel = {
         element_root:       panel_root,
+        element_title:      panel_root.querySelector("h2"),
         element_close:      panel_root.querySelector(".close"),
         element_content:    panel_root.querySelector(".content"),
     };
@@ -1825,10 +1833,7 @@ const PROJECTS: Project[] = [
         id: 0,
         name: "",
         url: "",
-        description: [
-            `<p>Ea officia laboris sit nisi anim pariatur voluptate quis sint consequat dolor. Fugiat consequat qui amet ipsum enim. Nostrud et quis nostrud nisi cupidatat dolore sunt fugiat do sit ipsum exercitation est.</p>`,
-            `<p>Laboris enim in velit ea sunt veniam anim incididunt proident dolor ad proident irure id. Excepteur ex proident tempor et. Cillum sint ullamco ullamco voluptate dolor irure est aliquip. Cillum quis cillum dolore do deserunt eiusmod voluptate. Anim eu et ad laborum proident. Elit anim nisi aute ipsum incididunt non consequat officia.</p>`,
-        ],
+        description: [],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -1840,6 +1845,8 @@ const PROJECTS: Project[] = [
         description: [
             `<p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>`,
             `<p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>`,
+            `<p>Reprehenderit ex ad sint culpa ea culpa aliqua culpa. Irure mollit cillum officia laboris magna culpa exercitation ipsum deserunt sunt magna dolor. Est laboris eiusmod deserunt amet exercitation velit nostrud ea amet aute commodo. Lorem cillum cupidatat duis velit. Sunt dolore minim esse laborum minim sit veniam cupidatat commodo proident sunt. Lorem quis Lorem officia dolore proident laboris ad sunt.</p>`,
+            `<p>Sint pariatur veniam irure nulla fugiat enim sit sunt aliquip anim quis duis anim. Voluptate culpa anim consectetur non sit irure. Consectetur exercitation sint consequat incididunt non ut dolor ex non aliquip dolore occaecat dolore pariatur. Nulla do pariatur minim qui quis aliquip fugiat duis ullamco commodo nostrud Lorem magna ex. Voluptate aliqua et voluptate sint Lorem laboris velit mollit ullamco. Elit do elit fugiat aliqua sint qui laboris.</p>`,
         ],
         bullet_points: [
             `Engine: Unity`,

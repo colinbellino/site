@@ -12,7 +12,7 @@
             width: 100%;
         }
         html {
-            font-size: 20px;
+            font-size: 18px;
             font-family: "Arial";
         }
         body {
@@ -31,32 +31,29 @@
             top: 10px;
             right: 10px;
             left: 10px;
+            height: 100%;
             min-width: 300px;
+            max-height: calc(100% - 42px*4);
             opacity: 1;
-            transition: opacity linear 50ms;
-        }
-        @media (min-width: 760px) {
-            .panel {
-                max-width: 740px;
-                left: calc(100%/2 - 740px/2);
-                right: auto;
-                margin: 0 auto;
-            }
+            transform: translate(0px, 0px);
+            transition: 200ms ease-in opacity, 200ms ease-in transform;
         }
         .panel.hide {
             opacity: 0;
+            transform: translateY(-20px);
+        }
+        .panel header {
+            position: absolute;
+            width: calc(100% - 30px);
         }
         .panel h2 {
             font-size: 1.5em;
             margin: 0;
         }
-        .panel p:last-of-type {
-            margin-bottom: 0;
-        }
         .panel .close {
             position: absolute;
-            top: 10px;
-            right: 10px;
+            top: 0;
+            right: 0;
             padding: 0;
             margin: 0;
             color: inherit;
@@ -73,6 +70,21 @@
         .panel .close:hover {
             background-color: rgba(255, 255, 255, 0.1);
         }
+        .panel .content {
+            overflow-y: auto;
+            scrollbar-color: rgba(128, 128, 128, 1) transparent;
+            scrollbar-width: thin;
+            height: calc(100% - 46px);
+            margin-top: 46px;
+            padding-right: 10px;
+        }
+        .panel p {
+            margin-top: 0;
+            margin-bottom: 1em;
+        }
+        .panel p:last-child {
+            margin-bottom: 0;
+        }
         .panel a {
             color: inherit
         }
@@ -83,7 +95,17 @@
         }
         .panel li {
             list-style: none;
-            float: left;
+        }
+        @media (min-width: 760px) {
+            .panel {
+                max-width: 740px;
+                left: calc(100%/2 - 740px/2);
+                right: auto;
+                margin: 0 auto;
+            }
+            .panel .content {
+                padding-right: 0;
+            }
         }
 
         .hud_label {
@@ -92,7 +114,7 @@
             margin: 0;
             padding: 5px;
             text-align: right;
-            color: rgba(255, 255, 255, 0.9);
+            color: rgba(255, 255, 255, 0.95);
             display: flex;
             align-items: center;
             background: rgba(0, 0, 0, 0.2);
