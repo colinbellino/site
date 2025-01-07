@@ -301,10 +301,10 @@ function update() {
                     renderer_resize_canvas();
                     update_zoom();
 
-                    ui_button_show(game.renderer.ui_up);
-                    ui_button_show(game.renderer.ui_right);
-                    ui_button_show(game.renderer.ui_down);
-                    ui_button_show(game.renderer.ui_left);
+                    ui_label_show(game.renderer.ui_up);
+                    ui_label_show(game.renderer.ui_right);
+                    ui_label_show(game.renderer.ui_down);
+                    ui_label_show(game.renderer.ui_left);
                     game.render_active = true;
                     game.game_mode = Game_Mode.RUNNING;
                 }
@@ -339,8 +339,8 @@ function update() {
                                     }
                                 }
                                 ui_panel_hide(game.renderer.ui_node_project);
-                                ui_button_hide(game.renderer.ui_confirm);
-                                ui_button_hide(game.renderer.ui_node_action);
+                                ui_label_hide(game.renderer.ui_confirm);
+                                ui_label_hide(game.renderer.ui_node_action);
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
                             } else {
@@ -357,17 +357,27 @@ function update() {
                                     const is_hidden = game.renderer.ui_node_project.element_root.classList.contains("hide");
                                     if (is_hidden) {
                                         // TODO: perf
-                                        const content = [
-                                            ...project.description,
-                                            `<ul>${project.bullet_points.map((item) => `<li> - ${item}</li>`).join("")}</ul>`,
-                                        ].join("");
-                                        ui_panel_show(game.renderer.ui_node_project, project.name, content);
-                                        ui_button_hide(game.renderer.ui_node_action);
-                                        ui_button_show(game.renderer.ui_confirm, "Close");
+                                        const content = [];
+                                        for (let i = 0; i < project.screenshots_count; i++) {
+                                            content.push(`<img src="${project_image_url(project, i+1)}" alt="A Screenshot of the app (${i+1} of ${project.screenshots_count})." />`);
+                                        }
+                                        for (let i = 0; i < project.description.length; i++) {
+                                            content.push(project.description[i]);
+                                        }
+                                        content.push("<ul>");
+                                        for (let i = 0; i < project.bullet_points.length; i++) {
+                                            content.push(`<li> - ${project.bullet_points[i]}</li>`);
+                                        }
+                                        content.push("</ul>");
+
+                                        ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""));
+                                        ui_label_hide(game.renderer.ui_node_action);
+                                        ui_label_show(game.renderer.ui_confirm, "Close");
                                     } else {
                                         ui_panel_hide(game.renderer.ui_node_project);
-                                        ui_button_show(game.renderer.ui_node_action, "Open");
-                                        ui_button_show(game.renderer.ui_confirm, "Open");
+                                        const label = ui_get_node_label(node);
+                                        ui_label_show(game.renderer.ui_node_action);
+                                        ui_label_show(game.renderer.ui_confirm, label);
                                     }
                                 } break;
                                 case Node_Type.WARP: {
@@ -380,8 +390,8 @@ function update() {
 
                                     game.camera_move_start = game.renderer.camera_main.position;
                                     game.camera_move_end   = vector2_multiply_float(current_node.warp_camera, GRID_SIZE);
-                                    ui_button_hide(game.renderer.ui_confirm);
-                                    ui_button_hide(game.renderer.ui_node_action);
+                                    ui_label_hide(game.renderer.ui_confirm);
+                                    ui_label_hide(game.renderer.ui_node_action);
 
                                     game.world_mode = World_Mode.MOVING;
                                     game.world_mode_timer = now;
@@ -418,14 +428,15 @@ function update() {
                                 game.player.sprite.scale = [1, 1];
                             }
 
-                            let label = "";
-                            switch (node.type) {
-                                case Node_Type.PROJECT: { label = "Open"; } break;
-                                case Node_Type.WARP:    { label = "Warp"; } break;
-                            }
+                            const label = ui_get_node_label(node);
                             if (label !== "") {
-                                ui_button_show(game.renderer.ui_confirm, label);
-                                ui_button_show(game.renderer.ui_node_action, label);
+                                ui_label_show(game.renderer.ui_confirm, label);
+                                if (node.project_id) {
+                                    ui_label_node_show(game.renderer.ui_node_action, label, project_image_url(game.projects.data[node.project_id], 0));
+                                } else {
+                                    ui_label_node_show(game.renderer.ui_node_action, label, "");
+                                }
+                                ui_label_show(game.renderer.ui_node_action, label);
                             }
                             game.world_mode = World_Mode.IDLE;
                         }
@@ -708,7 +719,7 @@ type Renderer = {
     ui_left:            UI_Label;
     ui_confirm:         UI_Label;
     ui_cancel:          UI_Label;
-    ui_node_action:     UI_Label;
+    ui_node_action:     UI_Label_Node;
     sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
@@ -824,10 +835,11 @@ function renderer_init(): [Renderer, true] | [null, false] {
     const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_label };
 
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label anchor_bottom node_action hide"></label>`);
-    const node_action_label = ui_create_element<HTMLSpanElement>(node_action_root, `<span>HELLO</span>`);
+    const node_action_image = ui_create_element<HTMLImageElement>(node_action_root, `<img />`);
+    const node_action_label = ui_create_element<HTMLSpanElement>(node_action_root, `<span></span>`);
     const node_action_button = ui_create_element<HTMLButtonElement>(node_action_root, `<button class="hud_icon icon_confirm"></button>`);
     node_action_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter));
-    const ui_node_action: UI_Label = { element_root: node_action_root, element_button: node_action_button, element_label: node_action_label };
+    const ui_node_action: UI_Label_Node = { element_root: node_action_root, element_button: node_action_button, element_label: node_action_label, element_image: node_action_image };
 
     // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
@@ -1399,6 +1411,12 @@ function world_to_window_position(world_position: Vector2): Vector2 {
         (world_position[1] * camera.zoom) + (game.renderer.window_size[1] / 2) - (camera.position[1] * camera.zoom),
     ];
 }
+function project_image_url(project: Project, image_index: int): string {
+    if (image_index === 0) {
+        return `/images/screenshots/${project.screenshots_prefix}/banner-small.png`;
+    }
+    return `/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-small.png`;
+}
 
 // :debug
 function number_to_binary_string(dec: number, size: number = 4): string {
@@ -1761,6 +1779,9 @@ type UI_Label = {
     element_label:      HTMLSpanElement;
     element_button:     HTMLButtonElement;
 }
+type UI_Label_Node = UI_Label & {
+    element_image:      HTMLImageElement;
+}
 type UI_Panel = {
     element_root:       HTMLElement;
     element_title:      HTMLDivElement;
@@ -1770,12 +1791,27 @@ type UI_Panel = {
 function ui_push_console_line(line: string) {
     fixed_array_add(game.console_lines, line);
 }
-function ui_button_show(button: UI_Label, label: string = ""): void {
-    button.element_label.innerHTML = label;
+function ui_label_show(button: UI_Label, label: string = ""): void {
+    if (label) {
+        button.element_label.innerHTML = label;
+    }
     button.element_root.classList.remove("hide");
 }
-function ui_button_hide(button: UI_Label): void {
+function ui_label_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
+}
+function ui_label_node_show(button: UI_Label_Node, label: string, image_url: string): void {
+    if (label) {
+        button.element_label.innerHTML = label;
+    }
+    button.element_root.classList.remove("hide");
+    if (image_url) {
+        button.element_root.classList.add("thumbnail");
+        button.element_image.src = image_url;
+    } else {
+        button.element_root.classList.remove("thumbnail");
+        button.element_image.src = "";
+    }
 }
 function ui_panel_show(button: UI_Panel, title: string, content: string): void {
     button.element_title.innerHTML = title;
@@ -1784,6 +1820,14 @@ function ui_panel_show(button: UI_Panel, title: string, content: string): void {
 }
 function ui_panel_hide(button: UI_Panel): void {
     button.element_root.classList.add("hide");
+}
+function ui_get_node_label(node: Map_Node): string {
+    let label = "";
+    switch (node.type) {
+        case Node_Type.PROJECT: { label = "Open"; } break;
+        case Node_Type.WARP:    { label = "Warp"; } break;
+    }
+    return label;
 }
 function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
     const parent = document.createElement("div");
@@ -1855,7 +1899,7 @@ const PROJECTS: Project[] = [
             `<a href="https://github.com/colinbellino/ludum-dare-50" target="_blank" rel="noopener">Source code</a>`,
         ],
         screenshots_prefix: "feast",
-        screenshots_count: 4,
+        screenshots_count: 3,
     },
     {
         id: 2,
@@ -1871,7 +1915,7 @@ const PROJECTS: Project[] = [
             `Duration: 72h (+ a couple of days after the jam)`,
             `<a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source code</a>`,
         ],
-        screenshots_prefix: "",
+        screenshots_prefix: "alteration",
         screenshots_count: 6,
     },
     {
@@ -1883,8 +1927,8 @@ const PROJECTS: Project[] = [
             `<p>Sint pariatur veniam irure nulla fugiat enim sit sunt aliquip anim quis duis anim. Voluptate culpa anim consectetur non sit irure. Consectetur exercitation sint consequat incididunt non ut dolor ex non aliquip dolore occaecat dolore pariatur. Nulla do pariatur minim qui quis aliquip fugiat duis ullamco commodo nostrud Lorem magna ex. Voluptate aliqua et voluptate sint Lorem laboris velit mollit ullamco. Elit do elit fugiat aliqua sint qui laboris.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "bonbon",
+        screenshots_count: 1,
     },
     {
         id: 4,
@@ -1895,8 +1939,8 @@ const PROJECTS: Project[] = [
             `<p>Pariatur enim voluptate irure sunt nostrud. Ipsum pariatur fugiat adipisicing occaecat qui deserunt. Aliquip irure sint non sint ut adipisicing ullamco deserunt non consequat veniam pariatur. Sit amet deserunt ut velit eu. Non consequat ad reprehenderit officia anim cillum Lorem. Quis enim voluptate aliqua anim cupidatat quis.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "flight",
+        screenshots_count: 1,
     },
     {
         id: 5,
@@ -1907,8 +1951,8 @@ const PROJECTS: Project[] = [
             `<p>Culpa pariatur id do non enim ut tempor cillum nostrud eu qui pariatur sit eiusmod. Ipsum elit enim deserunt occaecat cupidatat. Laboris veniam cupidatat voluptate amet enim ullamco mollit mollit ea adipisicing consectetur eiusmod esse do. Aliqua officia qui ex adipisicing esse esse qui aute pariatur veniam. Occaecat aute anim nulla in laboris deserunt irure et. Ut enim excepteur enim dolor proident non reprehenderit.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "hubside",
+        screenshots_count: 1,
     },
     {
         id: 6,
@@ -1919,8 +1963,8 @@ const PROJECTS: Project[] = [
             `<p>Amet proident amet ut excepteur dolore esse cillum veniam ea quis aute exercitation in. Ad ut eiusmod nulla quis quis eu minim tempor aute excepteur minim aliquip mollit. Proident fugiat pariatur commodo labore fugiat.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "monstrum",
+        screenshots_count: 1,
     },
     {
         id: 7,
@@ -1931,8 +1975,8 @@ const PROJECTS: Project[] = [
             `<p>Consectetur nulla adipisicing et duis irure in voluptate in nostrud elit excepteur sint officia et. Incididunt reprehenderit fugiat laborum aliqua nostrud dolor quis in dolor ea. Culpa duis dolor cupidatat deserunt in nulla cillum consectetur cillum nisi et duis laboris esse.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "precogs",
+        screenshots_count: 1,
     },
     {
         id: 8,
@@ -1943,8 +1987,8 @@ const PROJECTS: Project[] = [
             `<p>Tempor aute nulla occaecat eiusmod duis cillum sint ullamco mollit nulla. Ipsum minim ea nulla cupidatat nisi dolor do est excepteur excepteur cillum ipsum. Velit pariatur culpa incididunt irure cillum incididunt cupidatat voluptate id velit. Duis id officia aliquip nulla. Ut ullamco proident amet elit quis pariatur.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "renault",
+        screenshots_count: 1,
     },
     {
         id: 9,
@@ -1955,8 +1999,8 @@ const PROJECTS: Project[] = [
             `<p>Enim ex sunt velit culpa exercitation consequat non incididunt magna quis cupidatat. Minim nulla ullamco ut quis laboris tempor duis sunt. Laborum proident aliqua ipsum proident aliqua. Duis commodo proident eiusmod velit proident laborum duis ut do tempor sint labore voluptate. Sint exercitation cupidatat adipisicing cupidatat id aliquip est cillum id tempor exercitation nisi dolor consequat. In eu laborum cupidatat consectetur ad nulla magna consequat commodo do incididunt ullamco adipisicing nulla. Est in dolor esse velit excepteur Lorem qui adipisicing.</p>`,
         ],
         bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "snowball",
+        screenshots_count: 1,
     },
     {
         id: 10,

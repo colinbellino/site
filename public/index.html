@@ -78,6 +78,9 @@
             margin-top: 46px;
             padding-right: 10px;
         }
+        .panel img {
+            width: 128px;
+        }
         .panel p {
             margin-top: 0;
             margin-bottom: 1em;
@@ -116,6 +119,7 @@
             text-align: right;
             color: rgba(255, 255, 255, 0.95);
             display: flex;
+            flex-wrap: wrap;
             align-items: center;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 25px;
@@ -125,7 +129,24 @@
             user-select: none;
         }
         .hud_label.node_action {
-            background: rgba(0, 0, 0, 0.5);
+            background: rgba(0, 0, 0, 0.6);
+        }
+        .hud_label.thumbnail {
+            padding: 0 0 5px 0;
+            border-radius: 15px;
+        }
+        .hud_label.thumbnail img {
+            display: block;
+            width: 64px;
+            flex: 100%;
+            margin-bottom: 5px;
+            border-radius: 15px 15px 0 0;
+        }
+        .hud_label.thumbnail span {
+            flex-grow: 1;
+        }
+        .hud_label.thumbnail button {
+            margin-right: 5px;
         }
         .hud_label.up {
             left: 64px;
