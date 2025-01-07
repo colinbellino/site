@@ -315,15 +315,16 @@ function update() {
             // :game RUNNING
             case Game_Mode.RUNNING: {
                 {
+                    // TODO: perf
                     const current_node = game.nodes.data[game.nodes_current];
                     const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
                     const root = game.renderer.ui_node_action.element_root;
                     const margin = 10;
-                    const max_x = game.renderer.window_size[0] - root.clientWidth  - margin;
-                    const max_y = game.renderer.window_size[1] - root.clientHeight - margin;
-                    let client_height_but_bad = game.renderer.ui_node_action.element_root.clientHeight;
-                    const x = clamp(window_position[0] - root.clientWidth * 0.5, margin, max_x);
-                    const y = clamp(window_position[1] - client_height_but_bad - 36, margin, max_y);
+                    const rect = root.getClientRects()[0];
+                    const max_x = game.renderer.window_size[0] - rect.width  - margin;
+                    const max_y = game.renderer.window_size[1] - rect.height - margin;
+                    const x = clamp(window_position[0] - rect.width * 0.5, margin, max_x);
+                    const y = clamp(window_position[1] - rect.height - 12 - 8*game.renderer.camera_main.zoom, margin, max_y);
                     root.style.left = `${x}px`;
                     root.style.top  = `${y}px`;
                 }
@@ -620,7 +621,9 @@ function update() {
             ui_set_element_class(game.renderer.ui_console, "open", game.draw_console);
             game.renderer.ui_console.innerHTML = console_lines;
 
-            gl.viewport(0, 0, game.renderer.window_size[0]*game.renderer.pixel_ratio, game.renderer.window_size[1]*game.renderer.pixel_ratio);
+            if (game.inputs.window_resized) {
+                gl.viewport(0, 0, game.renderer.window_size[0]*game.renderer.pixel_ratio, game.renderer.window_size[1]*game.renderer.pixel_ratio);
+            }
 
             gl.clearColor(game.clear_color[0], game.clear_color[1], game.clear_color[2], game.clear_color[3]);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
@@ -648,8 +651,7 @@ function update() {
                     offset += 4;
 
                     let matrix = matrix4_identity();
-                    matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0], sprite.size[1], 0));
-                    matrix4_multiply(matrix, matrix4_make_scale(sprite.scale[0], sprite.scale[1], 0));
+                    matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0] * sprite.scale[0], sprite.size[1] * sprite.scale[1], 0));
                     matrix4_multiply(matrix, matrix4_make_translation(sprite.position[0] + sprite.offset[0], sprite.position[1] + sprite.offset[1], 0));
                     // matrix = matrix4_rotate_z(matrix, sprite.rotation);
                     game.sprite_data.set(matrix, offset);
@@ -711,7 +713,7 @@ function update_zoom(): void {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
     const smallest = Math.min(game.renderer.window_size[0], game.renderer.window_size[1]);
     const threshold = 360;
-    game.renderer.camera_main.zoom = Math.max(0.5, Math.floor(smallest / threshold));
+    game.renderer.camera_main.zoom = Math.max(1.0, Math.floor(smallest / threshold));
 }
 
 // :renderer
@@ -1215,17 +1217,17 @@ enum Mouse_Key {
 }
 function inputs_init(): Inputs {
     const inputs: Inputs = {
-        quit_requested: false,
-        window_resized: false,
-        window_is_focused: true,
-        keyboard_was_used: false,
-        controller_was_used: false,
-        mouse_was_used: false,
-        mouse_moved: false,
-        mouse_position: [0, 0],
-        mouse_wheel: [0, 0],
-        keys: {} as any,
-        mouse_keys: {} as any,
+        quit_requested:         false,
+        window_resized:         true,
+        window_is_focused:      true,
+        keyboard_was_used:      false,
+        controller_was_used:    false,
+        mouse_was_used:         false,
+        mouse_moved:            false,
+        mouse_position:         [0, 0],
+        mouse_wheel:            [0, 0],
+        keys:                   {} as any,
+        mouse_keys:             {} as any,
     };
     inputs.mouse_position = [0,0];
     inputs.mouse_wheel = [0,0];
