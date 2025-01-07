@@ -26,7 +26,7 @@
             padding: 15px;
             box-sizing: border-box;
             border-radius: 5px;
-            background: rgba(0, 0, 0, 0.8);
+            background: rgba(0, 0, 0, 0.95);
             color: rgba(255, 255, 255, 0.9);
             top: 10px;
             right: 10px;
@@ -115,12 +115,8 @@
             z-index: 10;
             position: absolute;
             margin: 0;
-            padding: 5px;
             text-align: right;
             color: rgba(255, 255, 255, 0.95);
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
             background: rgba(0, 0, 0, 0.2);
             border-radius: 25px;
             opacity: 1;
@@ -128,25 +124,27 @@
             transition: 100ms ease-in opacity, 100ms ease-in transform;
             user-select: none;
         }
+        .hud_label .content {
+            padding: 5px;
+            display: flex;
+            flex-wrap: wrap;
+            align-items: center;
+        }
         .hud_label.node_action {
-            background: rgba(0, 0, 0, 0.6);
+            background: rgba(0, 0, 0, 0.8);
         }
         .hud_label.thumbnail {
-            padding: 0 0 5px 0;
             border-radius: 15px;
         }
-        .hud_label.thumbnail img {
+        .hud_label > img {
+            display: none;
+        }
+        .hud_label.thumbnail > img {
             display: block;
-            width: 64px;
-            flex: 100%;
-            margin-bottom: 5px;
             border-radius: 15px 15px 0 0;
         }
-        .hud_label.thumbnail span {
-            flex-grow: 1;
-        }
-        .hud_label.thumbnail button {
-            margin-right: 5px;
+        .hud_label.thumbnail .label {
+            flex: 1;
         }
         .hud_label.up {
             left: 64px;
@@ -179,14 +177,13 @@
         .hud_label.anchor_bottom.hide {
             transform: translate(0px, 20px);
         }
-        .hud_label.no_label span {
+        .hud_label.no_label .content .label {
             display: none;
         }
-        .hud_label span {
-            margin-right: 10px;
-            margin-left: 10px;
-            margin-bottom: 1px;
+        .hud_label .content .label {
+            padding: 0 10px 0 10px;
         }
+
         .hud_icon {
             width: 32px;
             height: 32px;

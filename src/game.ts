@@ -33,7 +33,6 @@ type Game = {
     sorted_sprites:         Fixed_Size_Array<Sprite, typeof MAX_SPRITES>;
     sprite_data:            Float32Array;
     world:                  World;
-    // world_size:             Vector2;
     world_grid:             Cell[];
     tile_grid:              int[];
     camera_move_start:      Vector2;
@@ -44,6 +43,8 @@ type Game = {
     draw_world_grid:        boolean;
     draw_world_tile:        boolean;
     draw_tiles:             boolean;
+    image_projects:         HTMLImageElement;
+    texture0:               WebGLTexture;
     // engine
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
     renderer:               Renderer;
@@ -52,7 +53,6 @@ type Game = {
     fps:                    int;
     fps_last_update:        number;
     fps_count:              number;
-    texture0:               WebGLTexture;
     inputs:                 Inputs;
 }
 type World = {
@@ -95,6 +95,7 @@ type Neighbour = {
 }
 
 // :constants
+const THUMBNAIL_SIZE: Vector2 = [256, 160];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
@@ -172,6 +173,7 @@ function update() {
             window.addEventListener("keyup", inputs_on_key, false);
 
             load_image("./images/atlas.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+            load_image("./images/projects.png").then(image => { game.image_projects = image });
             load_world().then((world) => { game.world = world; } );
         }
 
@@ -259,6 +261,7 @@ function update() {
                 let is_loaded = true;
                 is_loaded &&= game.world !== undefined;
                 is_loaded &&= game.texture0 !== undefined;
+                is_loaded &&= game.image_projects !== undefined;
                 if (is_loaded) {
                     // :init world
                     game.tile_grid = Array(game.world.width+1 * game.world.height+1);
@@ -315,8 +318,12 @@ function update() {
                     const current_node = game.nodes.data[game.nodes_current];
                     const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
                     const root = game.renderer.ui_node_action.element_root;
-                    const x = clamp(window_position[0] - root.clientWidth*0.5, 10, game.renderer.window_size[0] - root.clientWidth*1.0 - 10);
-                    const y = clamp(window_position[1] - (56 + 8*game.renderer.camera_main.zoom), 10, game.renderer.window_size[1] - root.clientHeight*1.0 - 10);
+                    const margin = 10;
+                    const max_x = game.renderer.window_size[0] - root.clientWidth  - margin;
+                    const max_y = game.renderer.window_size[1] - root.clientHeight - margin;
+                    let client_height_but_bad = game.renderer.ui_node_action.element_root.clientHeight;
+                    const x = clamp(window_position[0] - root.clientWidth * 0.5, margin, max_x);
+                    const y = clamp(window_position[1] - client_height_but_bad - 36, margin, max_y);
                     root.style.left = `${x}px`;
                     root.style.top  = `${y}px`;
                 }
@@ -359,7 +366,7 @@ function update() {
                                         // TODO: perf
                                         const content = [];
                                         for (let i = 0; i < project.screenshots_count; i++) {
-                                            content.push(`<img src="${project_image_url(project, i+1)}" alt="A Screenshot of the app (${i+1} of ${project.screenshots_count})." />`);
+                                            content.push(`<img src="${generate_project_image_url(project, i+1)}" alt="A Screenshot of the app (${i+1} of ${project.screenshots_count})." />`);
                                         }
                                         for (let i = 0; i < project.description.length; i++) {
                                             content.push(project.description[i]);
@@ -432,7 +439,7 @@ function update() {
                             if (label !== "") {
                                 ui_label_show(game.renderer.ui_confirm, label);
                                 if (node.project_id) {
-                                    ui_label_node_show(game.renderer.ui_node_action, label, project_image_url(game.projects.data[node.project_id], 0));
+                                    ui_label_node_show(game.renderer.ui_node_action, label, generate_project_thumbnail_url(node.project_id));
                                 } else {
                                     ui_label_node_show(game.renderer.ui_node_action, label, "");
                                 }
@@ -710,6 +717,7 @@ function update_zoom(): void {
 // :renderer
 type Renderer = {
     gl:                 WebGL2RenderingContext;
+    offscreen:          CanvasRenderingContext2D;
     ui_root:            HTMLDivElement;
     ui_console:         HTMLPreElement;
     ui_node_project:    UI_Panel;
@@ -795,51 +803,105 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
+    const offscreen = ui_create_element<HTMLCanvasElement>(document.body, `<canvas id="offscreen"></canvas>`)
+    const offscreen_context = offscreen.getContext("2d");
+    if (offscreen_context === null) {
+        return [null, false];
+    }
+
     const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
     assert(ui_root !== undefined);
 
-    const up_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label anchor_bottom no_label hide up" for="up"></label>`);
-    const up_label = ui_create_element<HTMLSpanElement>(up_root, `<span></span>`);
-    const up_button = ui_create_element<HTMLButtonElement>(up_root, `<button class="hud_icon icon_up" aria-label="Move: up"></button>`);
+    const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label anchor_bottom no_label hide up" for="up">
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_up" aria-label="Move: up"></button>
+            </span>
+        </label>
+    `);
+    const up_button = up_root.querySelector(".content button") as HTMLButtonElement;
     up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp));
-    const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_label };
+    const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_root.querySelector(".content .label") };
 
-    const right_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label anchor_bottom no_label hide right"></label>`);
-    const right_label = ui_create_element<HTMLSpanElement>(right_root, `<span></span>`);
-    const right_button = ui_create_element<HTMLButtonElement>(right_root, `<button class="hud_icon icon_right" aria-label="Move: right"></button>`);
+    const right_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label anchor_bottom no_label hide right">
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_right" aria-label="Move: right"></button>
+            </span>
+        </label>
+    `);
+    const right_button = right_root.querySelector(".content button") as HTMLButtonElement;
     right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight));
-    const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_label };
+    const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_root.querySelector(".content .label") };
 
-    const down_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label anchor_bottom no_label hide down"></label>`);
-    const down_label = ui_create_element<HTMLSpanElement>(down_root, `<span></span>`);
-    const down_button = ui_create_element<HTMLButtonElement>(down_root, `<button class="hud_icon icon_down" aria-label="Move: down"></button>`);
+    const down_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label anchor_bottom no_label hide down">
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_down" aria-label="Move: down"></button>
+            </span>
+        </label>
+    `);
+    const down_button = down_root.querySelector(".content button") as HTMLButtonElement;
     down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown));
-    const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_label };
+    const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_root.querySelector(".content .label") };
 
-    const left_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label anchor_bottom no_label hide left"></label>`);
-    const left_label = ui_create_element<HTMLSpanElement>(left_root, `<span></span>`);
-    const left_button = ui_create_element<HTMLButtonElement>(left_root, `<button class="hud_icon icon_left" aria-label="Move: left"></button>`);
+    const left_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label anchor_bottom no_label hide left">
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_left" aria-label="Move: left"></button>
+            </span>
+        </label>
+    `);
+    const left_button = left_root.querySelector(".content button") as HTMLButtonElement;
     left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft));
-    const ui_left: UI_Label = { element_root: left_root, element_button: left_button, element_label: left_label };
+    const ui_left: UI_Label = { element_root: left_root, element_button: left_button, element_label: left_root.querySelector(".content .label") };
 
-    const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide confirm"></label>`);
-    const confirm_label = ui_create_element<HTMLSpanElement>(confirm_root, `<span></span>`);
-    const confirm_button = ui_create_element<HTMLButtonElement>(confirm_root, `<button class="hud_icon icon_confirm" aria-label="Confirm" id="confirm"></button>`);
+    const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label hide confirm">
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_confirm" aria-label="Confirm" id="confirm"></button>
+            </span>
+        </label>
+    `);
+    const confirm_button = confirm_root.querySelector(".content button") as HTMLButtonElement;
     confirm_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Enter); });
-    const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_label };
+    const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_root.querySelector(".content .label") };
 
-    const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label hide cancel"></label>`);
-    const cancel_label = ui_create_element<HTMLSpanElement>(cancel_root, `<span></span>`);
-    const cancel_button = ui_create_element<HTMLButtonElement>(cancel_root, `<button class="hud_icon icon_cancel" aria-label="Confirm" id="cancel"></button>`);
-    cancel_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Escape); });
-    const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_label };
+    const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label hide cancel">
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_cancel" aria-label="Confirm" id="cancel"></button>
+            </span>
+        </label>
+    `);
+    const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
+    const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
 
-    const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `<label class="hud_label anchor_bottom node_action hide"></label>`);
-    const node_action_image = ui_create_element<HTMLImageElement>(node_action_root, `<img />`);
-    const node_action_label = ui_create_element<HTMLSpanElement>(node_action_root, `<span></span>`);
-    const node_action_button = ui_create_element<HTMLButtonElement>(node_action_root, `<button class="hud_icon icon_confirm"></button>`);
+    const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
+        <label class="hud_label anchor_bottom node_action hide">
+            <img />
+            <span class="content">
+                <span class="label"></span>
+                <button class="hud_icon icon_confirm"></button>
+            </span>
+        </label>
+    `);
+    const node_action_button = node_action_root.querySelector(".content button") as HTMLButtonElement;
     node_action_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter));
-    const ui_node_action: UI_Label_Node = { element_root: node_action_root, element_button: node_action_button, element_label: node_action_label, element_image: node_action_image };
+    const node_action_image = node_action_root.querySelector("img");
+    node_action_image.width = THUMBNAIL_SIZE[0]*0.5;
+    node_action_image.height = THUMBNAIL_SIZE[1]*0.5;
+    const ui_node_action: UI_Label_Node = { element_root: node_action_root, element_button: node_action_button, element_label: node_action_root.querySelector(".content .label"), element_image: node_action_image };
+    assert(ui_node_action.element_root !== undefined);
+    assert(ui_node_action.element_button !== undefined);
+    assert(ui_node_action.element_label !== undefined);
+    assert(ui_node_action.element_image !== undefined);
 
     // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
@@ -856,6 +918,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         window_size:        [0, 0],
         pixel_ratio:        1.0,
         gl:                 _gl,
+        offscreen:          offscreen_context,
         ui_root:            ui_root,
         ui_console:         ui_console,
         ui_node_project:    ui_node_project,
@@ -1411,11 +1474,19 @@ function world_to_window_position(world_position: Vector2): Vector2 {
         (world_position[1] * camera.zoom) + (game.renderer.window_size[1] / 2) - (camera.position[1] * camera.zoom),
     ];
 }
-function project_image_url(project: Project, image_index: int): string {
+function generate_project_image_url(project: Project, image_index: int): string {
     if (image_index === 0) {
         return `/images/screenshots/${project.screenshots_prefix}/banner-small.png`;
     }
     return `/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-small.png`;
+}
+function generate_project_thumbnail_url(project_id: int): string {
+    const w = THUMBNAIL_SIZE[0];
+    const h = THUMBNAIL_SIZE[1];
+    game.renderer.offscreen.canvas.width = w;
+    game.renderer.offscreen.canvas.height = h;
+    game.renderer.offscreen.drawImage(game.image_projects, 0, h * project_id, w, h, 0, 0, w, h);
+    return game.renderer.offscreen.canvas.toDataURL();
 }
 
 // :debug
