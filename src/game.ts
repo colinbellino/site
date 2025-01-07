@@ -308,6 +308,7 @@ function update() {
                     ui_label_show(game.renderer.ui_right);
                     ui_label_show(game.renderer.ui_down);
                     ui_label_show(game.renderer.ui_left);
+                    game.inputs.window_resized = true;
                     game.render_active = true;
                     game.game_mode = Game_Mode.RUNNING;
                 }
@@ -1218,7 +1219,7 @@ enum Mouse_Key {
 function inputs_init(): Inputs {
     const inputs: Inputs = {
         quit_requested:         false,
-        window_resized:         true,
+        window_resized:         false,
         window_is_focused:      true,
         keyboard_was_used:      false,
         controller_was_used:    false,
