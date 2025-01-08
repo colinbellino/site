@@ -1,11 +1,3 @@
-#import "Compiler";
-#import "Basic";
-#import "Process";
-#import "String";
-#import "File_Watcher";
-#import "Thread";
-#import "Math";
-
 watcher: File_Watcher(void);
 config: Config;
 
@@ -14,11 +6,37 @@ Config :: struct {
     no_server:  bool;
 }
 
-#run {
+#run,stallable {
     root_options := get_build_options();
+    args := root_options.compile_time_command_line;
 
-    config.release = array_find(root_options.compile_time_command_line, "-release");
-    config.no_server = array_find(root_options.compile_time_command_line, "-no-server");
+    compile := array_find(args, "-compile");
+    if compile {
+        w := get_current_workspace();
+        set_build_options_dc(.{ output_executable_name = "build"}, w);
+    } else {
+        set_build_options_dc(.{ do_output = false });
+
+        if !build(args) {
+            compiler_set_workspace_status(.FAILED);
+        }
+    }
+}
+
+main :: () {
+    #import "System";
+
+    print("main()");
+    set_working_directory(path_strip_filename(get_path_of_running_executable()));
+    args := get_command_line_arguments();
+    if !build(args) {
+        exit(1);
+    }
+}
+
+build :: (args: []string) -> bool {
+    config.release = array_find(args, "-release");
+    config.no_server = array_find(args, "-no-server");
 
     if config.no_server {
         run_compile_command("src/game.ts", config.release);
@@ -30,9 +48,12 @@ Config :: struct {
         start(*thread_group);
         add_work(*thread_group, null, tprint("Work item 0"));
 
-        args := string.[tprint("./bin/%/http-server", OS), "--port", "8000", "--path", "public"];
+        args := string.[tprint("./bin/%/http-server", OS), "--path", "public"];
         process_result, output, error := run_command(..args, capture_and_return_output = false, print_captured_output = true);
+        return error != "";
     }
+
+    return true;
 }
 
 compile_work :: (group: *Thread_Group, thread: *Thread, work: *void) -> Thread_Continue_Status {
@@ -300,3 +321,11 @@ inject_js :: (text: string) {
     file_set_position(js_file, file_length(js_file));
     file_write(*js_file, text.data, text.count);
 }
+
+#import "Compiler";
+#import "Basic";
+#import "Process";
+#import "String";
+#import "File_Watcher";
+#import "Thread";
+#import "Math";
