@@ -1,8 +1,12 @@
 // These are injected at build time
 declare const __RELEASE__: boolean;
-declare const sprite_vs: string;
-declare const sprite_fs: string;
-declare const WORLD: World;
+declare const __CODEGEN__: Codegen;
+
+type Codegen = {
+    sprite_vs:  string;
+    sprite_fs:  string;
+    world:      World;
+}
 
 type Vector2 = Static_Array<float,2>;
 type Vector3 = Static_Array<float,3>;
@@ -45,6 +49,9 @@ type Game = {
     draw_tiles:             boolean;
     image_projects:         HTMLImageElement;
     texture0:               WebGLTexture;
+    sprite_vs:              string;
+    sprite_fs:              string;
+    sprite_pass:            Sprite_Pass;
     // engine
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
     renderer:               Renderer;
@@ -162,7 +169,6 @@ function update() {
             }
             game.renderer = renderer;
             renderer_update_camera_matrix_main(game.renderer.camera_main);
-            game.renderer.sprite_pass = renderer_make_sprite_pass(game.renderer.gl);
 
             game.inputs = inputs_init();
             game.projects = fixed_array_make(MAX_PROJECTS);
@@ -174,7 +180,11 @@ function update() {
 
             load_image("./images/atlas.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
             load_image("./images/projects.png").then(image => { game.image_projects = image });
-            load_world().then((world) => { game.world = world; } );
+            load_codegen().then((codegen) => {
+                game.world = codegen.world;
+                game.sprite_vs = codegen.sprite_vs;
+                game.sprite_fs = codegen.sprite_fs;
+            });
         }
 
         const gl = game.renderer.gl;
@@ -270,7 +280,10 @@ function update() {
                 is_loaded &&= game.world !== undefined;
                 is_loaded &&= game.texture0 !== undefined;
                 is_loaded &&= game.image_projects !== undefined;
+                is_loaded &&= game.sprite_vs !== undefined;
+                is_loaded &&= game.sprite_fs !== undefined;
                 if (is_loaded) {
+                    game.sprite_pass = renderer_make_sprite_pass(game.sprite_vs, game.sprite_fs, game.renderer.gl);
                     // :init world
                     game.tile_grid = Array(game.world.width+1 * game.world.height+1);
                     game.world_grid = Array(game.world.width * game.world.height);
@@ -644,7 +657,7 @@ function update() {
             gl.clearColor(game.clear_color[0], game.clear_color[1], game.clear_color[2], game.clear_color[3]);
             gl.clear(gl.COLOR_BUFFER_BIT | gl.DEPTH_BUFFER_BIT);
 
-            {
+            if (game.sprite_pass) {
                 game.sorted_sprites.count = game.renderer.sprites.count;
                 for (let sprite_index = 0; sprite_index < game.sorted_sprites.count; sprite_index++) {
                     game.sorted_sprites.data[sprite_index] = game.renderer.sprites.data[sprite_index];
@@ -688,13 +701,13 @@ function update() {
                     offset += 2;
                 }
 
-                gl.useProgram(game.renderer.sprite_pass.program);
-                gl.uniformMatrix4fv(game.renderer.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
-                gl.bindVertexArray(game.renderer.sprite_pass.vao);
+                gl.useProgram(game.sprite_pass.program);
+                gl.uniformMatrix4fv(game.sprite_pass.location_matrix, false, game.renderer.camera_main.view_projection_matrix);
+                gl.bindVertexArray(game.sprite_pass.vao);
                 gl.bindTexture(gl.TEXTURE_2D, game.texture0);
-                gl.bindBuffer(gl.ARRAY_BUFFER, game.renderer.sprite_pass.instance_data);
+                gl.bindBuffer(gl.ARRAY_BUFFER, game.sprite_pass.instance_data);
                 gl.bufferData(gl.ARRAY_BUFFER, game.sprite_data, gl.STREAM_DRAW);
-                gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.renderer.sprite_pass.indices as GLintptr, game.sorted_sprites.count);
+                gl.drawElementsInstanced(gl.TRIANGLES, 6, gl.UNSIGNED_BYTE, game.sprite_pass.indices as GLintptr, game.sorted_sprites.count);
             }
         }
 
@@ -715,15 +728,15 @@ function update() {
     }
 }
 
-function load_world(): Promise<World> {
-    if (typeof WORLD === "undefined") {
+function load_codegen(): Promise<Codegen> {
+    if (typeof __CODEGEN__ === "undefined") {
         if (!__RELEASE__) {
             console.log("location.reload");
             window.location.reload();
         }
-        return Promise.reject("WORLD isn't defined.");
+        return Promise.reject("__CODEGEN__ isn't defined.");
     }
-    return Promise.resolve(WORLD);
+    return Promise.resolve(__CODEGEN__);
 }
 function update_zoom(): void {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
@@ -746,7 +759,6 @@ type Renderer = {
     ui_confirm:         UI_Label;
     ui_cancel:          UI_Label;
     ui_node_action:     UI_Label_Node;
-    sprite_pass:        Sprite_Pass;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
     pixel_ratio:        float;
@@ -931,7 +943,6 @@ function renderer_init(): [Renderer, true] | [null, false] {
     });
 
     const renderer: Renderer = {
-        sprite_pass:        {} as Sprite_Pass,
         camera_main:        CAMERA_DEFAULT,
         sprites:            fixed_array_make(MAX_SPRITES),
         window_size:        [0, 0],
@@ -956,7 +967,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
 
     return [renderer, true];
 }
-function renderer_make_sprite_pass(gl: WebGL2RenderingContext): Sprite_Pass {
+function renderer_make_sprite_pass(sprite_vs: string, sprite_fs: string, gl: WebGL2RenderingContext): Sprite_Pass {
     // @ts-ignore
     const pass: Sprite_Pass = {};
     const [program, program_ok] = renderer_create_program(gl, sprite_vs, sprite_fs);
