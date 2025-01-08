@@ -132,14 +132,17 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
         }
     }
 
+    codegen_str: String_Builder;
+    append(*codegen_str, "\nconst __CODEGEN__ = {\n");
+
     {
         sprite_vert, sprite_vert_ok := read_entire_file("./src/sprite.glsl.vert");
         if !sprite_vert_ok { log_error("Couldn't read shader file: sprite.glsl.vert"); return; }
         sprite_frag, sprite_frag_ok := read_entire_file("./src/sprite.glsl.frag");
         if !sprite_frag_ok { log_error("Couldn't read shader file: sprite.glsl.frag"); return; }
 
-        shaders_js := tprint("\nconst sprite_vs = `%`;\nconst sprite_fs = `%`;\n", sprite_vert, sprite_frag);
-        inject_js(shaders_js);
+        append(*codegen_str, tprint("sprite_vs: `%`,\n", sprite_vert));
+        append(*codegen_str, tprint("sprite_fs: `%`,\n", sprite_frag));
         // log("---- injected shaders_js");
     }
 
@@ -264,46 +267,46 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
 
         assert(start_position[0] != 0 && start_position[1] != 0, "Missing start_position");
 
-        world_str: String_Builder;
-        append(*world_str, "\nconst WORLD = {\n");
-        append(*world_str, tprint("  width:  %,\n", level.pxWid / grid_size));
-        append(*world_str, tprint("  height: %,\n", level.pxHei / grid_size));
-        append(*world_str, tprint("  grid:   ["));
-        for grid { append(*world_str, tprint("%, ", it)); }
-        append(*world_str, "],\n");
-        append(*world_str, tprint("  tiles:   ["));
-        for tiles { append(*world_str, tprint("{ px: %, src: % }, ", it.px, it.src)); }
-        append(*world_str, "],\n");
-        append(*world_str, tprint("  nodes:   ["));
+        append(*codegen_str, "world: {\n");
+        append(*codegen_str, tprint("  width:  %,\n", level.pxWid / grid_size));
+        append(*codegen_str, tprint("  height: %,\n", level.pxHei / grid_size));
+        append(*codegen_str, tprint("  grid:   ["));
+        for grid { append(*codegen_str, tprint("%, ", it)); }
+        append(*codegen_str, "],\n");
+        append(*codegen_str, tprint("  tiles:   ["));
+        for tiles { append(*codegen_str, tprint("{ px: %, src: % }, ", it.px, it.src)); }
+        append(*codegen_str, "],\n");
+        append(*codegen_str, tprint("  nodes:   ["));
         for nodes {
-            append(*world_str, tprint("{ type: %,", cast(s32)it.type));
-            append(*world_str, tprint(" grid_position: %,", it.grid_position));
-            append(*world_str, tprint(" neighbours: ["));
+            append(*codegen_str, tprint("{ type: %,", cast(s32)it.type));
+            append(*codegen_str, tprint(" grid_position: %,", it.grid_position));
+            append(*codegen_str, tprint(" neighbours: ["));
             for neighbour : it.neighbours {
-                append(*world_str, tprint("{ path: [",));
+                append(*codegen_str, tprint("{ path: [",));
                 for point : neighbour.path {
-                    append(*world_str, tprint("%, ", point));
+                    append(*codegen_str, tprint("%, ", point));
                 }
-                append(*world_str, tprint("] }, "));
+                append(*codegen_str, tprint("] }, "));
             }
-            append(*world_str, tprint(" ],"));
+            append(*codegen_str, tprint(" ],"));
             if it.project_id
-                append(*world_str, tprint(" project_id: %,", it.project_id));
+                append(*codegen_str, tprint(" project_id: %,", it.project_id));
             if it.warp_target
-                append(*world_str, tprint(" warp_target: %,", it.warp_target));
+                append(*codegen_str, tprint(" warp_target: %,", it.warp_target));
             if it.warp_camera[0] != 0 && it.warp_camera[1] != 0
-                append(*world_str, tprint(" warp_camera: %,", it.warp_camera));
+                append(*codegen_str, tprint(" warp_camera: %,", it.warp_camera));
             if it.tooltip
-                append(*world_str, tprint(" tooltip: `%`,", it.tooltip));
-            append(*world_str, " }, ");
+                append(*codegen_str, tprint(" tooltip: `%`,", it.tooltip));
+            append(*codegen_str, " }, ");
         }
-        append(*world_str, "],\n");
-        append(*world_str, tprint("  start_position: %,\n", start_position));
-        append(*world_str, "};");
-
-        inject_js(builder_to_string(*world_str));
-        // log("---- world_js injected");
+        append(*codegen_str, "],\n");
+        append(*codegen_str, tprint("  start_position: %,\n", start_position));
+        append(*codegen_str, "},");
     }
+
+    append(*codegen_str, "\n};");
+
+    inject_js(builder_to_string(*codegen_str));
 }
 
 inject_js :: (text: string) {
