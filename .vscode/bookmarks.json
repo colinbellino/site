@@ -2,7 +2,143 @@
 	"files": [
 		{
 			"path": "src/game.ts",
-			"bookmarks": []
+			"bookmarks": [
+				{
+					"line": 23,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 103,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 216,
+					"column": 12,
+					"label": ""
+				},
+				{
+					"line": 255,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 282,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 292,
+					"column": 24,
+					"label": ""
+				},
+				{
+					"line": 342,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 360,
+					"column": 24,
+					"label": ""
+				},
+				{
+					"line": 444,
+					"column": 24,
+					"label": ""
+				},
+				{
+					"line": 490,
+					"column": 12,
+					"label": ""
+				},
+				{
+					"line": 496,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 503,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 531,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 559,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 598,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 617,
+					"column": 16,
+					"label": ""
+				},
+				{
+					"line": 678,
+					"column": 20,
+					"label": ""
+				},
+				{
+					"line": 753,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1012,
+					"column": 8,
+					"label": ""
+				},
+				{
+					"line": 1071,
+					"column": 8,
+					"label": ""
+				},
+				{
+					"line": 1158,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1368,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1528,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1533,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1600,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1883,
+					"column": 4,
+					"label": ""
+				},
+				{
+					"line": 1981,
+					"column": 4,
+					"label": ""
+				}
+			]
 		}
 	]
 }

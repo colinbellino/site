@@ -178,6 +178,12 @@ function update() {
             window.addEventListener("keydown", inputs_on_key, false);
             window.addEventListener("keyup", inputs_on_key, false);
 
+            if (!__RELEASE__) {
+                setInterval(() => {
+                    load_image("./images/atlas.png?v="+ Date.now()).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+                }, 1000);
+            }
+
             load_image("./images/atlas.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
             load_image("./images/projects.png").then(image => { game.image_projects = image });
             load_codegen().then((codegen) => {
