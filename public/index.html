@@ -1,233 +1,429 @@
 <!DOCTYPE html>
-<html>
+<html lang="en-us">
 
 <head>
-    <meta name="viewport" content="width=device-width, user-scalable=no">
-    <link rel="icon" type="image/png" sizes="32x32" href="./images/favicon-32x32.png" />
-    <style>
-        html,body {
-            margin: 0;
-            padding: 0;
-            height: 100%;
-            width: 100%;
-        }
-        html {
-            font-size: 18px;
-            font-family: "Arial";
-        }
-        body {
-            background: #2080ff;
-            overflow: hidden;
-        }
+  <meta charset="utf-8">
+  <title>Colin Bellino</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="Description" content="Hi, I‘m Colin. I‘m a french freelance programmer, designer and all around nerd. I build cool stuff and I stream my work sometimes.">
+  <link rel="apple-touch-icon" sizes="180x180" href="/site/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/site/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/site/images/favicon-16x16.png">
+  <style nonce="style">
+    :root {
+      --main-color: rgba(35, 55, 176, 1);
+      --main-color-hover: rgba(76, 95, 208, 1);
+      --background-color: rgba(255, 255, 255, 1);
+      --text-color: rgba(0, 0, 0, 0.85);
+      --link-background-color: rgba(0, 0, 0, 0.03);
+      --link-background-color-hover: rgba(0, 0, 0, 0.09);
+    }
 
-        .panel {
-            position: absolute;
-            z-index: 2;
-            padding: 15px;
-            box-sizing: border-box;
-            border-radius: 5px;
-            background: rgba(0, 0, 0, 0.95);
-            color: rgba(255, 255, 255, 0.9);
-            top: 10px;
-            right: 10px;
-            left: 10px;
-            height: 100%;
-            min-width: 300px;
-            max-height: calc(100% - 42px*4);
-            opacity: 1;
-            transform: translate(0px, 0px);
-            transition: 200ms ease-in opacity, 200ms ease-in transform;
-        }
-        .panel.hide {
-            opacity: 0;
-            transform: translateY(-20px);
-        }
-        .panel header {
-            position: absolute;
-            width: calc(100% - 30px);
-        }
-        .panel h2 {
-            font-size: 1.5em;
-            margin: 0;
-        }
-        .panel .close {
-            position: absolute;
-            top: 0;
-            right: 0;
-            padding: 0;
-            margin: 0;
-            color: inherit;
-            border: none;
-            width: 32px;
-            height: 32px;
-            border-radius: 5px;
-            background-color: transparent;
-            background-image: url("/images/atlas.png");
-            background-position: calc(-16px * 7 * 2) 0px;
-            background-size: calc(512px * 2) calc(512px * 2);
-            image-rendering: pixelated;
-        }
-        .panel .close:hover {
-            background-color: rgba(255, 255, 255, 0.1);
-        }
-        .panel .content {
-            overflow-y: auto;
-            scrollbar-color: rgba(128, 128, 128, 1) transparent;
-            scrollbar-width: thin;
-            height: calc(100% - 46px);
-            margin-top: 46px;
-            padding-right: 10px;
-        }
-        .panel img {
-            width: 128px;
-        }
-        .panel p {
-            margin-top: 0;
-            margin-bottom: 1em;
-        }
-        .panel p:last-child {
-            margin-bottom: 0;
-        }
-        .panel a {
-            color: inherit
-        }
-        .panel ul {
-            margin: 0;
-            padding: 0;
-            list-style-position: inside;
-        }
-        .panel li {
-            list-style: none;
-        }
-        @media (min-width: 760px) {
-            .panel {
-                max-width: 740px;
-                left: calc(100%/2 - 740px/2);
-                right: auto;
-                margin: 0 auto;
-            }
-            .panel .content {
-                padding-right: 0;
-            }
-        }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --main-color: rgba(72, 91, 201, 0.9);
+        --main-color-hover: rgba(76, 95, 208, 1);
+        --background-color: rgba(20, 20, 20, 1);
+        --text-color: rgba(255, 255, 255, 0.9);
+        --link-background-color: rgba(255, 255, 255, 0.7);
+        --link-background-color-hover: rgba(255, 255, 255, 0.6);
+      }
+    }
 
-        .hud_label {
-            z-index: 10;
-            position: absolute;
-            margin: 0;
-            text-align: right;
-            color: rgba(255, 255, 255, 0.95);
-            background: rgba(0, 0, 0, 0.2);
-            border-radius: 25px;
-            opacity: 1;
-            transform: translate(0px, 0px);
-            transition: 100ms ease-in opacity, 100ms ease-in transform;
-            user-select: none;
-        }
-        .hud_label .content {
-            padding: 5px;
-            display: flex;
-            flex-wrap: wrap;
-            align-items: center;
-        }
-        .hud_label.node_action {
-            background: rgba(0, 0, 0, 0.8);
-        }
-        .hud_label.thumbnail {
-            border-radius: 15px;
-        }
-        .hud_label > img {
-            display: none;
-        }
-        .hud_label.thumbnail > img {
-            display: block;
-            border-radius: 15px 15px 0 0;
-        }
-        .hud_label.thumbnail .label {
-            flex: 1;
-        }
-        .hud_label.up {
-            left: 64px;
-            bottom: 96px;
-        }
-        .hud_label.right {
-            left: 96px;
-            bottom: 64px;
-        }
-        .hud_label.down {
-            left: 64px;
-            bottom: 32px;
-        }
-        .hud_label.left {
-            left: 32px;
-            bottom: 64px;
-        }
-        .hud_label.confirm {
-            right: 32px;
-            bottom: 32px;
-        }
-        .hud_label.cancel {
-            right: 32px;
-            bottom: 64px;
-        }
-        .hud_label.hide {
-            opacity: 0;
-            transform: translate(20px, 0px);
-        }
-        .hud_label.anchor_bottom.hide {
-            transform: translate(0px, 20px);
-        }
-        .hud_label.no_label .content .label {
-            display: none;
-        }
-        .hud_label .content .label {
-            padding: 0 10px 0 10px;
-        }
+    html,
+    body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
 
-        .hud_icon {
-            width: 32px;
-            height: 32px;
-            border: 0;
-            background-color: transparent;
-            background-image: url("/images/atlas.png");
-            background-position-y: 0px;
-            background-position-x: -256px;
-            background-size: 1024px 1024px;
-            image-rendering: pixelated;
-        }
-        .hud_icon.icon_right { background-position-x: -288px; }
-        .hud_icon.icon_down { background-position-x: -320px; }
-        .hud_icon.icon_left { background-position-x: -352px; }
-        .hud_icon.icon_confirm { background-position-x: -384px; }
-        .hud_icon.icon_cancel { background-position-x: -384px; }
+    body {
+      box-sizing: border-box;
+      padding: 2rem;
+      font-family: Arial, Helvetica, sans-serif;
+      background: var(--background-color);
+      color: var(--text-color);
+    }
 
-        .ui_console {
-            display: none;
-            box-sizing: border-box;
-            position: absolute;
-            top: 0px;
-            left: 0px;
-            width: 100%;
-            height: 100%;
-            overflow: auto;
-            padding: 10px;
-            margin: 0;
-            z-index: 99;
-            white-space: pre;
-            font: 18px "Courier New";
-            color: #ffffff;
-            background: rgba(0, 0, 0, 0.4);
-        }
-        .ui_console.open {
-            display: block;
-        }
-    </style>
+    main {
+      display: grid;
+      grid-template-areas:
+        "aside"
+        "content"
+        "nav"
+        "footer";
+    }
+    main > aside {
+      grid-area: aside;
+      position: relative;
+    }
+    main > nav {
+      grid-area: nav;
+    }
+    main > section {
+      grid-area: content;
+    }
+    main > footer {
+      grid-area: footer;
+    }
+
+    .avatar {
+
+    }
+    .avatar img {
+      display: block;
+      margin: 0 auto 1.5rem auto;
+      width: 128px;
+      height: 128px;
+      border-radius: 50%;
+      background: #5fcde4;
+      transition: transform ease-in-out 0.2s;
+    }
+    body:not(.game-running) .avatar.clickable:hover .dialog {
+      opacity: 1;
+    }
+    body:not(.game-running) .avatar.clickable {
+      cursor: pointer;
+    }
+    body:not(.game-running) .avatar.flipped img {
+      transform: scaleX(-1);
+    }
+
+    .dialog {
+      position: absolute;
+      display: block;
+      top: -80px;
+      width: 340px;
+      margin: 0 0 20px 0;
+      padding: 15px 20px;
+      border: 2px solid var(--text-color);
+      border-radius: 3px;
+      font-family: "Courier New", Courier, monospace;
+      font-weight: 600;
+      opacity: 0;
+      transform: translateY(10px);
+      transition: opacity linear 0.2s, transform ease-in-out 0.2s;
+    }
+    .dialog::before {
+      position: absolute;
+      content: "";
+      bottom: -14px;
+      left: 70px;
+      width: 0;
+      height: 0;
+      border-left: 14px solid transparent;
+      border-right: 14px solid transparent;
+      border-top: 14px solid var(--text-color);
+    }
+    .dialog::after {
+      position: absolute;
+      content: "";
+      bottom: -11px;
+      left: 73px;
+      width: 0;
+      height: 0;
+      border-left: 11px solid transparent;
+      border-right: 11px solid transparent;
+      border-top: 11px solid var(--background-color);
+      z-index: 2;
+    }
+
+    .avatar:hover .dialog {
+      transform: translateY(0);
+    }
+
+    .pixel-art {
+      image-rendering: pixelated;
+    }
+
+    h1 {
+      display: inline-block;
+      margin: 0.8rem 0 1rem;
+      font-size: 1.4rem;
+      color: var(--text-color)
+    }
+    h1 a {
+      color: var(--text-color)
+    }
+
+    h2 {
+      margin: 0 0 1rem;
+      font-size: 1rem;
+      font-weight: 600;
+      line-height: 150%;
+      color: var(--text-color)
+    }
+
+    h3 {
+      margin: 0 0 0rem;
+      font-size: 1.0rem;
+      font-weight: bold;
+      line-height: 150%;
+      color: rgba(0, 0, 0, 0.75);
+    }
+
+    a {
+      color: var(--main-color);
+      text-decoration: none;
+    }
+
+    p {
+      display: inline-block;
+      margin-top: 0;
+      line-height: 150%;
+    }
+
+    a:hover {
+      text-decoration: underline;
+    }
+
+    ul.links {
+      display: flex;
+      flex-wrap: wrap;
+      padding: 0;
+      margin: 0 0 1em 0;
+    }
+    ul.links li {
+      display: block;
+      width: 47%;
+      padding: 0 0.5em 0.5em 0;
+      margin: 0;
+    }
+
+    .link {
+      display: flex;
+      flex-grow: 1;
+      box-sizing: border-box;
+      padding: 0.6em 1.5em;
+      align-items: center;
+      min-height: 44px;
+      font-size: 0.9em;
+      font-weight: 600;
+      border-radius: 3px;
+      background: var(--link-background-color);
+      transition: all linear 0.2s;
+    }
+    .link > img,
+    .link > svg {
+      display: inline-block;
+      width: 26px;
+      margin-right: 12px;
+    }
+    .link:hover {
+      background: var(--link-background-color-hover);
+      text-decoration: none;
+      border-color: var(--main-color-hover);
+    }
+
+    .hire-me {
+      position: relative;
+      display: inline-block;
+      box-sizing: border-box;
+      width: 115px;
+      padding: 8px 16px;
+      margin: 0.5em 0 0 0.5em;
+      border-radius: 3px;
+      background: var(--main-color);
+      color: #ffffff;
+    }
+    .hire-me svg {
+      position: absolute;
+      right: 10px;
+      height: 20px;
+      margin-left: 10px;
+      opacity: 0;
+      transform: scale(0);
+    }
+    .hire-me:hover {
+      text-decoration: none;
+      background: var(--main-color-hover);
+    }
+    body:not(.game-running) .hire-me.animated {
+      transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
+    }
+    body:not(.game-running) .hire-me.animated svg {
+      transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
+    }
+    body:not(.game-running) .hire-me.animated:hover {
+      width: 135px;
+      transition-delay: 0ms, 0ms;
+    }
+    body:not(.game-running) .hire-me.animated:hover svg {
+      opacity: 1;
+      transform: scale(1);
+      transition-delay: 0ms, 0ms;
+    }
+
+    @media (min-width: 700px) {
+      body {
+        padding: 100px 0 0 0;
+      }
+
+      main {
+        margin: 0 auto;
+        padding-top: 30px;
+        max-width: 660px;
+        grid-template-columns: 200px auto;
+        grid-template-rows: 200px auto;
+        grid-template-areas:
+          "aside content"
+          "nav content"
+          "nav footer";
+      }
+      main > aside {
+        padding-right: 30px;
+      }
+      main > nav {
+        padding-right: 30px;
+      }
+
+      ul.navigation {
+        display: block;
+      }
+      ul.navigation li {
+        display: block;
+        width: auto;
+        padding-right: 0;
+      }
+
+      ul.socials li {
+        width: 31%;
+      }
+
+      .avatar img {
+        width: 170px;
+        height: 170px;
+      }
+    }
+  </style>
 </head>
 
 <body>
-    <canvas></canvas>
-    <div id="ui_root" style="overflow: hidden;"></div>
-    <script async src="./dist/game.js"></script>
+  <main>
+    <aside>
+      <div id="avatar" class="avatar pixel-art start-game">
+        <img src="/site/images/me.gif" aria-hidden="true" width="128" />
+      </div>
+    </aside>
+    <nav>
+      <p><b>My projects:</b></p>
+      <ul class="links navigation">
+        <li><a href="/web" class="link"><img src="/site/images/web.svg" aria-hidden="true" width="26" height="26" /><span>Web</span></a></li>
+        <li><a href="/games" class="link"><img src="/site/images/games.svg" aria-hidden="true" width="26" height="26" /><span>Games</span></a></li>
+        <li><a href="/changelog" class="link"><img src="/site/images/changelog.svg" aria-hidden="true" width="26" height="26" /><span>Changelog</span></a></li>
+      </ul>
+    </nav>
+    <section>
+      <h1><a href="/changelog">Colin Bellino</a></h1>
+      <a class="hire-me animated" href="mailto:work@colinbellino.com" target="_blank">
+        <span>Contact me</span>
+        <svg viewBox="0 0 45 45">
+          <g transform="matrix(1.25 0 0 -1.25 0 45)">
+            <path d="M11.626 28.512a1.413 1.413 0 0 1-.268-.395l-.008.008L.134 2.86l.011-.011c-.208-.403.14-1.223.853-1.937S2.53-.148 2.933.06l.01-.01L28.21 11.265l-.008.009c.148.07.282.155.395.268 1.562 1.562-.971 6.627-5.657 11.313s-9.752 7.219-11.314 5.657" fill="#dd2e44"/>
+            <path d="M13 24 .416 3.494l-.282-.635.011-.01c-.208-.404.14-1.223.853-1.937a3.97 3.97 0 0 1 .709-.557L17 19l-4 5z" fill="#ea596e"/>
+            <path d="M23.012 22.934c4.67-4.672 7.263-9.652 5.789-11.124s-6.453 1.118-11.126 5.788-7.263 9.653-5.79 11.126 6.454-1.119 11.127-5.79" fill="#a0041e"/>
+            <path d="M18.59 22.391a.99.99 0 0 0-.734-.215c-.868.094-1.597.396-2.109.873-.541.505-.808 1.182-.735 1.862.128 1.192 1.324 2.286 3.363 2.066.793-.085 1.147.169 1.158.291s-.277.446-1.069.532c-.869.094-1.598.396-2.11.873-.541.505-.809 1.183-.735 1.862.13 1.193 1.325 2.286 3.362 2.066.578-.063.882.057 1.011.134.104.063.145.123.149.158.011.12-.276.445-1.071.531a1 1 0 0 0-.886 1.102 1 1 0 0 0 1.101.886c2.037-.219 2.973-1.542 2.844-2.735s-1.324-2.285-3.363-2.065c-.578.063-.88-.057-1.01-.134-.103-.063-.145-.124-.149-.157-.013-.122.277-.447 1.071-.532 2.037-.22 2.973-1.543 2.844-2.736s-1.325-2.286-3.362-2.065c-.578.062-.882-.057-1.012-.134-.103-.063-.143-.124-.147-.158-.013-.121.276-.446 1.07-.531a1 1 0 0 0 .886-1.102.997.997 0 0 0-.367-.672" fill="#aa8dd8"/>
+            <path d="M30.661 13.143c1.973.557 3.334-.323 3.658-1.478s-.378-2.615-2.349-3.169c-.77-.216-1.001-.584-.97-.702s.425-.312 1.193-.094c1.972.554 3.333-.326 3.657-1.48s-.377-2.614-2.35-3.17c-.769-.216-1.001-.585-.967-.702s.423-.31 1.192-.095a1 1 0 0 0 1.234-.691 1 1 0 0 0-.694-1.234c-1.97-.555-3.333.323-3.659 1.479s.379 2.613 2.353 3.169c.769.217 1.001.584.967.702s-.422.312-1.191.096c-1.973-.556-3.334.322-3.659 1.478s.378 2.614 2.352 3.17c.767.215.999.585.966.701s-.422.313-1.192.096a1 1 0 0 0-1.233.692 1 1 0 0 0 .692 1.232" fill="#77b255"/>
+            <path d="M23.001 15.84a1 1 0 0 0-.626 1.781c.218.175 5.418 4.259 12.767 3.208a1 1 0 0 0 .848-1.131.995.995 0 0 0-1.132-.848c-6.493.922-11.187-2.754-11.233-2.791a.994.994 0 0 0-.624-.219" fill="#aa8dd8"/>
+            <path d="M5.754 20a1.03 1.03 0 0 0-.288.042 1 1 0 0 0-.67 1.246c1.133 3.773 2.16 9.793.898 11.363-.142.178-.354.353-.842.316-.939-.071-.849-2.051-.848-2.071a1 1 0 0 0-.922-1.072 1 1 0 0 0-1.072.923c-.104 1.379.326 4.035 2.691 4.214 1.056.08 1.933-.287 2.553-1.057 2.371-2.951-.036-11.506-.543-13.192A1 1 0 0 0 5.754 20" fill="#77b255"/>
+            <path d="M4 18a2 2 0 1 0-4 0 2 2 0 1 0 4 0" fill="#9266cc"/>
+            <path d="M34 16.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0m-9-12a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0" fill="#5c913b"/>
+            <path d="M30 32a2 2 0 1 0-4 0 2 2 0 1 0 4 0m4-4.5a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0m-3-4a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0m-22-11a1.5 1.5 0 1 0-3 0 1.5 1.5 0 1 0 3 0" fill="#ffcc4d"/>
+          </g>
+        </svg>
+      </a>
+      <h2>I‘m a french freelance programmer and designer who loves creating cool sites, apps and video games.</h2>
+      <p>I‘ve been coding, tinkering and prototyping for more than 20 years with many technology from C to JavaScript, from Jai to Go, from web apps to video games. <br>Over the years, I‘ve developed a taste for rapid prototyping and a good intuition for building good experiences for my users and clients. <br>I speak fluent French, English and <a href="https://www.youtube.com/watch?v=sD3SF6foL00" target="_blank" rel="noopener noreferrer me" class="">Nerd</a>.</p>
+      <p>If that‘s something that‘s interesting to you, <a href="mailto:work@colinbellino.com" target="_blank">let‘s talk</a> ;)</p>
+    </section>
+    <footer>
+      <p>Where to find me on social media:</p>
+      <ul class="links socials">
+        <li>
+          <a href="https://mastodon.gamedev.place/@colinbellino" target="_blank" rel="noopener noreferrer me" class="link">
+            <img src="/site/images/mastodon.svg" aria-hidden="true" width="24" height="26" loading="lazy" />
+            <span>Mastodon</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://twitter.com/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/twitter.svg" aria-hidden="true" width="24" height="26" loading="lazy" />
+            <span>Twitter</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.linkedin.com/in/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/linked-in.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <span>LinkedIn</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://github.com/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/github.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <span>Github</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://colinbellino.itch.io/" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/itch.svg" aria-hidden="true" width="26" height="23" loading="lazy" />
+            <span>Itch</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.twitch.tv/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/twitch.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <span>Twitch</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://www.youtube.com/@colinbellino" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/youtube.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <span>YouTube</span>
+          </a>
+        </li>
+        <li>
+          <a href="https://discord.com/invite/6xcJYNh" target="_blank" rel="noopener noreferrer" class="link">
+            <img src="/site/images/discord.svg" aria-hidden="true" width="26" height="26" />
+            <span>Discord</span>
+          </a>
+        </li>
+      </ul>
+    </footer>
+  </main>
+  <script nonce="script">
+    {
+      const canHover = matchMedia("(hover: hover)").matches;
+
+      if (canHover)
+        document.addEventListener("mousemove", flip_avatar);
+
+      function flip_avatar(e) {
+        const avatar = document.getElementById("avatar");
+
+        const rect = avatar.getBoundingClientRect();
+        const rectCenterX = rect.x + rect.width / 2;
+
+        if (e.clientX < rect.x) {
+          avatar.classList.add("flipped");
+        } else if (e.clientX > rect.x + rect.width) {
+          avatar.classList.remove("flipped");
+        }
+      }
+    }
+
+    // Prepare some config for breakout
+    function prepare_page_for_breakout() {
+      document.body.setAttribute("data-breakout-min-width", 1000);
+      document.body.setAttribute("data-breakout-min-height", 700);
+      const blocks = [".avatar img", ".hire-me", "li > a"];
+      document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
+      const toSplit = ["h1 a", "h2", "main > nav > p > b", "main > section > p", "main > footer > p"];
+      document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
+    }
+  </script>
+  <script src="/breakout/scripts/breakout_loader.mjs" type="module" async defer></script>
 </body>
 
 </html>

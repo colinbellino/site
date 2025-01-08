@@ -1,0 +1,184 @@
+body.game-running {
+  overflow: hidden;
+  padding-top: 100px;
+  transition: padding linear 200ms;
+}
+
+body.game-running::after {
+  transform: translateY(0);
+  opacity: 0.05;
+  background: linear-gradient(135deg, #444cf755 25%, transparent 25%) -10px 0/ 20px 20px,
+              linear-gradient(225deg, #444cf7 25%, transparent 25%) -10px 0/ 20px 20px,
+              linear-gradient(315deg, #444cf755 25%, transparent 25%) 0px 0/ 20px 20px,
+              linear-gradient(45deg, #444cf7 25%, #e5e5f7 25%) 0px 0/ 20px 20px
+              rgba(255, 255, 255, 1);
+}
+
+.breakout-canvas {
+  position: absolute;
+  top: 0;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  display: block;
+  width: 100%;
+  height: 100%;
+  z-index: 1;
+}
+.breakout-canvas.blocking {
+  pointer-events: all;
+}
+
+.breakout-block {
+  opacity: 1;
+  transform: scale(1);
+  transition: opacity ease-in 100ms, transform ease-in 100ms !important;
+}
+.breakout-block.destroyed {
+  opacity: 0;
+  transform: scale(1.2);
+}
+
+.breakout-help {
+  display: block;
+  position: absolute;
+  top: 20px;
+  left: 20px;
+  right: 20px;
+  opacity: 1;
+  transition: opacity ease-out 300ms, transform ease-in 200ms;
+}
+.breakout-help > p {
+  display: block;
+  margin: 0;
+  padding: 20px;
+  width: 500px;
+  margin: 0 auto;
+  border-radius: 3px;
+  background: rgba(10, 10, 10, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  color: rgba(255, 255, 255, 0.9);
+}
+.breakout-help.hidden {
+  pointer-events: none;
+  opacity: 0;
+  transform: translateY(-100%);
+}
+
+.breakout-score {
+  position: absolute;
+  display: block;
+  top: 20px;
+  right: 20px;
+  margin: 0;
+  padding: 10px 25px;
+  border-radius: 3px;
+  font-size: 1.6rem;
+  background: rgba(0, 0, 0, 0.03);
+  opacity: 1;
+  transition: opacity linear 400ms;
+}
+.breakout-score.hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.breakout-pause {
+  position: absolute;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  inset: 0;
+  margin: 0;
+  padding: 0;
+  z-index: 3;
+  background: rgba(0, 0, 0, 0.5);
+  opacity: 1;
+  transition: opacity linear 100ms;
+}
+.breakout-pause > section {
+  border-radius: 3px;
+  padding: 30px 50px;
+  margin: 0;
+  width: 200px;
+  background: rgba(10, 10, 10, 1);
+  border: 1px solid rgba(255, 255, 255, 0.8);
+  transition: transform ease-out 200ms;
+}
+.breakout-pause > section > *:not(:last-child) {
+  margin-bottom: 20px;
+}
+.breakout-pause h3 {
+  text-align: center;
+}
+.breakout-pause .link {
+  display: block;
+  border: 0;
+  width: 100%;
+  color: white;
+  background: rgba(255, 255, 255, 0.05);
+}
+.breakout-pause .link:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+.breakout-pause h3 {
+  display: block;
+  font-size: 1.6rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+.breakout-pause.hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+.breakout-pause.hidden > section {
+  transform: translateY(20px);
+}
+
+.breakout-lives {
+  position: absolute;
+  display: block;
+  top: 20px;
+  left: 20px;
+  margin: 0;
+  padding: 10px 25px;
+  border-radius: 3px;
+  font-size: 1.6rem;
+  background: rgba(0, 0, 0, 0.03);
+  opacity: 1;
+  transition: opacity linear 400ms;
+}
+.breakout-lives.hidden {
+  pointer-events: none;
+  opacity: 0;
+}
+
+.breakout-hidden {
+  opacity: 0 !important;
+  transition: opacity linear 100ms !important;
+}
+
+.slider {
+  font-size: 1.2rem;
+  color: rgba(255, 255, 255, 0.95);
+}
+.slider input {
+  display: block;
+  width: 100%;
+}
+
+.bounce-1 { animation: 200ms ease-in-out bounce-1; }
+.bounce-2 { animation: 200ms ease-in-out bounce-2; }
+.bounce-3 { animation: 200ms ease-in-out bounce-3; }
+
+@keyframes bounce-1 {
+  from { transform: scale(1.05) }
+  to { transform: scale(1) }
+}
+@keyframes bounce-2 {
+  from { transform: scale(1.1) }
+  to { transform: scale(1) }
+}
+@keyframes bounce-3 {
+  from { transform: scale(1.2) }
+  to { transform: scale(1) }
+}

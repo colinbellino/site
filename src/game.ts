@@ -102,6 +102,7 @@ type Neighbour = {
 }
 
 // :constants
+const ATLAS_URL = "/worldmap/images/atlas.png";
 const THUMBNAIL_SIZE: Vector2 = [256, 160];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
 const CLEAR_COLOR = 0x2080ffff;
@@ -180,12 +181,12 @@ function update() {
 
             if (!__RELEASE__) {
                 setInterval(() => {
-                    load_image("./images/atlas.png?v="+ Date.now()).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+                    load_image(`${ATLAS_URL}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
                 }, 1000);
             }
 
-            load_image("./images/atlas.png").then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
-            load_image("./images/projects.png").then(image => { game.image_projects = image });
+            load_image(ATLAS_URL).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+            load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
             load_codegen().then((codegen) => {
                 game.world = codegen.world;
                 game.sprite_vs = codegen.sprite_vs;
@@ -845,14 +846,23 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
+    // TODO: create ui_root and canvas here
     const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
     assert(ui_root !== undefined);
+
+    ui_create_element(ui_root, `
+        <style nonce="style">
+            .atlas_icon {
+                background-image: url("${ATLAS_URL}");
+            }
+        </style>
+    `);
 
     const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
         <label class="hud_label anchor_bottom no_label hide up" for="up">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_up" aria-label="Move: up"></button>
+                <button class="hud_icon atlas_icon icon_up" aria-label="Move: up"></button>
             </span>
         </label>
     `);
@@ -864,7 +874,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label anchor_bottom no_label hide right">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_right" aria-label="Move: right"></button>
+                <button class="hud_icon atlas_icon icon_right" aria-label="Move: right"></button>
             </span>
         </label>
     `);
@@ -876,7 +886,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label anchor_bottom no_label hide down">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_down" aria-label="Move: down"></button>
+                <button class="hud_icon atlas_icon icon_down" aria-label="Move: down"></button>
             </span>
         </label>
     `);
@@ -888,7 +898,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label anchor_bottom no_label hide left">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_left" aria-label="Move: left"></button>
+                <button class="hud_icon atlas_icon icon_left" aria-label="Move: left"></button>
             </span>
         </label>
     `);
@@ -900,7 +910,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label hide confirm">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_confirm" aria-label="Confirm" id="confirm"></button>
+                <button class="hud_icon atlas_icon icon_confirm" aria-label="Confirm" id="confirm"></button>
             </span>
         </label>
     `);
@@ -912,7 +922,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label hide cancel">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_cancel" aria-label="Confirm" id="cancel"></button>
+                <button class="hud_icon atlas_icon icon_cancel" aria-label="Confirm" id="cancel"></button>
             </span>
         </label>
     `);
@@ -925,7 +935,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
             <img />
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_confirm"></button>
+                <button class="hud_icon atlas_icon icon_confirm"></button>
             </span>
         </label>
     `);
@@ -1513,9 +1523,9 @@ function world_to_window_position(world_position: Vector2): Vector2 {
 }
 function generate_project_image_url(project: Project, image_index: int): string {
     if (image_index === 0) {
-        return `/images/screenshots/${project.screenshots_prefix}/banner-small.png`;
+        return `/site/images/screenshots/${project.screenshots_prefix}/banner-small.png`;
     }
-    return `/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-small.png`;
+    return `/site/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-small.png`;
 }
 function generate_project_thumbnail_url(project_id: int): string {
     const w = THUMBNAIL_SIZE[0];

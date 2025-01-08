@@ -1,0 +1,269 @@
+<!DOCTYPE html>
+<html lang="en-us">
+
+<head>
+  <meta charset="utf-8">
+  <title>Colin Bellino | Card</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="Description" content="A simple tool to generate a card that i use when looking for work.">
+  <link rel="apple-touch-icon" sizes="180x180" href="/public/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/public/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/public/favicon-16x16.png">
+  <style nonce="style">
+    @import url('https://fonts.googleapis.com/css2?family=Exo+2:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap');
+
+    :root {
+      --color-1: #de6470;
+      --color-2: #86c7f7;
+      --color-2-light: #c8e1e7;
+      --color-3: #a5f2c4;
+      --color-4: #252550;
+      --color-5: #fbf7a8;
+      --bg: #000a2b;
+    }
+
+    html,
+    body {
+      margin: 0;
+    }
+
+    body {
+      font-family: 'Exo 2', sans-serif;
+    }
+
+    main {
+      position: relative;
+      width: 1200px;
+      height: 675px;
+      margin: 50px auto;
+      overflow: hidden;
+      background: var(--bg);
+    }
+
+    aside {
+      position: relative;
+      width: 550px;
+      height: 100%;
+      box-sizing: border-box;
+      float: left;
+      color: var(--color-4);
+      margin-left: -40px;
+    }
+    aside:before {
+      content: "";
+      position: absolute;
+      top: -150px;
+      left: -86px;
+      height: 1000px;
+      width: 630px;
+      background: var(--color-2);
+      border-radius: 50%;
+    }
+    aside > * {
+      position: absolute;
+      top: 0;
+      left: 0;
+      margin: 0;
+    }
+    aside > h2 {
+      position: absolute;
+      width: 100%;
+      top: 60px;
+      font-size: 2.3em;
+      font-weight: 400;
+      text-align: center;
+    }
+    aside > img {
+      position: absolute;
+      top: 125px;
+      left: 100px;
+      width: 350px;
+      height: 350px;
+      image-rendering: pixelated;
+      background: #5b6ee159;
+      border-radius: 50%;
+      border: 3px solid var(--bg);
+    }
+    aside > h1 {
+      position: absolute;
+      width: 100%;
+      top: 500px;
+      font-size: 2.3em;
+      text-align: center;
+    }
+    aside > a {
+      color: var(--color-4);
+      text-decoration: none;
+      left: 120px;
+      font-size: 1.3em;
+    }
+    aside > a > svg {
+      float: left;
+      width: 20px;
+      margin-top: 4px;
+      margin-right: 10px;
+    }
+    aside > .mail {
+      top: auto;
+      bottom: 30px;
+    }
+    aside > .mail > svg ellipse {
+      fill: var(--color-4) !important;
+    }
+    aside > .linked-in {
+      top: auto;
+      bottom: 60px;
+    }
+    aside > .linked-in > svg path[fill="#007ebb"] {
+      fill: var(--color-4);
+    }
+
+    section {
+      height: 100%;
+      position: relative;
+      margin-left: 500px;
+      width: 670px;
+      line-height: 220%;
+      color: white;
+    }
+    section > * {
+      position: relative;
+      margin: 0 auto;
+      z-index: 1;
+      text-align: center;
+    }
+    section > h1 {
+      margin-top: 40px;
+      font-size: 3.5em;
+      line-height: 100%;
+      color: var(--color-5);
+    }
+    section > h1 > small {
+      display: block;
+      position: relative;
+      font-size: 0.7em;
+      font-weight: normal;
+      color: var(--color-1);
+    }
+    section > h1:before,
+    section > h1:after {
+      position: absolute;
+      top: 20px;
+      font-weight: 300;
+      font-size: 2em;
+      color: var(--color-5);
+    }
+    section > h1:before {
+      content: "{";
+      left: 50px;
+    }
+    section > h1:after {
+      content: "}";
+      right: 50px;
+    }
+    section > h3 {
+      color: var(--color-2);
+      margin-top: 30px;
+      font-size: 2em;
+    }
+    section > h3 > small {
+      display: block;
+      font-size: 0.6em;
+      font-weight: normal;
+      color: var(--color-2-light);
+    }
+    section > h3:nth-of-type(2) {
+
+    }
+    section > p {
+      background: rgba(255, 255, 255, 0.1);
+      border-radius: 65px;
+      padding: 25px 25px 30px;
+      width: 500px;
+      margin: 40px auto 0;
+      font-size: 1.3em;
+      color: var(--color-2);
+    }
+    section > h2 {
+      font-size: 2em;
+      color: var(--color-1);
+      margin-top: 40px;
+    }
+    section > h2 > small{
+      font-size: 0.7em;
+      display: block;
+      font-weight: normal;
+    }
+
+    .placeholder {
+      position: absolute;
+      top: 0;
+      left: 0;
+      opacity: 1;
+      z-index: 999;
+      pointer-events: none;
+    }
+    .placeholder.hidden {
+      display: none;
+    }
+  </style>
+</head>
+
+<body>
+
+  <main>
+    <aside>
+      <h2>WEB ENGINEER</h2>
+      <h1>Colin Bellino</h1>
+      <img src="/public/me.png">
+      <a href="mailto:work@colinbellino.com" class="mail">
+        <svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 300 300"><g transform="translate(-231.54 -375.82)"><ellipse style="color:#000;fill:#000" cx="381.54" cy="525.82" rx="143.458" ry="143.45"/><g style="fill:#fff"><path style="color:#000;font-style:normal;font-variant:normal;font-weight:400;font-stretch:normal;font-size:medium;line-height:normal;font-family:sans-serif;text-indent:0;text-align:start;text-decoration:none;text-decoration-line:none;text-decoration-style:solid;text-decoration-color:#000;letter-spacing:normal;word-spacing:normal;text-transform:none;direction:ltr;block-progression:tb;writing-mode:lr-tb;baseline-shift:baseline;text-anchor:start;clip-rule:nonzero;display:inline;overflow:visible;visibility:visible;opacity:1;isolation:auto;color-interpolation:sRGB;color-interpolation-filters:linearRGB;fill:#fff;fill-opacity:1;fill-rule:nonzero;stroke:none;stroke-width:2.9519999;stroke-linecap:round;stroke-linejoin:round;stroke-miterlimit:4;stroke-dasharray:none;stroke-dashoffset:0;stroke-opacity:1;color-rendering:auto;image-rendering:auto;shape-rendering:auto;text-rendering:auto;enable-background:accumulate" d="M1005.12 267.465c-1.03 0-1.874.841-1.874 1.87v29.52a1.88 1.88 0 0 0 1.873 1.875h42.172a1.88 1.88 0 0 0 1.873-1.875v-29.52c0-1.029-.844-1.87-1.873-1.87h-42.172zm4.991 4.484h32.176l-16.086 14.055-16.09-14.055zm35.307 2.238v20.764l-11.764-10.486 11.764-10.278zm-38.426.012 11.813 10.322-11.813 10.532v-20.854zm23.82 12.748 11.192 9.979h-31.482l11.126-9.92 3.317 2.898a1.88 1.88 0 0 0 2.465 0l3.383-2.957z" transform="matrix(3.81893 0 0 3.81893 -3537.467 -559.127)"/></g></g></svg>
+         work@colinbellino.com
+      </a>
+      <a href="https://linkedin.com/in/colinbellino" class="linked-in">
+        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg"><g fill="none" fill-rule="evenodd"><path d="m8 72h56a8 8 0 0 0 8-8v-56a8 8 0 0 0 -8-8h-56a8 8 0 0 0 -8 8v56a8 8 0 0 0 8 8z" fill="#007ebb"/><path d="m62 62h-10.684v-18.198c0-4.99-1.896-7.777-5.845-7.777-4.296 0-6.54 2.901-6.54 7.777v18.198h-10.299v-34.667h10.298v4.67s3.096-5.729 10.453-5.729c7.353 0 12.617 4.49 12.617 13.777zm-45.65-39.206c-3.508 0-6.35-2.864-6.35-6.397s2.842-6.397 6.35-6.397c3.507 0 6.347 2.864 6.347 6.397s-2.84 6.397-6.348 6.397zm-5.318 39.206h10.736v-34.667h-10.735v34.667z" fill="#fff"/></g></svg>
+         linkedin.com/in/colinbellino
+        </a>
+    </aside>
+    <section>
+      <h1>
+        FREELANCER
+        <small>HTML, CSS, JS/TS, Node</small>
+      </h1>
+      <h3>
+        10+ years
+        <small>industry experience (front-end & back-end)</small>
+      </h3>
+      <h3>
+        Small & large projects
+        <small>20+ products shipped (from beginning to end)</small>
+      </h3>
+      <p>
+        Hired, coached & led teams.<br />
+        Great eye for design, quality and performance.
+      </p>
+      <h2>
+        AVAILABLE FOR
+        <small>CONTRACT WORK: DEVELOPMENT & CONSULTING</small>
+      </h2>
+    </section>
+  </main>
+
+  <script type="text/javascript" src="/public/js/libs/jquery.js"></script>
+  <script type="text/javascript" src="/public/js/libs/jquery.arctext.js"></script>
+  <script nonce="script">
+    $("aside > h2").arctext({ radius: 200 });
+    $("aside > h1").arctext({ radius: 200, dir: -1 });
+
+    document.addEventListener("keyup", (e) => {
+      console.log(e);
+      if (e.code === "Space") {
+        document.querySelector(".placeholder").classList.toggle("hidden");
+      }
+    });
+  </script>
+
+</body>
+
+</html>
