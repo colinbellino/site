@@ -260,64 +260,79 @@
       transition-delay: 0ms, 0ms;
     }
 
-    .corner_button {
-        display: none;
-        position: fixed;
-        top: 0;
-        right: 0;
-        border: 0;
-        margin: 0;
-        padding: 0;
-        z-index: 10;
-        background: #2080ff;
-        width: 48px;
-        height: 48px;
-        border-radius: 0 0 0 100%;
-        transition: transform ease-in 100ms;
-        transform: scale(1.0);
-        transform-origin: top right;
-        cursor: pointer;
-        -webkit-tap-highlight-color: transparent;
+    .worldmap_button {
+      display: none;
+      position: fixed;
+      top: 0;
+      right: 0;
+      border: 0;
+      margin: 0;
+      padding: 0;
+      z-index: 10;
+      background: #2080ff;
+      width: 48px;
+      height: 48px;
+      border-radius: 0 0 0 100%;
+      transition: transform ease-in 100ms, background-color 100ms ease-in, opacity 100 ease-in;
+      transform: scale(1.0);
+      transform-origin: top right;
+      cursor: pointer;
+      -webkit-tap-highlight-color: transparent;
+      opacity: 0;
     }
-    .corner_button .icon {
-        position: absolute;
-        top: 16px;
-        right: 10px;
-        display: block;
-        width: 16px;
-        height: 4px;
-        background: rgba(255, 255, 255, 0.9);
-        opacity: 0;
-        transition: opacity 200ms ease-in;
-        animation: 1000ms corner_button_loading forwards infinite linear;
+    .worldmap_button.visible {
+      display: block;
+      opacity: 1;
     }
-    .corner_button:hover {
-        transform: scale(1.5);
+    .worldmap_button .icon_loading {
+      position: absolute;
+      top: -15px;
+      right: -12px;
+      width: 64px;
+      height: 64px;
+      display: block;
+      opacity: 0;
+      transition: opacity 200ms ease-in;
+      animation: 1000ms worldmap_button_loading forwards infinite linear;
+      fill: rgba(255, 255, 255, 0.9);
     }
-    body.worldmap_enabled .corner_button {
-        display: block;
+    .worldmap_button .icon_loading svg {
+      transform: scale(0.5);
     }
-    body.worldmap_loading .corner_button {
-        transform: scale(1.5);
+    @keyframes worldmap_button_loading {
+      from { transform: rotate(0deg); }
+      to   { transform: rotate(360deg); }
     }
-    body.worldmap_loading .corner_button .icon {
-        opacity: 1;
+    .worldmap_button .icon_close {
+      display: block;
+      position: absolute;
+      top: -14px;
+      right: -11px;
+      opacity: 0;
+      transition: opacity 200ms ease-in;
+      fill: rgba(255, 255, 255, 0.9);
+      transform: rotate(45deg);
+      pointer-events: none;
     }
-    @keyframes corner_button_loading {
-        from { transform: rotate(0deg); }
-        to   { transform: rotate(360deg); }
+    .worldmap_button:hover {
+      transform: scale(1.25);
     }
-    body.worldmap_running .corner_button {
-        animation: 1500ms corner_button_running forwards;
+    .worldmap_loading .worldmap_button .icon_loading {
+      opacity: 1;
     }
-    body.worldmap_running .corner_button:hover {
-        transform: scale(1.5);
+    .worldmap_running .worldmap_button {
+      background: rgba(255, 255, 255, 0.3);
     }
-    @keyframes corner_button_running {
-        0%   { transform: inherit; }
-        25%  { transform: scale(0.0); }
-        75%  { transform: scale(0.0); }
-        100% { background: rgba(255, 255, 255, 0.3); }
+    .worldmap_running .worldmap_button .icon_close {
+      opacity: 1;
+      transition-delay: 300ms;
+    }
+    .worldmap_running.worldmap_closing .worldmap_button {
+      background: #2080ff;
+      transition: background-color linear 500ms;
+    }
+    .worldmap_running.worldmap_closing .worldmap_button .icon_close {
+      opacity: 0;
     }
 
     @media (min-width: 700px) {
@@ -379,8 +394,22 @@
         <li><a href="/changelog" class="link"><img src="/site/images/changelog.svg" aria-hidden="true" width="26" height="26" /><span>Changelog</span></a></li>
       </ul>
       <!-- TODO: aria/content -->
-      <button id="worldmap_start" class="corner_button">
-        <span class="icon"></span>
+      <!-- TODO: insert this with JS so we don't have to pay the bytes if we don't have JS enabled -->
+      <button id="worldmap_start" class="worldmap_button">
+        <span class="icon_loading">
+          <svg width="64" height="64">
+            <g>
+              <path d="M15 15 L16 14.05 Q17.6 12.6 19.4 11.5 24.95 8 32 8 39.05 8 44.6 11.5 46.9 12.95 48.95 15 L49 15.05 44.75 19.3 44.7 19.25 Q39.45 14 32 14 24.55 14 19.25 19.25 L15 15 M48.95 48.95 Q41.95 56 32 56 22.75 56 16 49.9 L15.05 49 19.3 44.75 Q24.55 50 32 50 39.45 50 44.7 44.75 L44.75 44.75 48.95 48.95"/>
+            </g>
+          </svg>
+        </span>
+        <span class="icon_close">
+          <svg width="64" height="64">
+            <g>
+              <path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/>
+            </g>
+          </svg>
+        </span>
       </button>
     </nav>
     <section>
@@ -460,76 +489,7 @@
       </ul>
     </footer>
   </main>
-  <script nonce="script">
-    {
-      const can_hover = matchMedia("(hover: hover)").matches;
-
-      if (can_hover) {
-          document.addEventListener("mousemove", flip_avatar);
-      }
-
-      function flip_avatar(e) {
-        const avatar = document.getElementById("avatar");
-
-        const rect = avatar.getBoundingClientRect();
-        if (e.clientX < rect.x) {
-          avatar.classList.add("flipped");
-        } else if (e.clientX > rect.x + rect.width) {
-          avatar.classList.remove("flipped");
-        }
-      }
-    }
-
-    const worldmap_start_button = document.querySelector("button#worldmap_start");
-    if (worldmap_start_button) {
-        worldmap_start_button.addEventListener("click", worldmap_start_or_stop);
-    }
-    if (location.search.includes("worldmap")) {
-        document.body.classList.add("worldmap_enabled");
-    }
-
-    // TODO: clean all this up!
-    function worldmap_start_or_stop() {
-        const is_running = document.body.classList.contains("worldmap_running");
-        if (is_running) {
-
-        } else {
-            document.body.classList.add("worldmap_loading");
-            Promise.all([
-                import      ("/worldmap/dist/game.js"),
-                import_style("/worldmap/worldmap.css"),
-                // new Promise(resolve => setTimeout(resolve, 500)),
-            ]).then(([game]) => {
-                game.start(loaded_callback);
-                function loaded_callback() {
-                    document.body.classList.remove("worldmap_loading");
-                    document.body.classList.add("worldmap_running");
-                    worldmap_start_button.dispatchEvent(new Event("focusout"));
-                }
-            });
-        }
-    }
-
-    function import_style(url) {
-        return new Promise((resolve, reject) => {
-        const link = document.createElement("link");
-            link.setAttribute("href", url);
-            link.setAttribute("rel", "stylesheet");
-            link.onload = resolve;
-            document.body.appendChild(link);
-        });
-    }
-
-    // Prepare some config for breakout
-    function prepare_page_for_breakout() {
-      document.body.setAttribute("data-breakout-min-width", 1000);
-      document.body.setAttribute("data-breakout-min-height", 700);
-      const blocks = [".avatar img", ".hire-me", "li > a"];
-      document.querySelectorAll(blocks).forEach((node) => node.classList.add("breakout-preblock"));
-      const toSplit = ["h1 a", "h2", "main > nav > p > b", "main > section > p", "main > footer > p"];
-      document.querySelectorAll(toSplit).forEach((node) => node.classList.add("breakout-to-split"));
-    }
-  </script>
+  <script src="/site/scripts/index.js"></script>
   <script src="/breakout/scripts/breakout_loader.mjs" type="module" async defer></script>
 </body>
 

@@ -9,7 +9,6 @@ type Codegen = {
 }
 
 type Vector2 = Static_Array<float,2>;
-type Vector3 = Static_Array<float,3>;
 type Vector4 = Static_Array<float,4>;
 type Matrix4 = Static_Array<float, 16>;
 type float = GLfloat;
@@ -26,6 +25,7 @@ type Game = {
     game_mode:              Game_Mode;
     world_mode:             World_Mode;
     world_mode_timer:       int;
+    animation_frame:        int;
     clear_color:            Color;
     player:                 Entity;
     projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
@@ -57,10 +57,10 @@ type Game = {
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
     renderer:               Renderer;
     frame_count:            int;
-    frame_end:              number;
+    frame_end:              int;
     fps:                    int;
-    fps_last_update:        number;
-    fps_count:              number;
+    fps_last_update:        int;
+    fps_count:              int;
     inputs:                 Inputs;
 }
 type World = {
@@ -128,12 +128,6 @@ const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
 
 function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
-function COLOR_RED(): Color { return [1, 0, 0, 1]; }
-function COLOR_BLUE(): Color { return [0, 0, 1, 1]; }
-function COLOR_GREEN(): Color { return [0, 1, 0, 1]; }
-function COLOR_YELLOW(): Color { return [1, 1, 0, 1]; }
-function COLOR_PINK(): Color { return [1, 0, 1, 1]; }
-function COLOR_GREY(): Color { return [0.5, 0.5, 0.5, 1]; }
 function COLOR_BLACK(): Color { return [0, 0, 0, 1]; }
 
 let game: Game;
@@ -152,7 +146,7 @@ export function start(loaded_callback: () => void) {
     game.sorted_sprites = fixed_array_make(MAX_SPRITES);
     game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
     game.destination_path = fixed_array_make(MAX_PATH);
-    game.draw_console = location.search.includes("?console");
+    game.draw_console = location.search.includes("console");
     game.draw_entities = true;
     game.draw_world_grid = false;
     game.draw_world_tile = true;
@@ -193,6 +187,10 @@ export function start(loaded_callback: () => void) {
     requestAnimationFrame(update);
 }
 
+export function stop() {
+    cancelAnimationFrame(game.animation_frame);
+}
+
 function update() {
     try {
         const gl = game.renderer.gl;
@@ -219,7 +217,7 @@ function update() {
         // :debug inputs
         if (game.inputs.keys["ShiftLeft"].down) {
             if (!__RELEASE__) {
-                if (game.inputs.keys["Backquote"].released || game.inputs.keys["Backquote"].released) {
+                if (game.inputs.keys["Backquote"].released || game.inputs.keys["IntlBackslash"].released) {
                     game.draw_console = !game.draw_console;
                 }
                 if (game.inputs.keys["Digit1"].released) {
@@ -361,7 +359,8 @@ function update() {
                 switch (game.world_mode) {
                     // :world INTRO
                     case World_Mode.INTRO: {
-                        const done = now > game.world_mode_timer + 1500;
+                        // TODO: remove this if we don't use the intro mode anymore?
+                        const done = true;
                         if (done) {
                             ui_label_show(game.renderer.ui_up);
                             ui_label_show(game.renderer.ui_right);
@@ -737,7 +736,7 @@ function update() {
         game.fps_count += 1;
         game.frame_end = performance.now();
 
-        requestAnimationFrame(update);
+        game.animation_frame = requestAnimationFrame(update);
     } catch(e) {
         if (!__RELEASE__) document.body.style.borderTop = "4px solid red";
         // TODO: better error handling for release
@@ -840,19 +839,21 @@ function renderer_resize_canvas() {
     if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
-    const canvas = ui_create_element<HTMLCanvasElement>(document.body, `<canvas id="worldmap"></canvas>`);
+    const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
+
+    const canvas = ui_create_element<HTMLCanvasElement>(game_root, `<canvas id="main"></canvas>`);
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
     }
 
-    const offscreen = ui_create_element<HTMLCanvasElement>(document.body, `<canvas id="offscreen" style="display: none;"></canvas>`)
+    const offscreen = ui_create_element<HTMLCanvasElement>(game_root, `<canvas id="offscreen" style="display: none;"></canvas>`)
     const offscreen_context = offscreen.getContext("2d");
     if (offscreen_context === null) {
         return [null, false];
     }
 
-    const ui_root = ui_create_element<HTMLDivElement>(document.body, `<div class="ui_root"></div>`);
+    const ui_root = ui_create_element<HTMLDivElement>(game_root, `<div id="ui_root"></div>`);
 
     ui_create_element(ui_root, `
         <style nonce="style">
@@ -1423,13 +1424,6 @@ const TILE_VALUES = [
     0b0111, // 4 3
 ];
 const AUTO_TILE_SIZE: Vector2 = [5, 4];
-function is_same_tile(grid_position: Vector2): int {
-    const grid_index = grid_position_to_index(grid_position[0], grid_position[1], game.world.width);
-    if (!is_in_bounds(grid_position[0], grid_position[1], game.world.width, game.world.height)) {
-        return 0;
-    }
-    return game.world_grid[grid_index] ? 1 : 0;
-}
 
 function calculate_tile_value(tile_position: Vector2): Grid_Value {
     const tl_x = tile_position[0] - 1;
@@ -1470,16 +1464,6 @@ function fixed_array_add<T>(arr: Fixed_Size_Array<T, any>, item: T): T {
     arr.data[arr.count] = item;
     arr.count += 1;
     return arr.data[arr.count-1];
-}
-function log_matrix(matrix: Matrix4) {
-    let str = "";
-    for (let i = 0; i < matrix.length; i++) {
-        if (i > 0 && i % 4 === 0) {
-            str += "\n";
-        }
-        str += `${matrix[i].toString().padStart(4)}, `;
-    }
-    console.log(str);
 }
 function load_image(url: string): Promise<HTMLImageElement> {
     const image = new Image();
@@ -1541,6 +1525,16 @@ function generate_project_thumbnail_url(project_id: int): string {
 }
 
 // :debug
+function log_matrix(matrix: Matrix4) {
+    let str = "";
+    for (let i = 0; i < matrix.length; i++) {
+        if (i > 0 && i % 4 === 0) {
+            str += "\n";
+        }
+        str += `${matrix[i].toString().padStart(4)}, `;
+    }
+    console.log(str);
+}
 function number_to_binary_string(dec: number, size: number = 4): string {
     return (dec >>> 0).toString(2).padStart(size, "0");
 }
@@ -1557,17 +1551,8 @@ function hex_to_color(hex_value: number): Color {
     color[3] = ((hex_value) & 0xff) / 255;
     return color;
 }
-function vector2_copy(arr: Vector2): Vector2 {
-    return Array.from(arr) as Vector2;
-}
 function vector2_equal(vec1: Vector2, vec2: Vector2): boolean {
     return vec1[0] === vec2[0] && vec1[1] === vec2[1];
-}
-function vector2_add(arr1: Vector2, arr2: Vector2): Vector2 {
-    const result: Vector2 = [0, 0];
-    result[0] = arr1[0] + arr2[0];
-    result[1] = arr1[1] + arr2[1];
-    return result;
 }
 function vector2_multiply_float(arr1: Vector2, value: float): Vector2 {
     const result: Vector2 = [0, 0];
@@ -1647,15 +1632,6 @@ function matrix4_make_orthographic_projection(left: float, right: float, bottom:
 
     return result;
 }
-// const a = matrix4_identity();
-// const b = [
-//     2, 0, 0, 0,
-//     0, 2, 0, 0,
-//     0, 0, 2, 0,
-//     0, 0, 0, 2,
-// ];
-// matrix4_multiply(a, b);
-// log_matrix(a);
 function matrix4_multiply(m: Matrix4, n: Matrix4): void {
     var b00 = m[0 * 4 + 0];
     var b01 = m[0 * 4 + 1];
