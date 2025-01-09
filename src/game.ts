@@ -142,7 +142,7 @@ requestAnimationFrame(update);
 function update() {
     try {
         if (!game) {
-            if (!__RELEASE__) { console.clear(); }
+            if (!__RELEASE__) console.clear();
             // @ts-ignore
             game = {};
             game.game_mode = Game_Mode.LOADING;
@@ -381,7 +381,7 @@ function update() {
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
                             } else {
-                                console.warn("Can't move in this direction: " + direction);
+                                if (!__RELEASE__) console.warn("Can't move in this direction: " + direction);
                             }
                         }
 
@@ -727,9 +727,7 @@ function update() {
 
         requestAnimationFrame(update);
     } catch(e) {
-        if (!__RELEASE__) {
-            document.body.style.borderTop = "4px solid red";
-        }
+        if (!__RELEASE__) document.body.style.borderTop = "4px solid red";
         // TODO: better error handling for release
         console.error(e);
     }
@@ -827,14 +825,10 @@ function renderer_resize_canvas() {
     game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio;
     game.renderer.gl.canvas.height = final_height * game.renderer.pixel_ratio;
 
-    if (!__RELEASE__) {
-        console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
-    }
+    if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
-    const canvas = document.querySelector("canvas");
-    assert(canvas !== null, "Canvas not found");
-
+    const canvas = ui_create_element<HTMLCanvasElement>(document.body, `<canvas class="worldmap"></canvas>`);
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
@@ -846,9 +840,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         return [null, false];
     }
 
-    // TODO: create ui_root and canvas here
-    const ui_root = document.querySelector("#ui_root") as HTMLDivElement;
-    assert(ui_root !== undefined);
+    const ui_root = ui_create_element<HTMLDivElement>(document.body, `<div class="ui_root"></div>`);
 
     ui_create_element(ui_root, `
         <style nonce="style">
@@ -1294,7 +1286,7 @@ function window_on_resize(_event: Event) {
 function inputs_on_key(event: KeyboardEvent) {
     // console.log("inputs_on_key", event.type, event.code);
     if (!game.inputs.keys.hasOwnProperty(event.code)) {
-        console.warn("Unrecognized key:", event.code);
+        if (!__RELEASE__) console.warn("Unrecognized key:", event.code);
         return;
     }
     const key_state = game.inputs.keys[event.code as Keyboard_Key];

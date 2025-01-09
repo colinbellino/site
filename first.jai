@@ -38,6 +38,10 @@ build :: (args: []string) -> bool {
     config.release = array_find(args, "-release");
     config.no_server = array_find(args, "-no-server");
 
+    if config.release {
+        run_minify_html_command();
+    }
+
     if config.no_server {
         run_compile_command("src/game.ts", config.release);
     } else {
@@ -88,12 +92,45 @@ file_change_callback :: (watcher: *File_Watcher(void), change: *File_Change, use
     }
 }
 
+run_minify_html_command :: () {
+    // ./bin/MACOS/minhtml public/games.html --minify-css --minify-js --output public/games.min.html
+
+    files :: string.[
+        "breakout",
+        "card",
+        "changelog",
+        "games",
+        "index",
+        "web",
+        "worldmap",
+    ];
+    for file : files {
+        path_input  := tprint("public/%.html", file);
+        path_output := tprint("public/%.min.html", file);
+        args := string.[
+            tprint("./bin/%/minhtml", OS),
+            path_input,
+            "--output", path_output,
+            "--minify-css",
+        ];
+        process_result, output, error := run_command(..args, capture_and_return_output = true);
+        // log("[MIN] ❯ %", join(..args, " "));
+        if error {
+            log_error("[MIN] %", error);
+        } else {
+            #import "File";
+            data, read_ok := read_entire_file(path_output);
+            log("[MIN] % compiled (% bytes).", path_output, data.count);
+        }
+    }
+}
+
 run_compile_command :: (file_full_path: string, is_release: bool) {
     remove_whitespace :: (str: string) -> string {
         return replace(replace(str, "\n", ""), " ", "");
     }
     to_dist_path :: (path: string) -> string {
-        return replace(replace(path, ".ts", ".js"), "src/", "public/dist/");
+        return replace(replace(path, ".ts", ".js"), "src/", "public/worldmap/dist/");
     }
 
     {
@@ -122,7 +159,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             "--config-json", remove_whitespace(build_config),
         ];
         process_result, output, error := run_command(..args, capture_and_return_output = true);
-        log("[SWC] ❯ %", join(..args, " "));
+        // log("[SWC] ❯ %", join(..args, " "));
         if error {
             log_error("[SWC] %", error);
         } else {
@@ -310,7 +347,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
 }
 
 inject_js :: (text: string) {
-    path := "./public/dist/game.js";
+    path :: "./public/worldmap/dist/game.js";
 
     js_file, js_file_ok := file_open(path, for_writing = true, keep_existing_content = true);
     if !js_file_ok {
