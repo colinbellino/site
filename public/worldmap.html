@@ -7,8 +7,11 @@
     <link rel="stylesheet" href="/worldmap/worldmap.css">
 </head>
 
-<body>
-    <script src="/worldmap/dist/game.js" type="module" async></script>
+<body class="worldmap_running skip_animation" style="background: #2080ff;">
+    <script type="module">
+        const game = await import("/worldmap/dist/game.js");
+        game.start();
+    </script>
 </body>
 
 </html>
