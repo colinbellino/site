@@ -4,18 +4,26 @@ html,body {
     height: 100%;
     width: 100%;
 }
-html {
+/* html {
     font-size: 18px;
     font-family: "Arial";
-}
-body {
-    background: #2080ff;
+} */
+body.worldmap-running {
     overflow: hidden;
 }
+/* TODO: maybe don't apply this until the game is loaded? */
 canvas#worldmap {
+    background: #2080ff;
     position: absolute;
     top: 0;
     left: 0;
+    width: 100%;
+    height: 100%;
+    z-index: 9;
+}
+#ui_root {
+    font-size: 18px;
+    font-family: "Arial";
 }
 
 .panel {
