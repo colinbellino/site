@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <title>Colin Bellino</title>
   <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, user-scalable=no">
   <meta name="Description" content="Hi, I‘m Colin. I‘m a french freelance programmer, designer and all around nerd. I build cool stuff and I stream my work sometimes.">
   <link rel="apple-touch-icon" sizes="180x180" href="/site/images/apple-touch-icon.png">
   <link rel="icon" type="image/png" sizes="32x32" href="/site/images/favicon-32x32.png">
@@ -164,9 +164,11 @@
       color: rgba(0, 0, 0, 0.75);
     }
 
-    a {
+    a, .link {
       color: var(--main-color);
       text-decoration: none;
+      font-weight: normal;
+      font-family: inherit;
     }
 
     p {
@@ -194,6 +196,7 @@
 
     .link {
       display: flex;
+      width: 100%;
       flex-grow: 1;
       box-sizing: border-box;
       padding: 0.6em 1.5em;
@@ -201,6 +204,7 @@
       min-height: 44px;
       font-size: 0.9em;
       font-weight: 600;
+      border: 0;
       border-radius: 3px;
       background: var(--link-background-color);
       transition: all linear 0.2s;
@@ -256,9 +260,68 @@
       transition-delay: 0ms, 0ms;
     }
 
+    .corner_button {
+        display: none;
+        position: fixed;
+        top: 0;
+        right: 0;
+        border: 0;
+        margin: 0;
+        padding: 0;
+        z-index: 10;
+        background: #2080ff;
+        width: 48px;
+        height: 48px;
+        border-radius: 0 0 0 100%;
+        transition: transform ease-in 100ms;
+        transform: scale(1.0);
+        transform-origin: top right;
+        cursor: pointer;
+    }
+    .corner_button .icon {
+        position: absolute;
+        top: 16px;
+        right: 10px;
+        display: block;
+        width: 16px;
+        height: 4px;
+        background: rgba(255, 255, 255, 0.9);
+        opacity: 0;
+        transition: opacity 200ms ease-in;
+        animation: 1000ms corner_button_loading forwards infinite linear;
+    }
+    .corner_button:hover {
+        transform: scale(1.5);
+    }
+    body.worldmap_enabled .corner_button {
+        display: block;
+    }
+    body.worldmap_loading .corner_button {
+        transform: scale(1.5);
+    }
+    body.worldmap_loading .corner_button .icon {
+        opacity: 1;
+    }
+    @keyframes corner_button_loading {
+        from { transform: rotate(0deg); }
+        to   { transform: rotate(360deg); }
+    }
+    body.worldmap_running .corner_button {
+        animation: 1500ms corner_button_running forwards;
+    }
+    body.worldmap_running .corner_button:hover {
+        transform: scale(1.5);
+    }
+    @keyframes corner_button_running {
+        0%   { }
+        25%  { transform: scale(0.0); }
+        75%  { transform: scale(0.0); }
+        100% { background: rgba(255, 255, 255, 0.3); }
+    }
+
     @media (min-width: 700px) {
       body {
-        padding: 100px 0 0 0;
+        padding: 8vh 0 0 0;
       }
 
       main {
@@ -391,12 +454,16 @@
         </li>
       </ul>
     </footer>
+    <!-- TODO: aria/content -->
+    <button id="worldmap_start" class="corner_button">
+        <span class="icon"></span>
+    </button>
   </main>
   <script nonce="script">
     {
-      const canHover = matchMedia("(hover: hover)").matches;
+      const can_hover = matchMedia("(hover: hover)").matches;
 
-      if (canHover) {
+      if (can_hover) {
           document.addEventListener("mousemove", flip_avatar);
       }
 
@@ -404,8 +471,6 @@
         const avatar = document.getElementById("avatar");
 
         const rect = avatar.getBoundingClientRect();
-        const rectCenterX = rect.x + rect.width / 2;
-
         if (e.clientX < rect.x) {
           avatar.classList.add("flipped");
         } else if (e.clientX > rect.x + rect.width) {
@@ -414,9 +479,34 @@
       }
     }
 
+    const worldmap_start_button = document.querySelector("button#worldmap_start");
+    if (worldmap_start_button) {
+        worldmap_start_button.addEventListener("click", worldmap_start_or_stop);
+    }
     if (location.search.includes("worldmap")) {
-        import_style("/worldmap/worldmap.css");
-        import_script("/worldmap/dist/game.js");
+        document.body.classList.add("worldmap_enabled");
+    }
+
+    // FIXME: don't do this if the worldmap is already loaded
+    function worldmap_start_or_stop() {
+        const is_running = document.body.classList.contains("worldmap_running");
+        if (is_running) {
+
+        } else {
+            worldmap_start_button.dispatchEvent(new Event("mouseout"));
+            document.body.classList.add("worldmap_loading");
+            Promise.all([
+                import      ("/worldmap/dist/game.js"),
+                import_style("/worldmap/worldmap.css"),
+                // new Promise(resolve => setTimeout(resolve, 500)),
+            ]).then(([game]) => {
+                game.start(loaded_callback);
+                function loaded_callback() {
+                    document.body.classList.remove("worldmap_loading");
+                    document.body.classList.add("worldmap_running");
+                }
+            });
+        }
     }
 
     function import_style(url) {
@@ -426,14 +516,6 @@
             link.setAttribute("rel", "stylesheet");
             link.onload = resolve;
             document.body.appendChild(link);
-        });
-    }
-    function import_script(url) {
-        return new Promise((resolve, reject) => {
-        const script = document.createElement("script");
-            script.setAttribute("src", url);
-            script.onload = resolve;
-            document.body.appendChild(script);
         });
     }
 

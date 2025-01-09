@@ -52,6 +52,7 @@ type Game = {
     sprite_vs:              string;
     sprite_fs:              string;
     sprite_pass:            Sprite_Pass;
+    loaded_callback:        () => void;
     // engine
     console_lines:          Fixed_Size_Array<Message, typeof MAX_CONSOLE_LINES>;
     renderer:               Renderer;
@@ -123,7 +124,7 @@ const DIRECTIONS : Vector2[] = [
     [ -1, +0 ], // .West
 ];
 const enum Direction { NORTH, EAST, SOUTH, WEST }
-const enum World_Mode { IDLE, MOVING }
+const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
 
 function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
@@ -137,63 +138,63 @@ function COLOR_BLACK(): Color { return [0, 0, 0, 1]; }
 
 let game: Game;
 
-requestAnimationFrame(update);
+export function start(loaded_callback: () => void) {
+    // if (!__RELEASE__) console.clear();
+    // @ts-ignore
+    game = {};
+    game.game_mode = Game_Mode.LOADING;
+    game.frame_count = 0;
+    game.frame_end = 0;
+    game.fps = 0;
+    game.fps_last_update = 0;
+    game.fps_count = 0;
+    game.entities = fixed_array_make(MAX_ENTITIES);
+    game.sorted_sprites = fixed_array_make(MAX_SPRITES);
+    game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
+    game.destination_path = fixed_array_make(MAX_PATH);
+    game.draw_console = location.search.includes("?console");
+    game.draw_entities = true;
+    game.draw_world_grid = false;
+    game.draw_world_tile = true;
+    game.draw_tiles = true;
+    game.clear_color = hex_to_color(CLEAR_COLOR);
+
+    const [renderer, renderer_ok] = renderer_init();
+    if (!renderer_ok) {
+        console.error("Couldn't initialize renderer.");
+        return;
+    }
+    game.renderer = renderer;
+    renderer_update_camera_matrix_main(game.renderer.camera_main);
+
+    game.inputs = inputs_init();
+    game.projects = fixed_array_make(MAX_PROJECTS);
+    game.nodes = fixed_array_make(MAX_NODES);
+    game.loaded_callback = loaded_callback;
+
+    window.addEventListener("resize", window_on_resize, false);
+    window.addEventListener("keydown", inputs_on_key, false);
+    window.addEventListener("keyup", inputs_on_key, false);
+
+    if (!__RELEASE__) {
+        setInterval(() => {
+            load_image(`${ATLAS_URL}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+        }, 1000);
+    }
+
+    load_image(ATLAS_URL).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+    load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
+    load_codegen().then((codegen) => {
+        game.world = codegen.world;
+        game.sprite_vs = codegen.sprite_vs;
+        game.sprite_fs = codegen.sprite_fs;
+    });
+
+    requestAnimationFrame(update);
+}
 
 function update() {
     try {
-        if (!game) {
-            if (!__RELEASE__) console.clear();
-            // @ts-ignore
-            game = {};
-            game.game_mode = Game_Mode.LOADING;
-            game.world_mode = World_Mode.IDLE;
-            game.frame_count = 0;
-            game.frame_end = 0;
-            game.fps = 0;
-            game.fps_last_update = 0;
-            game.fps_count = 0;
-            game.entities = fixed_array_make(MAX_ENTITIES);
-            game.sorted_sprites = fixed_array_make(MAX_SPRITES);
-            game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
-            game.destination_path = fixed_array_make(MAX_PATH);
-            game.draw_console = location.search.includes("?console");
-            game.draw_entities = true;
-            game.draw_world_grid = false;
-            game.draw_world_tile = true;
-            game.draw_tiles = true;
-            game.clear_color = hex_to_color(CLEAR_COLOR);
-
-            const [renderer, renderer_ok] = renderer_init();
-            if (!renderer_ok) {
-                console.error("Couldn't initialize renderer.");
-                return;
-            }
-            game.renderer = renderer;
-            renderer_update_camera_matrix_main(game.renderer.camera_main);
-
-            game.inputs = inputs_init();
-            game.projects = fixed_array_make(MAX_PROJECTS);
-            game.nodes = fixed_array_make(MAX_NODES);
-
-            window.addEventListener("resize", window_on_resize, false);
-            window.addEventListener("keydown", inputs_on_key, false);
-            window.addEventListener("keyup", inputs_on_key, false);
-
-            if (!__RELEASE__) {
-                setInterval(() => {
-                    load_image(`${ATLAS_URL}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
-                }, 1000);
-            }
-
-            load_image(ATLAS_URL).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
-            load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
-            load_codegen().then((codegen) => {
-                game.world = codegen.world;
-                game.sprite_vs = codegen.sprite_vs;
-                game.sprite_fs = codegen.sprite_fs;
-            });
-        }
-
         const gl = game.renderer.gl;
         const now = performance.now();
 
@@ -290,6 +291,7 @@ function update() {
                 is_loaded &&= game.sprite_vs !== undefined;
                 is_loaded &&= game.sprite_fs !== undefined;
                 if (is_loaded) {
+                    if (game.loaded_callback) { game.loaded_callback(); }
                     game.sprite_pass = renderer_make_sprite_pass(game.sprite_vs, game.sprite_fs, game.renderer.gl);
                     // :init world
                     game.tile_grid = Array(game.world.width+1 * game.world.height+1);
@@ -332,13 +334,11 @@ function update() {
                     renderer_resize_canvas();
                     update_zoom();
 
-                    ui_label_show(game.renderer.ui_up);
-                    ui_label_show(game.renderer.ui_right);
-                    ui_label_show(game.renderer.ui_down);
-                    ui_label_show(game.renderer.ui_left);
                     game.inputs.window_resized = true;
                     game.render_active = true;
                     game.game_mode = Game_Mode.RUNNING;
+                    game.world_mode = World_Mode.INTRO;
+                    game.world_mode_timer = now;
                 }
             } break;
             // :game RUNNING
@@ -349,7 +349,7 @@ function update() {
                     const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
                     const root = game.renderer.ui_node_action.element_root;
                     const margin = 10;
-                    const rect = root.getClientRects()[0];
+                    const rect = root.getBoundingClientRect();
                     const max_x = game.renderer.window_size[0] - rect.width  - margin;
                     const max_y = game.renderer.window_size[1] - rect.height - margin;
                     const x = clamp(window_position[0] - rect.width * 0.5, margin, max_x);
@@ -359,6 +359,18 @@ function update() {
                 }
 
                 switch (game.world_mode) {
+                    // :world INTRO
+                    case World_Mode.INTRO: {
+                        const done = now > game.world_mode_timer + 1500;
+                        if (done) {
+                            ui_label_show(game.renderer.ui_up);
+                            ui_label_show(game.renderer.ui_right);
+                            ui_label_show(game.renderer.ui_down);
+                            ui_label_show(game.renderer.ui_left);
+                            game.world_mode = World_Mode.IDLE;
+                            game.world_mode_timer = now;
+                        }
+                    } break;
                     // :world IDLE
                     case World_Mode.IDLE: {
                         if (!vector2_equal(player_input_move, [0, 0])) {
@@ -811,8 +823,8 @@ function renderer_resize_canvas() {
 
     let final_width = width;
     let final_height = height;
-    if (width % 2)  { final_width -= 1; }
-    if (height % 2) { final_height -= 1; }
+    // if (width % 2)  { final_width -= 1; }
+    // if (height % 2) { final_height -= 1; }
 
     game.renderer.pixel_ratio = window.devicePixelRatio;
     if (!Number.isInteger(window.devicePixelRatio)) { // Default to pixel_ratio of 2 in case we have some fucky wucky floating number ratio for now...
@@ -1944,7 +1956,7 @@ function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
     parent.innerHTML = html.trim();
     return ui_root.appendChild(parent.firstChild) as T;
 }
-function ui_create_panel(ui_root: HTMLDivElement, close_fn: (this: HTMLButtonElement, ev: MouseEvent) => any): UI_Panel {
+function ui_create_panel(ui_root: HTMLDivElement, close_callback: (this: HTMLButtonElement, ev: MouseEvent) => any): UI_Panel {
     const panel_root = ui_create_element<HTMLElement>(ui_root, `
         <section class="panel hide">
             <header>
@@ -1960,7 +1972,7 @@ function ui_create_panel(ui_root: HTMLDivElement, close_fn: (this: HTMLButtonEle
         element_close:      panel_root.querySelector(".close"),
         element_content:    panel_root.querySelector(".content"),
     };
-    panel.element_close.addEventListener("click", close_fn);
+    panel.element_close.addEventListener("click", close_callback);
     return panel;
 }
 function ui_set_element_class(element: HTMLElement, class_name: string, value: boolean) {
