@@ -277,6 +277,7 @@
         transform: scale(1.0);
         transform-origin: top right;
         cursor: pointer;
+        -webkit-tap-highlight-color: transparent;
     }
     .corner_button .icon {
         position: absolute;
@@ -377,6 +378,10 @@
         <li><a href="/games" class="link"><img src="/site/images/games.svg" aria-hidden="true" width="26" height="26" /><span>Games</span></a></li>
         <li><a href="/changelog" class="link"><img src="/site/images/changelog.svg" aria-hidden="true" width="26" height="26" /><span>Changelog</span></a></li>
       </ul>
+      <!-- TODO: aria/content -->
+      <button id="worldmap_start" class="corner_button">
+        <span class="icon"></span>
+      </button>
     </nav>
     <section>
       <h1><a href="/changelog">Colin Bellino</a></h1>
@@ -454,10 +459,6 @@
         </li>
       </ul>
     </footer>
-    <!-- TODO: aria/content -->
-    <button id="worldmap_start" class="corner_button">
-        <span class="icon"></span>
-    </button>
   </main>
   <script nonce="script">
     {
@@ -493,7 +494,6 @@
         if (is_running) {
 
         } else {
-            worldmap_start_button.dispatchEvent(new Event("mouseout"));
             document.body.classList.add("worldmap_loading");
             Promise.all([
                 import      ("/worldmap/dist/game.js"),
@@ -504,6 +504,7 @@
                 function loaded_callback() {
                     document.body.classList.remove("worldmap_loading");
                     document.body.classList.add("worldmap_running");
+                    worldmap_start_button.dispatchEvent(new Event("focusout"));
                 }
             });
         }

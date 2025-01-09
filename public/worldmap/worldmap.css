@@ -29,12 +29,8 @@ canvas#worldmap {
     }
 }
 @keyframes button_grow {
-    0% {
-        transform: scale(1.0);
-    }
-    100% {
-        transform: scale(200.0);
-    }
+    0%   { transform: scale(1.0); }
+    100% { transform: scale(200.0); }
 }
 
 #ui_root {
@@ -44,7 +40,7 @@ canvas#worldmap {
 
 .panel {
     position: absolute;
-    z-index: 2;
+    z-index: 10;
     padding: 15px;
     box-sizing: border-box;
     border-radius: 5px;

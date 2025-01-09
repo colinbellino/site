@@ -93,8 +93,6 @@ file_change_callback :: (watcher: *File_Watcher(void), change: *File_Change, use
 }
 
 run_minify_html_command :: () {
-    // ./bin/MACOS/minhtml public/games.html --minify-css --minify-js --output public/games.min.html
-
     files :: string.[
         "breakout",
         "card",
@@ -112,6 +110,7 @@ run_minify_html_command :: () {
             path_input,
             "--output", path_output,
             "--minify-css",
+            "--ensure-spec-compliant-unquoted-attribute-values",
         ];
         process_result, output, error := run_command(..args, capture_and_return_output = true);
         // log("[MIN] ❯ %", join(..args, " "));
