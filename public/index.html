@@ -396,8 +396,9 @@
     {
       const canHover = matchMedia("(hover: hover)").matches;
 
-      if (canHover)
-        document.addEventListener("mousemove", flip_avatar);
+      if (canHover) {
+          document.addEventListener("mousemove", flip_avatar);
+      }
 
       function flip_avatar(e) {
         const avatar = document.getElementById("avatar");
@@ -411,6 +412,29 @@
           avatar.classList.remove("flipped");
         }
       }
+    }
+
+    if (location.search.includes("worldmap")) {
+        import_style("/worldmap/worldmap.css");
+        import_script("/worldmap/dist/game.js");
+    }
+
+    function import_style(url) {
+        return new Promise((resolve, reject) => {
+        const link = document.createElement("link");
+            link.setAttribute("href", url);
+            link.setAttribute("rel", "stylesheet");
+            link.onload = resolve;
+            document.body.appendChild(link);
+        });
+    }
+    function import_script(url) {
+        return new Promise((resolve, reject) => {
+        const script = document.createElement("script");
+            script.setAttribute("src", url);
+            script.onload = resolve;
+            document.body.appendChild(script);
+        });
     }
 
     // Prepare some config for breakout

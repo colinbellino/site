@@ -1,0 +1,219 @@
+html,body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+}
+html {
+    font-size: 18px;
+    font-family: "Arial";
+}
+body {
+    background: #2080ff;
+    overflow: hidden;
+}
+canvas#worldmap {
+    position: absolute;
+    top: 0;
+    left: 0;
+}
+
+.panel {
+    position: absolute;
+    z-index: 2;
+    padding: 15px;
+    box-sizing: border-box;
+    border-radius: 5px;
+    background: rgba(0, 0, 0, 0.95);
+    color: rgba(255, 255, 255, 0.9);
+    top: 10px;
+    right: 10px;
+    left: 10px;
+    height: 100%;
+    min-width: 300px;
+    max-height: calc(100% - 42px*4);
+    opacity: 1;
+    transform: translate(0px, 0px);
+    transition: 200ms ease-in opacity, 200ms ease-in transform;
+}
+.panel.hide {
+    opacity: 0;
+    transform: translateY(-20px);
+}
+.panel header {
+    position: absolute;
+    width: calc(100% - 30px);
+}
+.panel h2 {
+    font-size: 1.5em;
+    margin: 0;
+}
+.panel .close {
+    position: absolute;
+    top: 0;
+    right: 0;
+    padding: 0;
+    margin: 0;
+    color: inherit;
+    border: none;
+    width: 32px;
+    height: 32px;
+    border-radius: 5px;
+    background-color: transparent;
+    background-position: calc(-16px * 7 * 2) 0px;
+    background-size: calc(512px * 2) calc(512px * 2);
+    image-rendering: pixelated;
+}
+.panel .close:hover {
+    background-color: rgba(255, 255, 255, 0.1);
+}
+.panel .content {
+    overflow-y: auto;
+    scrollbar-color: rgba(128, 128, 128, 1) transparent;
+    scrollbar-width: thin;
+    height: calc(100% - 46px);
+    margin-top: 46px;
+    padding-right: 10px;
+}
+.panel img {
+    width: 128px;
+}
+.panel p {
+    margin-top: 0;
+    margin-bottom: 1em;
+}
+.panel p:last-child {
+    margin-bottom: 0;
+}
+.panel a {
+    color: inherit
+}
+.panel ul {
+    margin: 0;
+    padding: 0;
+    list-style-position: inside;
+}
+.panel li {
+    list-style: none;
+}
+@media (min-width: 760px) {
+    .panel {
+        max-width: 740px;
+        left: calc(100%/2 - 740px/2);
+        right: auto;
+        margin: 0 auto;
+    }
+    .panel .content {
+        padding-right: 0;
+    }
+}
+
+.hud_label {
+    z-index: 10;
+    position: absolute;
+    margin: 0;
+    text-align: right;
+    color: rgba(255, 255, 255, 0.95);
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 25px;
+    opacity: 1;
+    transform: translate(0px, 0px);
+    transition: 100ms ease-in opacity, 100ms ease-in transform;
+    user-select: none;
+}
+.hud_label .content {
+    padding: 5px;
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+}
+.hud_label.node_action {
+    background: rgba(0, 0, 0, 0.8);
+}
+.hud_label.thumbnail {
+    border-radius: 15px;
+}
+.hud_label > img {
+    display: none;
+}
+.hud_label.thumbnail > img {
+    display: block;
+    border-radius: 15px 15px 0 0;
+}
+.hud_label.thumbnail .label {
+    flex: 1;
+}
+.hud_label.up {
+    left: 64px;
+    bottom: 96px;
+}
+.hud_label.right {
+    left: 96px;
+    bottom: 64px;
+}
+.hud_label.down {
+    left: 64px;
+    bottom: 32px;
+}
+.hud_label.left {
+    left: 32px;
+    bottom: 64px;
+}
+.hud_label.confirm {
+    right: 32px;
+    bottom: 32px;
+}
+.hud_label.cancel {
+    right: 32px;
+    bottom: 64px;
+}
+.hud_label.hide {
+    opacity: 0;
+    transform: translate(20px, 0px);
+}
+.hud_label.anchor_bottom.hide {
+    transform: translate(0px, 20px);
+}
+.hud_label.no_label .content .label {
+    display: none;
+}
+.hud_label .content .label {
+    padding: 0 10px 0 10px;
+}
+
+.hud_icon {
+    width: 32px;
+    height: 32px;
+    border: 0;
+    background-color: transparent;
+    background-position-y: 0px;
+    background-position-x: -256px;
+    background-size: 1024px 1024px;
+    image-rendering: pixelated;
+}
+.hud_icon.icon_right { background-position-x: -288px; }
+.hud_icon.icon_down { background-position-x: -320px; }
+.hud_icon.icon_left { background-position-x: -352px; }
+.hud_icon.icon_confirm { background-position-x: -384px; }
+.hud_icon.icon_cancel { background-position-x: -384px; }
+
+.ui_console {
+    display: none;
+    box-sizing: border-box;
+    position: absolute;
+    top: 0px;
+    left: 0px;
+    width: 100%;
+    height: 100%;
+    overflow: auto;
+    padding: 10px;
+    margin: 0;
+    z-index: 99;
+    white-space: pre;
+    font: 18px "Courier New";
+    color: #ffffff;
+    background: rgba(0, 0, 0, 0.4);
+}
+.ui_console.open {
+    display: block;
+}

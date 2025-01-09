@@ -828,13 +828,13 @@ function renderer_resize_canvas() {
     if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
 function renderer_init(): [Renderer, true] | [null, false] {
-    const canvas = ui_create_element<HTMLCanvasElement>(document.body, `<canvas class="worldmap"></canvas>`);
+    const canvas = ui_create_element<HTMLCanvasElement>(document.body, `<canvas id="worldmap"></canvas>`);
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
     }
 
-    const offscreen = ui_create_element<HTMLCanvasElement>(document.body, `<canvas id="offscreen"></canvas>`)
+    const offscreen = ui_create_element<HTMLCanvasElement>(document.body, `<canvas id="offscreen" style="display: none;"></canvas>`)
     const offscreen_context = offscreen.getContext("2d");
     if (offscreen_context === null) {
         return [null, false];
