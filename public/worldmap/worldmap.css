@@ -50,7 +50,7 @@ body.worldmap_closing #worldmap {
 
 .panel {
     position: absolute;
-    z-index: 10;
+    z-index: 11;
     padding: 15px;
     box-sizing: border-box;
     border-radius: 5px;
@@ -90,10 +90,14 @@ body.worldmap_closing #worldmap {
     width: 32px;
     height: 32px;
     border-radius: 5px;
-    background-color: transparent;
-    background-position: calc(-16px * 7 * 2) 0px;
-    background-size: calc(512px * 2) calc(512px * 2);
-    image-rendering: pixelated;
+    background: none;
+}
+.panel .close svg {
+    position: absolute;
+    top: -16px;
+    left: -16px;
+    transform: rotate(45deg);
+    fill: rgba(255, 255, 255, 0.9);
 }
 .panel .close:hover {
     background-color: rgba(255, 255, 255, 0.1);
@@ -129,10 +133,11 @@ body.worldmap_closing #worldmap {
 }
 @media (min-width: 760px) {
     .panel {
-        max-width: 740px;
         left: calc(100%/2 - 740px/2);
         right: auto;
         margin: 0 auto;
+        height: auto;
+        max-width: 740px;
     }
     .panel .content {
         padding-right: 0;

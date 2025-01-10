@@ -855,6 +855,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
 
     const ui_root = ui_create_element<HTMLDivElement>(game_root, `<div id="ui_root"></div>`);
 
+    // TODO: remove this once we have converted the icons to svg
     ui_create_element(ui_root, `
         <style nonce="style">
             .atlas_icon {
@@ -1937,7 +1938,13 @@ function ui_create_panel(ui_root: HTMLDivElement, close_callback: (this: HTMLBut
         <section class="panel hide">
             <header>
                 <h2></h2>
-                <button class="close" aria-label="Close"></button>
+                <button class="close" aria-label="Close">
+                    <svg width="64" height="64">
+                        <g>
+                            <path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/>
+                        </g>
+                    </svg>
+                </button>
             </header>
             <div class="content"></div>
         </section>

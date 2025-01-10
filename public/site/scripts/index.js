@@ -43,7 +43,7 @@ function worldmap_start_or_stop() {
             Promise.all([
                 import      ("/worldmap/dist/game.js"),
                 import_style("/worldmap/worldmap.css"),
-                new Promise(resolve => setTimeout(resolve, 200)),
+                new Promise(resolve => setTimeout(resolve, 300)),
             ]).then((results) => {
                 worldmap_game = results[0];
                 worldmap_game.start(loaded_callback);
