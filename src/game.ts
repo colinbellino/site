@@ -392,6 +392,16 @@ export function update() {
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_hide(game.renderer.ui_confirm);
                                 ui_label_hide(game.renderer.ui_node_action);
+
+                                // Simple way to project images while we are moving to the node
+                                const destination_node = game.nodes.data[game.destination_node];
+                                if (destination_node.type === Node_Type.PROJECT) {
+                                    const project = game.projects.data[destination_node.project_id];
+                                    const preload_images = [];
+                                    for (let i = 0; i < project.screenshots_count; i++) {
+                                        preload_images.push(load_image(generate_project_image_url(project, i)));
+                                    }
+                                }
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
                             } else {
@@ -421,17 +431,23 @@ export function update() {
                                         ui_label_show(game.renderer.ui_confirm, ui_get_node_label(node));
                                     } else {
                                         const content = [];
-                                        for (let i = 0; i < project.screenshots_count; i++) {
-                                            content.push(`<img src="${generate_project_image_url(project, i+1)}" alt="A Screenshot of the app (${i+1} of ${project.screenshots_count})." />`);
+                                        if (project.screenshots_count > 0) {
+                                            content.push(`<ul class="screenshots">`);
+                                            for (let i = 0; i < project.screenshots_count; i++) {
+                                                content.push(`<li><img src="${generate_project_image_url(project, i+1)}" alt="A screenshot of the project (${i+1} of ${project.screenshots_count})." /></li>`);
+                                            }
+                                            content.push("</ul>");
                                         }
                                         for (let i = 0; i < project.description.length; i++) {
                                             content.push(project.description[i]);
                                         }
-                                        content.push("<ul>");
-                                        for (let i = 0; i < project.bullet_points.length; i++) {
-                                            content.push(`<li> - ${project.bullet_points[i]}</li>`);
+                                        if (project.bullet_points.length > 0) {
+                                            content.push(`<ul class="bullet_points">`);
+                                            for (let i = 0; i < project.bullet_points.length; i++) {
+                                                content.push(`<li>${project.bullet_points[i]}</li>`);
+                                            }
+                                            content.push("</ul>");
                                         }
-                                        content.push("</ul>");
 
                                         ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""));
                                         ui_label_hide(game.renderer.ui_node_action);
