@@ -44,7 +44,7 @@ body.worldmap_closing #worldmap {
 }
 
 #ui_root {
-    font-size: 18px;
+    font-size: 20px;
     font-family: "Arial";
 }
 
@@ -53,7 +53,7 @@ body.worldmap_closing #worldmap {
     z-index: 11;
     padding: 15px;
     box-sizing: border-box;
-    border-radius: 5px;
+    border-radius: 10px;
     background: rgba(0, 0, 0, 0.95);
     color: rgba(255, 255, 255, 0.9);
     top: 10px;
@@ -150,58 +150,78 @@ body.worldmap_closing #worldmap {
     margin: 0;
     text-align: right;
     color: rgba(255, 255, 255, 0.95);
+    fill: rgba(255, 255, 255, 0.95);
     background: rgba(0, 0, 0, 0.2);
-    border-radius: 25px;
+    border-radius: 10px;
     opacity: 1;
     transform: translate(0px, 0px);
     transition: 100ms ease-in opacity, 100ms ease-in transform;
     user-select: none;
 }
 .hud_label .content {
-    padding: 5px;
     display: flex;
     flex-wrap: wrap;
     align-items: center;
+}
+.hud_label .label {
+    padding: 0 10px 0 20px;
 }
 .hud_label.node_action {
     background: rgba(0, 0, 0, 0.8);
 }
 .hud_label.thumbnail {
-    border-radius: 15px;
+    border-radius: 10px;
 }
 .hud_label > img {
     display: none;
 }
 .hud_label.thumbnail > img {
     display: block;
-    border-radius: 15px 15px 0 0;
+    border-radius: 10px 10px 0 0;
 }
 .hud_label.thumbnail .label {
     flex: 1;
 }
 .hud_label.up {
-    left: 64px;
-    bottom: 96px;
+    left: 96px;
+    bottom: 144px;
+    background: none;
+}
+.hud_icon.icon_up:before {
+    content: "";
+    display: block;
+    width: 48px;
+    height: 144px;
+    position: absolute;
+    left: 0px;
+    top: 0px;
+    background: rgba(0, 0, 0, 0.2);
+    border-radius: 10px;
 }
 .hud_label.right {
-    left: 96px;
-    bottom: 64px;
+    left: 144px;
+    bottom: 96px;
+    border-top-left-radius: 0;
+    border-bottom-left-radius: 0;
 }
 .hud_label.down {
-    left: 64px;
-    bottom: 32px;
+    left: 96px;
+    bottom: 48px;
+    background: none;
 }
 .hud_label.left {
-    left: 32px;
-    bottom: 64px;
+    left: 48px;
+    bottom: 96px;
+    border-top-right-radius: 0;
+    border-bottom-right-radius: 0;
 }
 .hud_label.confirm {
-    right: 32px;
-    bottom: 32px;
+    right: 48px;
+    bottom: 48px;
 }
 .hud_label.cancel {
-    right: 32px;
-    bottom: 64px;
+    right: 48px;
+    bottom: 104px;
 }
 .hud_label.hide {
     opacity: 0;
@@ -218,20 +238,20 @@ body.worldmap_closing #worldmap {
 }
 
 .hud_icon {
-    width: 32px;
-    height: 32px;
+    width: 48px;
+    height: 48px;
     border: 0;
-    background-color: transparent;
-    background-position-y: 0px;
-    background-position-x: -256px;
-    background-size: 1024px 1024px;
-    image-rendering: pixelated;
+    background: none;
 }
-.hud_icon.icon_right { background-position-x: -288px; }
-.hud_icon.icon_down { background-position-x: -320px; }
-.hud_icon.icon_left { background-position-x: -352px; }
-.hud_icon.icon_confirm { background-position-x: -384px; }
-.hud_icon.icon_cancel { background-position-x: -384px; }
+.hud_icon svg {
+    transform: scale(0.75) translate(-16px, -12px);
+}
+.hud_icon.icon_up   {  }
+.hud_icon.icon_right   { transform: rotate(90deg); }
+.hud_icon.icon_down    { transform: rotate(180deg); }
+.hud_icon.icon_left    { transform: rotate(270deg); }
+.hud_icon.icon_confirm { }
+.hud_icon.icon_cancel  { }
 
 .ui_console {
     display: none;

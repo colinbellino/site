@@ -123,6 +123,9 @@ const DIRECTIONS : Vector2[] = [
     [ +0, +1 ], // .South
     [ -1, +0 ], // .West
 ];
+const ICON_KEYBOARD_ESCAPE = `<svg width="64" height="64"><path d="M16 8h32q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8m16 20q-.4 0-.7.3-.3.3-.3.7 0 .4.3.7l.65.3h.1q1.55 0 2.75 1.2T36 34q0 1.6-1.2 2.8Q33.6 38 32 38h-4v-3h4l.7-.3.3-.7-.3-.7q-.3-.3-.65-.3h-.1q-1.55 0-2.75-1.2T28 29q0-1.6 1.2-2.8Q30.4 25 32 25h4v3h-4m-14-3h8v3h-5v2h5v3h-5v2h5v3h-8V25m26.8 12-.1.1q-1.15.9-2.7.9-1.6 0-2.7-.9l-.1-.05-.05-.1Q38 35.8 38 34.3v-5.55q0-1.6 1.2-2.7h.05Q40.4 25 42 25q1.55 0 2.75 1.05 1.25 1.1 1.25 2.7v1.5h-3v-1.5l-.2-.45q-.35-.3-.8-.3-.45 0-.75.25l-.05.05-.2.45v5.55l.2.5.8.2.75-.2.25-.5v-1.5h3v1.5q.05 1.5-1.2 2.7M11 16v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5H16q-5 0-5 5"/></svg>`;
+const ICON_KEYBOARD_ENTER = `<svg width="64" height="64"><path d="M40 11h-4q-5 0-5 5v15H16q-5 0-5 5v12q0 5 5 5h32q5 0 5-5V16q0-5-5-5h-8m8-3q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V36q0-8 8-8h12V16q0-8 8-8h12M20 43q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3m2-1.2q0-1.15.85-2l.05-.05Q23.75 39 25 39q1.15 0 2.05.75l.05.05q.9.85.9 2V48l-.3.7q-.3.3-.7.3l-.7-.3-.3-.7v-6.2l-.25-.55v.05q-.3-.3-.75-.3t-.8.3l.05-.1-.25.6V48l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-6.2m8-.8-.7-.3q-.3-.3-.3-.7 0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7q-.3.3-.7.3h-1v7l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-7h-1m6-1q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8m12.1 4.1v.05l-.65.5 1.45 2.9q.2.4.05.8l-.5.55-.75.05q-.4-.15-.6-.5L45.4 45H45v3l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h2.05q1.2 0 2.05.85.9.9.9 2.15t-.9 2.1m-2-1.1.35-.1.25-.2h.05L47 42l-.3-.75q-.25-.25-.65-.25H45v2h1.1"/></svg>`;
+const ICON_KEYBOARD_ARROW_UP = `<svg width="64" height="64"><path d="M48 11H16q-5 0-5 5v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5m8 5v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8h32q8 0 8 8m-24 6 8 8v2h-4v10h-8V32h-4v-2l8-8"/></svg>`;
 const enum Direction { NORTH, EAST, SOUTH, WEST }
 const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
@@ -171,7 +174,7 @@ export function start(loaded_callback: () => void) {
     window.addEventListener("keyup", inputs_on_key, false);
 
     if (!__RELEASE__ && location.search.includes("reload")) {
-        setInterval(() => {
+        setInterval(function reload_atlas() {
             load_image(`${ATLAS_URL}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
         }, 1000);
     }
@@ -855,20 +858,13 @@ function renderer_init(): [Renderer, true] | [null, false] {
 
     const ui_root = ui_create_element<HTMLDivElement>(game_root, `<div id="ui_root"></div>`);
 
-    // TODO: remove this once we have converted the icons to svg
-    ui_create_element(ui_root, `
-        <style nonce="style">
-            .atlas_icon {
-                background-image: url("${ATLAS_URL}");
-            }
-        </style>
-    `);
-
     const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
         <label class="hud_label anchor_bottom no_label hide up" for="up">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_up" aria-label="Move: up"></button>
+                <button class="hud_icon icon_up" aria-label="Move: up">
+                    ${ICON_KEYBOARD_ARROW_UP}
+                </button>
             </span>
         </label>
     `);
@@ -880,7 +876,9 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label anchor_bottom no_label hide right">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_right" aria-label="Move: right"></button>
+                <button class="hud_icon icon_right" aria-label="Move: right">
+                    ${ICON_KEYBOARD_ARROW_UP}
+                </button>
             </span>
         </label>
     `);
@@ -892,7 +890,9 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label anchor_bottom no_label hide down">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_down" aria-label="Move: down"></button>
+                <button class="hud_icon icon_down" aria-label="Move: down">
+                    ${ICON_KEYBOARD_ARROW_UP}
+                </button>
             </span>
         </label>
     `);
@@ -904,7 +904,9 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label anchor_bottom no_label hide left">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_left" aria-label="Move: left"></button>
+                <button class="hud_icon icon_left" aria-label="Move: left">
+                    ${ICON_KEYBOARD_ARROW_UP}
+                </button>
             </span>
         </label>
     `);
@@ -916,24 +918,28 @@ function renderer_init(): [Renderer, true] | [null, false] {
         <label class="hud_label hide confirm">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_confirm" aria-label="Confirm" id="confirm"></button>
+                <button class="hud_icon icon_confirm" aria-label="Confirm">
+                    ${ICON_KEYBOARD_ENTER}
+                </button>
             </span>
         </label>
     `);
     const confirm_button = confirm_root.querySelector(".content button") as HTMLButtonElement;
-    confirm_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Enter); });
+    confirm_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter));
     const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_root.querySelector(".content .label") };
 
     const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `
         <label class="hud_label hide cancel">
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_cancel" aria-label="Confirm" id="cancel"></button>
+                <button class="hud_icon icon_cancel" aria-label="Cancel">
+                    ${ICON_KEYBOARD_ESCAPE}
+                </button>
             </span>
         </label>
     `);
     const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
-    cancel_button.addEventListener("click", () => { input_send_key(Keyboard_Key.Escape); });
+    cancel_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Escape));
     const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
 
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -941,7 +947,9 @@ function renderer_init(): [Renderer, true] | [null, false] {
             <img />
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon atlas_icon icon_confirm"></button>
+                <button class="hud_icon icon_confirm" aria-label="Confirm">
+                    ${ICON_KEYBOARD_ENTER}
+                </button>
             </span>
         </label>
     `);
@@ -1380,6 +1388,8 @@ function inputs_reset(inputs: Inputs): void {
 }
 function input_send_key(key: Keyboard_Key): void {
     game.inputs.keys[key].triggered = true;
+    // This is to ensure sure we don't keep a focus on the button since this will break keyboard navigation.
+    (document.activeElement as any).blur();
 }
 
 // :auto_tile
