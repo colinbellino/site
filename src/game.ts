@@ -170,7 +170,7 @@ export function start(loaded_callback: () => void) {
     window.addEventListener("keydown", inputs_on_key, false);
     window.addEventListener("keyup", inputs_on_key, false);
 
-    if (!__RELEASE__) {
+    if (!__RELEASE__ && location.search.includes("reload")) {
         setInterval(() => {
             load_image(`${ATLAS_URL}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
         }, 1000);
