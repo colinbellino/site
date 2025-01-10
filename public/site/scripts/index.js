@@ -49,6 +49,7 @@ function worldmap_start_or_stop() {
                 worldmap_game.start(loaded_callback);
             });
         } else {
+            worldmap_game.update();
             loaded_callback();
         }
 

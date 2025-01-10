@@ -191,7 +191,7 @@ export function stop() {
     cancelAnimationFrame(game.animation_frame);
 }
 
-function update() {
+export function update() {
     try {
         const gl = game.renderer.gl;
         const now = performance.now();
