@@ -399,7 +399,7 @@ export function update() {
                                     const project = game.projects.data[destination_node.project_id];
                                     const preload_images = [];
                                     for (let i = 0; i < project.screenshots_count; i++) {
-                                        preload_images.push(load_image(generate_project_image_url(project, i)));
+                                        preload_images.push(load_image(project_screenshot_url(project, i)));
                                     }
                                 }
                                 game.world_mode = World_Mode.MOVING;
@@ -434,7 +434,13 @@ export function update() {
                                         if (project.screenshots_count > 0) {
                                             content.push(`<ul class="screenshots">`);
                                             for (let i = 0; i < project.screenshots_count; i++) {
-                                                content.push(`<li><img src="${generate_project_image_url(project, i+1)}" alt="A screenshot of the project (${i+1} of ${project.screenshots_count})." /></li>`);
+                                                content.push(`
+                                                    <li>
+                                                        <a href="${project_screenshot_url(project, i+1, "large")}" target="_blank" rel="noopener">
+                                                            <img src="${project_screenshot_url(project, i+1)}" alt="A screenshot of the project (${i+1} of ${project.screenshots_count})." />
+                                                        </a>
+                                                    </li>
+                                                `);
                                             }
                                             content.push("</ul>");
                                         }
@@ -506,7 +512,7 @@ export function update() {
                             if (label !== "") {
                                 ui_label_show(game.renderer.ui_confirm, label);
                                 if (node.project_id) {
-                                    ui_label_node_show(game.renderer.ui_node_action, label, generate_project_thumbnail_url(node.project_id));
+                                    ui_label_node_show(game.renderer.ui_node_action, label, project_generate_thumbnail_url(node.project_id));
                                 } else {
                                     ui_label_node_show(game.renderer.ui_node_action, label, "");
                                 }
@@ -1536,13 +1542,13 @@ function world_to_window_position(world_position: Vector2): Vector2 {
         (world_position[1] * camera.zoom) + (game.renderer.window_size[1] / 2) - (camera.position[1] * camera.zoom),
     ];
 }
-function generate_project_image_url(project: Project, image_index: int): string {
+function project_screenshot_url(project: Project, image_index: int, variant: string = "small"): string {
     if (image_index === 0) {
-        return `/site/images/screenshots/${project.screenshots_prefix}/banner-small.png`;
+        return `/site/images/screenshots/${project.screenshots_prefix}/banner-${variant}.png`;
     }
-    return `/site/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-small.png`;
+    return `/site/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-${variant}.png`;
 }
-function generate_project_thumbnail_url(project_id: int): string {
+function project_generate_thumbnail_url(project_id: int): string {
     const w = THUMBNAIL_SIZE[0];
     const h = THUMBNAIL_SIZE[1];
     game.renderer.offscreen.canvas.width = w;

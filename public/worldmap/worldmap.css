@@ -113,7 +113,7 @@ body.worldmap_closing #worldmap {
     scrollbar-color: rgba(128, 128, 128, 1) transparent;
     scrollbar-width: thin;
 }
-.panel .content .screenshots {
+.panel .screenshots {
     display: flex;
     gap: 10px;
     width: 100%;
@@ -124,19 +124,28 @@ body.worldmap_closing #worldmap {
     scrollbar-color: rgba(128, 128, 128, 1) transparent;
     scrollbar-width: thin;
 }
-.panel .content .screenshots li {
+.panel .screenshots li {
     list-style-type: none;
     min-width: 160px;
     background: rgba(255, 255, 255, 0.1);
     width: calc(50% - 10px);
 }
-.panel .content .bullet_points {
-    list-style: inside;
+.panel .screenshots a {
+    display: block;
+    position: relative;
+    cursor: zoom-in;
 }
-.panel .content img {
+.panel .screenshots img {
     display: block;
     width: 100%;
     aspect-ratio: 16 / 9;
+    transition: transform ease 200ms;
+}
+.panel .screenshots a:hover img {
+    transform: scale(0.95, 0.9); /* Assuming the images are 16/9 */
+}
+.panel .content .bullet_points {
+    list-style: inside;
 }
 .panel p {
     margin-top: 0;
