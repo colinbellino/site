@@ -108,7 +108,7 @@ const THUMBNAIL_SIZE: Vector2 = [256, 160];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
-const TILESET_POSITION : Vector2 = [0, 192];
+const TILESET_POSITION : Vector2 = [0, 240];
 const MAX_CONSOLE_LINES : number = 128;
 const MAX_ENTITIES : number = 16;
 const MAX_PROJECTS : number = 16;
@@ -326,7 +326,7 @@ export function update() {
                             offset: [0, -2],
                             rotation: 0,
                             texture_size: [16, 16],
-                            texture_position: [32, 0],
+                            texture_position: [0, 144],
                             z_index: 9,
                         },
                     });
@@ -541,16 +541,16 @@ export function update() {
             // :render nodes
             for (let node_index = 0; node_index < game.nodes.count; node_index++) {
                 const node = game.nodes.data[node_index];
-                let texture_position: Vector2 = [48, 0];
+                let texture_position: Vector2 = [288, 144];
                 let texture_size    : Vector2 = [16, 16];
                 switch (node.type) {
                     case Node_Type.EMPTY: { } break;
                     case Node_Type.PROJECT: {
-                        texture_position = [64, 0];
+                        texture_position = [304, 144];
                     } break;
                     case Node_Type.WARP: {
-                        texture_position = [0, 16];
-                        texture_size     = [32, 32];
+                        texture_position = [144, 432];
+                        texture_size     = [48, 48];
                     } break;
                 }
                 const sprite: Sprite = {
@@ -587,7 +587,6 @@ export function update() {
                         scale:              [1, 1],
                         rotation:           0,
                         texture_size:       [16, 16],
-                        // texture_position:   [48, 96+16],
                         texture_position:   [0, 0],
                         z_index:            2,
                     };
