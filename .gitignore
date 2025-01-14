@@ -12,8 +12,8 @@ dist/
 *.min.mjs
 *.min.html
 
-/build
-/build.exe
+# /build
+# /build.exe
 /build.dSYM
 /build.pdb
 

@@ -13,7 +13,7 @@ Config :: struct {
     compile := array_find(args, "-compile");
     if compile {
         w := get_current_workspace();
-        set_build_options_dc(.{ output_executable_name = "build"}, w);
+        set_build_options_dc(.{ output_executable_name = "build" }, w);
     } else {
         set_build_options_dc(.{ do_output = false });
 
@@ -26,7 +26,6 @@ Config :: struct {
 main :: () {
     #import "System";
 
-    print("main()");
     set_working_directory(path_strip_filename(get_path_of_running_executable()));
     args := get_command_line_arguments();
     if !build(args) {
