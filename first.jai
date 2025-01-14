@@ -39,6 +39,7 @@ build :: (args: []string) -> bool {
 
     if config.release {
         run_minify_html_command();
+        run_compress_png_command();
     }
 
     if config.no_server {
@@ -91,6 +92,21 @@ file_change_callback :: (watcher: *File_Watcher(void), change: *File_Change, use
     }
 }
 
+run_compress_png_command :: () {
+    log("[PNG] Compressing images.");
+    args := string.[
+        tprint("./bin/%/oxipng", OS),
+        "-r", "public",
+    ];
+    process_result, output, error := run_command(..args, capture_and_return_output = true);
+    // log("[PNG] ❯ %", join(..args, " "));
+    if error {
+        log_error("[PNG] %", error);
+    } else {
+        #import "File";
+        log("[PNG] Done.");
+    }
+}
 run_minify_html_command :: () {
     files :: string.[
         "breakout",
@@ -118,7 +134,7 @@ run_minify_html_command :: () {
         } else {
             #import "File";
             data, read_ok := read_entire_file(path_output);
-            log("[MIN] % compiled (% bytes).", path_output, data.count);
+            log("[MIN] % minified (% bytes).", path_output, data.count);
         }
     }
 }

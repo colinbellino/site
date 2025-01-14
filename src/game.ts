@@ -105,7 +105,7 @@ type Neighbour = {
 
 // :constants
 const ATLAS_URL = "/worldmap/images/atlas.png";
-const THUMBNAIL_SIZE: Vector2 = [256, 160];
+const THUMBNAIL_SIZE: Vector2 = [320, 180];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
 const CLEAR_COLOR = 0x2080ffff;
 const GRID_SIZE = 48;
