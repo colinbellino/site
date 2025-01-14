@@ -185,6 +185,15 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
     {
         #import,file "./src/ldtk.jai";
 
+        assert :: (arg: bool, message := "", args: .. Any, loc := #caller_location) {
+            Basic :: #import "Basic";
+            if config.release {
+                Basic.assert(arg, message, args);
+            } else if !arg {
+                log_error(tprint("[\u001b[31mERROR\u001b[00m] %", message), args);
+            }
+        };
+
         LAYER_ENTITY  :: 0;
         LAYER_TILES   :: 1;
         LAYER_WORLD   :: 2;
@@ -192,6 +201,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
             EMPTY;
             PROJECT;
             WARP;
+            INFO;
         }
         Node :: struct {
             type:               Node_Type;
@@ -269,6 +279,7 @@ run_compile_command :: (file_full_path: string, is_release: bool) {
                                     case "EMPTY";    { node.type = .EMPTY; }
                                     case "PROJECT";  { node.type = .PROJECT; }
                                     case "WARP";     { node.type = .WARP; }
+                                    case "INFO";     { node.type = .INFO; }
                                     case;            { assert(false, "Unknown node type value: %", field_instance.__value.str); }
                                 }
                             }

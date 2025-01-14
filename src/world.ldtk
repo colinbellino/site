@@ -595,14 +595,15 @@
 			"customData": [],
 			"savedSelections": [],
 			"cachedPixelData": {
-				"opaqueTiles": "1111111111111000011111111111111111111111111111111111111111110000011111100000111111100001111111000010000010000111111111111",
-				"averageColors": "fd8bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7b0000f28ff38f928f928f828f828ff28ffd7bfd7bfd7b0000fd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7b0000f968f968f968fd7bfd7bfd7bfc8bfd7bfd7bfd7b0000fd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7b0000f27ff49bf3a9f4b7f4b51fea2fea2fea2fea2fea0000f4c2f39cf3a9f4b7f4b65fea4fea4fea4fea4fea0000fd7bf49bf3a9f4b7f4b5fd7b3fea2fea3fea2fea0000fd7bf39cf5a8f4b7f4b6fd7b3fea3fea2fea2fea000088b286a7838110900000f48f3fea3fea2fea2fea000000000000000000000000000000000000000000000000"
+				"opaqueTiles": "1111111111111000011111111111111110001110111111111111111111110000011111100000111111100001111111000010000010000111111111111",
+				"averageColors": "fd8bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7b0000f28ff38f928f928f828f828ff28ffd7bfd7bfd7b0000fd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7b0000a666a666a666fd7bfd7bfd7bbc8bfd7bfd7bfd7b0000fd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7bfd7b0000f27ff49bf3a9f4b7f4b51fea2fea2fea2fea2fea0000f4c2f39cf3a9f4b7f4b65fea4fea4fea4fea4fea0000fd7bf49bf3a9f4b7f4b5fd7b3fea2fea3fea2fea0000fd7bf39cf5a8f4b7f4b6fd7b3fea3fea2fea2fea000088b286a7838110901779f48f3fea3fea2fea2fea000000000000000000000000000000000000000000000000"
 			}
 		}
 	], "enums": [{ "identifier": "Node_Type", "uid": 30, "values": [
 		{ "id": "EMPTY", "tileRect": { "tilesetUid": 10, "x": 240, "y": 912, "w": 16, "h": 16 }, "color": 15389866 },
 		{ "id": "PROJECT", "tileRect": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "color": 12470831 },
-		{ "id": "WARP", "tileRect": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "color": 4446039 }
+		{ "id": "WARP", "tileRect": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "color": 4446039 },
+		{ "id": "INFO", "tileRect": { "tilesetUid": 10, "x": 192, "y": 16, "w": 16, "h": 16 }, "color": 4932567 }
 	], "iconTilesetUid": 10, "externalRelPath": null, "externalFileChecksum": null, "tags": [] }], "externalEnums": [], "levelFields": [] },
 	"levels": [
 		{
@@ -678,19 +679,10 @@
 									"id": "V_String",
 									"params": ["10,9"]
 								} ] },
-								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [ { "cx": 11, "cy": 11 }, { "cx": 12, "cy": 11 }, { "cx": 12, "cy": 10 }, { "cx": 12, "cy": 9 } ], "__tile": null, "defUid": 51, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["11,11"]
-								}, {
-									"id": "V_String",
-									"params": ["12,11"]
-								}, {
-									"id": "V_String",
-									"params": ["12,10"]
-								}, {
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [{ "cx": 12, "cy": 9 }], "__tile": null, "defUid": 51, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["12,9"]
-								} ] },
+								}] },
 								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
 								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 9, "cy": 11 }, { "cx": 8, "cy": 11 }, { "cx": 8, "cy": 10 }, { "cx": 8, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
 									"id": "V_String",
@@ -751,19 +743,10 @@
 									"id": "V_String",
 									"params": ["10,9"]
 								} ] },
-								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 9, "cy": 7 }, { "cx": 8, "cy": 7 }, { "cx": 8, "cy": 8 }, { "cx": 8, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["9,7"]
-								}, {
-									"id": "V_String",
-									"params": ["8,7"]
-								}, {
-									"id": "V_String",
-									"params": ["8,8"]
-								}, {
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [{ "cx": 8, "cy": 9 }], "__tile": null, "defUid": 49, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["8,9"]
-								} ] }
+								}] }
 							],
 							"__worldX": 480,
 							"__worldY": 336
@@ -789,19 +772,10 @@
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
 								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
-								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [ { "cx": 8, "cy": 8 }, { "cx": 8, "cy": 7 }, { "cx": 9, "cy": 7 }, { "cx": 10, "cy": 7 } ], "__tile": null, "defUid": 48, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["8,8"]
-								}, {
-									"id": "V_String",
-									"params": ["8,7"]
-								}, {
-									"id": "V_String",
-									"params": ["9,7"]
-								}, {
+								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [{ "cx": 10, "cy": 7 }], "__tile": null, "defUid": 48, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["10,7"]
-								} ] },
+								}] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [ { "cx": 9, "cy": 9 }, { "cx": 10, "cy": 9 } ], "__tile": null, "defUid": 51, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["9,9"]
@@ -822,7 +796,10 @@
 									"id": "V_String",
 									"params": ["10,11"]
 								} ] },
-								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 49, "realEditorValues": [] }
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [{ "cx": 7, "cy": 9 }], "__tile": null, "defUid": 49, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["7,9"]
+								}] }
 							],
 							"__worldX": 384,
 							"__worldY": 432
@@ -959,19 +936,10 @@
 									"params": ["10,7"]
 								} ] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
-								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [ { "cx": 12, "cy": 10 }, { "cx": 12, "cy": 11 }, { "cx": 11, "cy": 11 }, { "cx": 10, "cy": 11 } ], "__tile": null, "defUid": 50, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["12,10"]
-								}, {
-									"id": "V_String",
-									"params": ["12,11"]
-								}, {
-									"id": "V_String",
-									"params": ["11,11"]
-								}, {
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [{ "cx": 10, "cy": 11 }], "__tile": null, "defUid": 50, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["10,11"]
-								} ] },
+								}] },
 								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 11, "cy": 9 }, { "cx": 10, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["11,9"]
@@ -1205,7 +1173,10 @@
 									"id": "V_String",
 									"params": ["24,9"]
 								}] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Homeland", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Homeland"]
+								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [ { "cx": 10, "cy": 8 }, { "cx": 10, "cy": 7 } ], "__tile": null, "defUid": 48, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["10,8"]
@@ -1240,7 +1211,7 @@
 						},
 						{
 							"__identifier": "Node",
-							"__grid": [26,9],
+							"__grid": [27,7],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
@@ -1249,7 +1220,7 @@
 							"width": 48,
 							"height": 48,
 							"defUid": 5,
-							"px": [1248,432],
+							"px": [1296,336],
 							"fieldInstances": [
 								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
@@ -1269,20 +1240,29 @@
 									"id": "V_String",
 									"params": ["40,9"]
 								}] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Web Island", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Web Island"]
+								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
 								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
-								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 25, "cy": 9 }, { "cx": 24, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 26, "cy": 7 }, { "cx": 25, "cy": 7 }, { "cx": 25, "cy": 8 }, { "cx": 24, "cy": 8 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
 									"id": "V_String",
-									"params": ["25,9"]
+									"params": ["26,7"]
 								}, {
 									"id": "V_String",
-									"params": ["24,9"]
+									"params": ["25,7"]
+								}, {
+									"id": "V_String",
+									"params": ["25,8"]
+								}, {
+									"id": "V_String",
+									"params": ["24,8"]
 								} ] }
 							],
-							"__worldX": 1248,
-							"__worldY": 432
+							"__worldX": 1296,
+							"__worldY": 336
 						},
 						{
 							"__identifier": "Node",
@@ -1315,7 +1295,10 @@
 									"id": "V_String",
 									"params": ["24,9"]
 								}] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Homeland", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Homeland"]
+								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [{ "cx": 38, "cy": 9 }], "__tile": null, "defUid": 51, "realEditorValues": [{
 									"id": "V_String",
@@ -1329,7 +1312,7 @@
 						},
 						{
 							"__identifier": "Node",
-							"__grid": [22,9],
+							"__grid": [21,6],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
@@ -1338,7 +1321,7 @@
 							"width": 48,
 							"height": 48,
 							"defUid": 5,
-							"px": [1056,432],
+							"px": [1008,288],
 							"fieldInstances": [
 								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
@@ -1358,20 +1341,44 @@
 									"id": "V_String",
 									"params": ["10,9"]
 								}] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Games Isle", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Games Isle"]
+								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
-								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [ { "cx": 23, "cy": 9 }, { "cx": 24, "cy": 9 } ], "__tile": null, "defUid": 51, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["23,9"]
-								}, {
-									"id": "V_String",
-									"params": ["24,9"]
-								} ] },
-								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [
+									{ "cx": 21, "cy": 7 },
+									{ "cx": 21, "cy": 8 },
+									{ "cx": 22, "cy": 8 },
+									{ "cx": 23, "cy": 8 },
+									{ "cx": 24, "cy": 8 }
+								], "__tile": null, "defUid": 50, "realEditorValues": [
+									{
+										"id": "V_String",
+										"params": ["21,7"]
+									},
+									{
+										"id": "V_String",
+										"params": ["21,8"]
+									},
+									{
+										"id": "V_String",
+										"params": ["22,8"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,8"]
+									},
+									{
+										"id": "V_String",
+										"params": ["24,8"]
+									}
+								] },
 								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
-							"__worldX": 1056,
-							"__worldY": 432
+							"__worldX": 1008,
+							"__worldY": 288
 						},
 						{
 							"__identifier": "Node",
@@ -1393,32 +1400,78 @@
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": "Web <\n      > Games", "__tile": null, "defUid": 47, "realEditorValues": [{
+								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [null] },
+								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [{ "cx": 24, "cy": 8 }], "__tile": null, "defUid": 48, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["Web <\\n      > Games"]
+									"params": ["24,8"]
 								}] },
-								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
-								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [ { "cx": 25, "cy": 9 }, { "cx": 26, "cy": 9 } ], "__tile": null, "defUid": 51, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["25,9"]
-								}, {
-									"id": "V_String",
-									"params": ["26,9"]
-								} ] },
-								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [ { "cx": 24, "cy": 10 }, { "cx": 24, "cy": 11 } ], "__tile": null, "defUid": 50, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["24,10"]
-								}, {
-									"id": "V_String",
-									"params": ["24,11"]
-								} ] },
-								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 23, "cy": 9 }, { "cx": 22, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["23,9"]
-								}, {
-									"id": "V_String",
-									"params": ["22,9"]
-								} ] }
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [
+									{ "cx": 25, "cy": 9 },
+									{ "cx": 26, "cy": 9 },
+									{ "cx": 26, "cy": 10 },
+									{ "cx": 26, "cy": 11 },
+									{ "cx": 25, "cy": 11 }
+								], "__tile": null, "defUid": 51, "realEditorValues": [
+									{
+										"id": "V_String",
+										"params": ["25,9"]
+									},
+									{
+										"id": "V_String",
+										"params": ["26,9"]
+									},
+									{
+										"id": "V_String",
+										"params": ["26,10"]
+									},
+									{
+										"id": "V_String",
+										"params": ["26,11"]
+									},
+									{
+										"id": "V_String",
+										"params": ["25,11"]
+									}
+								] },
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [
+									{ "cx": 24, "cy": 10 },
+									{ "cx": 23, "cy": 10 },
+									{ "cx": 23, "cy": 11 },
+									{ "cx": 23, "cy": 12 },
+									{ "cx": 24, "cy": 12 },
+									{ "cx": 25, "cy": 12 },
+									{ "cx": 25, "cy": 11 }
+								], "__tile": null, "defUid": 50, "realEditorValues": [
+									{
+										"id": "V_String",
+										"params": ["24,10"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,10"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,11"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,12"]
+									},
+									{
+										"id": "V_String",
+										"params": ["24,12"]
+									},
+									{
+										"id": "V_String",
+										"params": ["25,12"]
+									},
+									{
+										"id": "V_String",
+										"params": ["25,11"]
+									}
+								] },
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
 							"__worldX": 1152,
 							"__worldY": 432
@@ -1442,19 +1495,22 @@
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
-									"entityIid": "4eb21eb0-c210-11ef-9c94-ade415c4cdfc",
+									"entityIid": "5f612550-c210-11ef-aa1e-2f4a7e76fb23",
 									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
 									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
 									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
 								}, "__tile": null, "defUid": 29, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["4eb21eb0-c210-11ef-9c94-ade415c4cdfc"]
+									"params": ["5f612550-c210-11ef-aa1e-2f4a7e76fb23"]
 								}] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 24, "cy": 9 }, "__tile": null, "defUid": 45, "realEditorValues": [{
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 10, "cy": 9 }, "__tile": null, "defUid": 45, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["24,9"]
+									"params": ["10,9"]
 								}] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [null] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Games Isle", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Games Isle"]
+								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
 								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
@@ -1468,7 +1524,7 @@
 						},
 						{
 							"__identifier": "Node",
-							"__grid": [24,11],
+							"__grid": [25,11],
 							"__pivot": [0,0],
 							"__tags": [],
 							"__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 },
@@ -1477,28 +1533,89 @@
 							"width": 48,
 							"height": 48,
 							"defUid": 5,
-							"px": [1152,528],
+							"px": [1200,528],
 							"fieldInstances": [
 								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "PROJECT", "__tile": { "tilesetUid": 10, "x": 208, "y": 912, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
 									"id": "V_String",
 									"params": ["PROJECT"]
 								}] },
 								{ "__identifier": "project_id", "__type": "Int", "__value": 1, "__tile": null, "defUid": 11, "realEditorValues": [{ "id": "V_Int", "params": [1] }] },
-								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
-								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [null] },
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 24, "cy": 8 }, "__tile": null, "defUid": 45, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["24,8"]
+								}] },
 								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
-								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [ { "cx": 24, "cy": 10 }, { "cx": 24, "cy": 9 } ], "__tile": null, "defUid": 48, "realEditorValues": [ {
-									"id": "V_String",
-									"params": ["24,10"]
-								}, {
-									"id": "V_String",
-									"params": ["24,9"]
-								} ] },
-								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
-								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
+								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [
+									{ "cx": 26, "cy": 11 },
+									{ "cx": 26, "cy": 10 },
+									{ "cx": 26, "cy": 9 },
+									{ "cx": 25, "cy": 9 },
+									{ "cx": 24, "cy": 9 }
+								], "__tile": null, "defUid": 51, "realEditorValues": [
+									{
+										"id": "V_String",
+										"params": ["26,11"]
+									},
+									{
+										"id": "V_String",
+										"params": ["26,10"]
+									},
+									{
+										"id": "V_String",
+										"params": ["26,9"]
+									},
+									{
+										"id": "V_String",
+										"params": ["25,9"]
+									},
+									{
+										"id": "V_String",
+										"params": ["24,9"]
+									}
+								] },
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [
+									{ "cx": 25, "cy": 12 },
+									{ "cx": 24, "cy": 12 },
+									{ "cx": 23, "cy": 12 },
+									{ "cx": 23, "cy": 11 },
+									{ "cx": 23, "cy": 10 },
+									{ "cx": 24, "cy": 10 },
+									{ "cx": 24, "cy": 9 }
+								], "__tile": null, "defUid": 50, "realEditorValues": [
+									{
+										"id": "V_String",
+										"params": ["25,12"]
+									},
+									{
+										"id": "V_String",
+										"params": ["24,12"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,12"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,11"]
+									},
+									{
+										"id": "V_String",
+										"params": ["23,10"]
+									},
+									{
+										"id": "V_String",
+										"params": ["24,10"]
+									},
+									{
+										"id": "V_String",
+										"params": ["24,9"]
+									}
+								] },
 								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
-							"__worldX": 1152,
+							"__worldX": 1200,
 							"__worldY": 528
 						},
 						{
@@ -1515,6 +1632,126 @@
 							"px": [1152,432],
 							"fieldInstances": [],
 							"__worldX": 1152,
+							"__worldY": 432
+						},
+						{
+							"__identifier": "Node",
+							"__grid": [24,8],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 10, "x": 192, "y": 16, "w": 16, "h": 16 },
+							"__smartColor": "#4B43D7",
+							"iid": "a61bd3a0-c210-11ef-aa1e-21423468528f",
+							"width": 48,
+							"height": 48,
+							"defUid": 5,
+							"px": [1152,384],
+							"fieldInstances": [
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "INFO", "__tile": { "tilesetUid": 10, "x": 192, "y": 16, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["INFO"]
+								}] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "← Games            Web    →", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["← Games            Web    →"]
+								}] },
+								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [ { "cx": 25, "cy": 8 }, { "cx": 25, "cy": 7 }, { "cx": 26, "cy": 7 }, { "cx": 27, "cy": 7 } ], "__tile": null, "defUid": 51, "realEditorValues": [ {
+									"id": "V_String",
+									"params": ["25,8"]
+								}, {
+									"id": "V_String",
+									"params": ["25,7"]
+								}, {
+									"id": "V_String",
+									"params": ["26,7"]
+								}, {
+									"id": "V_String",
+									"params": ["27,7"]
+								} ] },
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [{ "cx": 24, "cy": 9 }], "__tile": null, "defUid": 50, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["24,9"]
+								}] },
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [
+									{ "cx": 23, "cy": 8 },
+									{ "cx": 22, "cy": 8 },
+									{ "cx": 21, "cy": 8 },
+									{ "cx": 21, "cy": 7 },
+									{ "cx": 21, "cy": 6 }
+								], "__tile": null, "defUid": 49, "realEditorValues": [
+									{
+										"id": "V_String",
+										"params": ["23,8"]
+									},
+									{
+										"id": "V_String",
+										"params": ["22,8"]
+									},
+									{
+										"id": "V_String",
+										"params": ["21,8"]
+									},
+									{
+										"id": "V_String",
+										"params": ["21,7"]
+									},
+									{
+										"id": "V_String",
+										"params": ["21,6"]
+									}
+								] }
+							],
+							"__worldX": 1152,
+							"__worldY": 384
+						},
+						{
+							"__identifier": "Node",
+							"__grid": [7,9],
+							"__pivot": [0,0],
+							"__tags": [],
+							"__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 },
+							"__smartColor": "#43D757",
+							"iid": "5f612550-c210-11ef-aa1e-2f4a7e76fb23",
+							"width": 48,
+							"height": 48,
+							"defUid": 5,
+							"px": [336,432],
+							"fieldInstances": [
+								{ "__identifier": "type", "__type": "LocalEnum.Node_Type", "__value": "WARP", "__tile": { "tilesetUid": 10, "x": 400, "y": 80, "w": 16, "h": 16 }, "defUid": 31, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["WARP"]
+								}] },
+								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
+								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": {
+									"entityIid": "ff13d060-c210-11ef-a44b-63281ecfece8",
+									"layerIid": "75f82c70-c210-11ef-a872-c3751b9462f4",
+									"levelIid": "20b56430-c210-11ef-a872-edc55f5e23a2",
+									"worldIid": "20b4ef00-c210-11ef-a872-c7469e356e39"
+								}, "__tile": null, "defUid": 29, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["ff13d060-c210-11ef-a44b-63281ecfece8"]
+								}] },
+								{ "__identifier": "warp_camera", "__type": "Point", "__value": { "cx": 40, "cy": 9 }, "__tile": null, "defUid": 45, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["40,9"]
+								}] },
+								{ "__identifier": "tooltip", "__type": "String", "__value": "Web Island", "__tile": null, "defUid": 47, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["Web Island"]
+								}] },
+								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [{ "cx": 8, "cy": 9 }], "__tile": null, "defUid": 51, "realEditorValues": [{
+									"id": "V_String",
+									"params": ["8,9"]
+								}] },
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 49, "realEditorValues": [] }
+							],
+							"__worldX": 336,
 							"__worldY": 432
 						}
 					]
@@ -1543,48 +1780,56 @@
 					"overrideTilesetUid": null,
 					"gridTiles": [
 						{ "px": [384,96], "src": [240,432], "f": 0, "t": 104, "d": [108], "a": 1 },
+						{ "px": [1248,96], "src": [240,432], "f": 0, "t": 104, "d": [126], "a": 1 },
 						{ "px": [2112,96], "src": [240,432], "f": 0, "t": 104, "d": [144], "a": 1 },
 						{ "px": [528,144], "src": [240,432], "f": 0, "t": 104, "d": [161], "a": 1 },
-						{ "px": [1200,144], "src": [240,432], "f": 0, "t": 104, "d": [175], "a": 1 },
 						{ "px": [1872,144], "src": [240,432], "f": 0, "t": 104, "d": [189], "a": 1 },
-						{ "px": [1008,240], "src": [240,432], "f": 0, "t": 104, "d": [271], "a": 1 },
-						{ "px": [432,288], "src": [96,432], "f": 0, "t": 101, "d": [309], "a": 1 },
+						{ "px": [1056,192], "src": [240,432], "f": 0, "t": 104, "d": [222], "a": 1 },
+						{ "px": [384,288], "src": [96,432], "f": 0, "t": 101, "d": [308], "a": 1 },
 						{ "px": [528,288], "src": [48,432], "f": 0, "t": 100, "d": [311], "a": 1 },
+						{ "px": [1008,288], "src": [336,240], "f": 0, "t": 62, "d": [321], "a": 1 },
+						{ "px": [1056,288], "src": [0,432], "f": 0, "t": 99, "d": [322], "a": 1 },
+						{ "px": [1248,288], "src": [48,432], "f": 0, "t": 100, "d": [326], "a": 1 },
 						{ "px": [1488,288], "src": [240,432], "f": 0, "t": 104, "d": [331], "a": 1 },
 						{ "px": [1920,288], "src": [384,384], "f": 0, "t": 96, "d": [340], "a": 1 },
 						{ "px": [1968,288], "src": [384,336], "f": 0, "t": 85, "d": [341], "a": 1 },
 						{ "px": [2016,288], "src": [432,384], "f": 0, "t": 97, "d": [342], "a": 1 },
-						{ "px": [384,336], "src": [384,384], "f": 0, "t": 96, "d": [358], "a": 1 },
-						{ "px": [432,336], "src": [432,336], "f": 0, "t": 86, "d": [359], "a": 1 },
-						{ "px": [480,336], "src": [336,288], "f": 0, "t": 73, "d": [360], "a": 1 },
+						{ "px": [336,336], "src": [48,432], "f": 0, "t": 100, "d": [357], "a": 1 },
+						{ "px": [480,336], "src": [288,384], "f": 0, "t": 94, "d": [360], "a": 1 },
 						{ "px": [528,336], "src": [432,336], "f": 0, "t": 86, "d": [361], "a": 1 },
 						{ "px": [576,336], "src": [432,384], "f": 0, "t": 97, "d": [362], "a": 1 },
-						{ "px": [1152,336], "src": [96,432], "f": 0, "t": 101, "d": [374], "a": 1 },
+						{ "px": [1008,336], "src": [336,336], "f": 0, "t": 84, "d": [371], "a": 1 },
+						{ "px": [1104,336], "src": [96,432], "f": 0, "t": 101, "d": [373], "a": 1 },
+						{ "px": [1200,336], "src": [384,384], "f": 0, "t": 96, "d": [375], "a": 1 },
+						{ "px": [1248,336], "src": [432,336], "f": 0, "t": 86, "d": [376], "a": 1 },
+						{ "px": [1296,336], "src": [384,240], "f": 0, "t": 63, "d": [377], "a": 1 },
 						{ "px": [1872,336], "src": [0,432], "f": 0, "t": 99, "d": [389], "a": 1 },
 						{ "px": [1920,336], "src": [336,336], "f": 0, "t": 84, "d": [390], "a": 1 },
 						{ "px": [2016,336], "src": [336,336], "f": 0, "t": 84, "d": [392], "a": 1 },
-						{ "px": [384,384], "src": [336,336], "f": 0, "t": 84, "d": [408], "a": 1 },
+						{ "px": [432,384], "src": [96,432], "f": 0, "t": 101, "d": [409], "a": 1 },
 						{ "px": [480,384], "src": [336,336], "f": 0, "t": 84, "d": [410], "a": 1 },
-						{ "px": [528,384], "src": [96,432], "f": 0, "t": 101, "d": [411], "a": 1 },
 						{ "px": [576,384], "src": [336,336], "f": 0, "t": 84, "d": [412], "a": 1 },
-						{ "px": [1056,384], "src": [0,432], "f": 0, "t": 99, "d": [422], "a": 1 },
-						{ "px": [1248,384], "src": [48,432], "f": 0, "t": 100, "d": [426], "a": 1 },
+						{ "px": [1008,384], "src": [384,432], "f": 0, "t": 107, "d": [421], "a": 1 },
+						{ "px": [1056,384], "src": [432,336], "f": 0, "t": 86, "d": [422], "a": 1 },
+						{ "px": [1104,384], "src": [432,336], "f": 0, "t": 86, "d": [423], "a": 1 },
+						{ "px": [1152,384], "src": [336,288], "f": 0, "t": 73, "d": [424], "a": 1 },
+						{ "px": [1200,384], "src": [432,432], "f": 0, "t": 108, "d": [425], "a": 1 },
 						{ "px": [1824,384], "src": [384,384], "f": 0, "t": 96, "d": [438], "a": 1 },
 						{ "px": [1872,384], "src": [432,336], "f": 0, "t": 86, "d": [439], "a": 1 },
 						{ "px": [1920,384], "src": [336,432], "f": 0, "t": 106, "d": [440], "a": 1 },
 						{ "px": [2016,384], "src": [336,336], "f": 0, "t": 84, "d": [442], "a": 1 },
 						{ "px": [2064,384], "src": [96,432], "f": 0, "t": 101, "d": [443], "a": 1 },
 						{ "px": [240,432], "src": [240,432], "f": 0, "t": 104, "d": [455], "a": 1 },
-						{ "px": [384,432], "src": [288,288], "f": 0, "t": 72, "d": [458], "a": 1 },
+						{ "px": [336,432], "src": [432,240], "f": 0, "t": 64, "d": [457], "a": 1 },
+						{ "px": [384,432], "src": [336,288], "f": 0, "t": 73, "d": [458], "a": 1 },
 						{ "px": [432,432], "src": [432,336], "f": 0, "t": 86, "d": [459], "a": 1 },
 						{ "px": [480,432], "src": [240,288], "f": 0, "t": 71, "d": [460], "a": 1 },
 						{ "px": [528,432], "src": [432,336], "f": 0, "t": 86, "d": [461], "a": 1 },
-						{ "px": [576,432], "src": [432,288], "f": 0, "t": 75, "d": [462], "a": 1 },
-						{ "px": [1056,432], "src": [432,240], "f": 0, "t": 64, "d": [472], "a": 1 },
-						{ "px": [1104,432], "src": [432,336], "f": 0, "t": 86, "d": [473], "a": 1 },
-						{ "px": [1152,432], "src": [336,288], "f": 0, "t": 73, "d": [474], "a": 1 },
+						{ "px": [576,432], "src": [336,432], "f": 0, "t": 106, "d": [462], "a": 1 },
+						{ "px": [1104,432], "src": [0,432], "f": 0, "t": 99, "d": [473], "a": 1 },
+						{ "px": [1152,432], "src": [288,288], "f": 0, "t": 72, "d": [474], "a": 1 },
 						{ "px": [1200,432], "src": [432,336], "f": 0, "t": 86, "d": [475], "a": 1 },
-						{ "px": [1248,432], "src": [384,240], "f": 0, "t": 63, "d": [476], "a": 1 },
+						{ "px": [1248,432], "src": [432,384], "f": 0, "t": 97, "d": [476], "a": 1 },
 						{ "px": [1440,432], "src": [240,432], "f": 0, "t": 104, "d": [480], "a": 1 },
 						{ "px": [1776,432], "src": [432,240], "f": 0, "t": 64, "d": [487], "a": 1 },
 						{ "px": [1824,432], "src": [432,288], "f": 0, "t": 75, "d": [488], "a": 1 },
@@ -1592,24 +1837,25 @@
 						{ "px": [2016,432], "src": [288,288], "f": 0, "t": 72, "d": [492], "a": 1 },
 						{ "px": [2064,432], "src": [384,240], "f": 0, "t": 63, "d": [493], "a": 1 },
 						{ "px": [2208,432], "src": [240,432], "f": 0, "t": 104, "d": [496], "a": 1 },
-						{ "px": [336,480], "src": [96,432], "f": 0, "t": 101, "d": [507], "a": 1 },
 						{ "px": [384,480], "src": [336,336], "f": 0, "t": 84, "d": [508], "a": 1 },
-						{ "px": [432,480], "src": [48,432], "f": 0, "t": 100, "d": [509], "a": 1 },
 						{ "px": [480,480], "src": [336,336], "f": 0, "t": 84, "d": [510], "a": 1 },
-						{ "px": [576,480], "src": [336,336], "f": 0, "t": 84, "d": [512], "a": 1 },
+						{ "px": [576,480], "src": [0,432], "f": 0, "t": 99, "d": [512], "a": 1 },
 						{ "px": [768,480], "src": [240,432], "f": 0, "t": 104, "d": [516], "a": 1 },
-						{ "px": [1104,480], "src": [96,432], "f": 0, "t": 101, "d": [523], "a": 1 },
-						{ "px": [1152,480], "src": [336,336], "f": 0, "t": 84, "d": [524], "a": 1 },
+						{ "px": [1104,480], "src": [384,384], "f": 0, "t": 96, "d": [523], "a": 1 },
+						{ "px": [1152,480], "src": [432,432], "f": 0, "t": 108, "d": [524], "a": 1 },
 						{ "px": [1200,480], "src": [96,432], "f": 0, "t": 101, "d": [525], "a": 1 },
+						{ "px": [1248,480], "src": [336,336], "f": 0, "t": 84, "d": [526], "a": 1 },
 						{ "px": [1824,480], "src": [336,336], "f": 0, "t": 84, "d": [538], "a": 1 },
 						{ "px": [2016,480], "src": [336,336], "f": 0, "t": 84, "d": [542], "a": 1 },
 						{ "px": [384,528], "src": [384,432], "f": 0, "t": 107, "d": [558], "a": 1 },
 						{ "px": [432,528], "src": [432,336], "f": 0, "t": 86, "d": [559], "a": 1 },
-						{ "px": [480,528], "src": [384,288], "f": 0, "t": 74, "d": [560], "a": 1 },
-						{ "px": [528,528], "src": [432,336], "f": 0, "t": 86, "d": [561], "a": 1 },
-						{ "px": [576,528], "src": [432,432], "f": 0, "t": 108, "d": [562], "a": 1 },
-						{ "px": [960,528], "src": [240,432], "f": 0, "t": 104, "d": [570], "a": 1 },
-						{ "px": [1152,528], "src": [288,240], "f": 0, "t": 61, "d": [574], "a": 1 },
+						{ "px": [480,528], "src": [336,432], "f": 0, "t": 106, "d": [560], "a": 1 },
+						{ "px": [576,528], "src": [0,432], "f": 0, "t": 99, "d": [562], "a": 1 },
+						{ "px": [1056,528], "src": [48,432], "f": 0, "t": 100, "d": [572], "a": 1 },
+						{ "px": [1104,528], "src": [336,336], "f": 0, "t": 84, "d": [573], "a": 1 },
+						{ "px": [1152,528], "src": [96,432], "f": 0, "t": 101, "d": [574], "a": 1 },
+						{ "px": [1200,528], "src": [288,384], "f": 0, "t": 94, "d": [575], "a": 1 },
+						{ "px": [1248,528], "src": [432,432], "f": 0, "t": 108, "d": [576], "a": 1 },
 						{ "px": [1728,528], "src": [240,432], "f": 0, "t": 104, "d": [586], "a": 1 },
 						{ "px": [1824,528], "src": [384,432], "f": 0, "t": 107, "d": [588], "a": 1 },
 						{ "px": [1872,528], "src": [384,336], "f": 0, "t": 85, "d": [589], "a": 1 },
@@ -1617,10 +1863,15 @@
 						{ "px": [1968,528], "src": [384,336], "f": 0, "t": 85, "d": [591], "a": 1 },
 						{ "px": [2016,528], "src": [432,432], "f": 0, "t": 108, "d": [592], "a": 1 },
 						{ "px": [528,576], "src": [0,432], "f": 0, "t": 99, "d": [611], "a": 1 },
+						{ "px": [912,576], "src": [240,432], "f": 0, "t": 104, "d": [619], "a": 1 },
+						{ "px": [1104,576], "src": [384,432], "f": 0, "t": 107, "d": [623], "a": 1 },
+						{ "px": [1152,576], "src": [432,336], "f": 0, "t": 86, "d": [624], "a": 1 },
+						{ "px": [1200,576], "src": [432,432], "f": 0, "t": 108, "d": [625], "a": 1 },
+						{ "px": [1296,576], "src": [0,432], "f": 0, "t": 99, "d": [627], "a": 1 },
 						{ "px": [1968,576], "src": [48,432], "f": 0, "t": 100, "d": [641], "a": 1 },
 						{ "px": [2112,624], "src": [240,432], "f": 0, "t": 104, "d": [694], "a": 1 },
-						{ "px": [1152,672], "src": [240,432], "f": 0, "t": 104, "d": [724], "a": 1 },
 						{ "px": [576,720], "src": [240,432], "f": 0, "t": 104, "d": [762], "a": 1 },
+						{ "px": [1104,720], "src": [240,432], "f": 0, "t": 104, "d": [773], "a": 1 },
 						{ "px": [432,768], "src": [240,432], "f": 0, "t": 104, "d": [809], "a": 1 }
 					],
 					"entityInstances": []
@@ -1652,18 +1903,18 @@
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,
-						0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,
-						1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,1,1,0,0,0,0,0,0,0,0,1,1,1,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,1,0,0,0,
+						0,0,0,0,0,0,1,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,
+						0,0,0,0,0,0,0,1,0,0,1,1,1,0,0,0,0,0,0,0,0,1,0,1,0,1,1,1,0,0,0,0,0,0,0,
+						0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,1,0,0,0,0,0,0,0,
+						0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,1,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,0,
+						1,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,1,0,1,0,0,0,0,0,0,0,0,0,0,1,1,
 						1,1,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,
-						1,1,1,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						1,0,1,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,1,1,0,0,
+						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,1,1,1,0,1,0,0,
 						0,0,0,0,0,0,0,0,0,0,1,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
-						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
+						0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,
 						0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,

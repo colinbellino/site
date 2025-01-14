@@ -182,12 +182,13 @@ body.worldmap_closing #worldmap {
     text-align: right;
     color: rgba(255, 255, 255, 0.95);
     fill: rgba(255, 255, 255, 0.95);
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
     opacity: 1;
     transform: translate(0px, 0px);
     transition: 100ms ease-in opacity, 100ms ease-in transform;
     user-select: none;
+    font-size: 1em;
 }
 .hud_label .content {
     display: flex;
@@ -195,10 +196,15 @@ body.worldmap_closing #worldmap {
     align-items: center;
 }
 .hud_label .label {
-    padding: 0 10px 0 20px;
+    padding: 10px 15px;
+    white-space: pre;
 }
 .hud_label.node_action {
     background: rgba(0, 0, 0, 0.8);
+    text-align: center;
+}
+.hud_label.node_action .hud_icon {
+    display: none;
 }
 .hud_label.thumbnail {
     border-radius: 10px;
@@ -226,7 +232,7 @@ body.worldmap_closing #worldmap {
     position: absolute;
     left: 0px;
     top: 0px;
-    background: rgba(0, 0, 0, 0.2);
+    background: rgba(0, 0, 0, 0.3);
     border-radius: 10px;
 }
 .hud_label.right {
@@ -263,9 +269,6 @@ body.worldmap_closing #worldmap {
 }
 .hud_label.no_label .content .label {
     display: none;
-}
-.hud_label .content .label {
-    padding: 0 10px 0 10px;
 }
 
 .hud_icon {

@@ -87,6 +87,7 @@ enum Node_Type {
     EMPTY,
     PROJECT,
     WARP,
+    INFO,
 }
 type Map_Node = {
     type:               Node_Type;
@@ -391,6 +392,7 @@ export function update() {
                                 }
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_hide(game.renderer.ui_confirm);
+                                ui_label_hide(game.renderer.ui_cancel);
                                 ui_label_hide(game.renderer.ui_node_action);
 
                                 // Simple way to project images while we are moving to the node
@@ -417,7 +419,7 @@ export function update() {
                             if (project_panel_opened) {
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_show(game.renderer.ui_node_action);
-                                ui_label_show(game.renderer.ui_confirm, ui_get_node_label(node));
+                                ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
                             }
                         }
 
@@ -428,7 +430,7 @@ export function update() {
                                     if (project_panel_opened) {
                                         ui_panel_hide(game.renderer.ui_node_project);
                                         ui_label_show(game.renderer.ui_node_action);
-                                        ui_label_show(game.renderer.ui_confirm, ui_get_node_label(node));
+                                        ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
                                     } else {
                                         const content = [];
                                         if (project.screenshots_count > 0) {
@@ -485,9 +487,9 @@ export function update() {
                         const destination_node = game.nodes.data[game.destination_node];
                         const is_warp = current_node.type === Node_Type.WARP && destination_node.type == Node_Type.WARP;
 
-                        const distance = manhathan_distance(game.destination_path.data[0], game.destination_path.data[game.destination_path.count-1]);
+                        const distance = game.destination_path.count-1;
                         let duration = 200 * distance;
-                        if (is_warp) { duration *= 0.5; }
+                        if (is_warp) { duration *= 6.0; }
                         const end = game.world_mode_timer + duration;
                         const remaining = end - now;
                         const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
@@ -508,15 +510,16 @@ export function update() {
                                 game.player.sprite.scale = [1, 1];
                             }
 
-                            const label = ui_get_node_label(node);
-                            if (label !== "") {
-                                ui_label_show(game.renderer.ui_confirm, label);
-                                if (node.project_id) {
-                                    ui_label_node_show(game.renderer.ui_node_action, label, project_generate_thumbnail_url(node.project_id));
-                                } else {
-                                    ui_label_node_show(game.renderer.ui_node_action, label, "");
-                                }
-                                ui_label_show(game.renderer.ui_node_action, label);
+                            const action = ui_get_node_action(node);
+                            const tooltip = ui_get_node_tooltip(node);
+                            if (action !== "") {
+                                ui_label_show(game.renderer.ui_confirm, action);
+                            }
+
+                            if (node.project_id > 0) {
+                                ui_label_node_show(game.renderer.ui_node_action, action, project_generate_thumbnail_url(node.project_id));
+                            } else if (tooltip !== "") {
+                                ui_label_show(game.renderer.ui_node_action, tooltip);
                             }
                             game.world_mode = World_Mode.IDLE;
                         }
@@ -550,6 +553,10 @@ export function update() {
                     } break;
                     case Node_Type.WARP: {
                         texture_position = [144, 432];
+                        texture_size     = [48, 48];
+                    } break;
+                    case Node_Type.INFO: {
+                        texture_position = [192, 432];
                         texture_size     = [48, 48];
                     } break;
                 }
@@ -968,9 +975,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
             <img />
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_confirm" aria-label="Confirm">
-                    ${ICON_KEYBOARD_ENTER}
-                </button>
+                <button class="hud_icon icon_confirm" aria-label="Confirm"></button>
             </span>
         </label>
     `);
@@ -1925,23 +1930,19 @@ function ui_label_show(button: UI_Label, label: string = ""): void {
     if (label) {
         button.element_label.innerHTML = label;
     }
-    button.element_root.classList.remove("hide");
+    button.element_root.classList.remove("hide", "thumbnail");
 }
 function ui_label_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
 }
 function ui_label_node_show(button: UI_Label_Node, label: string, image_url: string): void {
+    assert(image_url !== "");
     if (label) {
         button.element_label.innerHTML = label;
     }
     button.element_root.classList.remove("hide");
-    if (image_url) {
-        button.element_root.classList.add("thumbnail");
-        button.element_image.src = image_url;
-    } else {
-        button.element_root.classList.remove("thumbnail");
-        button.element_image.src = "";
-    }
+    button.element_root.classList.add("thumbnail");
+    button.element_image.src = image_url;
 }
 function ui_panel_show(button: UI_Panel, title: string, content: string): void {
     button.element_title.innerHTML = title;
@@ -1951,11 +1952,20 @@ function ui_panel_show(button: UI_Panel, title: string, content: string): void {
 function ui_panel_hide(button: UI_Panel): void {
     button.element_root.classList.add("hide");
 }
-function ui_get_node_label(node: Map_Node): string {
+function ui_get_node_action(node: Map_Node): string {
     let label = "";
     switch (node.type) {
         case Node_Type.PROJECT: { label = "Open"; } break;
         case Node_Type.WARP:    { label = "Warp"; } break;
+    }
+    return label;
+}
+function ui_get_node_tooltip(node: Map_Node): string {
+    let label = "";
+    switch (node.type) {
+        case Node_Type.PROJECT: { label = "Open"; } break;
+        case Node_Type.WARP:    { label = `To ${node.tooltip}`; } break;
+        case Node_Type.INFO:    { label = node.tooltip; } break;
     }
     return label;
 }
