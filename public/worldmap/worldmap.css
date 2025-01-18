@@ -17,6 +17,7 @@ body.worldmap_closing #worldmap {
 }
 #worldmap {
     position: absolute;
+    overflow: hidden;
     top: 0;
     right: 0;
     width: 100%;

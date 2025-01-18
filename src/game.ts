@@ -215,6 +215,9 @@ export function update() {
             game.fps_last_update = now;
         }
 
+        const frame_start_node = game.nodes_current;
+        const frame_start_camera_zoom = game.renderer.camera_main.zoom;
+
         if (game.inputs.window_resized) {
             renderer_resize_canvas();
             update_zoom();
@@ -351,21 +354,6 @@ export function update() {
             } break;
             // :game RUNNING
             case Game_Mode.RUNNING: {
-                {
-                    // TODO: perf
-                    const current_node = game.nodes.data[game.nodes_current];
-                    const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
-                    const root = game.renderer.ui_node_action.element_root;
-                    const margin = 10;
-                    const rect = root.getBoundingClientRect();
-                    const max_x = game.renderer.window_size[0] - rect.width  - margin;
-                    const max_y = game.renderer.window_size[1] - rect.height - margin;
-                    const x = clamp(window_position[0] - rect.width * 0.5, margin, max_x);
-                    const y = clamp(window_position[1] - rect.height - 12 - 8*game.renderer.camera_main.zoom, margin, max_y);
-                    root.style.left = `${x}px`;
-                    root.style.top  = `${y}px`;
-                }
-
                 switch (game.world_mode) {
                     // :world INTRO
                     case World_Mode.INTRO: {
@@ -539,6 +527,22 @@ export function update() {
             if (!game.render_active) { break render; }
 
             renderer_update_camera_matrix_main(game.renderer.camera_main);
+
+            const node_changed = frame_start_node !== game.nodes_current;
+            const camera_changed = frame_start_camera_zoom !== game.renderer.camera_main.zoom;
+            if (node_changed || game.inputs.window_resized || camera_changed) {
+                const MARGIN = 10;
+                const current_node = game.nodes.data[game.nodes_current];
+                const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
+                const root = game.renderer.ui_node_action.element_root;
+                const rect = root.getBoundingClientRect();
+                const max_x = game.renderer.window_size[0] - rect.width  - MARGIN;
+                const max_y = game.renderer.window_size[1] - rect.height - MARGIN;
+                const x = clamp(window_position[0] - rect.width * 0.5, MARGIN, max_x);
+                const y = clamp(window_position[1] - rect.height - 12 - 8*game.renderer.camera_main.zoom, MARGIN, max_y);
+                root.style.left = `${x}px`;
+                root.style.top  = `${y}px`;
+            }
 
             // :render entities
             if (game.draw_entities) {
@@ -859,8 +863,9 @@ function renderer_resize_canvas() {
 
     let final_width = width;
     let final_height = height;
-    // if (width % 2)  { final_width -= 1; }
-    // if (height % 2) { final_height -= 1; }
+    // We don't wan't odd sizes because our renderer is very dumb and can't handle that right now
+    if (width % 2)  { final_width -= 1; }
+    if (height % 2) { final_height -= 1; }
 
     game.renderer.pixel_ratio = window.devicePixelRatio;
     if (!Number.isInteger(window.devicePixelRatio)) { // Default to pixel_ratio of 2 in case we have some fucky wucky floating number ratio for now...
@@ -868,6 +873,7 @@ function renderer_resize_canvas() {
     }
     game.renderer.window_size[0] = final_width;
     game.renderer.window_size[1] = final_height;
+    console.log("game.renderer.pixel_ratio", game.renderer.pixel_ratio);
     (game.renderer.gl.canvas as HTMLCanvasElement).style.width = `${final_width}px`;
     (game.renderer.gl.canvas as HTMLCanvasElement).style.height = `${final_height}px`;
     game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio;
