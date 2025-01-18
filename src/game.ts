@@ -26,6 +26,7 @@ type Game = {
     world_mode:             World_Mode;
     world_mode_timer:       int;
     animation_frame:        int;
+    theme:                  Theme;
     clear_color:            Color;
     player:                 Entity;
     projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
@@ -103,11 +104,14 @@ type Neighbour = {
     path: Vector2[];
 }
 
+const THEMES = [
+    { color: hex_to_color(0x2080ffff), atlas: "/worldmap/images/atlas.png" },
+    { color: hex_to_color(0x17152cff), atlas: "/worldmap/images/atlas_dark.png" },
+];
+
 // :constants
-const ATLAS_URL = "/worldmap/images/atlas.png";
 const THUMBNAIL_SIZE: Vector2 = [320, 180];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
-const CLEAR_COLOR = location.search.includes("dark") ? 0x17152cff : 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION : Vector2 = [0, 240];
 const MAX_CONSOLE_LINES : number = 128;
@@ -130,6 +134,7 @@ const ICON_KEYBOARD_ARROW_UP = `<svg width="64" height="64"><path d="M48 11H16q-
 const enum Direction { NORTH, EAST, SOUTH, WEST }
 const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
+const enum Theme { LIGHT, DARK };
 
 function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
 function COLOR_BLACK(): Color { return [0, 0, 0, 1]; }
@@ -155,7 +160,8 @@ export function start(loaded_callback: () => void) {
     game.draw_world_grid = false;
     game.draw_world_tile = true;
     game.draw_tiles = true;
-    game.clear_color = hex_to_color(CLEAR_COLOR);
+    game.theme = location.search.includes("dark") ? Theme.DARK : Theme.LIGHT;
+    game.clear_color = THEMES[game.theme].color;
 
     const [renderer, renderer_ok] = renderer_init();
     if (!renderer_ok) {
@@ -176,11 +182,11 @@ export function start(loaded_callback: () => void) {
 
     if (!__RELEASE__ && location.search.includes("reload")) {
         setInterval(function reload_atlas() {
-            load_image(`${ATLAS_URL}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+            load_image(`${THEMES[game.theme].atlas}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
         }, 1000);
     }
 
-    load_image(ATLAS_URL).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+    load_image(THEMES[game.theme].atlas).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
     load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
     load_codegen().then((codegen) => {
         game.world = codegen.world;
@@ -779,7 +785,7 @@ function load_codegen(): Promise<Codegen> {
     if (typeof __CODEGEN__ === "undefined") {
         if (!__RELEASE__) {
             console.log("location.reload");
-            // window.location.reload();
+            window.location.reload();
         }
         return Promise.reject("__CODEGEN__ isn't defined.");
     }
