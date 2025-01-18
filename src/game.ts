@@ -107,7 +107,7 @@ type Neighbour = {
 const ATLAS_URL = "/worldmap/images/atlas.png";
 const THUMBNAIL_SIZE: Vector2 = [320, 180];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
-const CLEAR_COLOR = 0x2080ffff;
+const CLEAR_COLOR = location.search.includes("dark") ? 0x5957a3ff : 0x2080ffff;
 const GRID_SIZE = 48;
 const TILESET_POSITION : Vector2 = [0, 240];
 const MAX_CONSOLE_LINES : number = 128;
@@ -779,7 +779,7 @@ function load_codegen(): Promise<Codegen> {
     if (typeof __CODEGEN__ === "undefined") {
         if (!__RELEASE__) {
             console.log("location.reload");
-            window.location.reload();
+            // window.location.reload();
         }
         return Promise.reject("__CODEGEN__ isn't defined.");
     }
