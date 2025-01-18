@@ -5,9 +5,20 @@
     <meta name="viewport" content="width=device-width, user-scalable=no">
     <link rel="icon" type="image/png" sizes="32x32" href="/site/images/favicon-32x32.png" />
     <link rel="stylesheet" href="/worldmap/worldmap.css">
+    <style>
+      body {
+        background: #076ef0;
+      }
+
+      @media (prefers-color-scheme: dark) {
+        body {
+          background: #17152c;
+        }
+      }
+    </style>
 </head>
 
-<body class="worldmap_running skip_animation" style="background: #2080ff;">
+<body class="worldmap_running skip_animation">
     <script type="module">
         const game = await import("/worldmap/dist/game.js");
         game.start();
