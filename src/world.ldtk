@@ -679,10 +679,7 @@
 									"id": "V_String",
 									"params": ["10,9"]
 								} ] },
-								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [{ "cx": 12, "cy": 9 }], "__tile": null, "defUid": 51, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["12,9"]
-								}] },
+								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
 								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
 								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 9, "cy": 11 }, { "cx": 8, "cy": 11 }, { "cx": 8, "cy": 10 }, { "cx": 8, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
 									"id": "V_String",
@@ -743,10 +740,7 @@
 									"id": "V_String",
 									"params": ["10,9"]
 								} ] },
-								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [{ "cx": 8, "cy": 9 }], "__tile": null, "defUid": 49, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["8,9"]
-								}] }
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 49, "realEditorValues": [] }
 							],
 							"__worldX": 480,
 							"__worldY": 336
@@ -772,10 +766,7 @@
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
 								{ "__identifier": "tooltip", "__type": "String", "__value": null, "__tile": null, "defUid": 47, "realEditorValues": [] },
-								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [{ "cx": 10, "cy": 7 }], "__tile": null, "defUid": 48, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["10,7"]
-								}] },
+								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [ { "cx": 9, "cy": 9 }, { "cx": 10, "cy": 9 } ], "__tile": null, "defUid": 51, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["9,9"]
@@ -936,10 +927,7 @@
 									"params": ["10,7"]
 								} ] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
-								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [{ "cx": 10, "cy": 11 }], "__tile": null, "defUid": 50, "realEditorValues": [{
-									"id": "V_String",
-									"params": ["10,11"]
-								}] },
+								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
 								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [ { "cx": 11, "cy": 9 }, { "cx": 10, "cy": 9 } ], "__tile": null, "defUid": 49, "realEditorValues": [ {
 									"id": "V_String",
 									"params": ["11,9"]

@@ -105,7 +105,7 @@ type Neighbour = {
 }
 
 const THEMES = [
-    { color: hex_to_color(0x2080ffff), atlas: "/worldmap/images/atlas.png" },
+    { color: hex_to_color(0x076ef0ff), atlas: "/worldmap/images/atlas.png" },
     { color: hex_to_color(0x17152cff), atlas: "/worldmap/images/atlas_dark.png" },
 ];
 
