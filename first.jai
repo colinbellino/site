@@ -61,6 +61,8 @@ build :: (args: []string) -> bool {
 }
 
 compile_work :: (group: *Thread_Group, thread: *Thread, work: *void) -> Thread_Continue_Status {
+    run_compile_command("src/game.ts", config.release);
+
     if !init(*watcher, file_change_callback, null, events_to_watch = .ALL_EVENTS, verbose = false) {
         log_error("Could not initialize watcher");
         exit(4);
@@ -72,8 +74,6 @@ compile_work :: (group: *Thread_Group, thread: *Thread, work: *void) -> Thread_C
         log_error("Could not watch directories %", dirs_to_watch);
         exit(4);
     }
-
-    run_compile_command("src/game.ts", config.release);
 
     while true {
         sleep_milliseconds(100);
