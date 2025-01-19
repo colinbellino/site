@@ -160,9 +160,9 @@ export function start(loaded_callback: () => void) {
     game.draw_world_grid = false;
     game.draw_world_tile = true;
     game.draw_tiles = true;
-    game.theme = location.search.includes("dark") ? Theme.DARK : Theme.LIGHT;
 
-    const [renderer, renderer_ok] = renderer_init();
+    const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const [renderer, renderer_ok] = renderer_init(prefers_dark_theme);
     if (!renderer_ok) {
         console.error("Couldn't initialize renderer.");
         return;
@@ -174,6 +174,12 @@ export function start(loaded_callback: () => void) {
     game.projects = fixed_array_make(MAX_PROJECTS);
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
+    let use_dark_theme = prefers_dark_theme;
+    if (!__RELEASE__) {
+        if      (location.search.includes("dark"))  { use_dark_theme = true; }
+        else if (location.search.includes("light")) { use_dark_theme = false; }
+    }
+    game.theme = use_dark_theme ? Theme.DARK : Theme.LIGHT;
     ui_set_theme_color(THEMES[game.theme].color);
 
     window.addEventListener("resize", window_on_resize, false);
@@ -892,7 +898,7 @@ function renderer_resize_canvas() {
 
     if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
-function renderer_init(): [Renderer, true] | [null, false] {
+function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, false] {
     const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
 
     const canvas = ui_create_element<HTMLCanvasElement>(game_root, `<canvas id="main"></canvas>`);
@@ -1021,7 +1027,6 @@ function renderer_init(): [Renderer, true] | [null, false] {
         this.blur();
     });
 
-    const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const ui_theme_color = prefers_dark_theme
         ? document.head.querySelector<HTMLMetaElement>(`meta[name="theme-color"][media="(prefers-color-scheme: dark)"]`)
         : document.head.querySelector<HTMLMetaElement>(`meta[name="theme-color"]`)
