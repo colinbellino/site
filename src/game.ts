@@ -185,6 +185,8 @@ export function start(loaded_callback: () => void) {
     window.addEventListener("resize", window_on_resize, false);
     window.addEventListener("keydown", inputs_on_key, false);
     window.addEventListener("keyup", inputs_on_key, false);
+    window.addEventListener("touchstart", inputs_on_touch_start, false);
+    window.addEventListener("touchend", inputs_on_touch_end, false);
 
     if (!__RELEASE__ && location.search.includes("reload")) {
         setInterval(function reload_atlas() {
@@ -282,6 +284,22 @@ export function update() {
                 player_input_move[0] = -1;
             } else if (game.inputs.keys.KeyD.down || game.inputs.keys.ArrowRight.down) {
                 player_input_move[0] = +1;
+            }
+
+            if (game.inputs.touch_released) {
+                const THRESHOLD = 50;
+
+                const diff_x = game.inputs.touch_end_x - game.inputs.touch_start_x;
+                if (Math.abs(diff_x) > THRESHOLD) {
+                    if (diff_x < 0) { player_input_move[0] = -1; }
+                    if (diff_x > 0) { player_input_move[0] = +1; }
+                }
+
+                const diff_y = game.inputs.touch_end_y - game.inputs.touch_start_y;
+                if (Math.abs(diff_y) > THRESHOLD) {
+                    if (diff_y < 0) { player_input_move[1] = -1; }
+                    if (diff_y > 0) { player_input_move[1] = +1; }
+                }
             }
 
             if (game.inputs.keys.Space.released) {
@@ -1256,6 +1274,12 @@ type Inputs = {
     mouse_moved:                boolean;
     controller_was_used:        boolean;
     // controllers:                [MAX_CONTROLLERS]Controller_State;
+    touch_start_x:              int;
+    touch_start_y:              int;
+    touch_end_x:                int;
+    touch_end_y:                int;
+    touch_down:                 boolean;
+    touch_released:             boolean;
 }
 type Key_State = {
     pressed:            boolean; // The key was pressed this frame
@@ -1349,6 +1373,12 @@ function inputs_init(): Inputs {
         mouse_wheel:            [0, 0],
         keys:                   {} as any,
         mouse_keys:             {} as any,
+        touch_start_x:          -1,
+        touch_start_y:          -1,
+        touch_end_x:            -1,
+        touch_end_y:            -1,
+        touch_down:             false,
+        touch_released:         false,
     };
     inputs.mouse_position = [0,0];
     inputs.mouse_wheel = [0,0];
@@ -1377,6 +1407,18 @@ function inputs_on_key(event: KeyboardEvent) {
     key_state.down = event.type === "keydown";
     key_state.released = event.type === "keyup";
     key_state.pressed = event.type === "keydown";
+}
+function inputs_on_touch_start(e: TouchEvent) {
+    game.inputs.touch_start_x = e.changedTouches[0].screenX;
+    game.inputs.touch_start_y = e.changedTouches[0].screenY;
+    game.inputs.touch_end_x = -1;
+    game.inputs.touch_down = true;
+}
+function inputs_on_touch_end(e: TouchEvent) {
+    game.inputs.touch_end_x = e.changedTouches[0].screenX;
+    game.inputs.touch_end_y = e.changedTouches[0].screenY;
+    game.inputs.touch_down = false;
+    game.inputs.touch_released = true;
 }
 function inputs_prepare(inputs: Inputs) {
     inputs.keyboard_was_used = false;
@@ -1447,6 +1489,14 @@ function inputs_reset(inputs: Inputs): void {
     //         key_state.released = false;
     //     }
     // }
+    if (inputs.touch_released) {
+        inputs.touch_start_x = -1;
+        inputs.touch_start_y = -1;
+        inputs.touch_end_x = -1;
+        inputs.touch_end_y = -1;
+        inputs.touch_released = false;
+        inputs.touch_down = false;
+    }
 }
 function input_send_key(key: Keyboard_Key): void {
     game.inputs.keys[key].triggered = true;
