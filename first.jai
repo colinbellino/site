@@ -116,6 +116,7 @@ run_minify_html_command :: () {
         "index",
         "web",
         "worldmap",
+        "resume",
     ];
     for file : files {
         path_input  := tprint("public/%.html", file);

@@ -28,10 +28,16 @@
   force = true
   status = 200
 
+[[redirects]]
+  from = "/resume"
+  to = "/resume.min.html"
+  force = true
+  status = 200
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' 'nonce-style'; script-src 'self' 'unsafe-inline ' 'unsafe-eval' 'nonce-script'; img-src 'self' data:; child-src 'none'; font-src 'self'; style-src-attr 'unsafe-inline'; script-src-elem 'self' 'unsafe-inline'"
+    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' 'nonce-style' maxcdn.bootstrapcdn.com; script-src 'self' 'unsafe-inline ' 'unsafe-eval' 'nonce-script'; img-src 'self' data:; child-src 'none'; font-src 'self' fonts.gstatic.com; style-src-attr 'unsafe-inline'; script-src-elem 'self' 'unsafe-inline'"
