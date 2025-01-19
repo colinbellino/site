@@ -12,7 +12,7 @@ const AUDIO_CLIP_HIT_2 = "hit2";
 const AUDIO_CLIP_HIT_3 = "hit3";
 const AUDIO_CLIP_HIT_4 = "hit4";
 const AUDIO_CLIP_LOSE_1 = "lose1";
-const AUDIO_CLIP_MUSIC_1 = "music1";
+// const AUDIO_CLIP_MUSIC_1 = "music1";
 
 const AUDIO_CLIPS = [
   AUDIO_CLIP_BOUNCE_1,
@@ -22,7 +22,7 @@ const AUDIO_CLIPS = [
   AUDIO_CLIP_HIT_3,
   AUDIO_CLIP_HIT_4,
   AUDIO_CLIP_LOSE_1,
-  AUDIO_CLIP_MUSIC_1,
+//   AUDIO_CLIP_MUSIC_1,
 ];
 
 const MODE_INIT = 0;
@@ -166,7 +166,7 @@ export async function game_init(_platform, _renderer) {
     return platform.load_audio_clip(audio_clip);
   }));
 
-  platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
+//   platform.play_audio_clip(AUDIO_CLIP_MUSIC_1, 1, true);
 }
 
 export function game_update(current_time) {
@@ -475,7 +475,7 @@ export function game_update(current_time) {
     case MODE_END: {
       {
         if (data.outro.help.progress === 0) {
-          platform.stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
+        //   platform.stop_audio_clip(AUDIO_CLIP_MUSIC_1, 1, 0.5);
           platform.hide_help();
           platform.hide_pause();
         }
