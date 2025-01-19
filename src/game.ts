@@ -205,8 +205,13 @@ export function start(loaded_callback: () => void) {
     requestAnimationFrame(update);
 }
 
-export function stop() {
+export function pause() {
     cancelAnimationFrame(game.animation_frame);
+}
+
+export function resume() {
+    ui_set_theme_color(THEMES[game.theme].color);
+    update();
 }
 
 export function update() {
@@ -908,7 +913,6 @@ function renderer_resize_canvas() {
     }
     game.renderer.window_size[0] = final_width;
     game.renderer.window_size[1] = final_height;
-    console.log("game.renderer.pixel_ratio", game.renderer.pixel_ratio);
     (game.renderer.gl.canvas as HTMLCanvasElement).style.width = `${final_width}px`;
     (game.renderer.gl.canvas as HTMLCanvasElement).style.height = `${final_height}px`;
     game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio;
@@ -2097,8 +2101,9 @@ function ui_set_element_class(element: HTMLElement, class_name: string, value: b
 }
 function ui_set_theme_color(color: int) {
     game.clear_color = hex_to_color(color);
-    game.renderer.ui_theme_color.content = hex_to_string(color);
+    game.renderer.ui_theme_color.setAttribute("content", hex_to_string(color));
     game.renderer.game_root.style.background = hex_to_string(color);
+    document.body.style.background = hex_to_string(color);
 }
 
 type Project = {

@@ -10,6 +10,9 @@ body.worldmap_running.skip_animation #worldmap {
     animation: none;
     transform: scale(1.0);
 }
+body.worldmap_closing {
+    transition-delay: 0ms;
+}
 body.worldmap_closing #worldmap {
     transform-origin: top right;
     animation: 750ms canvas_shrink;

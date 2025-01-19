@@ -9,7 +9,7 @@ let worldmap_game;
     const worldmap_start_button = document.querySelector("button#worldmap_start");
     if (worldmap_start_button && location.search.includes("worldmap")) {
         worldmap_start_button.classList.add("visible");
-        worldmap_start_button.addEventListener("click", worldmap_start_or_stop);
+        worldmap_start_button.addEventListener("click", worldmap_start_or_pause);
     }
 }
 
@@ -23,17 +23,18 @@ function flip_avatar(e) {
     }
 }
 
-function worldmap_start_or_stop() {
+function worldmap_start_or_pause() {
     const is_running = document.body.classList.contains("worldmap_running");
     const is_loading = document.body.classList.contains("worldmap_loading");
     const is_closing = document.body.classList.contains("worldmap_closing");
     if (is_running) {
         if (is_loading || is_closing) { return; }
 
+        document.body.style.background = "";
         document.body.classList.add("worldmap_closing");
         setTimeout(() => {
             document.body.classList.remove("worldmap_running", "worldmap_closing");
-            worldmap_game.stop();
+            worldmap_game.pause();
         }, 1000);
     } else {
         if (is_loading || is_closing) { return; }
@@ -46,14 +47,14 @@ function worldmap_start_or_stop() {
                 new Promise(resolve => setTimeout(resolve, 300)),
             ]).then((results) => {
                 worldmap_game = results[0];
-                worldmap_game.start(loaded_callback);
+                worldmap_game.start(open_transition);
             });
         } else {
-            worldmap_game.update();
-            loaded_callback();
+            worldmap_game.resume();
+            open_transition();
         }
 
-        function loaded_callback() {
+        function open_transition() {
             document.body.classList.remove("worldmap_loading");
             document.body.classList.add("worldmap_running");
             document.activeElement.blur();
