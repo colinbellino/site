@@ -8,8 +8,8 @@ type Codegen = {
     world:      World;
 }
 
-type Vector2 = Static_Array<float,2>;
-type Vector4 = Static_Array<float,4>;
+type Vector2 = Static_Array<float, 2>;
+type Vector4 = Static_Array<float, 4>;
 type Matrix4 = Static_Array<float, 16>;
 type float = GLfloat;
 type int = GLint;
@@ -105,8 +105,8 @@ type Neighbour = {
 }
 
 const THEMES = [
-    { color: hex_to_color(0x076ef0ff), atlas: "/worldmap/images/atlas.png" },
-    { color: hex_to_color(0x17152cff), atlas: "/worldmap/images/atlas_dark.png" },
+    { color: 0x076ef0, atlas: "/worldmap/images/atlas.png" },
+    { color: 0x17152c, atlas: "/worldmap/images/atlas_dark.png" },
 ];
 
 // :constants
@@ -161,7 +161,6 @@ export function start(loaded_callback: () => void) {
     game.draw_world_tile = true;
     game.draw_tiles = true;
     game.theme = location.search.includes("dark") ? Theme.DARK : Theme.LIGHT;
-    game.clear_color = THEMES[game.theme].color;
 
     const [renderer, renderer_ok] = renderer_init();
     if (!renderer_ok) {
@@ -175,6 +174,7 @@ export function start(loaded_callback: () => void) {
     game.projects = fixed_array_make(MAX_PROJECTS);
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
+    ui_set_theme_color(THEMES[game.theme].color);
 
     window.addEventListener("resize", window_on_resize, false);
     window.addEventListener("keydown", inputs_on_key, false);
@@ -215,6 +215,7 @@ export function update() {
             game.fps_last_update = now;
         }
 
+        const frame_start_theme = game.theme;
         const frame_start_node = game.nodes_current;
         const frame_start_camera_zoom = game.renderer.camera_main.zoom;
 
@@ -228,65 +229,69 @@ export function update() {
         let player_input_cancel = false;
 
         // :debug inputs
-        if (game.inputs.keys["ShiftLeft"].down) {
+        if (game.inputs.keys.ShiftLeft.down) {
             if (!__RELEASE__) {
-                if (game.inputs.keys["Backquote"].released || game.inputs.keys["IntlBackslash"].released) {
+                if (game.inputs.keys.Backquote.released || game.inputs.keys.IntlBackslash.released) {
                     game.draw_console = !game.draw_console;
                 }
-                if (game.inputs.keys["Digit1"].released) {
+                if (game.inputs.keys.Digit1.released) {
                     game.draw_world_grid = !game.draw_world_grid;
                 }
-                if (game.inputs.keys["Digit2"].released) {
+                if (game.inputs.keys.Digit2.released) {
                     game.draw_world_tile = !game.draw_world_tile;
                 }
-                if (game.inputs.keys["Digit3"].released) {
+                if (game.inputs.keys.Digit3.released) {
                     game.draw_entities = !game.draw_entities;
                 }
-                if (game.inputs.keys["KeyT"].down) {
+                if (game.inputs.keys.KeyT.down) {
                     game.renderer.camera_main.zoom = 1;
                     console.log("Zoom reset to 1.");
                 }
-                if (game.inputs.keys["KeyR"].down) {
+                if (game.inputs.keys.KeyR.down) {
                     game.renderer.camera_main.zoom = clamp(game.renderer.camera_main.zoom + 0.1, 1, 16);
                 }
-                if (game.inputs.keys["KeyF"].down) {
+                if (game.inputs.keys.KeyF.down) {
                     game.renderer.camera_main.zoom = clamp(game.renderer.camera_main.zoom - 0.1, 1, 16);
                 }
-                if (game.inputs.keys["KeyW"].down) {
+                if (game.inputs.keys.KeyW.down) {
                     game.renderer.camera_main.position[1] -= 1.0;
                 }
-                if (game.inputs.keys["KeyS"].down) {
+                if (game.inputs.keys.KeyS.down) {
                     game.renderer.camera_main.position[1] += 1.0;
                 }
-                if (game.inputs.keys["KeyA"].down) {
+                if (game.inputs.keys.KeyA.down) {
                     game.renderer.camera_main.position[0] -= 1.0;
                 }
-                if (game.inputs.keys["KeyD"].down) {
+                if (game.inputs.keys.KeyD.down) {
                     game.renderer.camera_main.position[0] += 1.0;
                 }
             }
         } else {
             // :player inputs
-            if (game.inputs.keys["KeyW"].down || game.inputs.keys["ArrowUp"].down) {
+            if (game.inputs.keys.KeyW.down || game.inputs.keys.ArrowUp.down) {
                 player_input_move[1] = -1;
-            } else if (game.inputs.keys["KeyS"].down || game.inputs.keys["ArrowDown"].down) {
+            } else if (game.inputs.keys.KeyS.down || game.inputs.keys.ArrowDown.down) {
                 player_input_move[1] = +1;
-            } else if (game.inputs.keys["KeyA"].down || game.inputs.keys["ArrowLeft"].down) {
+            } else if (game.inputs.keys.KeyA.down || game.inputs.keys.ArrowLeft.down) {
                 player_input_move[0] = -1;
-            } else if (game.inputs.keys["KeyD"].down || game.inputs.keys["ArrowRight"].down) {
+            } else if (game.inputs.keys.KeyD.down || game.inputs.keys.ArrowRight.down) {
                 player_input_move[0] = +1;
             }
 
+            if (game.inputs.keys.Space.released) {
+                game.theme = (game.theme === Theme.DARK) ? Theme.LIGHT : Theme.DARK;
+            }
+
             if (
-                (game.inputs.keys["Space"].released || (game.inputs.keys["Space"].down && game.inputs.keys["Space"].reset_next_frame)) ||
-                (game.inputs.keys["Enter"].released || (game.inputs.keys["Enter"].down && game.inputs.keys["Enter"].reset_next_frame))
+                (game.inputs.keys.Space.released || (game.inputs.keys.Space.down && game.inputs.keys.Space.reset_next_frame)) ||
+                (game.inputs.keys.Enter.released || (game.inputs.keys.Enter.down && game.inputs.keys.Enter.reset_next_frame))
             ) {
                 player_input_confirm = true;
             }
 
             if (
-                (game.inputs.keys["Escape"].released || (game.inputs.keys["Escape"].down && game.inputs.keys["Space"].reset_next_frame)) ||
-                (game.inputs.keys["Backspace"].released || (game.inputs.keys["Backspace"].down && game.inputs.keys["Enter"].reset_next_frame))
+                (game.inputs.keys.Escape.released || (game.inputs.keys.Escape.down && game.inputs.keys.Space.reset_next_frame)) ||
+                (game.inputs.keys.Backspace.released || (game.inputs.keys.Backspace.down && game.inputs.keys.Enter.reset_next_frame))
             ) {
                 player_input_cancel = true;
             }
@@ -542,6 +547,10 @@ export function update() {
                 const y = clamp(window_position[1] - rect.height - 12 - 8*game.renderer.camera_main.zoom, MARGIN, max_y);
                 root.style.left = `${x}px`;
                 root.style.top  = `${y}px`;
+            }
+
+            if (frame_start_theme !== game.theme) {
+                ui_set_theme_color(THEMES[game.theme].color);
             }
 
             // :render entities
@@ -806,6 +815,7 @@ function update_zoom(): void {
 type Renderer = {
     gl:                 WebGL2RenderingContext;
     offscreen:          CanvasRenderingContext2D;
+    game_root:          HTMLDivElement;
     ui_root:            HTMLDivElement;
     ui_console:         HTMLPreElement;
     ui_node_project:    UI_Panel;
@@ -816,6 +826,7 @@ type Renderer = {
     ui_confirm:         UI_Label;
     ui_cancel:          UI_Label;
     ui_node_action:     UI_Label_Node;
+    ui_theme_color:     HTMLMetaElement;
     camera_main:        Camera_Orthographic;
     window_size:        Vector2;
     pixel_ratio:        float;
@@ -1010,6 +1021,12 @@ function renderer_init(): [Renderer, true] | [null, false] {
         this.blur();
     });
 
+    const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const ui_theme_color = prefers_dark_theme
+        ? document.head.querySelector<HTMLMetaElement>(`meta[name="theme-color"][media="(prefers-color-scheme: dark)"]`)
+        : document.head.querySelector<HTMLMetaElement>(`meta[name="theme-color"]`)
+    ;
+
     const renderer: Renderer = {
         camera_main:        CAMERA_DEFAULT,
         sprites:            fixed_array_make(MAX_SPRITES),
@@ -1017,6 +1034,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         pixel_ratio:        1.0,
         gl:                 _gl,
         offscreen:          offscreen_context,
+        game_root:          game_root,
         ui_root:            ui_root,
         ui_console:         ui_console,
         ui_node_project:    ui_node_project,
@@ -1027,6 +1045,7 @@ function renderer_init(): [Renderer, true] | [null, false] {
         ui_confirm:         ui_confirm,
         ui_cancel:          ui_cancel,
         ui_node_action:     ui_node_action,
+        ui_theme_color:     ui_theme_color,
     };
 
     _gl.enable(_gl.BLEND);
@@ -1592,13 +1611,16 @@ function number_to_binary_string(dec: number, size: number = 4): string {
 function manhathan_distance(a: Vector2, b: Vector2): int {
     return (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]));
 }
-function hex_to_color(hex_value: number): Color {
+function hex_to_color(hex_rgb: number): Color {
     const color = new Array(4) as Color;
-    color[0] = ((hex_value >> 24) & 0xff) / 255;
-    color[1] = ((hex_value >> 16) & 0xff) / 255;
-    color[2] = ((hex_value >> 8) & 0xff) / 255;
-    color[3] = ((hex_value) & 0xff) / 255;
+    color[0] = ((hex_rgb >> 16) & 0xff) / 255;
+    color[1] = ((hex_rgb >> 8) & 0xff) / 255;
+    color[2] = ((hex_rgb) & 0xff) / 255;
+    color[3] = 1;
     return color;
+}
+function hex_to_string(hex_rgb: number): string {
+    return "#"+hex_rgb.toString(16).padStart(6, "0");
 }
 function vector2_equal(vec1: Vector2, vec2: Vector2): boolean {
     return vec1[0] === vec2[0] && vec1[1] === vec2[1];
@@ -2017,6 +2039,11 @@ function ui_set_element_class(element: HTMLElement, class_name: string, value: b
     } else {
         element.classList.remove(class_name);
     }
+}
+function ui_set_theme_color(color: int) {
+    game.clear_color = hex_to_color(color);
+    game.renderer.ui_theme_color.content = hex_to_string(color);
+    game.renderer.game_root.style.background = hex_to_string(color);
 }
 
 type Project = {
