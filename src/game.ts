@@ -187,6 +187,8 @@ export function start(loaded_callback: () => void) {
     window.addEventListener("keyup", inputs_on_key, false);
     window.addEventListener("touchstart", inputs_on_touch_start, false);
     window.addEventListener("touchend", inputs_on_touch_end, false);
+    window.addEventListener("mousemove", inputs_on_mouse_move, false);
+    window.addEventListener("click", inputs_on_mouse_click, false);
 
     if (!__RELEASE__ && location.search.includes("reload")) {
         setInterval(function reload_atlas() {
@@ -237,7 +239,9 @@ export function update() {
             update_zoom();
         }
 
+        const mouse_position_world = window_to_world_position(game.inputs.mouse_position);
         let player_input_move: Vector2 = [0, 0];
+        let player_input_mouse_left = false;
         let player_input_confirm = false;
         let player_input_cancel = false;
 
@@ -281,6 +285,9 @@ export function update() {
             }
         } else {
             // :player inputs
+            if (game.inputs.mouse_keys[Mouse_Key.LEFT].pressed) {
+                player_input_mouse_left = true;
+            }
             if (game.inputs.keys.KeyW.down || game.inputs.keys.ArrowUp.down) {
                 player_input_move[1] = -1;
             } else if (game.inputs.keys.KeyS.down || game.inputs.keys.ArrowDown.down) {
@@ -404,8 +411,32 @@ export function update() {
                     } break;
                     // :world IDLE
                     case World_Mode.IDLE: {
+                        const current_node = game.nodes.data[game.nodes_current];
+
+                        if (player_input_mouse_left) {
+                            const HITBOX_SIZE = 48;
+                            let node_at_mouse_position = -1;
+                            for (let i = 0; i < game.nodes.count; i++) {
+                                const node = game.nodes.data[i];
+                                const box_top_left: Vector2 = [node.grid_position[0]*GRID_SIZE - HITBOX_SIZE*0.5, node.grid_position[1]*GRID_SIZE - HITBOX_SIZE*0.5];
+                                if (aabb_collides(mouse_position_world, [1, 1], box_top_left, [HITBOX_SIZE, HITBOX_SIZE])) {
+                                    node_at_mouse_position = i;
+                                    break;
+                                }
+                            }
+                            if (node_at_mouse_position > -1) {
+                                const destination_node = game.nodes.data[node_at_mouse_position];
+                                for (let direction = 0; direction < current_node.neighbours.length; direction++) {
+                                    const neighbour = current_node.neighbours[direction];
+                                    if (neighbour.path.length > 0 && vector2_equal(neighbour.path[neighbour.path.length - 1], destination_node.grid_position)) {
+                                        player_input_move = DIRECTIONS[direction];
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+
                         if (!vector2_equal(player_input_move, [0, 0])) {
-                            const current_node = game.nodes.data[game.nodes_current];
                             const direction = vector_to_direction(player_input_move);
                             const destination = current_node.neighbours[direction];
                             if (destination.path.length > 0) {
@@ -589,6 +620,7 @@ export function update() {
                     fixed_array_add(game.renderer.sprites, entity.sprite);
                 }
             }
+
             // :render nodes
             for (let node_index = 0; node_index < game.nodes.count; node_index++) {
                 const node = game.nodes.data[node_index];
@@ -675,7 +707,7 @@ export function update() {
 
                     const sprite: Sprite = {
                         color:              color,
-                        position:           [tile_position[0]*GRID_SIZE - GRID_SIZE/2, tile_position[1]*GRID_SIZE - GRID_SIZE/2],
+                        position:           [tile_position[0]*GRID_SIZE - GRID_SIZE*0.5, tile_position[1]*GRID_SIZE - GRID_SIZE*0.5],
                         offset:             [0, 0],
                         size:               [GRID_SIZE, GRID_SIZE],
                         scale:              [1, 1],
@@ -687,6 +719,7 @@ export function update() {
                     fixed_array_add(game.renderer.sprites, sprite);
                 }
             }
+
             // :render tiles
             if (game.draw_tiles) {
                 for (let tile_index = 0; tile_index < game.world.tiles.length; tile_index++) {
@@ -715,6 +748,7 @@ export function update() {
                 ui_push_console_line("pixel_ratio:        " + game.renderer.pixel_ratio);
                 ui_push_console_line("camera_position:    " + game.renderer.camera_main.position);
                 ui_push_console_line("camera_zoom:        " + game.renderer.camera_main.zoom);
+                ui_push_console_line("mouse_position:     " + game.inputs.mouse_position);
                 ui_push_console_line("entities:           " + game.entities.count);
                 ui_push_console_line("player_position:    " + game.player.sprite.position);
                 ui_push_console_line("world_draw:         " + game.draw_world_grid);
@@ -1358,7 +1392,7 @@ enum Keyboard_Key {
     "ArrowUp" = "ArrowUp",
 };
 enum Mouse_Key {
-    NONE,
+    // NONE,
     LEFT,
     MIDDLE,
     RIGHT,
@@ -1417,12 +1451,27 @@ function inputs_on_touch_start(e: TouchEvent) {
     game.inputs.touch_start_y = e.changedTouches[0].screenY;
     game.inputs.touch_end_x = -1;
     game.inputs.touch_down = true;
+
+    const key_state = game.inputs.mouse_keys[Mouse_Key.LEFT];
+    key_state.down = event.type === "keydown";
+    key_state.released = event.type === "keyup";
+    key_state.pressed = event.type === "keydown";
 }
-function inputs_on_touch_end(e: TouchEvent) {
-    game.inputs.touch_end_x = e.changedTouches[0].screenX;
-    game.inputs.touch_end_y = e.changedTouches[0].screenY;
+function inputs_on_touch_end(event: TouchEvent) {
+    game.inputs.touch_end_x = event.changedTouches[0].screenX;
+    game.inputs.touch_end_y = event.changedTouches[0].screenY;
     game.inputs.touch_down = false;
     game.inputs.touch_released = true;
+}
+function inputs_on_mouse_move(event: MouseEvent) {
+    game.inputs.mouse_position[0] = event.clientX;
+    game.inputs.mouse_position[1] = event.clientY;
+}
+function inputs_on_mouse_click(event: MouseEvent) {
+    const key_state = game.inputs.mouse_keys[event.button as Mouse_Key];
+    key_state.down = true;
+    key_state.pressed = true;
+    key_state.reset_next_frame = true;
 }
 function inputs_prepare(inputs: Inputs) {
     inputs.keyboard_was_used = false;
@@ -1632,8 +1681,16 @@ function find_node_at_position(position: Vector2): int {
 function world_to_window_position(world_position: Vector2): Vector2 {
     const camera = game.renderer.camera_main;
     return [
-        (world_position[0] * camera.zoom) + (game.renderer.window_size[0] / 2) - (camera.position[0] * camera.zoom),
-        (world_position[1] * camera.zoom) + (game.renderer.window_size[1] / 2) - (camera.position[1] * camera.zoom),
+        (world_position[0] * camera.zoom) + (game.renderer.window_size[0] * 0.5) - (camera.position[0] * camera.zoom),
+        (world_position[1] * camera.zoom) + (game.renderer.window_size[1] * 0.5) - (camera.position[1] * camera.zoom),
+    ];
+}
+function window_to_world_position(window_position: Vector2): Vector2 {
+    const camera = game.renderer.camera_main;
+    return [
+        // start position   - offset to top/left                   + camera offset
+        (window_position[0] - (game.renderer.window_size[0] * 0.5) + (camera.position[0] * camera.zoom)) / camera.zoom,
+        (window_position[1] - (game.renderer.window_size[1] * 0.5) + (camera.position[1] * camera.zoom)) / camera.zoom,
     ];
 }
 function project_screenshot_url(project: Project, image_index: int, variant: string = "small"): string {
@@ -1667,6 +1724,15 @@ function number_to_binary_string(dec: number, size: number = 4): string {
 }
 
 // :math
+function aabb_collides(a_position: Vector2, a_size: Vector2, b_position: Vector2, b_size: Vector2): boolean {
+    return (
+        a_size[0] != 0 && a_size[1] != 0 && b_size[0] != 0 && b_size[1] != 0 &&
+        a_position[0] < b_position[0] + b_size[0] &&
+        a_position[0] + a_size[0] > b_position[0] &&
+        a_position[1] < b_position[1] + b_size[1] &&
+        a_position[1] + a_size[1] > b_position[1]
+    )
+}
 function manhathan_distance(a: Vector2, b: Vector2): int {
     return (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]));
 }
@@ -2034,7 +2100,7 @@ function ui_label_node_show(button: UI_Label_Node, label: string, image_url: str
         button.element_label.innerHTML = label;
     }
     button.element_root.classList.remove("hide");
-    button.element_root.classList.add("thumbnail");
+    // button.element_root.classList.add("thumbnail");
     button.element_image.src = image_url;
 }
 function ui_panel_show(button: UI_Panel, title: string, content: string): void {
@@ -2106,6 +2172,7 @@ function ui_set_theme_color(color: int) {
     document.body.style.background = hex_to_string(color);
 }
 
+// :data
 type Project = {
     id:                 int;
     name:               string;
@@ -2115,8 +2182,6 @@ type Project = {
     screenshots_prefix: string;
     screenshots_count:  int;
 }
-
-// :data
 const PROJECTS: Project[] = [
     {
         id: 0,
