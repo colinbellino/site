@@ -129,6 +129,7 @@ const DIRECTIONS : Vector2[] = [
     [ +0, +1 ], // .South
     [ -1, +0 ], // .West
 ];
+const ICON_CLOSE = `<svg width="64" height="64"><g><path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/></g></svg>`;
 const ICON_KEYBOARD_ESCAPE = `<svg width="64" height="64"><path d="M16 8h32q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8m16 20q-.4 0-.7.3-.3.3-.3.7 0 .4.3.7l.65.3h.1q1.55 0 2.75 1.2T36 34q0 1.6-1.2 2.8Q33.6 38 32 38h-4v-3h4l.7-.3.3-.7-.3-.7q-.3-.3-.65-.3h-.1q-1.55 0-2.75-1.2T28 29q0-1.6 1.2-2.8Q30.4 25 32 25h4v3h-4m-14-3h8v3h-5v2h5v3h-5v2h5v3h-8V25m26.8 12-.1.1q-1.15.9-2.7.9-1.6 0-2.7-.9l-.1-.05-.05-.1Q38 35.8 38 34.3v-5.55q0-1.6 1.2-2.7h.05Q40.4 25 42 25q1.55 0 2.75 1.05 1.25 1.1 1.25 2.7v1.5h-3v-1.5l-.2-.45q-.35-.3-.8-.3-.45 0-.75.25l-.05.05-.2.45v5.55l.2.5.8.2.75-.2.25-.5v-1.5h3v1.5q.05 1.5-1.2 2.7M11 16v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5H16q-5 0-5 5"/></svg>`;
 const ICON_KEYBOARD_ENTER = `<svg width="64" height="64"><path d="M40 11h-4q-5 0-5 5v15H16q-5 0-5 5v12q0 5 5 5h32q5 0 5-5V16q0-5-5-5h-8m8-3q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V36q0-8 8-8h12V16q0-8 8-8h12M20 43q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3m2-1.2q0-1.15.85-2l.05-.05Q23.75 39 25 39q1.15 0 2.05.75l.05.05q.9.85.9 2V48l-.3.7q-.3.3-.7.3l-.7-.3-.3-.7v-6.2l-.25-.55v.05q-.3-.3-.75-.3t-.8.3l.05-.1-.25.6V48l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-6.2m8-.8-.7-.3q-.3-.3-.3-.7 0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7q-.3.3-.7.3h-1v7l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-7h-1m6-1q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8m12.1 4.1v.05l-.65.5 1.45 2.9q.2.4.05.8l-.5.55-.75.05q-.4-.15-.6-.5L45.4 45H45v3l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h2.05q1.2 0 2.05.85.9.9.9 2.15t-.9 2.1m-2-1.1.35-.1.25-.2h.05L47 42l-.3-.75q-.25-.25-.65-.25H45v2h1.1"/></svg>`;
 const ICON_KEYBOARD_ARROW_UP = `<svg width="64" height="64"><path d="M48 11H16q-5 0-5 5v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5m8 5v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8h32q8 0 8 8m-24 6 8 8v2h-4v10h-8V32h-4v-2l8-8"/></svg>`;
@@ -537,10 +538,6 @@ export function update() {
                                         fixed_array_add(game.destination_path, destination.path[point_index]);
                                     }
                                 }
-                                ui_panel_hide(game.renderer.ui_node_project);
-                                ui_label_hide(game.renderer.ui_confirm);
-                                ui_label_hide(game.renderer.ui_cancel);
-                                ui_label_hide(game.renderer.ui_node_action);
 
                                 // Simple way to project images while we are moving to the node
                                 const destination_node = game.nodes.data[game.destination_node];
@@ -551,6 +548,12 @@ export function update() {
                                         preload_images.push(load_image(project_screenshot_url(project, i)));
                                     }
                                 }
+
+                                ui_panel_hide(game.renderer.ui_node_project);
+                                ui_label_hide(game.renderer.ui_node_action);
+                                ui_label_hide(game.renderer.ui_confirm);
+                                ui_label_hide(game.renderer.ui_cancel);
+
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
                             } else {
@@ -563,20 +566,44 @@ export function update() {
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_show(game.renderer.ui_node_action);
                                 ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
-                                ui_label_hide(game.renderer.ui_node_action);
+                                ui_label_hide(game.renderer.ui_cancel);
+                                ui_label_show(game.renderer.ui_up);
+                                ui_label_show(game.renderer.ui_right);
+                                ui_label_show(game.renderer.ui_down);
+                                ui_label_show(game.renderer.ui_left);
                             } else {
-                                ui_label_hide(game.renderer.ui_node_action);
+                                if (game.renderer.ui_node_action.element_root.classList.contains("hide")) {
+                                    ui_label_show(game.renderer.ui_node_action);
+                                } else {
+                                    ui_label_hide(game.renderer.ui_node_action);
+                                }
                             }
                         }
 
                         if (player_input_confirm) {
                             switch (node.type) {
                                 case Node_Type.EMPTY: { } break;
+                                case Node_Type.INFO: {
+                                    if (project_panel_opened) {
+                                        // ui_label_show(game.renderer.ui_node_action);
+                                        // ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
+                                        // ui_panel_hide(game.renderer.ui_node_project);
+                                    } else {
+                                        ui_panel_show(game.renderer.ui_node_project, "Sign", node.tooltip);
+                                        ui_label_hide(game.renderer.ui_node_action);
+                                        ui_label_hide(game.renderer.ui_confirm);
+                                        ui_label_show(game.renderer.ui_cancel, "Close");
+                                        ui_label_hide(game.renderer.ui_up);
+                                        ui_label_hide(game.renderer.ui_right);
+                                        ui_label_hide(game.renderer.ui_down);
+                                        ui_label_hide(game.renderer.ui_left);
+                                    }
+                                } break;
                                 case Node_Type.PROJECT: {
                                     if (project_panel_opened) {
-                                        ui_panel_hide(game.renderer.ui_node_project);
-                                        ui_label_show(game.renderer.ui_node_action);
-                                        ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
+                                        // ui_panel_hide(game.renderer.ui_node_project);
+                                        // ui_label_show(game.renderer.ui_node_action);
+                                        // ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
                                     } else {
                                         const content = [];
                                         if (project.screenshots_count > 0) {
@@ -603,9 +630,14 @@ export function update() {
                                             content.push("</ul>");
                                         }
 
-                                        ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""));
+                                        ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""), true);
                                         ui_label_hide(game.renderer.ui_node_action);
-                                        ui_label_show(game.renderer.ui_confirm, "Close");
+                                        ui_label_hide(game.renderer.ui_confirm);
+                                        ui_label_show(game.renderer.ui_cancel, "Close");
+                                        ui_label_hide(game.renderer.ui_up);
+                                        ui_label_hide(game.renderer.ui_right);
+                                        ui_label_hide(game.renderer.ui_down);
+                                        ui_label_hide(game.renderer.ui_left);
                                     }
                                 } break;
                                 case Node_Type.WARP: {
@@ -618,8 +650,13 @@ export function update() {
 
                                     game.camera_move_start = game.renderer.camera_main.position;
                                     game.camera_move_end   = vector2_multiply_float(current_node.warp_camera, GRID_SIZE);
-                                    ui_label_hide(game.renderer.ui_confirm);
                                     ui_label_hide(game.renderer.ui_node_action);
+                                    ui_label_hide(game.renderer.ui_confirm);
+                                    ui_label_hide(game.renderer.ui_cancel);
+                                    ui_label_hide(game.renderer.ui_up);
+                                    ui_label_hide(game.renderer.ui_right);
+                                    ui_label_hide(game.renderer.ui_down);
+                                    ui_label_hide(game.renderer.ui_left);
 
                                     game.world_mode = World_Mode.MOVING;
                                     game.world_mode_timer = now;
@@ -657,6 +694,12 @@ export function update() {
                             }
 
                             ui_node_show(node);
+                            ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
+                            ui_label_hide(game.renderer.ui_cancel);
+                            // ui_label_show(game.renderer.ui_up);
+                            // ui_label_show(game.renderer.ui_right);
+                            // ui_label_show(game.renderer.ui_down);
+                            // ui_label_show(game.renderer.ui_left);
                             game.world_mode = World_Mode.IDLE;
                         }
                     } break;
@@ -672,7 +715,7 @@ export function update() {
 
             const node_changed = frame_start_node !== game.nodes_current;
             const camera_changed = frame_start_camera_zoom !== game.renderer.camera_main.zoom;
-            if (node_changed || game.inputs.window_resized || camera_changed) {
+            /* if (node_changed || game.inputs.window_resized || camera_changed) */ {
                 const MARGIN = 10;
                 const current_node = game.nodes.data[game.nodes_current];
                 const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
@@ -1049,7 +1092,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const ui_root = ui_create_element<HTMLDivElement>(game_root, `<div id="ui_root"></div>`);
 
     const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_bottom no_label hide up" for="up">
+        <label class="hud_label anchor_left no_label hide up" for="up">
             <span class="content">
                 <span class="label"></span>
                 <button class="hud_icon icon_up" aria-label="Move: up">
@@ -1063,7 +1106,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_root.querySelector(".content .label") };
 
     const right_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_bottom no_label hide right">
+        <label class="hud_label anchor_left no_label hide right">
             <span class="content">
                 <span class="label"></span>
                 <button class="hud_icon icon_right" aria-label="Move: right">
@@ -1077,7 +1120,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_root.querySelector(".content .label") };
 
     const down_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_bottom no_label hide down">
+        <label class="hud_label anchor_left no_label hide down">
             <span class="content">
                 <span class="label"></span>
                 <button class="hud_icon icon_down" aria-label="Move: down">
@@ -1091,7 +1134,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_root.querySelector(".content .label") };
 
     const left_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_bottom no_label hide left">
+        <label class="hud_label anchor_left no_label hide left">
             <span class="content">
                 <span class="label"></span>
                 <button class="hud_icon icon_left" aria-label="Move: left">
@@ -1137,7 +1180,9 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
             <img />
             <span class="content">
                 <span class="label"></span>
-                <button class="hud_icon icon_confirm" aria-label="Confirm"></button>
+                <button class="hud_icon icon_confirm" aria-label="Confirm">
+                    ${ICON_KEYBOARD_ENTER}
+                </button>
             </span>
         </label>
     `);
@@ -1155,10 +1200,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
 
-    const ui_node_project = ui_create_panel(ui_root, function ui_node_project_close() {
-        ui_panel_hide(ui_node_project);
-        this.blur();
-    });
+    const ui_node_project = ui_create_panel(ui_root, input_send_key.bind(null, Keyboard_Key.Escape));
 
     const ui_theme_color = prefers_dark_theme
         ? document.head.querySelector<HTMLMetaElement>(`meta[name="theme-color"][media="(prefers-color-scheme: dark)"]`)
@@ -2200,10 +2242,12 @@ function ui_label_node_show(button: UI_Label_Node, label: string, image_url: str
     button.element_root.classList.add("thumbnail");
     button.element_image.src = image_url;
 }
-function ui_panel_show(button: UI_Panel, title: string, content: string): void {
+function ui_panel_show(button: UI_Panel, title: string, content: string, full_size: boolean = false): void {
     button.element_title.innerHTML = title;
     button.element_content.innerHTML = content;
     button.element_root.classList.remove("hide");
+    if (full_size) { button.element_root.classList.add("full_size"); }
+    else           { button.element_root.classList.remove("full_size"); }
 }
 function ui_panel_hide(button: UI_Panel): void {
     button.element_root.classList.add("hide");
@@ -2211,17 +2255,18 @@ function ui_panel_hide(button: UI_Panel): void {
 function ui_get_node_action(node: Map_Node): string {
     let label = "";
     switch (node.type) {
-        case Node_Type.PROJECT: { label = "Open"; } break;
-        case Node_Type.WARP:    { label = "Warp"; } break;
+        case Node_Type.PROJECT: { label = `Open`; } break;
+        case Node_Type.WARP:    { label = `Warp`; } break;
+        case Node_Type.INFO:    { label = `Read`; } break;
     }
     return label;
 }
 function ui_get_node_tooltip(node: Map_Node): string {
     let label = "";
     switch (node.type) {
-        case Node_Type.PROJECT: { label = "Open"; } break;
+        case Node_Type.PROJECT: { label = `Open`; } break;
         case Node_Type.WARP:    { label = `To ${node.tooltip}`; } break;
-        case Node_Type.INFO:    { label = node.tooltip; } break;
+        case Node_Type.INFO:    { label = `Read`; } break;
     }
     return label;
 }
@@ -2236,11 +2281,7 @@ function ui_create_panel(ui_root: HTMLDivElement, close_callback: (this: HTMLBut
             <header>
                 <h2></h2>
                 <button class="close" aria-label="Close">
-                    <svg width="64" height="64">
-                        <g>
-                            <path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/>
-                        </g>
-                    </svg>
+                    ${ICON_CLOSE}
                 </button>
             </header>
             <div class="content"></div>
