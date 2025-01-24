@@ -226,6 +226,7 @@ export function update() {
         inputs_prepare(game.inputs);
 
         game.renderer.sprites.count = 0;
+        game.console_lines.count = 0;
         if (now >= game.fps_last_update + 1000) {
             game.fps = game.fps_count;
             game.fps_count = 0;
@@ -324,8 +325,8 @@ export function update() {
             }
 
             if (
-                (game.inputs.keys.Escape.released || (game.inputs.keys.Escape.down && game.inputs.keys.Space.reset_next_frame)) ||
-                (game.inputs.keys.Backspace.released || (game.inputs.keys.Backspace.down && game.inputs.keys.Enter.reset_next_frame))
+                (game.inputs.keys.Escape.released || (game.inputs.keys.Escape.down && game.inputs.keys.Escape.reset_next_frame)) ||
+                (game.inputs.keys.Backspace.released || (game.inputs.keys.Backspace.down && game.inputs.keys.Backspace.reset_next_frame))
             ) {
                 player_input_cancel = true;
             }
@@ -411,91 +412,99 @@ export function update() {
                     case World_Mode.IDLE: {
                         const current_node = game.nodes.data[game.nodes_current];
 
-                        if (player_input_mouse_left) {
-                            const HITBOX_SIZE = 48;
-                            let node_at_mouse_position = -1;
-                            for (let i = 0; i < game.nodes.count; i++) {
-                                const node = game.nodes.data[i];
-                                const box_top_left: Vector2 = [node.grid_position[0]*GRID_SIZE - HITBOX_SIZE*0.5, node.grid_position[1]*GRID_SIZE - HITBOX_SIZE*0.5];
-                                if (aabb_collides(mouse_position_world, [1, 1], box_top_left, [HITBOX_SIZE, HITBOX_SIZE])) {
-                                    node_at_mouse_position = i;
-                                    break;
-                                }
-                            }
+                        const project_panel_opened = !game.renderer.ui_node_project.element_root.classList.contains("hide");
+                        let node_at_mouse_position = -1;
 
+                        for (let i = 0; i < game.nodes.count; i++) {
+                            const HITBOX_SIZE = 48;
+                            const node = game.nodes.data[i];
+                            const box_top_left: Vector2 = [node.grid_position[0]*GRID_SIZE - HITBOX_SIZE*0.5, node.grid_position[1]*GRID_SIZE - HITBOX_SIZE*0.5];
+                            if (aabb_collides(mouse_position_world, [1, 1], box_top_left, [HITBOX_SIZE, HITBOX_SIZE])) {
+                                node_at_mouse_position = i;
+                                break;
+                            }
+                        }
+
+                        if (player_input_mouse_left) {
                             if (node_at_mouse_position > -1) {
                                 const destination_node = game.nodes.data[node_at_mouse_position];
 
-                                // Quick and dirty A* pathfinding
-                                // TODO: profile this, maybe we need to calculate all the pathes in advances since we don't have anything dynamic.
-                                let path : Node_Index[] = [];
-                                type Node_Index = int;
-                                type AStar_Node = { curr: Node_Index; prev: Node_Index; g_cost: int, h_cost: int }
+                                if (node_at_mouse_position === game.nodes_current) {
+                                    ui_node_show(destination_node);
+                                } else {
+                                    // Quick and dirty A* pathfinding
+                                    // TODO: profile this, maybe we need to calculate all the pathes in advances since we don't have anything dynamic.
+                                    let path : Node_Index[] = [];
+                                    type Node_Index = int;
+                                    type AStar_Node = { curr: Node_Index; prev: Node_Index; g_cost: int, h_cost: int }
 
-                                const nodes : AStar_Node[] = Array(game.nodes.count);
-                                for (let node_index = 0; node_index < nodes.length; node_index++) {
-                                    nodes[node_index] = { curr: node_index, prev: null, g_cost: 0, h_cost: 0 };
-                                }
-                                let checked : Node_Index[] = [];
-                                let to_check : Node_Index[] = [game.nodes_current];
-
-                                let tries = 0;
-                                while (to_check.length > 0) {
-                                    tries += 1;
-                                    if (tries > 50) {
-                                        if (!__RELEASE__) { console.warn("Path not found!"); }
-                                        break;
+                                    const nodes : AStar_Node[] = Array(game.nodes.count);
+                                    for (let node_index = 0; node_index < nodes.length; node_index++) {
+                                        nodes[node_index] = { curr: node_index, prev: null, g_cost: 0, h_cost: 0 };
                                     }
+                                    let checked : Node_Index[] = [];
+                                    let to_check : Node_Index[] = [game.nodes_current];
 
-                                    const current = to_check.pop();
-                                    if (checked.includes(current)) {
-                                        continue;
-                                    }
-
-                                    const node = game.nodes.data[current];
-                                    checked.push(current);
-
-                                    const destination_reached = vector2_equal(node.grid_position, destination_node.grid_position);
-                                    if (destination_reached) {
-                                        let n = checked[checked.length-1];
-                                        while (n !== null) {
-                                            const node = nodes[n];
-                                            if (node.curr !== game.nodes_current) path.push(n);
-                                            n = node.prev;
+                                    let tries = 0;
+                                    while (to_check.length > 0) {
+                                        tries += 1;
+                                        if (tries > 50) {
+                                            if (!__RELEASE__) { console.warn("Path not found!"); }
+                                            break;
                                         }
-                                        break;
-                                    }
 
-                                    for (let direction = 0; direction < node.neighbours.length; direction++) {
-                                        const neighbour = node.neighbours[direction];
-                                        if (neighbour.path.length === 0) {
+                                        const current = to_check.pop();
+                                        if (checked.includes(current)) {
                                             continue;
                                         }
 
-                                        const neighbour_position = neighbour.path[neighbour.path.length - 1];
-                                        const neighbour_node_id = find_node_at_position(neighbour_position);
-                                        if (checked.includes(neighbour_node_id)) {
-                                            continue;
+                                        const node = game.nodes.data[current];
+                                        checked.push(current);
+
+                                        const destination_reached = vector2_equal(node.grid_position, destination_node.grid_position);
+                                        if (destination_reached) {
+                                            let n = checked[checked.length-1];
+                                            while (n !== null) {
+                                                const node = nodes[n];
+                                                if (node.curr !== game.nodes_current) path.push(n);
+                                                n = node.prev;
+                                            }
+                                            break;
                                         }
 
-                                        const neighbour_g_cost = nodes[current].g_cost + manhathan_distance(destination_node.grid_position, neighbour_position);
-                                        const neighbour_node = nodes[neighbour_node_id];
-                                        const already_checked = to_check.includes(neighbour_node_id);
-                                        if (neighbour_g_cost < neighbour_node.g_cost || !already_checked) {
-                                            neighbour_node.g_cost = neighbour_g_cost;
-                                            neighbour_node.h_cost = manhathan_distance(destination_node.grid_position, neighbour_position);
-                                            neighbour_node.prev = current;
+                                        for (let direction = 0; direction < node.neighbours.length; direction++) {
+                                            const neighbour = node.neighbours[direction];
+                                            if (neighbour.path.length === 0) {
+                                                continue;
+                                            }
 
-                                            if (!already_checked) {
-                                                to_check.push(neighbour_node_id);
+                                            const neighbour_position = neighbour.path[neighbour.path.length - 1];
+                                            const neighbour_node_id = find_node_at_position(neighbour_position);
+                                            if (checked.includes(neighbour_node_id)) {
+                                                continue;
+                                            }
+
+                                            const neighbour_g_cost = nodes[current].g_cost + manhathan_distance(destination_node.grid_position, neighbour_position);
+                                            const neighbour_node = nodes[neighbour_node_id];
+                                            const already_checked = to_check.includes(neighbour_node_id);
+                                            if (neighbour_g_cost < neighbour_node.g_cost || !already_checked) {
+                                                neighbour_node.g_cost = neighbour_g_cost;
+                                                neighbour_node.h_cost = manhathan_distance(destination_node.grid_position, neighbour_position);
+                                                neighbour_node.prev = current;
+
+                                                if (!already_checked) {
+                                                    to_check.push(neighbour_node_id);
+                                                }
                                             }
                                         }
                                     }
-                                }
 
-                                if (path.length > 0) {
-                                    game.player_path = path;
+                                    if (path.length > 0) {
+                                        game.player_path = path;
+                                    }
                                 }
+                            } else {
+                                player_input_cancel = true;
                             }
                         }
 
@@ -512,7 +521,10 @@ export function update() {
                             }
                         }
 
-                        if (!vector2_equal(player_input_move, [0, 0])) {
+                        const node = game.nodes.data[game.nodes_current];
+                        const project = game.projects.data[node.project_id];
+
+                        if (!project_panel_opened && !vector2_equal(player_input_move, [0, 0])) {
                             const direction = vector_to_direction(player_input_move);
                             const destination = current_node.neighbours[direction];
                             if (destination.path.length > 0) {
@@ -546,15 +558,14 @@ export function update() {
                             }
                         }
 
-                        const node = game.nodes.data[game.nodes_current];
-                        const project = game.projects.data[node.project_id];
-                        const project_panel_opened = !game.renderer.ui_node_project.element_root.classList.contains("hide");
-
                         if (player_input_cancel) {
                             if (project_panel_opened) {
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_show(game.renderer.ui_node_action);
                                 ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
+                                ui_label_hide(game.renderer.ui_node_action);
+                            } else {
+                                ui_label_hide(game.renderer.ui_node_action);
                             }
                         }
 
@@ -645,17 +656,7 @@ export function update() {
                                 game.player.sprite.scale = [1, 1];
                             }
 
-                            const action = ui_get_node_action(node);
-                            const tooltip = ui_get_node_tooltip(node);
-                            if (action !== "") {
-                                ui_label_show(game.renderer.ui_confirm, action);
-                            }
-
-                            if (node.project_id > 0) {
-                                ui_label_node_show(game.renderer.ui_node_action, action, project_generate_thumbnail_url(node.project_id));
-                            } else if (tooltip !== "") {
-                                ui_label_show(game.renderer.ui_node_action, tooltip);
-                            }
+                            ui_node_show(node);
                             game.world_mode = World_Mode.IDLE;
                         }
                     } break;
@@ -817,7 +818,6 @@ export function update() {
             }
             // :render console lines
             // FIXME: don't do this in __RELEASE__
-            game.console_lines.count = 0;
             if (game.draw_console) {
                 ui_push_console_line("fps:                " + game.fps.toFixed(0));
                 ui_push_console_line("window_size:        " + game.renderer.window_size);
@@ -1034,6 +1034,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
 
     const canvas = ui_create_element<HTMLCanvasElement>(game_root, `<canvas id="main"></canvas>`);
+    canvas.addEventListener("touchstart", input_send_key.bind(null, Keyboard_Key.Escape), false);
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
@@ -1058,7 +1059,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const up_button = up_root.querySelector(".content button") as HTMLButtonElement;
-    up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp));
+    up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp), false);
     const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_root.querySelector(".content .label") };
 
     const right_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1072,7 +1073,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const right_button = right_root.querySelector(".content button") as HTMLButtonElement;
-    right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight));
+    right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight), false);
     const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_root.querySelector(".content .label") };
 
     const down_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1086,7 +1087,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const down_button = down_root.querySelector(".content button") as HTMLButtonElement;
-    down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown));
+    down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown), false);
     const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_root.querySelector(".content .label") };
 
     const left_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1100,7 +1101,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const left_button = left_root.querySelector(".content button") as HTMLButtonElement;
-    left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft));
+    left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft), false);
     const ui_left: UI_Label = { element_root: left_root, element_button: left_button, element_label: left_root.querySelector(".content .label") };
 
     const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1114,7 +1115,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const confirm_button = confirm_root.querySelector(".content button") as HTMLButtonElement;
-    confirm_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter));
+    confirm_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter), false);
     const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_root.querySelector(".content .label") };
 
     const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1128,7 +1129,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
-    cancel_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Escape));
+    cancel_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Escape), false);
     const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
 
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
@@ -1141,7 +1142,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </label>
     `);
     const node_action_button = node_action_root.querySelector(".content button") as HTMLButtonElement;
-    node_action_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter));
+    node_action_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter), false);
     const node_action_image = node_action_root.querySelector("img");
     node_action_image.width = THUMBNAIL_SIZE[0]*0.5;
     node_action_image.height = THUMBNAIL_SIZE[1]*0.5;
@@ -2170,13 +2171,33 @@ function ui_label_show(button: UI_Label, label: string = ""): void {
 function ui_label_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
 }
+function ui_label_toggle(button: UI_Label): void {
+    if (button.element_root.classList.contains("hide")) {
+        ui_label_show(button);
+    } else {
+        ui_label_hide(button);
+    }
+}
+function ui_node_show(node: Map_Node) {
+    const action = ui_get_node_action(node);
+    // if (action !== "") {
+    //     ui_label_show(game.renderer.ui_confirm, action);
+    // }
+
+    const tooltip = ui_get_node_tooltip(node);
+    if (node.project_id > 0) {
+        ui_label_node_show(game.renderer.ui_node_action, action, project_generate_thumbnail_url(node.project_id));
+    } else if (tooltip !== "") {
+        ui_label_show(game.renderer.ui_node_action, tooltip);
+    }
+}
 function ui_label_node_show(button: UI_Label_Node, label: string, image_url: string): void {
     assert(image_url !== "");
     if (label) {
         button.element_label.innerHTML = label;
     }
     button.element_root.classList.remove("hide");
-    // button.element_root.classList.add("thumbnail");
+    button.element_root.classList.add("thumbnail");
     button.element_image.src = image_url;
 }
 function ui_panel_show(button: UI_Panel, title: string, content: string): void {
@@ -2231,6 +2252,9 @@ function ui_create_panel(ui_root: HTMLDivElement, close_callback: (this: HTMLBut
         element_close:      panel_root.querySelector(".close"),
         element_content:    panel_root.querySelector(".content"),
     };
+    panel.element_root.addEventListener("click", function(e: MouseEvent) {
+        e.stopPropagation();
+    });
     panel.element_close.addEventListener("click", close_callback);
     return panel;
 }
