@@ -18,7 +18,7 @@ type Fixed_Size_Array<T, N extends int> = {
     data:   Static_Array<T, N>;
     count:  int;
     total:  N;
-};
+}
 
 // :game
 type Game = {
@@ -29,6 +29,7 @@ type Game = {
     theme:                  Theme;
     clear_color:            Color;
     player:                 Entity;
+    player_path:            int[];
     projects:               Fixed_Size_Array<Project, typeof MAX_PROJECTS>,
     nodes:                  Fixed_Size_Array<Map_Node, typeof MAX_NODES>,
     nodes_current:          int;
@@ -160,6 +161,7 @@ export function start(loaded_callback: () => void) {
     game.draw_world_grid = false;
     game.draw_world_tile = true;
     game.draw_tiles = true;
+    game.player_path = [];
 
     const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
     const [renderer, renderer_ok] = renderer_init(prefers_dark_theme);
@@ -314,10 +316,6 @@ export function update() {
                 }
             }
 
-            if (game.inputs.keys.Space.released) {
-                game.theme = (game.theme === Theme.DARK) ? Theme.LIGHT : Theme.DARK;
-            }
-
             if (
                 (game.inputs.keys.Space.released || (game.inputs.keys.Space.down && game.inputs.keys.Space.reset_next_frame)) ||
                 (game.inputs.keys.Enter.released || (game.inputs.keys.Enter.down && game.inputs.keys.Enter.reset_next_frame))
@@ -424,14 +422,92 @@ export function update() {
                                     break;
                                 }
                             }
+
                             if (node_at_mouse_position > -1) {
                                 const destination_node = game.nodes.data[node_at_mouse_position];
-                                for (let direction = 0; direction < current_node.neighbours.length; direction++) {
-                                    const neighbour = current_node.neighbours[direction];
-                                    if (neighbour.path.length > 0 && vector2_equal(neighbour.path[neighbour.path.length - 1], destination_node.grid_position)) {
-                                        player_input_move = DIRECTIONS[direction];
+
+                                // Quick and dirty A* pathfinding
+                                // TODO: profile this, maybe we need to calculate all the pathes in advances since we don't have anything dynamic.
+                                let path : Node_Index[] = [];
+                                type Node_Index = int;
+                                type AStar_Node = { curr: Node_Index; prev: Node_Index; g_cost: int, h_cost: int }
+
+                                const nodes : AStar_Node[] = Array(game.nodes.count);
+                                for (let node_index = 0; node_index < nodes.length; node_index++) {
+                                    nodes[node_index] = { curr: node_index, prev: null, g_cost: 0, h_cost: 0 };
+                                }
+                                let checked : Node_Index[] = [];
+                                let to_check : Node_Index[] = [game.nodes_current];
+
+                                let tries = 0;
+                                while (to_check.length > 0) {
+                                    tries += 1;
+                                    if (tries > 50) {
+                                        if (!__RELEASE__) { console.warn("Path not found!"); }
                                         break;
                                     }
+
+                                    const current = to_check.pop();
+                                    if (checked.includes(current)) {
+                                        continue;
+                                    }
+
+                                    const node = game.nodes.data[current];
+                                    checked.push(current);
+
+                                    const destination_reached = vector2_equal(node.grid_position, destination_node.grid_position);
+                                    if (destination_reached) {
+                                        let n = checked[checked.length-1];
+                                        while (n !== null) {
+                                            const node = nodes[n];
+                                            if (node.curr !== game.nodes_current) path.push(n);
+                                            n = node.prev;
+                                        }
+                                        break;
+                                    }
+
+                                    for (let direction = 0; direction < node.neighbours.length; direction++) {
+                                        const neighbour = node.neighbours[direction];
+                                        if (neighbour.path.length === 0) {
+                                            continue;
+                                        }
+
+                                        const neighbour_position = neighbour.path[neighbour.path.length - 1];
+                                        const neighbour_node_id = find_node_at_position(neighbour_position);
+                                        if (checked.includes(neighbour_node_id)) {
+                                            continue;
+                                        }
+
+                                        const neighbour_g_cost = nodes[current].g_cost + manhathan_distance(destination_node.grid_position, neighbour_position);
+                                        const neighbour_node = nodes[neighbour_node_id];
+                                        const already_checked = to_check.includes(neighbour_node_id);
+                                        if (neighbour_g_cost < neighbour_node.g_cost || !already_checked) {
+                                            neighbour_node.g_cost = neighbour_g_cost;
+                                            neighbour_node.h_cost = manhathan_distance(destination_node.grid_position, neighbour_position);
+                                            neighbour_node.prev = current;
+
+                                            if (!already_checked) {
+                                                to_check.push(neighbour_node_id);
+                                            }
+                                        }
+                                    }
+                                }
+
+                                if (path.length > 0) {
+                                    game.player_path = path;
+                                }
+                            }
+                        }
+
+                        if (game.player_path.length > 0) {
+                            const next = game.player_path.pop();
+                            // console.log("next", next);
+                            const next_node = game.nodes.data[next];
+                            for (let direction = 0; direction < current_node.neighbours.length; direction++) {
+                                const neighbour = current_node.neighbours[direction];
+                                if (neighbour.path.length > 0 && vector2_equal(next_node.grid_position, neighbour.path[neighbour.path.length-1])) {
+                                    player_input_move = DIRECTIONS[direction];
+                                    break;
                                 }
                             }
                         }
