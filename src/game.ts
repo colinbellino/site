@@ -111,6 +111,7 @@ const THEMES = [
 ];
 
 // :constants
+const CUSTOM_BACKGROUND = true; // TODO: disable this in release
 const THUMBNAIL_SIZE: Vector2 = [320, 180];
 const CAMERA_START_POSITION: Vector2 = [24, 9];
 const GRID_SIZE = 48;
@@ -199,7 +200,18 @@ export function start(loaded_callback: () => void) {
         }, 1000);
     }
 
-    load_image(THEMES[game.theme].atlas).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+    load_image(THEMES[game.theme].atlas).then(image => {
+        game.texture0 = renderer_create_texture(image, game.renderer.gl);
+
+        if (CUSTOM_BACKGROUND) {
+            game.renderer.offscreen.canvas.width = 1;
+            game.renderer.offscreen.canvas.height = 1;
+            game.renderer.offscreen.drawImage(image, 0, 240, 1, 1, 0, 0, 1, 1);
+            const color = game.renderer.offscreen.getImageData(0, 0, 1, 1);
+            THEMES[game.theme].color = color_to_hex(color.data as any);
+            ui_set_theme_color(THEMES[game.theme].color);
+        }
+     });
     load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
     load_codegen().then((codegen) => {
         game.world = codegen.world;
@@ -1854,6 +1866,9 @@ function aabb_collides(a_position: Vector2, a_size: Vector2, b_position: Vector2
 }
 function manhathan_distance(a: Vector2, b: Vector2): int {
     return (Math.abs(a[0] - b[0]) + Math.abs(a[1] - b[1]));
+}
+function color_to_hex(hex_rgba: Color): number {
+    return ((hex_rgba[0] << 16) + (hex_rgba[1] << 8) + hex_rgba[2]);
 }
 function hex_to_color(hex_rgb: number): Color {
     const color = new Array(4) as Color;
