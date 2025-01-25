@@ -35,15 +35,19 @@ main :: () {
 
 build :: (args: []string) -> bool {
     config.release = array_find(args, "-release");
+    log("release:   %", config.release);
     config.no_server = array_find(args, "-no-server");
+    log("no_server: %", config.no_server);
 
     if config.release {
         run_minify_html_command();
         run_compress_png_command();
     }
 
+    run_compile_command("src/game.ts", config.release);
+
     if config.no_server {
-        run_compile_command("src/game.ts", config.release);
+
     } else {
         thread_group: Thread_Group;
         init(*thread_group, 1, compile_work);
