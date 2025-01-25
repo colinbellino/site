@@ -178,7 +178,7 @@ export function start(loaded_callback: () => void) {
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
     let use_dark_theme = prefers_dark_theme;
-    if (!__RELEASE__) {
+    /* if (!__RELEASE__) */ {
         if      (location.search.includes("dark"))  { use_dark_theme = true; }
         else if (location.search.includes("light")) { use_dark_theme = false; }
     }
