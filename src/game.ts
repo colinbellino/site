@@ -45,9 +45,9 @@ type Game = {
     camera_move_end:        Vector2;
     render_active:          boolean;
     draw_console:           boolean;
-    draw_entities:          boolean;
     draw_world_grid:        boolean;
     draw_world_tile:        boolean;
+    draw_entities:          boolean;
     draw_tiles:             boolean;
     image_projects:         HTMLImageElement;
     texture0:               WebGLTexture;
@@ -156,8 +156,9 @@ const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
 const enum Theme { LIGHT, DARK };
 
-function COLOR_WHITE(): Color { return [1, 1, 1, 1]; }
-function COLOR_BLACK(): Color { return [0, 0, 0, 1]; }
+function COLOR_TRANSPARENT(): Color { return [0, 0, 0, 0]; }
+function COLOR_WHITE(): Color       { return [1, 1, 1, 1]; }
+function COLOR_BLACK(): Color       { return [0, 0, 0, 1]; }
 
 let game: Game;
 
@@ -176,10 +177,10 @@ export function start(loaded_callback: () => void) {
     game.console_lines = fixed_array_make(MAX_CONSOLE_LINES);
     game.destination_path = fixed_array_make(MAX_PATH);
     game.draw_console = location.search.includes("console");
-    game.draw_entities = true;
+    game.draw_entities = false;
     game.draw_world_grid = false;
-    game.draw_world_tile = true;
-    game.draw_tiles = true;
+    game.draw_world_tile = false;
+    game.draw_tiles = false;
     game.player_path = [];
 
     const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
@@ -264,8 +265,8 @@ export function update() {
         }
 
         const frame_start_theme = game.theme;
-        const frame_start_node = game.nodes_current;
-        const frame_start_camera_zoom = game.renderer.camera_main.zoom;
+        // const frame_start_node = game.nodes_current;
+        // const frame_start_camera_zoom = game.renderer.camera_main.zoom;
 
         if (game.inputs.window_resized) {
             renderer_resize_canvas();
@@ -292,6 +293,9 @@ export function update() {
                 }
                 if (game.inputs.keys.Digit3.released) {
                     game.draw_entities = !game.draw_entities;
+                }
+                if (game.inputs.keys.Digit4.released) {
+                    game.draw_tiles = !game.draw_tiles;
                 }
                 if (game.inputs.keys.KeyT.down) {
                     game.renderer.camera_main.zoom = 1;
@@ -441,18 +445,46 @@ export function update() {
                 switch (game.world_mode) {
                     // :world INTRO
                     case World_Mode.INTRO: {
-                        const current: Vector2 = [game.world.start_position[0] - 1, game.world.start_position[1]];
-                        const next = game.world.start_position;
-                        const duration = PLAYER_MOVE_SPEED * 2;
-                        const end = game.world_mode_timer + duration;
-                        const progress = 1 - ((end - now) / duration);
+                        let done = false;
+                        const fade_start = game.world_mode_timer;
+                        const fade_end = fade_start + 1500;
+                        const player_move_start = game.world_mode_timer + 1300;
+                        const player_move_end = player_move_start + PLAYER_MOVE_SPEED*2;
+                        // const intro_end = game.world_mode_timer + 3000;
 
-                        game.player.sprite.position = vector2_lerp(grid_position_center(current), grid_position_center(next), progress);
+                        game.draw_entities = true;
+                        game.draw_world_tile = true;
+                        game.draw_tiles = true;
 
-                        const direction = vector_to_direction(vector2_substract(next, current));
-                        game.player.animation.current_animation = direction;
+                        const fade_progress = timer_progress(fade_start, fade_end, now);
+                        fixed_array_add(game.renderer.sprites, {
+                            color: vector4_lerp(hex_to_color(THEMES[game.theme].color), COLOR_TRANSPARENT(), fade_progress),
+                            position: game.renderer.camera_main.position,
+                            size: [1, 1],
+                            scale: vector2_multiply_float(game.renderer.window_size, 2),
+                            offset: [0, -2],
+                            rotation: 0,
+                            texture_size: [16, 16],
+                            texture_position: [0, 0],
+                            z_index: 999,
+                        });
 
-                        if (progress >= 1) {
+                        if (now >= player_move_start) {
+                            const current: Vector2 = [game.world.start_position[0] - 1, game.world.start_position[1]];
+                            const next = game.world.start_position;
+                            const progress = timer_progress(player_move_start, player_move_end, now);
+
+                            game.player.sprite.position = vector2_lerp(vector2_substract(grid_position_center(current), [-8, 0.0]), grid_position_center(next), progress);
+
+                            const direction = vector_to_direction(vector2_substract(next, current));
+                            game.player.animation.current_animation = direction;
+
+                            if (progress >= 1) {
+                                done = true;
+                            }
+                        }
+
+                        if (done) {
                             ui_label_show(game.renderer.ui_up);
                             ui_label_show(game.renderer.ui_right);
                             ui_label_show(game.renderer.ui_down);
@@ -808,40 +840,41 @@ export function update() {
                         fixed_array_add(game.renderer.sprites, entity.sprite);
                     }
                 }
+
+                // :render nodes
+                for (let node_index = 0; node_index < game.nodes.count; node_index++) {
+                    const node = game.nodes.data[node_index];
+                    let texture_position: Vector2 = [288, 144];
+                    let texture_size    : Vector2 = [16, 16];
+                    switch (node.type) {
+                        case Node_Type.EMPTY: { } break;
+                        case Node_Type.PROJECT: {
+                            texture_position = [304, 144];
+                        } break;
+                        case Node_Type.WARP: {
+                            texture_position = [144, 432];
+                            texture_size     = [48, 48];
+                        } break;
+                        case Node_Type.INFO: {
+                            texture_position = [192, 432];
+                            texture_size     = [48, 48];
+                        } break;
+                    }
+                    const sprite: Sprite = {
+                        color:              COLOR_WHITE(),
+                        position:           grid_position_center(node.grid_position),
+                        offset:             [0, 0],
+                        size:               texture_size,
+                        scale:              [1, 1],
+                        rotation:           0,
+                        texture_size:       texture_size,
+                        texture_position:   texture_position,
+                        z_index:            5,
+                    };
+                    fixed_array_add(game.renderer.sprites, sprite);
+                }
             }
 
-            // :render nodes
-            for (let node_index = 0; node_index < game.nodes.count; node_index++) {
-                const node = game.nodes.data[node_index];
-                let texture_position: Vector2 = [288, 144];
-                let texture_size    : Vector2 = [16, 16];
-                switch (node.type) {
-                    case Node_Type.EMPTY: { } break;
-                    case Node_Type.PROJECT: {
-                        texture_position = [304, 144];
-                    } break;
-                    case Node_Type.WARP: {
-                        texture_position = [144, 432];
-                        texture_size     = [48, 48];
-                    } break;
-                    case Node_Type.INFO: {
-                        texture_position = [192, 432];
-                        texture_size     = [48, 48];
-                    } break;
-                }
-                const sprite: Sprite = {
-                    color:              COLOR_WHITE(),
-                    position:           grid_position_center(node.grid_position),
-                    offset:             [0, 0],
-                    size:               texture_size,
-                    scale:              [1, 1],
-                    rotation:           0,
-                    texture_size:       texture_size,
-                    texture_position:   texture_position,
-                    z_index:            5,
-                };
-                fixed_array_add(game.renderer.sprites, sprite);
-            }
             // :render world grid
             render_world_grid: {
                 if (!game.draw_world_grid) { break render_world_grid; }
@@ -928,10 +961,18 @@ export function update() {
                     fixed_array_add(game.renderer.sprites, sprite);
                 }
             }
+
             // :render console lines
             // FIXME: don't do this in __RELEASE__
             if (game.draw_console) {
                 ui_push_console_line("fps:                " + game.fps.toFixed(0));
+                ui_push_console_line("world_mode:         " + game.world_mode);
+                ui_push_console_line("game_mode:          " + game.game_mode);
+                ui_push_console_line("draw_console:       " + game.draw_console);
+                ui_push_console_line("draw_world_grid:    " + game.draw_world_grid);
+                ui_push_console_line("draw_world_tile:    " + game.draw_world_tile);
+                ui_push_console_line("draw_entities:      " + game.draw_entities);
+                ui_push_console_line("draw_tiles:         " + game.draw_tiles);
                 ui_push_console_line("window_size:        " + game.renderer.window_size);
                 ui_push_console_line("pixel_ratio:        " + game.renderer.pixel_ratio);
                 ui_push_console_line("camera_position:    " + game.renderer.camera_main.position);
@@ -1896,18 +1937,23 @@ function project_generate_thumbnail_url(project_id: int): string {
 }
 
 // :debug
-function log_matrix(matrix: Matrix4) {
-    let str = "";
-    for (let i = 0; i < matrix.length; i++) {
-        if (i > 0 && i % 4 === 0) {
-            str += "\n";
-        }
-        str += `${matrix[i].toString().padStart(4)}, `;
-    }
-    console.log(str);
-}
-function number_to_binary_string(dec: number, size: number = 4): string {
-    return (dec >>> 0).toString(2).padStart(size, "0");
+// function log_matrix(matrix: Matrix4) {
+//     let str = "";
+//     for (let i = 0; i < matrix.length; i++) {
+//         if (i > 0 && i % 4 === 0) {
+//             str += "\n";
+//         }
+//         str += `${matrix[i].toString().padStart(4)}, `;
+//     }
+//     console.log(str);
+// }
+// function number_to_binary_string(dec: number, size: number = 4): string {
+//     return (dec >>> 0).toString(2).padStart(size, "0");
+// }
+function timer_progress(start: number, end: number, now: number): float {
+    const duration = end - start;
+    const progress = 1 - ((end - now) / duration);
+    return progress;
 }
 function no_op(): void {}
 
@@ -1959,6 +2005,14 @@ function vector2_lerp(a: Vector2, b: Vector2, t: float): Vector2 {
     result[1] = a[1] + t * (b[1] - a[1]);
     return result;
 }
+function vector4_lerp(a: Vector4, b: Vector4, t: float): Vector4 {
+    const result: Vector4 = [0, 0, 0, 0];
+    result[0] = a[0] + t * (b[0] - a[0]);
+    result[1] = a[1] + t * (b[1] - a[1]);
+    result[2] = a[2] + t * (b[2] - a[2]);
+    result[3] = a[3] + t * (b[3] - a[3]);
+    return result;
+}
 function grid_index_to_position(grid_index: int, grid_width: int): Vector2 {
     return [ grid_index % grid_width, Math.floor(grid_index / grid_width) ];
 }
@@ -1968,9 +2022,9 @@ function grid_position_to_index(x: int, y: int, w: int): int {
 function clamp(value: number, min: number, max: number): number {
     return Math.min(Math.max(value, min), max);
 }
-function sin_01(time: float, frequency: float = 1.0): float {
-    return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
-}
+// function sin_01(time: float, frequency: float = 1.0): float {
+//     return 0.5 * (1 + Math.sin(2 * Math.PI * frequency * time));
+// }
 function is_in_bounds(x: int, y: int, w: int, h: int): boolean {
     return x >= 0 && x < w && y >= 0 && y < h;
 }
@@ -2110,149 +2164,149 @@ function matrix4_make_translation(x: float, y: float, z: float): Matrix4 {
 
     return result
 }
-function matrix4_transpose(m: Matrix4): Matrix4 {
-    const result = matrix4_zero();
+// function matrix4_transpose(m: Matrix4): Matrix4 {
+//     const result = matrix4_zero();
 
-    result[ 0] = m[0];
-    result[ 1] = m[4];
-    result[ 2] = m[8];
-    result[ 3] = m[12];
-    result[ 4] = m[1];
-    result[ 5] = m[5];
-    result[ 6] = m[9];
-    result[ 7] = m[13];
-    result[ 8] = m[2];
-    result[ 9] = m[6];
-    result[10] = m[10];
-    result[11] = m[14];
-    result[12] = m[3];
-    result[13] = m[7];
-    result[14] = m[11];
-    result[15] = m[15];
+//     result[ 0] = m[0];
+//     result[ 1] = m[4];
+//     result[ 2] = m[8];
+//     result[ 3] = m[12];
+//     result[ 4] = m[1];
+//     result[ 5] = m[5];
+//     result[ 6] = m[9];
+//     result[ 7] = m[13];
+//     result[ 8] = m[2];
+//     result[ 9] = m[6];
+//     result[10] = m[10];
+//     result[11] = m[14];
+//     result[12] = m[3];
+//     result[13] = m[7];
+//     result[14] = m[11];
+//     result[15] = m[15];
 
-    return result;
-}
-function matrix_4_inverse(m: Matrix4): Matrix4 {
-    const result = matrix4_zero();
-    var m00 = m[0 * 4 + 0];
-    var m01 = m[0 * 4 + 1];
-    var m02 = m[0 * 4 + 2];
-    var m03 = m[0 * 4 + 3];
-    var m10 = m[1 * 4 + 0];
-    var m11 = m[1 * 4 + 1];
-    var m12 = m[1 * 4 + 2];
-    var m13 = m[1 * 4 + 3];
-    var m20 = m[2 * 4 + 0];
-    var m21 = m[2 * 4 + 1];
-    var m22 = m[2 * 4 + 2];
-    var m23 = m[2 * 4 + 3];
-    var m30 = m[3 * 4 + 0];
-    var m31 = m[3 * 4 + 1];
-    var m32 = m[3 * 4 + 2];
-    var m33 = m[3 * 4 + 3];
-    var tmp_0  = m22 * m33;
-    var tmp_1  = m32 * m23;
-    var tmp_2  = m12 * m33;
-    var tmp_3  = m32 * m13;
-    var tmp_4  = m12 * m23;
-    var tmp_5  = m22 * m13;
-    var tmp_6  = m02 * m33;
-    var tmp_7  = m32 * m03;
-    var tmp_8  = m02 * m23;
-    var tmp_9  = m22 * m03;
-    var tmp_10 = m02 * m13;
-    var tmp_11 = m12 * m03;
-    var tmp_12 = m20 * m31;
-    var tmp_13 = m30 * m21;
-    var tmp_14 = m10 * m31;
-    var tmp_15 = m30 * m11;
-    var tmp_16 = m10 * m21;
-    var tmp_17 = m20 * m11;
-    var tmp_18 = m00 * m31;
-    var tmp_19 = m30 * m01;
-    var tmp_20 = m00 * m21;
-    var tmp_21 = m20 * m01;
-    var tmp_22 = m00 * m11;
-    var tmp_23 = m10 * m01;
+//     return result;
+// }
+// function matrix_4_inverse(m: Matrix4): Matrix4 {
+//     const result = matrix4_zero();
+//     var m00 = m[0 * 4 + 0];
+//     var m01 = m[0 * 4 + 1];
+//     var m02 = m[0 * 4 + 2];
+//     var m03 = m[0 * 4 + 3];
+//     var m10 = m[1 * 4 + 0];
+//     var m11 = m[1 * 4 + 1];
+//     var m12 = m[1 * 4 + 2];
+//     var m13 = m[1 * 4 + 3];
+//     var m20 = m[2 * 4 + 0];
+//     var m21 = m[2 * 4 + 1];
+//     var m22 = m[2 * 4 + 2];
+//     var m23 = m[2 * 4 + 3];
+//     var m30 = m[3 * 4 + 0];
+//     var m31 = m[3 * 4 + 1];
+//     var m32 = m[3 * 4 + 2];
+//     var m33 = m[3 * 4 + 3];
+//     var tmp_0  = m22 * m33;
+//     var tmp_1  = m32 * m23;
+//     var tmp_2  = m12 * m33;
+//     var tmp_3  = m32 * m13;
+//     var tmp_4  = m12 * m23;
+//     var tmp_5  = m22 * m13;
+//     var tmp_6  = m02 * m33;
+//     var tmp_7  = m32 * m03;
+//     var tmp_8  = m02 * m23;
+//     var tmp_9  = m22 * m03;
+//     var tmp_10 = m02 * m13;
+//     var tmp_11 = m12 * m03;
+//     var tmp_12 = m20 * m31;
+//     var tmp_13 = m30 * m21;
+//     var tmp_14 = m10 * m31;
+//     var tmp_15 = m30 * m11;
+//     var tmp_16 = m10 * m21;
+//     var tmp_17 = m20 * m11;
+//     var tmp_18 = m00 * m31;
+//     var tmp_19 = m30 * m01;
+//     var tmp_20 = m00 * m21;
+//     var tmp_21 = m20 * m01;
+//     var tmp_22 = m00 * m11;
+//     var tmp_23 = m10 * m01;
 
-    var t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
-        (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
-    var t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
-        (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
-    var t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
-        (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
-    var t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
-        (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
+//     var t0 = (tmp_0 * m11 + tmp_3 * m21 + tmp_4 * m31) -
+//         (tmp_1 * m11 + tmp_2 * m21 + tmp_5 * m31);
+//     var t1 = (tmp_1 * m01 + tmp_6 * m21 + tmp_9 * m31) -
+//         (tmp_0 * m01 + tmp_7 * m21 + tmp_8 * m31);
+//     var t2 = (tmp_2 * m01 + tmp_7 * m11 + tmp_10 * m31) -
+//         (tmp_3 * m01 + tmp_6 * m11 + tmp_11 * m31);
+//     var t3 = (tmp_5 * m01 + tmp_8 * m11 + tmp_11 * m21) -
+//         (tmp_4 * m01 + tmp_9 * m11 + tmp_10 * m21);
 
-    var d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
+//     var d = 1.0 / (m00 * t0 + m10 * t1 + m20 * t2 + m30 * t3);
 
-    result[0] = d * t0;
-    result[1] = d * t1;
-    result[2] = d * t2;
-    result[3] = d * t3;
-    result[4] = d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
-          (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30));
-    result[5] = d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
-          (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30));
-    result[6] = d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
-          (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30));
-    result[7] = d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
-          (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20));
-    result[8] = d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
-          (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33));
-    result[9] = d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
-          (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33));
-    result[10] = d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
-          (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33));
-    result[11] = d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
-          (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23));
-    result[12] = d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
-          (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22));
-    result[13] = d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
-          (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02));
-    result[14] = d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
-          (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12));
-    result[15] = d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
-          (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02));
+//     result[0] = d * t0;
+//     result[1] = d * t1;
+//     result[2] = d * t2;
+//     result[3] = d * t3;
+//     result[4] = d * ((tmp_1 * m10 + tmp_2 * m20 + tmp_5 * m30) -
+//           (tmp_0 * m10 + tmp_3 * m20 + tmp_4 * m30));
+//     result[5] = d * ((tmp_0 * m00 + tmp_7 * m20 + tmp_8 * m30) -
+//           (tmp_1 * m00 + tmp_6 * m20 + tmp_9 * m30));
+//     result[6] = d * ((tmp_3 * m00 + tmp_6 * m10 + tmp_11 * m30) -
+//           (tmp_2 * m00 + tmp_7 * m10 + tmp_10 * m30));
+//     result[7] = d * ((tmp_4 * m00 + tmp_9 * m10 + tmp_10 * m20) -
+//           (tmp_5 * m00 + tmp_8 * m10 + tmp_11 * m20));
+//     result[8] = d * ((tmp_12 * m13 + tmp_15 * m23 + tmp_16 * m33) -
+//           (tmp_13 * m13 + tmp_14 * m23 + tmp_17 * m33));
+//     result[9] = d * ((tmp_13 * m03 + tmp_18 * m23 + tmp_21 * m33) -
+//           (tmp_12 * m03 + tmp_19 * m23 + tmp_20 * m33));
+//     result[10] = d * ((tmp_14 * m03 + tmp_19 * m13 + tmp_22 * m33) -
+//           (tmp_15 * m03 + tmp_18 * m13 + tmp_23 * m33));
+//     result[11] = d * ((tmp_17 * m03 + tmp_20 * m13 + tmp_23 * m23) -
+//           (tmp_16 * m03 + tmp_21 * m13 + tmp_22 * m23));
+//     result[12] = d * ((tmp_14 * m22 + tmp_17 * m32 + tmp_13 * m12) -
+//           (tmp_16 * m32 + tmp_12 * m12 + tmp_15 * m22));
+//     result[13] = d * ((tmp_20 * m32 + tmp_12 * m02 + tmp_19 * m22) -
+//           (tmp_18 * m22 + tmp_21 * m32 + tmp_13 * m02));
+//     result[14] = d * ((tmp_18 * m12 + tmp_23 * m32 + tmp_15 * m02) -
+//           (tmp_22 * m32 + tmp_14 * m02 + tmp_19 * m12));
+//     result[15] = d * ((tmp_22 * m22 + tmp_16 * m02 + tmp_21 * m12) -
+//           (tmp_20 * m12 + tmp_23 * m22 + tmp_17 * m02));
 
-    return result;
-}
-function matrix4_rotate_z(m: Matrix4, angle_in_radians: float): Matrix4 {
-    const result = matrix4_zero();
+//     return result;
+// }
+// function matrix4_rotate_z(m: Matrix4, angle_in_radians: float): Matrix4 {
+//     const result = matrix4_zero();
 
-    var m00 = m[0 * 4 + 0];
-    var m01 = m[0 * 4 + 1];
-    var m02 = m[0 * 4 + 2];
-    var m03 = m[0 * 4 + 3];
-    var m10 = m[1 * 4 + 0];
-    var m11 = m[1 * 4 + 1];
-    var m12 = m[1 * 4 + 2];
-    var m13 = m[1 * 4 + 3];
-    var c = Math.cos(angle_in_radians);
-    var s = Math.sin(angle_in_radians);
+//     var m00 = m[0 * 4 + 0];
+//     var m01 = m[0 * 4 + 1];
+//     var m02 = m[0 * 4 + 2];
+//     var m03 = m[0 * 4 + 3];
+//     var m10 = m[1 * 4 + 0];
+//     var m11 = m[1 * 4 + 1];
+//     var m12 = m[1 * 4 + 2];
+//     var m13 = m[1 * 4 + 3];
+//     var c = Math.cos(angle_in_radians);
+//     var s = Math.sin(angle_in_radians);
 
-    result[ 0] = c * m00 + s * m10;
-    result[ 1] = c * m01 + s * m11;
-    result[ 2] = c * m02 + s * m12;
-    result[ 3] = c * m03 + s * m13;
-    result[ 4] = c * m10 - s * m00;
-    result[ 5] = c * m11 - s * m01;
-    result[ 6] = c * m12 - s * m02;
-    result[ 7] = c * m13 - s * m03;
+//     result[ 0] = c * m00 + s * m10;
+//     result[ 1] = c * m01 + s * m11;
+//     result[ 2] = c * m02 + s * m12;
+//     result[ 3] = c * m03 + s * m13;
+//     result[ 4] = c * m10 - s * m00;
+//     result[ 5] = c * m11 - s * m01;
+//     result[ 6] = c * m12 - s * m02;
+//     result[ 7] = c * m13 - s * m03;
 
-    if (m !== result) {
-      result[ 8] = m[ 8];
-      result[ 9] = m[ 9];
-      result[10] = m[10];
-      result[11] = m[11];
-      result[12] = m[12];
-      result[13] = m[13];
-      result[14] = m[14];
-      result[15] = m[15];
-    }
+//     if (m !== result) {
+//       result[ 8] = m[ 8];
+//       result[ 9] = m[ 9];
+//       result[10] = m[10];
+//       result[11] = m[11];
+//       result[12] = m[12];
+//       result[13] = m[13];
+//       result[14] = m[14];
+//       result[15] = m[15];
+//     }
 
-    return result;
-}
+//     return result;
+// }
 
 function grid_position_center(grid_position: Vector2): Vector2 {
     return [grid_position[0]*GRID_SIZE, grid_position[1]*GRID_SIZE];
@@ -2291,19 +2345,8 @@ function ui_label_show(button: UI_Label, label: string = ""): void {
 function ui_label_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
 }
-function ui_label_toggle(button: UI_Label): void {
-    if (button.element_root.classList.contains("hide")) {
-        ui_label_show(button);
-    } else {
-        ui_label_hide(button);
-    }
-}
 function ui_node_show(node: Map_Node) {
     const action = ui_get_node_action(node);
-    // if (action !== "") {
-    //     ui_label_show(game.renderer.ui_confirm, action);
-    // }
-
     const tooltip = ui_get_node_tooltip(node);
     if (node.project_id > 0) {
         ui_label_node_show(game.renderer.ui_node_action, action, project_generate_thumbnail_url(node.project_id));
