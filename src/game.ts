@@ -84,6 +84,21 @@ type Cell = int;
 type Entity = {
     name:           string;
     sprite:         Sprite;
+    animation:      Animation;
+}
+type Animation = {
+    active:             boolean;
+    entity:             Entity;
+    current_frame:      int;
+    current_animation:  int;
+    frame_duration:     int; // in milliseconds
+    frame_started_at:   DOMHighResTimeStamp; // in milliseconds
+    animations: [
+        /* IDLE_NORTH */ Static_Array<Vector2, 4>,
+        /* IDLE_EAST */  Static_Array<Vector2, 4>,
+        /* IDLE_SOUTH */ Static_Array<Vector2, 4>,
+        /* IDLE_WEST */  Static_Array<Vector2, 4>,
+    ],
 }
 enum Node_Type {
     EMPTY,
@@ -130,6 +145,8 @@ const DIRECTIONS : Vector2[] = [
     [ +0, +1 ], // .South
     [ -1, +0 ], // .West
 ];
+const PLAYER_MOVE_SPEED = 400;
+const WARP_MOVE_SPEED_MULTIPLIER = 8.0;
 const ICON_CLOSE = `<svg width="64" height="64"><g><path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/></g></svg>`;
 const ICON_KEYBOARD_ESCAPE = `<svg width="64" height="64"><path d="M16 8h32q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8m16 20q-.4 0-.7.3-.3.3-.3.7 0 .4.3.7l.65.3h.1q1.55 0 2.75 1.2T36 34q0 1.6-1.2 2.8Q33.6 38 32 38h-4v-3h4l.7-.3.3-.7-.3-.7q-.3-.3-.65-.3h-.1q-1.55 0-2.75-1.2T28 29q0-1.6 1.2-2.8Q30.4 25 32 25h4v3h-4m-14-3h8v3h-5v2h5v3h-5v2h5v3h-8V25m26.8 12-.1.1q-1.15.9-2.7.9-1.6 0-2.7-.9l-.1-.05-.05-.1Q38 35.8 38 34.3v-5.55q0-1.6 1.2-2.7h.05Q40.4 25 42 25q1.55 0 2.75 1.05 1.25 1.1 1.25 2.7v1.5h-3v-1.5l-.2-.45q-.35-.3-.8-.3-.45 0-.75.25l-.05.05-.2.45v5.55l.2.5.8.2.75-.2.25-.5v-1.5h3v1.5q.05 1.5-1.2 2.7M11 16v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5H16q-5 0-5 5"/></svg>`;
 const ICON_KEYBOARD_ENTER = `<svg width="64" height="64"><path d="M40 11h-4q-5 0-5 5v15H16q-5 0-5 5v12q0 5 5 5h32q5 0 5-5V16q0-5-5-5h-8m8-3q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V36q0-8 8-8h12V16q0-8 8-8h12M20 43q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3m2-1.2q0-1.15.85-2l.05-.05Q23.75 39 25 39q1.15 0 2.05.75l.05.05q.9.85.9 2V48l-.3.7q-.3.3-.7.3l-.7-.3-.3-.7v-6.2l-.25-.55v.05q-.3-.3-.75-.3t-.8.3l.05-.1-.25.6V48l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-6.2m8-.8-.7-.3q-.3-.3-.3-.7 0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7q-.3.3-.7.3h-1v7l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-7h-1m6-1q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8m12.1 4.1v.05l-.65.5 1.45 2.9q.2.4.05.8l-.5.55-.75.05q-.4-.15-.6-.5L45.4 45H45v3l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h2.05q1.2 0 2.05.85.9.9.9 2.15t-.9 2.1m-2-1.1.35-.1.25-.2h.05L47 42l-.3-.75q-.25-.25-.65-.25H45v2h1.1"/></svg>`;
@@ -383,7 +400,7 @@ export function update() {
                         name: "PLAYER",
                         sprite: {
                             color: COLOR_WHITE(),
-                            position: grid_position_center(game.nodes.data[game.nodes_current].grid_position),
+                            position: [0, 0],
                             size: [16, 16],
                             scale: [1, 1],
                             offset: [0, -2],
@@ -392,6 +409,20 @@ export function update() {
                             texture_position: [0, 144],
                             z_index: 9,
                         },
+                        animation: {
+                            active:             true,
+                            entity:             game.player,
+                            current_frame:      0,
+                            current_animation:  Direction.SOUTH,
+                            frame_duration:     200,
+                            frame_started_at:   now,
+                            animations: [
+                                /* IDLE_NORTH */ [[0*16, 160], [1*16, 160], [2*16, 160], [3*16, 160]],
+                                /* IDLE_EAST */  [[0*16, 192], [1*16, 192], [2*16, 192], [3*16, 192]],
+                                /* IDLE_SOUTH */ [[0*16, 144], [1*16, 144], [2*16, 144], [3*16, 144]],
+                                /* IDLE_WEST */  [[0*16, 176], [1*16, 176], [2*16, 176], [3*16, 176]],
+                            ],
+                        }
                     });
 
                     game.renderer.camera_main.position = vector2_multiply_float(CAMERA_START_POSITION, GRID_SIZE);
@@ -410,13 +441,23 @@ export function update() {
                 switch (game.world_mode) {
                     // :world INTRO
                     case World_Mode.INTRO: {
-                        // TODO: remove this if we don't use the intro mode anymore?
-                        const done = true;
-                        if (done) {
+                        const current: Vector2 = [game.world.start_position[0] - 1, game.world.start_position[1]];
+                        const next = game.world.start_position;
+                        const duration = PLAYER_MOVE_SPEED * 2;
+                        const end = game.world_mode_timer + duration;
+                        const progress = 1 - ((end - now) / duration);
+
+                        game.player.sprite.position = vector2_lerp(grid_position_center(current), grid_position_center(next), progress);
+
+                        const direction = vector_to_direction(vector2_substract(next, current));
+                        game.player.animation.current_animation = direction;
+
+                        if (progress >= 1) {
                             ui_label_show(game.renderer.ui_up);
                             ui_label_show(game.renderer.ui_right);
                             ui_label_show(game.renderer.ui_down);
                             ui_label_show(game.renderer.ui_left);
+                            game.player.animation.current_animation = Direction.SOUTH;
                             game.world_mode = World_Mode.IDLE;
                             game.world_mode_timer = now;
                         }
@@ -555,9 +596,8 @@ export function update() {
                                 const destination_node = game.nodes.data[game.destination_node];
                                 if (destination_node.type === Node_Type.PROJECT) {
                                     const project = game.projects.data[destination_node.project_id];
-                                    const preload_images = [];
                                     for (let i = 0; i < project.screenshots_count; i++) {
-                                        preload_images.push(load_image(project_screenshot_url(project, i)));
+                                        load_image(project_screenshot_url(project, i)).catch(no_op);
                                     }
                                 }
 
@@ -584,10 +624,12 @@ export function update() {
                                 ui_label_show(game.renderer.ui_down);
                                 ui_label_show(game.renderer.ui_left);
                             } else {
-                                if (game.renderer.ui_node_action.element_root.classList.contains("hide")) {
-                                    ui_label_show(game.renderer.ui_node_action);
-                                } else {
-                                    ui_label_hide(game.renderer.ui_node_action);
+                                if (current_node.type !== Node_Type.EMPTY) {
+                                    if (game.renderer.ui_node_action.element_root.classList.contains("hide")) {
+                                        ui_label_show(game.renderer.ui_node_action);
+                                    } else {
+                                        ui_label_hide(game.renderer.ui_node_action);
+                                    }
                                 }
                             }
                         }
@@ -683,8 +725,8 @@ export function update() {
                         const is_warp = current_node.type === Node_Type.WARP && destination_node.type == Node_Type.WARP;
 
                         const distance = game.destination_path.count-1;
-                        let duration = 200 * distance;
-                        if (is_warp) { duration *= 6.0; }
+                        let duration = PLAYER_MOVE_SPEED * distance;
+                        if (is_warp) { duration *= WARP_MOVE_SPEED_MULTIPLIER; }
                         const end = game.world_mode_timer + duration;
                         const remaining = end - now;
                         const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
@@ -692,8 +734,10 @@ export function update() {
                         const [current, next, step_progress] = lerp_indices(game.destination_path.count-1, progress);
                         game.player.sprite.position = vector2_lerp(grid_position_center(game.destination_path.data[current]), grid_position_center(game.destination_path.data[next]), step_progress);
 
+                        const direction = vector_to_direction(vector2_substract(game.destination_path.data[next], game.destination_path.data[current]));
+                        game.player.animation.current_animation = direction;
+
                         if (is_warp) {
-                            // TODO: better player animation
                             game.player.sprite.scale = [0, 0];
                             game.renderer.camera_main.position = vector2_lerp(game.camera_move_start, game.camera_move_end, progress);
                         }
@@ -712,6 +756,7 @@ export function update() {
                             // ui_label_show(game.renderer.ui_right);
                             // ui_label_show(game.renderer.ui_down);
                             // ui_label_show(game.renderer.ui_left);
+                            game.player.animation.current_animation = Direction.SOUTH;
                             game.world_mode = World_Mode.IDLE;
                         }
                     } break;
@@ -725,8 +770,8 @@ export function update() {
 
             renderer_update_camera_matrix_main(game.renderer.camera_main);
 
-            const node_changed = frame_start_node !== game.nodes_current;
-            const camera_changed = frame_start_camera_zoom !== game.renderer.camera_main.zoom;
+            // const node_changed = frame_start_node !== game.nodes_current;
+            // const camera_changed = frame_start_camera_zoom !== game.renderer.camera_main.zoom;
             /* if (node_changed || game.inputs.window_resized || camera_changed) */ {
                 const MARGIN = 10;
                 const current_node = game.nodes.data[game.nodes_current];
@@ -749,7 +794,19 @@ export function update() {
             if (game.draw_entities) {
                 for (let entity_index = 0; entity_index < game.entities.count; entity_index++) {
                     const entity = game.entities.data[entity_index];
-                    fixed_array_add(game.renderer.sprites, entity.sprite);
+
+                    if (entity.animation.active) {
+                        const sprite = Object.assign({}, entity.sprite);
+                        const frames = entity.animation.animations[entity.animation.current_animation];
+                        sprite.texture_position = frames[entity.animation.current_frame];
+                        if (now >= entity.animation.frame_started_at + entity.animation.frame_duration) {
+                            entity.animation.frame_started_at = now;
+                            entity.animation.current_frame = (entity.animation.current_frame + 1) % frames.length;
+                        }
+                        fixed_array_add(game.renderer.sprites, sprite);
+                    } else {
+                        fixed_array_add(game.renderer.sprites, entity.sprite);
+                    }
                 }
             }
 
@@ -1083,7 +1140,7 @@ function renderer_resize_canvas() {
     game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio;
     game.renderer.gl.canvas.height = final_height * game.renderer.pixel_ratio;
 
-    if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
+    // if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
 function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, false] {
     const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
@@ -1781,8 +1838,7 @@ function load_image(url: string): Promise<HTMLImageElement> {
             resolve(image);
         };
         image.onerror = function() {
-            console.error("Image couldn't be loaded:", url);
-            reject();
+            reject(`Image couldn't be loaded:${url}`);
         };
     });
 }
@@ -1853,6 +1909,7 @@ function log_matrix(matrix: Matrix4) {
 function number_to_binary_string(dec: number, size: number = 4): string {
     return (dec >>> 0).toString(2).padStart(size, "0");
 }
+function no_op(): void {}
 
 // :math
 function aabb_collides(a_position: Vector2, a_size: Vector2, b_position: Vector2, b_size: Vector2): boolean {
@@ -1888,6 +1945,12 @@ function vector2_multiply_float(arr1: Vector2, value: float): Vector2 {
     const result: Vector2 = [0, 0];
     result[0] = arr1[0] * value;
     result[1] = arr1[1] * value;
+    return result;
+}
+function vector2_substract(arr1: Vector2, arr2: Vector2): Vector2 {
+    const result: Vector2 = [0, 0];
+    result[0] = arr1[0] - arr2[0];
+    result[1] = arr1[1] - arr2[1];
     return result;
 }
 function vector2_lerp(a: Vector2, b: Vector2, t: float): Vector2 {
