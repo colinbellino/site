@@ -208,7 +208,7 @@
       width: 100%;
       flex-grow: 1;
       box-sizing: border-box;
-      padding: 0.6em 1.5em;
+      padding: 0.6em 1em;
       align-items: center;
       min-height: 44px;
       font-size: 0.9em;
@@ -234,7 +234,7 @@
       position: relative;
       display: inline-block;
       box-sizing: border-box;
-      width: 115px;
+      width: 90px;
       padding: 8px 16px;
       margin: 0.5em 0 0 0.5em;
       border-radius: 3px;
@@ -260,7 +260,7 @@
       transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
     }
     body:not(.game-running) .hire-me.animated:hover {
-      width: 135px;
+      width: 110px;
       transition-delay: 0ms, 0ms;
     }
     body:not(.game-running) .hire-me.animated:hover svg {
@@ -396,11 +396,33 @@
       </div>
     </aside>
     <nav>
-      <p><b>My projects:</b></p>
+      <p><b>My links:</b></p>
       <ul class="links navigation">
-        <li><a href="/web" class="link"><img src="/site/images/web.svg" aria-hidden="true" width="26" height="26" /><span>Web</span></a></li>
-        <li><a href="/games" class="link"><img src="/site/images/games.svg" aria-hidden="true" width="26" height="26" /><span>Games</span></a></li>
-        <li><a href="/changelog" class="link"><img src="/site/images/changelog.svg" aria-hidden="true" width="26" height="26" /><span>Changelog</span></a></li>
+        <li>
+          <a href="/web" class="link">
+            <svg aria-hidden="true" viewBox="50 0 580 580"><path fill-rule="evenodd" d="M105 122.5v315c0 48.328 39.172 87.5 87.5 87.5h315c23.203 0 45.465-9.223 61.871-25.629S595 460.703 595 437.5v-315c0-23.203-9.223-45.465-25.629-61.871S530.703 35 507.5 35h-315c-48.328 0-87.5 39.172-87.5 87.5zM350 105c-96.582 0-175 78.418-175 175s78.418 175 175 175 175-78.418 175-175-78.418-175-175-175zm77.84 192.5H367.5v111.36c33.117-27.027 55.641-66.551 60.34-111.36zm-182.09 0h-34.668c6.012 48.117 36.48 88.672 78.539 108.83-24.465-30.293-40.328-67.812-43.871-108.83zm86.746 0h-51.59c4.27 40.73 23.285 77.105 51.59 103.7zm156.41 0h-25.918c-3.21 37.25-16.59 71.609-37.344 100.29 34.062-21.938 58.012-58.23 63.262-100.29zm-243.16-35c3.543-41.027 19.406-78.547 43.871-108.83-42.062 20.16-72.527 60.715-78.539 108.83zm86.746 0V158.8c-28.316 26.59-47.32 62.965-51.59 103.7zm35 0h60.34c-4.7-44.809-27.23-84.332-60.34-111.36zm121.41 0c-5.25-42.062-29.199-78.355-63.262-100.29 20.754 28.684 34.133 63.043 37.344 100.29z"/></svg>
+            <span>Web projects</span>
+          </a>
+        </li>
+        <li>
+          <a href="/games" class="link">
+            <svg aria-hidden="true" viewBox="0 0 640 512"><path d="M480 96H160C71.6 96 0 167.6 0 256s71.6 160 160 160c44.8 0 85.2-18.4 114.2-48h91.5c29 29.6 69.5 48 114.2 48 88.4 0 160-71.6 160-160S568.4 96 480 96zM256 276c0 6.6-5.4 12-12 12h-52v52c0 6.6-5.4 12-12 12h-40c-6.6 0-12-5.4-12-12v-52H76c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h52v-52c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h52c6.6 0 12 5.4 12 12v40zm184 68c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48zm80-80c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z"/></svg>
+            <span>Game projects</span>
+          </a>
+        </li>
+        <li>
+          <a href="/resume.pdf" class="link" target="_blank">
+            <svg aria-hidden="true" viewBox="0 0 384 512" style="width: 18px; margin-left: 5px;"><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
+            <span>Résumé / CV</span>
+          </a>
+        </li>
+        <li>
+          <a href="/changelog" class="link">
+            <!-- <svg aria-hidden="true" viewBox="0 0 420.827 420.827"><path d="M210.29 0C156 0 104.43 20.693 65.077 58.269 25.859 95.715 2.794 146.022.134 199.921a10.005 10.005 0 0 0 2.744 7.388 10.005 10.005 0 0 0 7.244 3.105h45.211a9.999 9.999 0 0 0 9.979-9.362c4.871-76.214 68.553-135.914 144.979-135.914 80.105 0 145.275 65.171 145.275 145.276S290.396 355.69 210.291 355.69c-18.109 0-35.772-3.287-52.501-9.771l17.366-15.425a10.003 10.003 0 0 0-3.375-16.989l-113-32.552a10.002 10.002 0 0 0-13.028 11.415L69.71 403.157a10 10 0 0 0 16.401 5.575l18.599-16.298c31.946 18.574 68.456 28.394 105.581 28.394 116.021 0 210.414-94.392 210.414-210.414C420.705 94.391 326.312 0 210.29 0z"/><path d="M195.112 237.9h118.5c2.757 0 5-2.242 5-5v-30c0-2.757-2.243-5-5-5h-83.5v-91c0-2.757-2.243-5-5-5h-30c-2.757 0-5 2.243-5 5v126c0 2.758 2.243 5 5 5z"/></svg> -->
+            <svg xml:space="preserve" viewBox="0 0 256 256"><path d="M19.8 246V46.9L54.3 10h142.6c6.4 0 12.7 1.9 18.8 5.7 6.1 3.8 11.1 8.7 14.9 14.9 3.8 6.1 5.7 12.4 5.7 18.8v147.5l-19.7 19.7V59.2c0-19.7-9.8-29.5-29.5-29.5H66.4L46.7 49.4h120.6c8.1 0 15.1 2.9 20.9 8.6 5.8 5.8 8.6 12.7 8.6 20.9v137.6c0 8.1-2.9 15.1-8.6 20.9-5.8 5.8-12.7 8.6-20.9 8.6H19.8zm80.4-58c.5.5 1 .7 1.6.7s1.2-.2 1.6-.7l67.8-67.7c.5-.5.7-1 .7-1.7s-.2-1.2-.7-1.7l-15.3-15.1c-.5-.4-1-.6-1.7-.6s-1.2.2-1.7.7l-49 49.1c-.5.5-1 .7-1.7.7s-1.2-.2-1.7-.7l-18.3-18.3c-.5-.5-1-.7-1.7-.7-.6 0-1.2.2-1.7.7l-15 15.3c-.5.5-.7 1-.7 1.7s.2 1.2.7 1.6l36.8 36.7z"/></svg>
+            <span>Changelog</span>
+          </a>
+        </li>
       </ul>
       <!-- TODO: aria/content -->
       <!-- TODO: insert this with JS so we don't have to pay the bytes if we don't have JS enabled -->
@@ -434,56 +456,56 @@
       </a>
       <h2>I‘m a french freelance programmer and designer who loves creating cool sites, apps and video games.</h2>
       <p>I‘ve been coding, tinkering and prototyping for more than 20 years with many technology from C to JavaScript, from Jai to Go, from web apps to video games. <br>Over the years, I‘ve developed a taste for rapid prototyping and a good intuition for building good experiences for my users and clients. I speak French, English and <a href="https://www.youtube.com/watch?v=sD3SF6foL00" target="_blank" rel="noopener noreferrer me" class="">Nerd</a>.</p>
-      <p><b>Available for hire</b> and currently looking for cool projects. If you‘d be interested in working with me, <a href="mailto:work@colinbellino.com" target="_blank">let‘s talk</a> ;)</p>
+      <p>Currently <b>available for hire</b> and looking for interesting projects to work on. If you‘d be interested in hiring me, <a href="mailto:work@colinbellino.com" target="_blank">let‘s talk</a> ;)</p>
     </section>
     <footer>
-      <p>Where to find me on social media:</p>
+      <p>Where to find me online:</p>
       <ul class="links socials">
         <li>
           <a href="https://mastodon.gamedev.place/@colinbellino" target="_blank" rel="noopener noreferrer me" class="link">
-            <img src="/site/images/mastodon.svg" aria-hidden="true" width="24" height="26" loading="lazy" />
+            <svg viewBox="0 0 216.414 232.01" aria-hidden="true" height="26"><path fill="#2b90d9" d="M211.807 139.088c-3.18 16.366-28.492 34.277-57.562 37.748-15.159 1.809-30.084 3.471-45.999 2.741-26.027-1.192-46.565-6.212-46.565-6.212 0 2.534.156 4.946.469 7.202 3.384 25.687 25.47 27.225 46.391 27.943 21.116.723 39.919-5.206 39.919-5.206l.867 19.09s-14.77 7.931-41.08 9.39c-14.51.797-32.525-.365-53.507-5.919C9.232 213.82 1.406 165.311.209 116.091c-.365-14.613-.14-28.393-.14-39.918 0-50.33 32.976-65.083 32.976-65.083C49.672 3.454 78.204.242 107.865 0h.729c29.66.242 58.21 3.454 74.837 11.09 0 0 32.975 14.752 32.975 65.082 0 0 .414 37.134-4.599 62.916"/><path fill="#fff" d="M177.51 80.077v60.941h-24.144v-59.15c0-12.469-5.246-18.797-15.74-18.797-11.602 0-17.417 7.507-17.417 22.352V117.8H96.207V85.423c0-14.845-5.816-22.352-17.418-22.352-10.494 0-15.74 6.328-15.74 18.797v59.15H38.905V80.077c0-12.455 3.171-22.352 9.541-29.675 6.569-7.322 15.171-11.076 25.85-11.076 12.355 0 21.711 4.748 27.898 14.247l6.013 10.082 6.015-10.082c6.185-9.498 15.542-14.247 27.898-14.247 10.677 0 19.28 3.753 25.85 11.076 6.369 7.322 9.54 17.22 9.54 29.675"/></svg>
             <span>Mastodon</span>
           </a>
         </li>
         <li>
           <a href="https://twitter.com/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/twitter.svg" aria-hidden="true" width="24" height="26" loading="lazy" />
+            <svg stroke-linejoin="round" stroke-miterlimit="2" viewBox="0 0 512 512" aria-hidden="true" height="26"><path fill="#1da1f2" d="M448 512H64c-35.328 0-64-28.672-64-64V64C0 28.672 28.672 0 64 0h384c35.328 0 64 28.672 64 64v384c0 35.328-28.672 64-64 64Z"/><path fill="#fff" d="M196.608 386.048c120.704 0 186.752-100.096 186.752-186.752 0-2.816 0-5.632-.128-8.448 12.8-9.216 23.936-20.864 32.768-34.048-11.776 5.248-24.448 8.704-37.76 10.368 13.568-8.064 23.936-20.992 28.928-36.352-12.672 7.552-26.752 12.928-41.728 15.872-12.032-12.8-29.056-20.736-47.872-20.736-36.224 0-65.664 29.44-65.664 65.664 0 5.12.64 10.112 1.664 14.976-54.528-2.688-102.912-28.928-135.296-68.608-5.632 9.728-8.832 20.992-8.832 33.024 0 22.784 11.648 42.88 29.184 54.656a66.39 66.39 0 0 1-29.696-8.192v.896c0 31.744 22.656 58.368 52.608 64.384-5.504 1.536-11.264 2.304-17.28 2.304-4.224 0-8.32-.384-12.288-1.152 8.32 26.112 32.64 45.056 61.312 45.568-22.528 17.664-50.816 28.16-81.536 28.16-5.248 0-10.496-.256-15.616-.896 28.928 18.432 63.488 29.312 100.48 29.312"/></svg>
             <span>Twitter</span>
           </a>
         </li>
         <li>
           <a href="https://www.linkedin.com/in/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/linked-in.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <svg viewBox="0 0 72 72"><g fill="none" fill-rule="evenodd" aria-hidden="true" height="26"><path fill="#007ebb" d="M8 72h56a8 8 0 0 0 8-8V8a8 8 0 0 0-8-8H8a8 8 0 0 0-8 8v56a8 8 0 0 0 8 8z"/><path fill="#fff" d="M62 62H51.316V43.802c0-4.99-1.896-7.777-5.845-7.777-4.296 0-6.54 2.901-6.54 7.777V62H28.632V27.333H38.93v4.67s3.096-5.729 10.453-5.729c7.353 0 12.617 4.49 12.617 13.777zM16.35 22.794c-3.508 0-6.35-2.864-6.35-6.397S12.842 10 16.35 10c3.507 0 6.347 2.864 6.347 6.397s-2.84 6.397-6.348 6.397zM11.032 62h10.736V27.333H11.033V62z"/></g></svg>
             <span>LinkedIn</span>
           </a>
         </li>
         <li>
           <a href="https://github.com/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/github.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <svg viewBox="0 0 32 32" aria-hidden="true" height="26"><path fill="#181616" fill-rule="evenodd" d="M16.003 0A16 16 0 0 0 .008 15.997c0 7.067 4.582 13.063 10.94 15.179.8.146 1.052-.328 1.052-.752v-2.777c-4.449.967-5.371-2.107-5.371-2.107-.727-1.848-1.775-2.34-1.775-2.34-1.452-.992.109-.973.109-.973 1.605.113 2.451 1.649 2.451 1.649 1.427 2.443 3.743 1.737 4.654 1.329.146-1.034.56-1.739 1.017-2.139-3.552-.404-7.286-1.776-7.286-7.906 0-1.747.623-3.174 1.646-4.292-.165-.404-.715-2.031.157-4.234 0 0 1.343-.43 4.398 1.641a15.31 15.31 0 0 1 4.005-.538c1.359.006 2.727.183 4.005.538 3.055-2.07 4.396-1.641 4.396-1.641.872 2.203.323 3.83.159 4.234 1.023 1.118 1.644 2.545 1.644 4.292 0 6.146-3.74 7.498-7.304 7.893C19.479 23.548 20 24.508 20 26v4.428c0 .428.258.901 1.07.746C27.422 29.055 32 23.062 32 15.997A16 16 0 0 0 16.003 0z"/></svg>
             <span>Github</span>
           </a>
         </li>
         <li>
           <a href="https://colinbellino.itch.io/" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/itch.svg" aria-hidden="true" width="26" height="23" loading="lazy" />
+            <svg viewBox="8.226 10.91 49.755 44.078" aria-hidden="true" height="23"><path d="m14.419 10.91-6.194 7.742v2.168c0 6.193 10.116 6.193 10.116 0 0 6.193 9.703 6.193 9.703 0 0 6.193 10.116 6.193 10.116 0 0 6.193 9.704 6.193 9.704 0 0 6.193 10.115 6.193 10.115 0v-2.168l-6.193-7.742H14.419zm3.82 13.626c-.31.413-.62.722-.929 1.032-1.135.929-2.581 1.342-4.026 1.342-.413 0-.826 0-1.135-.103v28.181h41.807V26.807c-.413.103-.723.103-1.136.103-1.445 0-2.89-.413-4.026-1.342-.309-.31-.619-.62-.928-1.032-.311.413-.518.722-.93 1.032-1.136.929-2.58 1.342-3.923 1.342-1.444 0-2.89-.413-3.923-1.342-.309-.31-.619-.62-.929-1.032-.31.413-.619.722-.929 1.032-1.341 1.032-2.787 1.445-4.232 1.445s-2.89-.413-4.026-1.342c-.31-.31-.619-.619-.929-1.032-.31.413-.516.723-.929 1.032-1.136.929-2.581 1.342-3.923 1.342-1.445 0-2.89-.413-3.922-1.342-.31-.31-.619-.619-.929-1.032l-.103-.103zm5.574 4.232c2.374 0 3.406.62 4.645 3.097h9.187c.517-2.477 1.549-3.097 4.646-3.097 2.373 0 6.399 2.271 7.019 5.471l3.097 12.078c.619 3.097-1.135 5.367-4.232 5.367-2.168 0-4.955-1.445-6.812-5.367H24.845c-1.858 4.025-4.645 5.367-6.813 5.367-3.097 0-4.852-2.271-4.232-5.367l3.097-12.078c.619-3.2 4.645-5.471 7.019-5.471h-.103zM33 33l-7.329 7.742h3.097v3.922h8.568v-3.818h3.096L33 33z"/></svg>
             <span>Itch</span>
           </a>
         </li>
         <li>
           <a href="https://www.twitch.tv/colinbellino" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/twitch.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <svg viewBox="0 0 512 512" aria-hidden="true" height="26"><path fill="#6441a5" d="m67.175 26.001-30.906 78.96V427.68h109.866v58.319h61.813l58.321-58.319h89.329l120.133-120.136V26.001z"/><path fill="#fff" d="m434.558 286.905-68.692 68.693H256.001l-58.322 58.319v-58.319H104.96V67.176h329.598z"/><path fill="#6441a5" d="M324.692 146.134h41.174v120.03h-41.174zm-109.868 0h41.177v120.03h-41.177z"/></svg>
             <span>Twitch</span>
           </a>
         </li>
         <li>
           <a href="https://www.youtube.com/@colinbellino" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/youtube.svg" aria-hidden="true" width="26" height="26" loading="lazy" />
+            <svg viewBox="0 0 24 24" aria-hidden="true" height="26"><use xlink:href="#a" fill="#ee3325"/><path fill="#fff" d="m20.934 3.675-1.899-.237a57.004 57.004 0 0 0-14.07 0l-1.9.237A3.506 3.506 0 0 0 0 7.148v.25a3.506 3.506 0 0 1 3.066-3.473l1.899-.237a57.004 57.004 0 0 1 14.07 0l1.9.237A3.506 3.506 0 0 1 24 7.398v-.25a3.506 3.506 0 0 0-3.066-3.473z" opacity=".2"/><path fill="#010101" d="m20.934 20.073-1.899.237a56.869 56.869 0 0 1-14.07 0l-1.9-.237A3.506 3.506 0 0 1 0 16.6v.25a3.506 3.506 0 0 0 3.066 3.473l1.899.237a56.869 56.869 0 0 0 14.07 0l1.9-.237A3.506 3.506 0 0 0 24 16.85v-.25a3.506 3.506 0 0 1-3.066 3.473z" opacity=".1"/><path fill="#fff" d="M9.5 7.5v9l7-4.5z"/><linearGradient id="b" x1="9" x2="14.75" y1="8" y2="13.75" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#010101" stop-opacity="0"/><stop offset="1" stop-color="#010101" stop-opacity=".1"/></linearGradient><path fill="url(#b)" d="M9.5 7.5V12h7z"/><linearGradient id="c" x1="12.375" x2="20.517" y1="13.625" y2="21.767" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#010101" stop-opacity=".1"/><stop offset="1" stop-color="#010101" stop-opacity="0"/></linearGradient><path fill="url(#c)" d="m16.5 12-7 4.5 4.44 4.44 5.095-.378 1.9-.237a3.487 3.487 0 0 0 2.418-1.472L16.5 12z"/><linearGradient id="d" x1="-.012" x2="24.012" y1="6.398" y2="17.6" gradientUnits="userSpaceOnUse"><stop offset="0" stop-color="#fff" stop-opacity=".2"/><stop offset="1" stop-color="#fff" stop-opacity="0"/></linearGradient><use xlink:href="#a" fill="url(#d)"/><defs><path id="a" d="m20.934 3.673-1.899-.237a56.997 56.997 0 0 0-14.07 0l-1.9.237A3.506 3.506 0 0 0 0 7.147v9.704a3.506 3.506 0 0 0 3.066 3.474l1.899.237a56.869 56.869 0 0 0 14.07 0l1.9-.237A3.506 3.506 0 0 0 24 16.85V7.147a3.506 3.506 0 0 0-3.066-3.474z"/></defs></svg>
             <span>YouTube</span>
           </a>
         </li>
         <li>
           <a href="https://discord.com/invite/6xcJYNh" target="_blank" rel="noopener noreferrer" class="link">
-            <img src="/site/images/discord.svg" aria-hidden="true" width="26" height="26" />
+            <svg aria-hidden="true" height="26"><circle cx="12" cy="11.998" r="11" fill="#8c9eff"/><path fill="#fff" d="M16.775 8.438s-1.361-1.066-2.969-1.188l-.145.29c1.454.355 2.12.865 2.817 1.491-1.2-.613-2.387-1.187-4.453-1.187s-3.252.574-4.453 1.187c.696-.626 1.49-1.192 2.816-1.491l-.144-.29c-1.687.16-2.969 1.188-2.969 1.188s-1.52 2.204-1.781 6.53c1.532 1.768 3.86 1.782 3.86 1.782l.486-.649a5.946 5.946 0 0 1-2.565-1.726c.961.727 2.412 1.484 4.75 1.484s3.789-.757 4.75-1.484a5.945 5.945 0 0 1-2.565 1.726l.487.649s2.327-.014 3.86-1.781c-.262-4.327-1.782-6.531-1.782-6.531zm-6.68 5.343c-.574 0-1.039-.531-1.039-1.187s.465-1.188 1.04-1.188 1.038.532 1.038 1.188-.465 1.187-1.039 1.187zm3.86 0c-.574 0-1.04-.531-1.04-1.187s.466-1.188 1.04-1.188 1.039.532 1.039 1.188-.466 1.187-1.04 1.187z"/><path fill="#231f20" d="M4.222 19.778A10.966 10.966 0 0 0 12 23c6.075 0 11-4.925 11-11a10.96 10.96 0 0 0-3.222-7.778L4.222 19.778z" opacity=".1"/></svg>
             <span>Discord</span>
           </a>
         </li>
