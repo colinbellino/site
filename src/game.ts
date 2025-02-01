@@ -500,7 +500,6 @@ export function update() {
 
                         const project_panel_opened = !game.renderer.ui_node_project.element_root.classList.contains("hide");
                         let node_at_mouse_position = -1;
-
                         for (let i = 0; i < game.nodes.count; i++) {
                             const HITBOX_SIZE = 48;
                             const node = game.nodes.data[i];
@@ -509,6 +508,12 @@ export function update() {
                                 node_at_mouse_position = i;
                                 break;
                             }
+                        }
+
+                        if (node_at_mouse_position > -1) {
+                            document.body.style.cursor = "pointer";
+                        } else {
+                            document.body.style.cursor = "default";
                         }
 
                         if (player_input_mouse_left) {
