@@ -229,7 +229,7 @@ export function start(loaded_callback: () => void) {
             THEMES[game.theme].color = color_to_hex(color.data as any);
             ui_set_theme_color(THEMES[game.theme].color);
         }
-     });
+    });
     load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
     load_codegen().then((codegen) => {
         game.world = codegen.world;
