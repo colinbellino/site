@@ -145,8 +145,8 @@ const DIRECTIONS : Vector2[] = [
     [ +0, +1 ], // .South
     [ -1, +0 ], // .West
 ];
-const PLAYER_MOVE_SPEED = 400;
-const WARP_MOVE_SPEED_MULTIPLIER = 8.0;
+const PLAYER_MOVE_SPEED = 300;
+const WARP_DURATION_MULTIPLIER = 4.0;
 const ICON_CLOSE = `<svg width="64" height="64"><g><path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/></g></svg>`;
 const ICON_KEYBOARD_ESCAPE = `<svg width="64" height="64"><path d="M16 8h32q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8m16 20q-.4 0-.7.3-.3.3-.3.7 0 .4.3.7l.65.3h.1q1.55 0 2.75 1.2T36 34q0 1.6-1.2 2.8Q33.6 38 32 38h-4v-3h4l.7-.3.3-.7-.3-.7q-.3-.3-.65-.3h-.1q-1.55 0-2.75-1.2T28 29q0-1.6 1.2-2.8Q30.4 25 32 25h4v3h-4m-14-3h8v3h-5v2h5v3h-5v2h5v3h-8V25m26.8 12-.1.1q-1.15.9-2.7.9-1.6 0-2.7-.9l-.1-.05-.05-.1Q38 35.8 38 34.3v-5.55q0-1.6 1.2-2.7h.05Q40.4 25 42 25q1.55 0 2.75 1.05 1.25 1.1 1.25 2.7v1.5h-3v-1.5l-.2-.45q-.35-.3-.8-.3-.45 0-.75.25l-.05.05-.2.45v5.55l.2.5.8.2.75-.2.25-.5v-1.5h3v1.5q.05 1.5-1.2 2.7M11 16v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5H16q-5 0-5 5"/></svg>`;
 const ICON_KEYBOARD_ENTER = `<svg width="64" height="64"><path d="M40 11h-4q-5 0-5 5v15H16q-5 0-5 5v12q0 5 5 5h32q5 0 5-5V16q0-5-5-5h-8m8-3q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V36q0-8 8-8h12V16q0-8 8-8h12M20 43q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3m2-1.2q0-1.15.85-2l.05-.05Q23.75 39 25 39q1.15 0 2.05.75l.05.05q.9.85.9 2V48l-.3.7q-.3.3-.7.3l-.7-.3-.3-.7v-6.2l-.25-.55v.05q-.3-.3-.75-.3t-.8.3l.05-.1-.25.6V48l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-6.2m8-.8-.7-.3q-.3-.3-.3-.7 0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7q-.3.3-.7.3h-1v7l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-7h-1m6-1q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8m12.1 4.1v.05l-.65.5 1.45 2.9q.2.4.05.8l-.5.55-.75.05q-.4-.15-.6-.5L45.4 45H45v3l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h2.05q1.2 0 2.05.85.9.9.9 2.15t-.9 2.1m-2-1.1.35-.1.25-.2h.05L47 42l-.3-.75q-.25-.25-.65-.25H45v2h1.1"/></svg>`;
@@ -763,7 +763,7 @@ export function update() {
 
                         const distance = game.destination_path.count-1;
                         let duration = PLAYER_MOVE_SPEED * distance;
-                        if (is_warp) { duration *= WARP_MOVE_SPEED_MULTIPLIER; }
+                        if (is_warp) { duration *= WARP_DURATION_MULTIPLIER; }
                         const end = game.world_mode_timer + duration;
                         const remaining = end - now;
                         const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
@@ -2452,7 +2452,7 @@ type Project = {
 const PROJECTS: Project[] = [
     {
         id: 0,
-        name: "",
+        name: "Project 0",
         url: "",
         description: [],
         bullet_points: [],
@@ -2461,132 +2461,108 @@ const PROJECTS: Project[] = [
     },
     {
         id: 1,
-        name: "Feast & Famine",
-        url: "https://colinbellino.itch.io/feast",
-        description: [
-            `<p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>`,
-            `<p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>`,
-            `<p>Reprehenderit ex ad sint culpa ea culpa aliqua culpa. Irure mollit cillum officia laboris magna culpa exercitation ipsum deserunt sunt magna dolor. Est laboris eiusmod deserunt amet exercitation velit nostrud ea amet aute commodo. Lorem cillum cupidatat duis velit. Sunt dolore minim esse laborum minim sit veniam cupidatat commodo proident sunt. Lorem quis Lorem officia dolore proident laboris ad sunt.</p>`,
-            `<p>Sint pariatur veniam irure nulla fugiat enim sit sunt aliquip anim quis duis anim. Voluptate culpa anim consectetur non sit irure. Consectetur exercitation sint consequat incididunt non ut dolor ex non aliquip dolore occaecat dolore pariatur. Nulla do pariatur minim qui quis aliquip fugiat duis ullamco commodo nostrud Lorem magna ex. Voluptate aliqua et voluptate sint Lorem laboris velit mollit ullamco. Elit do elit fugiat aliqua sint qui laboris.</p>`,
-        ],
-        bullet_points: [
-            `Engine: Unity`,
-            `Language: C#`,
-            `Duration: 72h`,
-            `<a href="https://github.com/colinbellino/ludum-dare-50" target="_blank" rel="noopener">Source code</a>`,
-        ],
-        screenshots_prefix: "feast",
-        screenshots_count: 3,
+        name: "Project 1",
+        url: "",
+        description: [],
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 2,
-        name: "Alteration",
-        url: "https://colinbellino.itch.io/alteration",
-        description: [
-            `<p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.</p>`,
-            `<p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach perfect balance, symbolized by the goal of each level. <br />But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>`,
-        ],
-        bullet_points: [
-            `Engine: Unity`,
-            `Language: C#`,
-            `Duration: 72h (+ a couple of days after the jam)`,
-            `<a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source code</a>`,
-        ],
-        screenshots_prefix: "alteration",
-        screenshots_count: 6,
+        name: "Project 2",
+        url: "",
+        description: [],
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 3,
         name: "Project 3",
         url: "",
-        description: [
-            `<p>Reprehenderit ex ad sint culpa ea culpa aliqua culpa. Irure mollit cillum officia laboris magna culpa exercitation ipsum deserunt sunt magna dolor. Est laboris eiusmod deserunt amet exercitation velit nostrud ea amet aute commodo. Lorem cillum cupidatat duis velit. Sunt dolore minim esse laborum minim sit veniam cupidatat commodo proident sunt. Lorem quis Lorem officia dolore proident laboris ad sunt.</p>`,
-            `<p>Sint pariatur veniam irure nulla fugiat enim sit sunt aliquip anim quis duis anim. Voluptate culpa anim consectetur non sit irure. Consectetur exercitation sint consequat incididunt non ut dolor ex non aliquip dolore occaecat dolore pariatur. Nulla do pariatur minim qui quis aliquip fugiat duis ullamco commodo nostrud Lorem magna ex. Voluptate aliqua et voluptate sint Lorem laboris velit mollit ullamco. Elit do elit fugiat aliqua sint qui laboris.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "bonbon",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 4,
         name: "Project 4",
         url: "",
-        description: [
-            `<p>Deserunt consectetur do qui nostrud. Duis qui eu do excepteur occaecat tempor consectetur. Deserunt deserunt laboris non minim ex. Irure ut officia occaecat ad aliquip ea dolore in exercitation proident enim Lorem officia minim. Exercitation in Lorem veniam occaecat ex ullamco sit elit eiusmod Lorem et sunt ea incididunt.</p>`,
-            `<p>Pariatur enim voluptate irure sunt nostrud. Ipsum pariatur fugiat adipisicing occaecat qui deserunt. Aliquip irure sint non sint ut adipisicing ullamco deserunt non consequat veniam pariatur. Sit amet deserunt ut velit eu. Non consequat ad reprehenderit officia anim cillum Lorem. Quis enim voluptate aliqua anim cupidatat quis.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "flight",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 5,
         name: "Project 5",
         url: "",
-        description: [
-            `<p>Exercitation quis cillum nisi duis anim ad eu exercitation consequat elit ullamco ad. Dolor dolore reprehenderit est enim adipisicing. Minim nisi eiusmod do ullamco ea anim fugiat anim velit ipsum minim Lorem. Commodo ex aliqua sint cillum amet do. Ullamco cupidatat dolore sint incididunt et ipsum.</p>`,
-            `<p>Culpa pariatur id do non enim ut tempor cillum nostrud eu qui pariatur sit eiusmod. Ipsum elit enim deserunt occaecat cupidatat. Laboris veniam cupidatat voluptate amet enim ullamco mollit mollit ea adipisicing consectetur eiusmod esse do. Aliqua officia qui ex adipisicing esse esse qui aute pariatur veniam. Occaecat aute anim nulla in laboris deserunt irure et. Ut enim excepteur enim dolor proident non reprehenderit.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "hubside",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 6,
         name: "Project 6",
         url: "",
-        description: [
-            `<p>Eu occaecat velit enim labore duis labore in ex ullamco officia excepteur. Laboris adipisicing nostrud non dolore minim laboris et voluptate non fugiat cupidatat. Ullamco quis minim magna elit cillum deserunt aliqua. Eu sit nisi ea fugiat nostrud anim.</p>`,
-            `<p>Amet proident amet ut excepteur dolore esse cillum veniam ea quis aute exercitation in. Ad ut eiusmod nulla quis quis eu minim tempor aute excepteur minim aliquip mollit. Proident fugiat pariatur commodo labore fugiat.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "monstrum",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 7,
         name: "Project 7",
         url: "",
-        description: [
-            `<p>Reprehenderit officia minim fugiat velit non. Et qui adipisicing sunt ex occaecat amet non. Sunt reprehenderit velit elit proident fugiat irure dolor laborum.</p>`,
-            `<p>Consectetur nulla adipisicing et duis irure in voluptate in nostrud elit excepteur sint officia et. Incididunt reprehenderit fugiat laborum aliqua nostrud dolor quis in dolor ea. Culpa duis dolor cupidatat deserunt in nulla cillum consectetur cillum nisi et duis laboris esse.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "precogs",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 8,
         name: "Project 8",
         url: "",
-        description: [
-            `<p>Nulla nulla irure sunt laborum laborum. Magna qui eu quis mollit proident aliquip consectetur labore sunt amet amet Lorem occaecat duis. Qui commodo qui tempor ullamco qui do anim. Eiusmod irure quis officia laboris sunt deserunt nisi enim excepteur. Ad irure cupidatat id amet nisi.</p>`,
-            `<p>Tempor aute nulla occaecat eiusmod duis cillum sint ullamco mollit nulla. Ipsum minim ea nulla cupidatat nisi dolor do est excepteur excepteur cillum ipsum. Velit pariatur culpa incididunt irure cillum incididunt cupidatat voluptate id velit. Duis id officia aliquip nulla. Ut ullamco proident amet elit quis pariatur.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "renault",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 9,
         name: "Project 9",
         url: "",
-        description: [
-            `<p>Elit dolor occaecat tempor adipisicing tempor ea consectetur cupidatat velit anim. Qui nostrud ea tempor enim dolore occaecat pariatur. Ex ipsum occaecat et nostrud reprehenderit ipsum enim nostrud nostrud sit. Tempor anim dolore et voluptate dolore cillum amet ad consequat eu dolore. Cupidatat sit minim in minim anim sit aliqua ipsum pariatur aliquip. Amet do aliqua tempor occaecat tempor excepteur officia nulla deserunt deserunt exercitation esse. Fugiat duis sunt adipisicing ut cillum officia dolore et labore proident id ea officia.</p>`,
-            `<p>Enim ex sunt velit culpa exercitation consequat non incididunt magna quis cupidatat. Minim nulla ullamco ut quis laboris tempor duis sunt. Laborum proident aliqua ipsum proident aliqua. Duis commodo proident eiusmod velit proident laborum duis ut do tempor sint labore voluptate. Sint exercitation cupidatat adipisicing cupidatat id aliquip est cillum id tempor exercitation nisi dolor consequat. In eu laborum cupidatat consectetur ad nulla magna consequat commodo do incididunt ullamco adipisicing nulla. Est in dolor esse velit excepteur Lorem qui adipisicing.</p>`,
-        ],
+        description: [],
         bullet_points: [],
-        screenshots_prefix: "snowball",
-        screenshots_count: 1,
+        screenshots_prefix: "",
+        screenshots_count: 0,
     },
     {
         id: 10,
         name: "Project 10",
         url: "",
-        description: [
-            `<p>Dolor proident velit Lorem ipsum ea non irure ad commodo. Nulla esse non nisi laboris esse nisi officia irure. Proident qui ipsum incididunt Lorem incididunt. Duis excepteur do amet enim occaecat sunt duis esse adipisicing velit Lorem mollit. Sint quis reprehenderit nisi reprehenderit culpa nostrud laborum occaecat deserunt voluptate dolore ipsum enim.</p>`,
-            `<p>Eu dolore eu sit consequat in dolore ad quis adipisicing Lorem aliqua minim. Proident Lorem non incididunt deserunt nisi et. Laborum excepteur reprehenderit velit et nisi ex ullamco aliqua occaecat. Nostrud ex elit aute non quis ipsum occaecat nulla dolore cupidatat ea ut. Eiusmod minim exercitation pariatur exercitation cillum deserunt exercitation est duis Lorem id culpa reprehenderit. In irure tempor nostrud anim aute anim. Excepteur dolor magna voluptate consectetur est ea occaecat laboris.</p>`,
-        ],
+        description: [],
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 11,
+        name: "Project 11",
+        url: "",
+        description: [],
+        bullet_points: [],
+        screenshots_prefix: "",
+        screenshots_count: 0,
+    },
+    {
+        id: 12,
+        name: "Project 12",
+        url: "",
+        description: [],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
