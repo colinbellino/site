@@ -126,8 +126,10 @@ const THEMES = [
 ];
 
 // :constants
+const PROJECTS_IMAGE_URL = "/worldmap/images/projects.png";
 const CUSTOM_BACKGROUND = true; // TODO: disable this in release
 const THUMBNAIL_SIZE: Vector2 = [320, 180];
+const THUMBNAIL_MAX: int = 16;
 const CAMERA_START_POSITION: Vector2 = [24, 9];
 const GRID_SIZE = 48;
 const TILESET_POSITION : Vector2 = [0, 240];
@@ -148,9 +150,9 @@ const DIRECTIONS : Vector2[] = [
 const PLAYER_MOVE_SPEED = 300;
 const WARP_DURATION_MULTIPLIER = 4.0;
 const ICON_CLOSE = `<svg width="64" height="64"><g><path d="M30 22 L34 22 34 30 42 30 42 34 34 34 34 42 30 42 30 34 22 34 22 30 30 30 30 22"/></g></svg>`;
-const ICON_KEYBOARD_ESCAPE = `<svg width="64" height="64"><path d="M16 8h32q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8m16 20q-.4 0-.7.3-.3.3-.3.7 0 .4.3.7l.65.3h.1q1.55 0 2.75 1.2T36 34q0 1.6-1.2 2.8Q33.6 38 32 38h-4v-3h4l.7-.3.3-.7-.3-.7q-.3-.3-.65-.3h-.1q-1.55 0-2.75-1.2T28 29q0-1.6 1.2-2.8Q30.4 25 32 25h4v3h-4m-14-3h8v3h-5v2h5v3h-5v2h5v3h-8V25m26.8 12-.1.1q-1.15.9-2.7.9-1.6 0-2.7-.9l-.1-.05-.05-.1Q38 35.8 38 34.3v-5.55q0-1.6 1.2-2.7h.05Q40.4 25 42 25q1.55 0 2.75 1.05 1.25 1.1 1.25 2.7v1.5h-3v-1.5l-.2-.45q-.35-.3-.8-.3-.45 0-.75.25l-.05.05-.2.45v5.55l.2.5.8.2.75-.2.25-.5v-1.5h3v1.5q.05 1.5-1.2 2.7M11 16v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5H16q-5 0-5 5"/></svg>`;
+// const ICON_KEYBOARD_ESCAPE = `<svg width="64" height="64"><path d="M16 8h32q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8m16 20q-.4 0-.7.3-.3.3-.3.7 0 .4.3.7l.65.3h.1q1.55 0 2.75 1.2T36 34q0 1.6-1.2 2.8Q33.6 38 32 38h-4v-3h4l.7-.3.3-.7-.3-.7q-.3-.3-.65-.3h-.1q-1.55 0-2.75-1.2T28 29q0-1.6 1.2-2.8Q30.4 25 32 25h4v3h-4m-14-3h8v3h-5v2h5v3h-5v2h5v3h-8V25m26.8 12-.1.1q-1.15.9-2.7.9-1.6 0-2.7-.9l-.1-.05-.05-.1Q38 35.8 38 34.3v-5.55q0-1.6 1.2-2.7h.05Q40.4 25 42 25q1.55 0 2.75 1.05 1.25 1.1 1.25 2.7v1.5h-3v-1.5l-.2-.45q-.35-.3-.8-.3-.45 0-.75.25l-.05.05-.2.45v5.55l.2.5.8.2.75-.2.25-.5v-1.5h3v1.5q.05 1.5-1.2 2.7M11 16v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5H16q-5 0-5 5"/></svg>`;
 const ICON_KEYBOARD_ENTER = `<svg width="64" height="64"><path d="M40 11h-4q-5 0-5 5v15H16q-5 0-5 5v12q0 5 5 5h32q5 0 5-5V16q0-5-5-5h-8m8-3q8 0 8 8v32q0 8-8 8H16q-8 0-8-8V36q0-8 8-8h12V16q0-8 8-8h12M20 43q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3m2-1.2q0-1.15.85-2l.05-.05Q23.75 39 25 39q1.15 0 2.05.75l.05.05q.9.85.9 2V48l-.3.7q-.3.3-.7.3l-.7-.3-.3-.7v-6.2l-.25-.55v.05q-.3-.3-.75-.3t-.8.3l.05-.1-.25.6V48l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-6.2m8-.8-.7-.3q-.3-.3-.3-.7 0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7q-.3.3-.7.3h-1v7l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-7h-1m6-1q0-.4.3-.7.3-.3.7-.3h4q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-3v2h3q.4 0 .7.3l.3.7-.3.7-.7.3h-4l-.7-.3q-.3-.3-.3-.7v-8m12.1 4.1v.05l-.65.5 1.45 2.9q.2.4.05.8l-.5.55-.75.05q-.4-.15-.6-.5L45.4 45H45v3l-.3.7-.7.3q-.4 0-.7-.3-.3-.3-.3-.7v-8q0-.4.3-.7.3-.3.7-.3h2.05q1.2 0 2.05.85.9.9.9 2.15t-.9 2.1m-2-1.1.35-.1.25-.2h.05L47 42l-.3-.75q-.25-.25-.65-.25H45v2h1.1"/></svg>`;
-const ICON_KEYBOARD_ARROW_UP = `<svg width="64" height="64"><path d="M48 11H16q-5 0-5 5v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5m8 5v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8h32q8 0 8 8m-24 6 8 8v2h-4v10h-8V32h-4v-2l8-8"/></svg>`;
+// const ICON_KEYBOARD_ARROW_UP = `<svg width="64" height="64"><path d="M48 11H16q-5 0-5 5v32q0 5 5 5h32q5 0 5-5V16q0-5-5-5m8 5v32q0 8-8 8H16q-8 0-8-8V16q0-8 8-8h32q8 0 8 8m-24 6 8 8v2h-4v10h-8V32h-4v-2l8-8"/></svg>`;
 const enum Direction { NORTH, EAST, SOUTH, WEST }
 const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
@@ -230,7 +232,7 @@ export function start(loaded_callback: () => void) {
             ui_set_theme_color(THEMES[game.theme].color);
         }
     });
-    load_image("/worldmap/images/projects.png").then(image => { game.image_projects = image });
+    load_image(PROJECTS_IMAGE_URL).then(image => { game.image_projects = image });
     load_codegen().then((codegen) => {
         game.world = codegen.world;
         game.sprite_vs = codegen.sprite_vs;
@@ -1250,7 +1252,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
 
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
         <label class="hud_label anchor_bottom node_action hide">
-            <img />
+            <span class="image_container"><img width="${THUMBNAIL_SIZE[0]}" height="${THUMBNAIL_SIZE[1]}" src="${PROJECTS_IMAGE_URL}" /></span>
             <span class="content">
                 <span class="label"></span>
                 <button class="hud_icon icon_confirm" aria-label="Confirm">
@@ -1263,7 +1265,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     node_action_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter), false);
     const node_action_image = node_action_root.querySelector("img");
     node_action_image.width = THUMBNAIL_SIZE[0]*0.5;
-    node_action_image.height = THUMBNAIL_SIZE[1]*0.5;
+    node_action_image.height = THUMBNAIL_SIZE[1]*0.5*THUMBNAIL_MAX;
     const ui_node_action: UI_Label_Node = { element_root: node_action_root, element_button: node_action_button, element_label: node_action_root.querySelector(".content .label"), element_image: node_action_image };
     assert(ui_node_action.element_root !== undefined);
     assert(ui_node_action.element_button !== undefined);
@@ -1885,14 +1887,6 @@ function project_screenshot_url(project: Project, image_index: int, variant: str
     }
     return `/site/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-${variant}.png`;
 }
-function project_generate_thumbnail_url(project_id: int): string {
-    const w = THUMBNAIL_SIZE[0];
-    const h = THUMBNAIL_SIZE[1];
-    game.renderer.offscreen.canvas.width = w;
-    game.renderer.offscreen.canvas.height = h;
-    game.renderer.offscreen.drawImage(game.image_projects, 0, h * project_id, w, h, 0, 0, w, h);
-    return game.renderer.offscreen.canvas.toDataURL();
-}
 
 // :debug
 // function log_matrix(matrix: Matrix4) {
@@ -2307,19 +2301,18 @@ function ui_node_show(node: Map_Node) {
     const action = ui_get_node_action(node);
     // const tooltip = ui_get_node_tooltip(node);
     if (node.project_id > 0) {
-        ui_label_node_show(game.renderer.ui_node_action, action, project_generate_thumbnail_url(node.project_id));
+        ui_label_node_show(game.renderer.ui_node_action, action, node.project_id);
     } else {
         ui_label_show(game.renderer.ui_node_action, action);
     }
 }
-function ui_label_node_show(button: UI_Label_Node, label: string, image_url: string): void {
-    assert(image_url !== "");
+function ui_label_node_show(button: UI_Label_Node, label: string, project_id: int): void {
     if (label) {
         button.element_label.innerHTML = label;
     }
     button.element_root.classList.remove("hide");
     button.element_root.classList.add("thumbnail");
-    button.element_image.src = image_url;
+    button.element_image.style.marginTop = `-${project_id*THUMBNAIL_SIZE[1]*0.5}px`;
 }
 function ui_panel_show(button: UI_Panel, title: string, content: string, full_size: boolean = false): void {
     button.element_title.innerHTML = title;

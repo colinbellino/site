@@ -228,12 +228,17 @@ body.worldmap_closing #worldmap {
 .hud_label.thumbnail {
     border-radius: 10px;
 }
-.hud_label > img {
+.hud_label .image_container {
     display: none;
 }
-.hud_label.thumbnail > img {
+.hud_label.thumbnail .image_container {
     display: block;
     border-radius: 10px 10px 0 0;
+}
+.hud_label .image_container {
+    overflow: hidden;
+    width: 160px;
+    height: 90px;
 }
 .hud_label.thumbnail .label {
     flex: 1;
