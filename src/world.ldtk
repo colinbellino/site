@@ -1487,9 +1487,9 @@
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
 								{ "__identifier": "path_east", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 51, "realEditorValues": [] },
 								{ "__identifier": "path_south", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 50, "realEditorValues": [] },
-								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [{ "cx": 43, "cy": 9 }], "__tile": null, "defUid": 49, "realEditorValues": [{
+								{ "__identifier": "path_west", "__type": "Array<Point>", "__value": [{ "cx": 42, "cy": 9 }], "__tile": null, "defUid": 49, "realEditorValues": [{
 									"id": "V_String",
-									"params": ["43,9"]
+									"params": ["42,9"]
 								}] }
 							],
 							"__worldX": 2064,
