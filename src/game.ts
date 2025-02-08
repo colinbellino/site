@@ -485,10 +485,6 @@ export function update() {
                         }
 
                         if (done) {
-                            ui_label_show(game.renderer.ui_up);
-                            ui_label_show(game.renderer.ui_right);
-                            ui_label_show(game.renderer.ui_down);
-                            ui_label_show(game.renderer.ui_left);
                             game.player.animation.current_animation = Direction.SOUTH;
                             game.world_mode = World_Mode.IDLE;
                             game.world_mode_timer = now;
@@ -499,6 +495,7 @@ export function update() {
                         const current_node = game.nodes.data[game.nodes_current];
 
                         const project_panel_opened = !game.renderer.ui_node_project.element_root.classList.contains("hide");
+                        const node_label_opened = !game.renderer.ui_node_action.element_root.classList.contains("hide");
                         let node_at_mouse_position = -1;
                         for (let i = 0; i < game.nodes.count; i++) {
                             const HITBOX_SIZE = 48;
@@ -517,87 +514,98 @@ export function update() {
                         }
 
                         if (player_input_mouse_left) {
-                            if (node_at_mouse_position > -1) {
-                                const destination_node = game.nodes.data[node_at_mouse_position];
+                            if (project_panel_opened) {
+                                player_input_cancel = true;
+                            } else {
+                                if (node_at_mouse_position > -1) {
+                                    const destination_node = game.nodes.data[node_at_mouse_position];
 
-                                if (node_at_mouse_position === game.nodes_current) {
-                                    ui_node_show(destination_node);
-                                } else {
-                                    // Quick and dirty A* pathfinding
-                                    // TODO: profile this, maybe we need to calculate all the pathes in advances since we don't have anything dynamic.
-                                    let path : Node_Index[] = [];
-                                    type Node_Index = int;
-                                    type AStar_Node = { curr: Node_Index; prev: Node_Index; g_cost: int, h_cost: int }
-
-                                    const nodes : AStar_Node[] = Array(game.nodes.count);
-                                    for (let node_index = 0; node_index < nodes.length; node_index++) {
-                                        nodes[node_index] = { curr: node_index, prev: null, g_cost: 0, h_cost: 0 };
-                                    }
-                                    let checked : Node_Index[] = [];
-                                    let to_check : Node_Index[] = [game.nodes_current];
-
-                                    let tries = 0;
-                                    while (to_check.length > 0) {
-                                        tries += 1;
-                                        if (tries > 50) {
-                                            if (!__RELEASE__) { console.warn("Path not found!"); }
-                                            break;
+                                    if (node_at_mouse_position === game.nodes_current) {
+                                        if (node_label_opened) {
+                                            player_input_confirm = true;
+                                        } else {
+                                            ui_node_show(destination_node);
                                         }
+                                    } else {
+                                        // Quick and dirty A* pathfinding
+                                        // TODO: profile this, maybe we need to calculate all the pathes in advances since we don't have anything dynamic.
+                                        let path : Node_Index[] = [];
+                                        type Node_Index = int;
+                                        type AStar_Node = { curr: Node_Index; prev: Node_Index; g_cost: int, h_cost: int }
 
-                                        const current = to_check.pop();
-                                        if (checked.includes(current)) {
-                                            continue;
+                                        const nodes : AStar_Node[] = Array(game.nodes.count);
+                                        for (let node_index = 0; node_index < nodes.length; node_index++) {
+                                            nodes[node_index] = { curr: node_index, prev: null, g_cost: 0, h_cost: 0 };
                                         }
+                                        let checked : Node_Index[] = [];
+                                        let to_check : Node_Index[] = [game.nodes_current];
 
-                                        const node = game.nodes.data[current];
-                                        checked.push(current);
-
-                                        const destination_reached = vector2_equal(node.grid_position, destination_node.grid_position);
-                                        if (destination_reached) {
-                                            let n = checked[checked.length-1];
-                                            while (n !== null) {
-                                                const node = nodes[n];
-                                                if (node.curr !== game.nodes_current) path.push(n);
-                                                n = node.prev;
+                                        let tries = 0;
+                                        while (to_check.length > 0) {
+                                            tries += 1;
+                                            if (tries > 50) {
+                                                if (!__RELEASE__) { console.warn("Path not found!"); }
+                                                break;
                                             }
-                                            break;
-                                        }
 
-                                        for (let direction = 0; direction < node.neighbours.length; direction++) {
-                                            const neighbour = node.neighbours[direction];
-                                            if (neighbour.path.length === 0) {
+                                            const current = to_check.pop();
+                                            if (checked.includes(current)) {
                                                 continue;
                                             }
 
-                                            const neighbour_position = neighbour.path[neighbour.path.length - 1];
-                                            const neighbour_node_id = find_node_at_position(neighbour_position);
-                                            if (checked.includes(neighbour_node_id)) {
-                                                continue;
+                                            const node = game.nodes.data[current];
+                                            checked.push(current);
+
+                                            const destination_reached = vector2_equal(node.grid_position, destination_node.grid_position);
+                                            if (destination_reached) {
+                                                let n = checked[checked.length-1];
+                                                while (n !== null) {
+                                                    const node = nodes[n];
+                                                    if (node.curr !== game.nodes_current) path.push(n);
+                                                    n = node.prev;
+                                                }
+                                                break;
                                             }
 
-                                            const neighbour_g_cost = nodes[current].g_cost + manhathan_distance(destination_node.grid_position, neighbour_position);
-                                            const neighbour_node = nodes[neighbour_node_id];
-                                            const already_checked = to_check.includes(neighbour_node_id);
-                                            if (neighbour_g_cost < neighbour_node.g_cost || !already_checked) {
-                                                neighbour_node.g_cost = neighbour_g_cost;
-                                                neighbour_node.h_cost = manhathan_distance(destination_node.grid_position, neighbour_position);
-                                                neighbour_node.prev = current;
+                                            for (let direction = 0; direction < node.neighbours.length; direction++) {
+                                                const neighbour = node.neighbours[direction];
+                                                if (neighbour.path.length === 0) {
+                                                    continue;
+                                                }
 
-                                                if (!already_checked) {
-                                                    to_check.push(neighbour_node_id);
+                                                const neighbour_position = neighbour.path[neighbour.path.length - 1];
+                                                const neighbour_node_id = find_node_at_position(neighbour_position);
+                                                if (checked.includes(neighbour_node_id)) {
+                                                    continue;
+                                                }
+
+                                                const neighbour_g_cost = nodes[current].g_cost + manhathan_distance(destination_node.grid_position, neighbour_position);
+                                                const neighbour_node = nodes[neighbour_node_id];
+                                                const already_checked = to_check.includes(neighbour_node_id);
+                                                if (neighbour_g_cost < neighbour_node.g_cost || !already_checked) {
+                                                    neighbour_node.g_cost = neighbour_g_cost;
+                                                    neighbour_node.h_cost = manhathan_distance(destination_node.grid_position, neighbour_position);
+                                                    neighbour_node.prev = current;
+
+                                                    if (!already_checked) {
+                                                        to_check.push(neighbour_node_id);
+                                                    }
                                                 }
                                             }
                                         }
-                                    }
 
-                                    if (path.length > 0) {
-                                        game.player_path = path;
+                                        if (path.length > 0) {
+                                            game.player_path = path;
+                                        }
                                     }
+                                } else {
+                                    player_input_cancel = true;
                                 }
-                            } else {
-                                player_input_cancel = true;
                             }
                         }
+
+                        const node = game.nodes.data[game.nodes_current];
+                        const project = game.projects.data[node.project_id];
 
                         if (game.player_path.length > 0) {
                             const next = game.player_path.pop();
@@ -611,11 +619,8 @@ export function update() {
                                 }
                             }
                         }
-
-                        const node = game.nodes.data[game.nodes_current];
-                        const project = game.projects.data[node.project_id];
-
-                        if (!project_panel_opened && !vector2_equal(player_input_move, [0, 0])) {
+                        const is_moving = !vector2_equal(player_input_move, [0, 0]);
+                        if (!project_panel_opened && is_moving) {
                             const direction = vector_to_direction(player_input_move);
                             const destination = current_node.neighbours[direction];
                             if (destination.path.length > 0) {
@@ -640,8 +645,6 @@ export function update() {
 
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_hide(game.renderer.ui_node_action);
-                                ui_label_hide(game.renderer.ui_confirm);
-                                ui_label_hide(game.renderer.ui_cancel);
 
                                 game.world_mode = World_Mode.MOVING;
                                 game.world_mode_timer = now;
@@ -654,19 +657,11 @@ export function update() {
                             if (project_panel_opened) {
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_show(game.renderer.ui_node_action);
-                                ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
-                                ui_label_hide(game.renderer.ui_cancel);
-                                ui_label_show(game.renderer.ui_up);
-                                ui_label_show(game.renderer.ui_right);
-                                ui_label_show(game.renderer.ui_down);
-                                ui_label_show(game.renderer.ui_left);
                             } else {
-                                if (current_node.type !== Node_Type.EMPTY) {
-                                    if (game.renderer.ui_node_action.element_root.classList.contains("hide")) {
-                                        ui_label_show(game.renderer.ui_node_action);
-                                    } else {
-                                        ui_label_hide(game.renderer.ui_node_action);
-                                    }
+                                if (node_label_opened) {
+                                    ui_label_hide(game.renderer.ui_node_action);
+                                } else {
+                                    ui_node_show(node);
                                 }
                             }
                         }
@@ -676,25 +671,15 @@ export function update() {
                                 case Node_Type.EMPTY: { } break;
                                 case Node_Type.INFO: {
                                     if (project_panel_opened) {
-                                        // ui_label_show(game.renderer.ui_node_action);
-                                        // ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
-                                        // ui_panel_hide(game.renderer.ui_node_project);
+
                                     } else {
                                         ui_panel_show(game.renderer.ui_node_project, "Sign", node.tooltip);
                                         ui_label_hide(game.renderer.ui_node_action);
-                                        ui_label_hide(game.renderer.ui_confirm);
-                                        ui_label_show(game.renderer.ui_cancel, "Close");
-                                        ui_label_hide(game.renderer.ui_up);
-                                        ui_label_hide(game.renderer.ui_right);
-                                        ui_label_hide(game.renderer.ui_down);
-                                        ui_label_hide(game.renderer.ui_left);
                                     }
                                 } break;
                                 case Node_Type.PROJECT: {
                                     if (project_panel_opened) {
-                                        // ui_panel_hide(game.renderer.ui_node_project);
-                                        // ui_label_show(game.renderer.ui_node_action);
-                                        // ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
+
                                     } else {
                                         const content = [];
                                         if (project.screenshots_count > 0) {
@@ -723,12 +708,6 @@ export function update() {
 
                                         ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""), true);
                                         ui_label_hide(game.renderer.ui_node_action);
-                                        ui_label_hide(game.renderer.ui_confirm);
-                                        ui_label_show(game.renderer.ui_cancel, "Close");
-                                        ui_label_hide(game.renderer.ui_up);
-                                        ui_label_hide(game.renderer.ui_right);
-                                        ui_label_hide(game.renderer.ui_down);
-                                        ui_label_hide(game.renderer.ui_left);
                                     }
                                 } break;
                                 case Node_Type.WARP: {
@@ -742,12 +721,6 @@ export function update() {
                                     game.camera_move_start = game.renderer.camera_main.position;
                                     game.camera_move_end   = vector2_multiply_float(current_node.warp_camera, GRID_SIZE);
                                     ui_label_hide(game.renderer.ui_node_action);
-                                    ui_label_hide(game.renderer.ui_confirm);
-                                    ui_label_hide(game.renderer.ui_cancel);
-                                    ui_label_hide(game.renderer.ui_up);
-                                    ui_label_hide(game.renderer.ui_right);
-                                    ui_label_hide(game.renderer.ui_down);
-                                    ui_label_hide(game.renderer.ui_left);
 
                                     game.world_mode = World_Mode.MOVING;
                                     game.world_mode_timer = now;
@@ -787,12 +760,6 @@ export function update() {
                             }
 
                             ui_node_show(node);
-                            ui_label_show(game.renderer.ui_confirm, ui_get_node_action(node));
-                            ui_label_hide(game.renderer.ui_cancel);
-                            // ui_label_show(game.renderer.ui_up);
-                            // ui_label_show(game.renderer.ui_right);
-                            // ui_label_show(game.renderer.ui_down);
-                            // ui_label_show(game.renderer.ui_left);
                             game.player.animation.current_animation = Direction.SOUTH;
                             game.world_mode = World_Mode.IDLE;
                         }
@@ -995,16 +962,6 @@ export function update() {
                     ui_push_console_line("tiles_count:        " + game.tile_grid.length);
                 }
                 ui_push_console_line("nodes_current:      " + game.nodes_current);
-                // ui_push_console_line("nodes:              ");
-                // for (let node_index = 0; node_index < game.nodes.count; node_index++) {
-                //     const node = game.nodes.data[node_index];
-                //     ui_push_console_line((node_index === game.nodes_current ? "* " : "  ") + node_index + " " + (Node_Type[node.type]) + " " + JSON.stringify(node));
-                // }
-                // ui_push_console_line("projects:             ");
-                // for (let project_index = 0; project_index < game.projects.count; project_index++) {
-                //     const project = game.projects.data[project_index];
-                //     ui_push_console_line("  " + project_index + " - " + project.id + " name: " + project.name);
-                // }
             }
             let console_lines = "";
             if (game.draw_console) {
@@ -1084,10 +1041,10 @@ export function update() {
         game.frame_end = performance.now();
 
         game.animation_frame = requestAnimationFrame(update);
-    } catch(e) {
+    } catch(error) {
         if (!__RELEASE__) document.body.style.borderTop = "4px solid red";
         // TODO: better error handling for release
-        console.error(e);
+        console.error(error);
     }
 }
 
@@ -1116,12 +1073,6 @@ type Renderer = {
     ui_root:            HTMLDivElement;
     ui_console:         HTMLPreElement;
     ui_node_project:    UI_Panel;
-    ui_up:              UI_Label;
-    ui_right:           UI_Label;
-    ui_down:            UI_Label;
-    ui_left:            UI_Label;
-    ui_confirm:         UI_Label;
-    ui_cancel:          UI_Label;
     ui_node_action:     UI_Label_Node;
     ui_theme_color:     HTMLMetaElement;
     camera_main:        Camera_Orthographic;
@@ -1192,7 +1143,14 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
 
     const canvas = ui_create_element<HTMLCanvasElement>(game_root, `<canvas id="main"></canvas>`);
-    canvas.addEventListener("touchstart", input_send_key.bind(null, Keyboard_Key.Escape), false);
+    // canvas.addEventListener("click", (e) => {
+    //     console.log("click", e); // FIXME:
+    //     input_send_key(Keyboard_Key.Escape);
+    // }, false);
+    // canvas.addEventListener("touchstart", (e) => {
+    //     console.log("touchstart", e); // FIXME:
+    //     input_send_key(Keyboard_Key.Escape);
+    // }, false);
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
@@ -1206,89 +1164,89 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
 
     const ui_root = ui_create_element<HTMLDivElement>(game_root, `<div id="ui_root"></div>`);
 
-    const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_left no_label hide up" for="up">
-            <span class="content">
-                <span class="label"></span>
-                <button class="hud_icon icon_up" aria-label="Move: up">
-                    ${ICON_KEYBOARD_ARROW_UP}
-                </button>
-            </span>
-        </label>
-    `);
-    const up_button = up_root.querySelector(".content button") as HTMLButtonElement;
-    up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp), false);
-    const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_root.querySelector(".content .label") };
+    // const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
+    //     <label class="hud_label anchor_left no_label hide up" for="up">
+    //         <span class="content">
+    //             <span class="label"></span>
+    //             <button class="hud_icon icon_up" aria-label="Move: up">
+    //                 ${ICON_KEYBOARD_ARROW_UP}
+    //             </button>
+    //         </span>
+    //     </label>
+    // `);
+    // const up_button = up_root.querySelector(".content button") as HTMLButtonElement;
+    // up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp), false);
+    // const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_root.querySelector(".content .label") };
 
-    const right_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_left no_label hide right">
-            <span class="content">
-                <span class="label"></span>
-                <button class="hud_icon icon_right" aria-label="Move: right">
-                    ${ICON_KEYBOARD_ARROW_UP}
-                </button>
-            </span>
-        </label>
-    `);
-    const right_button = right_root.querySelector(".content button") as HTMLButtonElement;
-    right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight), false);
-    const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_root.querySelector(".content .label") };
+    // const right_root = ui_create_element<HTMLLabelElement>(ui_root, `
+    //     <label class="hud_label anchor_left no_label hide right">
+    //         <span class="content">
+    //             <span class="label"></span>
+    //             <button class="hud_icon icon_right" aria-label="Move: right">
+    //                 ${ICON_KEYBOARD_ARROW_UP}
+    //             </button>
+    //         </span>
+    //     </label>
+    // `);
+    // const right_button = right_root.querySelector(".content button") as HTMLButtonElement;
+    // right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight), false);
+    // const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_root.querySelector(".content .label") };
 
-    const down_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_left no_label hide down">
-            <span class="content">
-                <span class="label"></span>
-                <button class="hud_icon icon_down" aria-label="Move: down">
-                    ${ICON_KEYBOARD_ARROW_UP}
-                </button>
-            </span>
-        </label>
-    `);
-    const down_button = down_root.querySelector(".content button") as HTMLButtonElement;
-    down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown), false);
-    const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_root.querySelector(".content .label") };
+    // const down_root = ui_create_element<HTMLLabelElement>(ui_root, `
+    //     <label class="hud_label anchor_left no_label hide down">
+    //         <span class="content">
+    //             <span class="label"></span>
+    //             <button class="hud_icon icon_down" aria-label="Move: down">
+    //                 ${ICON_KEYBOARD_ARROW_UP}
+    //             </button>
+    //         </span>
+    //     </label>
+    // `);
+    // const down_button = down_root.querySelector(".content button") as HTMLButtonElement;
+    // down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown), false);
+    // const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_root.querySelector(".content .label") };
 
-    const left_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label anchor_left no_label hide left">
-            <span class="content">
-                <span class="label"></span>
-                <button class="hud_icon icon_left" aria-label="Move: left">
-                    ${ICON_KEYBOARD_ARROW_UP}
-                </button>
-            </span>
-        </label>
-    `);
-    const left_button = left_root.querySelector(".content button") as HTMLButtonElement;
-    left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft), false);
-    const ui_left: UI_Label = { element_root: left_root, element_button: left_button, element_label: left_root.querySelector(".content .label") };
+    // const left_root = ui_create_element<HTMLLabelElement>(ui_root, `
+    //     <label class="hud_label anchor_left no_label hide left">
+    //         <span class="content">
+    //             <span class="label"></span>
+    //             <button class="hud_icon icon_left" aria-label="Move: left">
+    //                 ${ICON_KEYBOARD_ARROW_UP}
+    //             </button>
+    //         </span>
+    //     </label>
+    // `);
+    // const left_button = left_root.querySelector(".content button") as HTMLButtonElement;
+    // left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft), false);
+    // const ui_left: UI_Label = { element_root: left_root, element_button: left_button, element_label: left_root.querySelector(".content .label") };
 
-    const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label hide confirm">
-            <span class="content">
-                <span class="label"></span>
-                <button class="hud_icon icon_confirm" aria-label="Confirm">
-                    ${ICON_KEYBOARD_ENTER}
-                </button>
-            </span>
-        </label>
-    `);
-    const confirm_button = confirm_root.querySelector(".content button") as HTMLButtonElement;
-    confirm_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter), false);
-    const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_root.querySelector(".content .label") };
+    // const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `
+    //     <label class="hud_label hide confirm">
+    //         <span class="content">
+    //             <span class="label"></span>
+    //             <button class="hud_icon icon_confirm" aria-label="Confirm">
+    //                 ${ICON_KEYBOARD_ENTER}
+    //             </button>
+    //         </span>
+    //     </label>
+    // `);
+    // const confirm_button = confirm_root.querySelector(".content button") as HTMLButtonElement;
+    // confirm_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter), false);
+    // const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_root.querySelector(".content .label") };
 
-    const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `
-        <label class="hud_label hide cancel">
-            <span class="content">
-                <span class="label"></span>
-                <button class="hud_icon icon_cancel" aria-label="Cancel">
-                    ${ICON_KEYBOARD_ESCAPE}
-                </button>
-            </span>
-        </label>
-    `);
-    const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
-    cancel_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Escape), false);
-    const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
+    // const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `
+    //     <label class="hud_label hide cancel">
+    //         <span class="content">
+    //             <span class="label"></span>
+    //             <button class="hud_icon icon_cancel" aria-label="Cancel">
+    //                 ${ICON_KEYBOARD_ESCAPE}
+    //             </button>
+    //         </span>
+    //     </label>
+    // `);
+    // const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
+    // cancel_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Escape), false);
+    // const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
 
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
         <label class="hud_label anchor_bottom node_action hide">
@@ -1333,12 +1291,6 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         ui_root:            ui_root,
         ui_console:         ui_console,
         ui_node_project:    ui_node_project,
-        ui_up:              ui_up,
-        ui_right:           ui_right,
-        ui_down:            ui_down,
-        ui_left:            ui_left,
-        ui_confirm:         ui_confirm,
-        ui_cancel:          ui_cancel,
         ui_node_action:     ui_node_action,
         ui_theme_color:     ui_theme_color,
     };
@@ -1685,6 +1637,7 @@ function inputs_on_touch_start(e: TouchEvent) {
     game.inputs.touch_start_y = e.changedTouches[0].screenY;
     game.inputs.touch_end_x = -1;
     game.inputs.touch_down = true;
+    console.log("inputs_on_touch_start", event);
 
     const key_state = game.inputs.mouse_keys[Mouse_Key.LEFT];
     key_state.down = event.type === "keydown";
@@ -2352,11 +2305,11 @@ function ui_label_hide(button: UI_Label): void {
 }
 function ui_node_show(node: Map_Node) {
     const action = ui_get_node_action(node);
-    const tooltip = ui_get_node_tooltip(node);
+    // const tooltip = ui_get_node_tooltip(node);
     if (node.project_id > 0) {
         ui_label_node_show(game.renderer.ui_node_action, action, project_generate_thumbnail_url(node.project_id));
-    } else if (tooltip !== "") {
-        ui_label_show(game.renderer.ui_node_action, tooltip);
+    } else {
+        ui_label_show(game.renderer.ui_node_action, action);
     }
 }
 function ui_label_node_show(button: UI_Label_Node, label: string, image_url: string): void {
@@ -2381,21 +2334,21 @@ function ui_panel_hide(button: UI_Panel): void {
 function ui_get_node_action(node: Map_Node): string {
     let label = "";
     switch (node.type) {
-        case Node_Type.PROJECT: { label = `Open`; } break;
-        case Node_Type.WARP:    { label = `Warp`; } break;
-        case Node_Type.INFO:    { label = `Read`; } break;
+        case Node_Type.PROJECT: { label = `Open project`; } break;
+        case Node_Type.WARP:    { label = `Warp to ${node.tooltip}`; } break;
+        case Node_Type.INFO:    { label = `Read sign`; } break;
     }
     return label;
 }
-function ui_get_node_tooltip(node: Map_Node): string {
-    let label = "";
-    switch (node.type) {
-        case Node_Type.PROJECT: { label = `Open`; } break;
-        case Node_Type.WARP:    { label = `To ${node.tooltip}`; } break;
-        case Node_Type.INFO:    { label = `Read`; } break;
-    }
-    return label;
-}
+// function ui_get_node_tooltip(node: Map_Node): string {
+//     let label = "";
+//     switch (node.type) {
+//         case Node_Type.PROJECT: { label = `Open project`; } break;
+//         case Node_Type.WARP:    { label = `Warp to ${node.tooltip}`; } break;
+//         case Node_Type.INFO:    { label = `Read sign`; } break;
+//     }
+//     return label;
+// }
 function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
     const parent = document.createElement("div");
     parent.innerHTML = html.trim();
@@ -2419,8 +2372,8 @@ function ui_create_panel(ui_root: HTMLDivElement, close_callback: (this: HTMLBut
         element_close:      panel_root.querySelector(".close"),
         element_content:    panel_root.querySelector(".content"),
     };
-    panel.element_root.addEventListener("click", function(e: MouseEvent) {
-        e.stopPropagation();
+    panel.element_root.addEventListener("click", function panel_root_click(event: MouseEvent) {
+        event.stopPropagation();
     });
     panel.element_close.addEventListener("click", close_callback);
     return panel;
@@ -2461,108 +2414,144 @@ const PROJECTS: Project[] = [
     },
     {
         id: 1,
-        name: "Project 1",
+        name: "My résumé",
         url: "",
-        description: [],
+        description: [
+            "<p>Pariatur cupidatat commodo non irure occaecat. Dolore qui Lorem voluptate quis aliquip quis proident adipisicing aliqua. Officia eu id deserunt officia et culpa. Veniam ex nulla sit elit magna excepteur laborum dolor laboris ad ipsum eiusmod laborum minim. Voluptate ad culpa do id irure anim.</p>",
+            "<p>Lorem anim laborum deserunt in anim qui. Aliquip commodo excepteur ipsum do veniam qui aliquip pariatur occaecat anim. Enim et enim cillum tempor ea dolore anim sint minim eiusmod incididunt u</p>",
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 2,
-        name: "Project 2",
+        name: "Monstrum Prison",
         url: "",
-        description: [],
+        description: [
+            "<p>Exercitation incididunt commodo Lorem esse qui incididunt sit dolore aliquip commodo eu. Aliquip fugiat cillum do exercitation cupidatat ipsum enim tempor voluptate. Ut laboris ut veniam magna ut anim sit eu exercitation Lorem. Ad cillum amet veniam duis mollit in amet reprehenderit laborum deserunt laborum reprehenderit. Consectetur aliqua aliquip nostrud ea ad ex. Nostrud anim eiusmod ut nulla officia.</p>",
+            "<p>Veniam enim nisi minim labore irure voluptate aliquip eiusmod. Non pariatur ullamco commodo sint et enim laboris quis nisi mollit id ea incididunt. Ut ullamco nisi incididunt proident qui id nisi laborum culpa sint irure mollit non. Id anim commodo do dolore amet dolor esse elit laborum qui. Ullamco adipisicing ad laborum velit deserunt nisi cillum excepteur exercitation. Labore deserunt sunt commodo est u,llamco et. Ut labore consequat pariatur est proide</p>n"
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 3,
-        name: "Project 3",
+        name: "Janitor",
         url: "",
-        description: [],
+        description: [
+            "<p>Dolor nisi ea Lorem exercitation nostrud laboris ea est aute. Ullamco commodo quis et esse Lorem sit do consequat. Labore velit ea quis consectetur aute consequat sit tempor pariatur ipsum dolore magna enim pariatur. Deserunt magna ut amet pariatur cillum quis deserunt ea cupidatat. Incididunt culpa sint velit mollit Lorem. Non in ea fugiat ut. Non ad aliqua nisi velit commodo cupidatat excepteur nulla minim veniam ut.</p>",
+            "<p>Reprehenderit minim dolor aliquip fugiat qui pariatur commodo. Aliqua culpa ut irure sint culpa nisi in consectetur eu. Dolore veniam sint pariatur fugiat mollit id nulla fugiat ut. Cillum ad culpa aliqua minim labore cillum magna velit aliquip do esse. Labore id non qui ut dolore laborum sit qui esse nostrud excepteur consectetur d</p>",
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 4,
-        name: "Project 4",
+        name: "Feast or Famine",
         url: "",
-        description: [],
+        description: [
+            "<p>Proident duis eu elit occaecat minim. Et consectetur culpa anim ad id labore sunt. Deserunt et enim proident dolor officia. Adipisicing aute est consequat sunt aliquip nulla.</p>",
+            "<p>Minim mollit dolore non nisi laboris aliquip exercitation aliqua id reprehenderit reprehenderit. Mollit laborum laborum duis elit qui amet voluptate cupidatat consequat irure. ,Proident sunt voluptate consequat fugiat duis sit veniam dolore do culpa reprehenderit nisi n</p>o"
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 5,
-        name: "Project 5",
+        name: "Alteration",
         url: "",
-        description: [],
+        description: [
+            "<p>Reprehenderit dolor Lorem ipsum ad excepteur labore consectetur aliqua nulla. Cillum deserunt cupidatat nostrud fugiat. Proident voluptate ut in aute veniam. Exercitation fugiat ex nisi enim nulla est ea exercitation magna nisi. Nostrud aliquip dolor magna laborum deserunt et non sunt cupidatat voluptate enim adipisicing.</p>",
+            "<p>Sunt eu pariatur ad irure nostrud ad in non excepteur ad. Duis aliquip excepteur ut est ullamco dolor duis ut excepteur ullamco ipsum. Irure minim et aute eu sunt reprehenderit esse excepteur elit veniam Lorem eu. Cupidatat consectetur culpa veniam adipisicing qui aliquip eu occaecat. Ea cupidatat aliquip in anim aliquip en,im mag</p>n"
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 6,
-        name: "Project 6",
+        name: "Snowball",
         url: "",
-        description: [],
+        description: [
+            "<p>Ad eu consequat ipsum est velit fugiat id aliquip do. Labore cillum consequat dolor cupidatat pariatur et Lorem mollit et nisi dolore. Officia minim non consequat consequat reprehenderit eu aute. Voluptate officia duis deserunt exercitation quis. Eiusmod ad culpa elit Lorem reprehenderit consectetur dolore do. Sint enim nulla nulla ad dolore et laboris Lorem eu excepteur non.</p>",
+            "<p>Voluptate pariatur dolor magna occaecat nostrud dolor qui duis. Occaecat amet nostrud ea ex consectetur ex. Fugiat velit laboris occaecat dolor. Occaecat deserunt proident et velit commodo occaecat fugiat laboris labore. Est labore quis nulla incididunt. Cupidatat exercitation aliqua cillum qui incididunt qui est ullamco commod</p>",
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 7,
-        name: "Project 7",
+        name: "Flight",
         url: "",
-        description: [],
+        description: [
+            "<p>Cillum id est consequat Lorem exercitation quis sint enim fugiat velit non anim enim non. Minim ad est eu cupidatat. Enim elit nisi eiusmod veniam esse do labore laborum consectetur reprehenderit. Consequat reprehenderit dolor deserunt ut cupidatat consectetur dolore amet cillum aliqua voluptate exercitation do amet.</p>",
+            "<p>Reprehenderit magna enim est elit dolor. Fugiat ut consectetur ut adipisicing pariatur. Nisi incididunt non culpa consequat nisi Lorem excepteur. Magna sit culpa duis et velit nostrud proident qui nulla proident pariatur excepteur fugiat. Nulla aliqua qui ex minim quis duis enim culpa incididunt officia deserunt aliqui,p nisi labore. Consectetur mollit veniam laboris exercitation voluptate officia laborum pariatur ad nostrud pariatur veniam cupidat</p>a"
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 8,
-        name: "Project 8",
+        name: "Bonbon",
         url: "",
-        description: [],
+        description: [
+            "<p>Labore excepteur aliqua ea ullamco do laboris sit aliquip aliquip. Id laborum sit quis officia aliqua eu nostrud nostrud. Ex quis irure ad tempor consectetur Lorem. Id esse officia aute officia sunt. Enim dolor dolor laborum commodo minim tempor non esse ut labore Lorem deserunt eu. Aute officia nulla in nulla.</p>",
+            "<p>Magna veniam qui qui proident qui velit in amet sunt nostrud exercitation. Adipisicing consectetur exercitation veniam irure enim culpa eiusmod sunt et commodo laboris fugiat. Anim culpa nisi in ipsum consequat enim sunt id amet fugia</p>",
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 9,
-        name: "Project 9",
+        name: "Chipsmarket",
         url: "",
-        description: [],
+        description: [
+            "<p>Laborum qui laboris dolor ex id tempor eu ut ullamco ipsum. Ex ad dolor adipisicing occaecat Lorem nulla Lorem in nisi magna incididunt cillum. Et nisi labore ea non qui. Consectetur irure esse eiusmod sint voluptate est. Voluptate aute duis Lorem esse excepteur et minim velit consectetur in. Dolor anim id consectetur reprehenderit occaecat commodo cillum sit. Mollit eiusmod nostrud in fugiat cupidatat aliqua tempor tempor quis irure Lorem eu tempor.</p>",
+            "<p>Incididunt anim occaecat enim non aliquip esse. Aute eu Lorem amet id cillum anim nisi laborum do sint. Ex ad duis culpa id labore adipisicing. Dolore aliquip dolore minim laboris occaecat ad incididunt do ea consectetur quis. Nisi cupidatat duis culpa irure fugiat cillum veniam. Duis proident deserunt ipsum laboris duis voluptate nostrud. Et ipsum occaecat eu duis laborum Lorem eiusmod consequat cillum tempor aliquip eni</p>",
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 10,
-        name: "Project 10",
+        name: "MyPhotos",
         url: "",
-        description: [],
+        description: [
+            "<p>Commodo eu amet et anim et aute. Ea incididunt occaecat ad laborum aliquip cillum deserunt adipisicing qui excepteur excepteur minim reprehenderit in. Dolor velit pariatur quis qui enim eu. Fugiat do anim ex ut excepteur magna labore aute ullamco. Aliqua amet tempor esse occaecat in ea qui Lorem deserunt nisi nulla. Amet adipisicing aute adipisicing laboris sunt duis commodo labore consequat. Commodo labore ex Lorem cillum voluptate est eiusmod nisi nostrud ea.</p>",
+            "<p>In elit reprehenderit incididunt velit exercitation proident minim dolor consectetur eu cillum. Et laborum reprehenderit occaecat eu mollit pariatur officia ullamco irure voluptate nulla fugiat. Aliquip esse incididunt aliqua esse fugiat incididunt occaecat exercitation elit eiusmod anim quis. Nostrud nostrud aliquip occaecat deserunt aliqua non quis officia. Exercitation reprehenderit id esse cillum et aliqua sint dolor ipsum irure. Et id minim minim elit do est,. Magna proident aliqua duis amet veniam nostrud est laborum fugiat ex nul</p>l"
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 11,
-        name: "Project 11",
+        name: "Bi-BOP",
         url: "",
-        description: [],
+        description: [
+            "<p>Proident eiusmod adipisicing dolore exercitation esse nulla reprehenderit quis occaecat id do. Excepteur cillum occaecat minim voluptate elit adipisicing nisi eiusmod ex duis adipisicing laboris occaecat. Commodo esse et proident est Lorem velit aute magna sunt velit. Elit officia amet nisi eu incididunt ad anim veniam ex culpa qui. Quis sit cillum dolore ut ipsum id id mollit. In anim ut excepteur ullamco pariatur consequat irure occaecat et Lorem tempor culpa.</p>",
+            "<p>Ad laborum exercitation labore ad anim officia eiusmod consectetur mollit aute. Dolore qui dolore aliquip esse adipisicing excepteur. Duis enim dolore voluptate voluptate minim et nostrud amet nostrud ullamco. Cillum laborum eiusmod laborum reprehenderit ad. Deserunt ullamco qui tempor eiusmod laborum esse velit. Qui ad esse laboris aliqui</p>",
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 12,
-        name: "Project 12",
+        name: "Portfolio",
         url: "",
-        description: [],
+        description: [
+            "<p>Nisi amet irure cillum velit. Sunt exercitation minim amet cillum id. Mollit velit sint magna ut consequat.</p>",
+            "<p>Labore duis eiusmod dolor velit esse mollit eiusmod occaecat aliqua cillum culpa consectetur. Ea laboris aute, consequat et sunt est. Eu quis in proident pariatur labore velit. Sunt Lorem exercitation consequat cupidatat ipsum sint duis am</p>e"
+        ],
         bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,

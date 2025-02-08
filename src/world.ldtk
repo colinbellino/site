@@ -1627,10 +1627,10 @@
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": "<p>Welcome to my portfolio world \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\o/</p>\n\n<p>← Games Isle</p>\n\n<p>→ Web Island</p>", "__tile": null, "defUid": 47, "realEditorValues": [{
+								{ "__identifier": "tooltip", "__type": "String", "__value": "<p>Welcome to my portfolio world \\o/</p>\n\n<pre>← Games Isle\n\n                    Web Island →</pre>", "__tile": null, "defUid": 47, "realEditorValues": [{
 									"id": "V_String",
 									"params": [
-										"<p>Welcome to my portfolio world \\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\\o/</p>\\n\\n<p>← Games Isle</p>\\n\\n<p>→ Web Island</p>"
+										"<p>Welcome to my portfolio world \\\\o/</p>\\n\\n<pre>← Games Isle\\n\\n                    Web Island →</pre>"
 									]
 								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },

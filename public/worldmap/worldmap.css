@@ -202,6 +202,7 @@ body.worldmap_closing #worldmap {
     transition: 100ms ease-in opacity, 100ms ease-in transform;
     user-select: none;
     font-size: 1em;
+    cursor: pointer;
 }
 .hud_label .content {
     display: flex;
@@ -309,6 +310,8 @@ body.worldmap_closing #worldmap {
     border: 0;
     background: none;
     padding: 0;
+    cursor: pointer;
+    display: none !important;
 }
 .hud_icon svg {
     transform: scale(0.75);
