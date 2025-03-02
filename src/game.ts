@@ -420,13 +420,13 @@ export function update() {
                             entity:             game.player,
                             current_frame:      0,
                             current_animation:  Direction.SOUTH,
-                            frame_duration:     200,
+                            frame_duration:     150,
                             frame_started_at:   now,
                             animations: [
                                 /* IDLE_NORTH */ [[0*16, 160], [1*16, 160], [2*16, 160], [3*16, 160]],
-                                /* IDLE_EAST */  [[0*16, 192], [1*16, 192], [2*16, 192], [3*16, 192]],
+                                /* IDLE_EAST  */ [[0*16, 192], [1*16, 192], [2*16, 192], [3*16, 192]],
                                 /* IDLE_SOUTH */ [[0*16, 144], [1*16, 144], [2*16, 144], [3*16, 144]],
-                                /* IDLE_WEST */  [[0*16, 176], [1*16, 176], [2*16, 176], [3*16, 176]],
+                                /* IDLE_WEST  */ [[0*16, 176], [1*16, 176], [2*16, 176], [3*16, 176]],
                             ],
                         }
                     });
@@ -1639,7 +1639,6 @@ function inputs_on_touch_start(e: TouchEvent) {
     game.inputs.touch_start_y = e.changedTouches[0].screenY;
     game.inputs.touch_end_x = -1;
     game.inputs.touch_down = true;
-    console.log("inputs_on_touch_start", event);
 
     const key_state = game.inputs.mouse_keys[Mouse_Key.LEFT];
     key_state.down = event.type === "keydown";
@@ -2291,8 +2290,8 @@ function ui_push_console_line(line: string) {
 function ui_label_show(button: UI_Label, label: string = ""): void {
     if (label) {
         button.element_label.innerHTML = label;
+        button.element_root.classList.remove("hide", "thumbnail");
     }
-    button.element_root.classList.remove("hide", "thumbnail");
 }
 function ui_label_hide(button: UI_Label): void {
     button.element_root.classList.add("hide");
@@ -2329,19 +2328,10 @@ function ui_get_node_action(node: Map_Node): string {
     switch (node.type) {
         case Node_Type.PROJECT: { label = `Open project`; } break;
         case Node_Type.WARP:    { label = `Warp to ${node.tooltip}`; } break;
-        case Node_Type.INFO:    { label = `Read sign`; } break;
+        case Node_Type.INFO:    { label = `Examine`; } break;
     }
     return label;
 }
-// function ui_get_node_tooltip(node: Map_Node): string {
-//     let label = "";
-//     switch (node.type) {
-//         case Node_Type.PROJECT: { label = `Open project`; } break;
-//         case Node_Type.WARP:    { label = `Warp to ${node.tooltip}`; } break;
-//         case Node_Type.INFO:    { label = `Read sign`; } break;
-//     }
-//     return label;
-// }
 function ui_create_element<T>(ui_root: HTMLElement, html: string): T {
     const parent = document.createElement("div");
     parent.innerHTML = html.trim();
@@ -2379,6 +2369,7 @@ function ui_set_element_class(element: HTMLElement, class_name: string, value: b
     }
 }
 function ui_set_theme_color(color: int) {
+    console.trace(color);
     game.clear_color = hex_to_color(color);
     game.renderer.ui_theme_color.setAttribute("content", hex_to_string(color));
     game.renderer.game_root.style.background = hex_to_string(color);
