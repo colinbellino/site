@@ -510,9 +510,9 @@ export function update() {
                         }
 
                         if (node_at_mouse_position > -1) {
-                            document.body.style.cursor = "pointer";
+                            set_mouse_cursor("pointer");
                         } else {
-                            document.body.style.cursor = "default";
+                            set_mouse_cursor("default");
                         }
 
                         if (player_input_mouse_left) {
@@ -1885,6 +1885,12 @@ function project_screenshot_url(project: Project, image_index: int, variant: str
         return `/site/images/screenshots/${project.screenshots_prefix}/banner-${variant}.png`;
     }
     return `/site/images/screenshots/${project.screenshots_prefix}/screenshot${image_index}-${variant}.png`;
+}
+// Somehow, changing the mouse cursor on mobile Chrome makes the screen flashes... this is fine 🔥
+function set_mouse_cursor(cursor: string) {
+    if (matchMedia("(pointer:fine)").matches) {
+        document.body.style.cursor = cursor;
+    }
 }
 
 // :debug
