@@ -231,27 +231,29 @@
     }
 
     .hire-me {
+      --hire-me-width: 115px;
+
       position: relative;
       display: inline-block;
       box-sizing: border-box;
-      width: 90px;
+      width: 115px;
       padding: 8px 16px;
       margin: 0.5em 0 0 0.5em;
       border-radius: 3px;
       background: var(--main-color);
       color: #ffffff;
     }
+    .hire-me:hover {
+      text-decoration: none;
+      background: var(--main-color-hover);
+    }
     .hire-me svg {
       position: absolute;
-      right: 10px;
+      right: 15px;
       height: 20px;
       margin-left: 10px;
       opacity: 0;
       transform: scale(0);
-    }
-    .hire-me:hover {
-      text-decoration: none;
-      background: var(--main-color-hover);
     }
     body:not(.game-running) .hire-me.animated {
       transition: width ease-out 200ms 100ms, background-color linear 300ms 0ms;
@@ -260,13 +262,19 @@
       transition: opacity ease-out 200ms 0ms, transform ease-out 200ms 0ms;
     }
     body:not(.game-running) .hire-me.animated:hover {
-      width: 110px;
+      width: calc(var(--hire-me-width) + 30px);
       transition-delay: 0ms, 0ms;
     }
     body:not(.game-running) .hire-me.animated:hover svg {
       opacity: 1;
       transform: scale(1);
       transition-delay: 0ms, 0ms;
+    }
+
+    .services {
+      margin: -16px 0 16px 0px;
+      padding: 0 0 0 32px;
+      line-height: 150%;
     }
 
     .worldmap_button {
@@ -396,8 +404,14 @@
       </div>
     </aside>
     <nav>
-      <p><b>My links:</b></p>
+      <p><b>Navigation:</b></p>
       <ul class="links navigation">
+        <li>
+          <a href="/CV - Colin Bellino.pdf" class="link" target="_blank">
+            <svg aria-hidden="true" viewBox="0 0 384 512" style="width: 18px; margin-left: 5px; margin-right: 14px;"><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
+            <span>Résumé / CV</span>
+          </a>
+        </li>
         <li>
           <a href="/web" class="link">
             <svg aria-hidden="true" viewBox="50 0 580 580"><path fill-rule="evenodd" d="M105 122.5v315c0 48.328 39.172 87.5 87.5 87.5h315c23.203 0 45.465-9.223 61.871-25.629S595 460.703 595 437.5v-315c0-23.203-9.223-45.465-25.629-61.871S530.703 35 507.5 35h-315c-48.328 0-87.5 39.172-87.5 87.5zM350 105c-96.582 0-175 78.418-175 175s78.418 175 175 175 175-78.418 175-175-78.418-175-175-175zm77.84 192.5H367.5v111.36c33.117-27.027 55.641-66.551 60.34-111.36zm-182.09 0h-34.668c6.012 48.117 36.48 88.672 78.539 108.83-24.465-30.293-40.328-67.812-43.871-108.83zm86.746 0h-51.59c4.27 40.73 23.285 77.105 51.59 103.7zm156.41 0h-25.918c-3.21 37.25-16.59 71.609-37.344 100.29 34.062-21.938 58.012-58.23 63.262-100.29zm-243.16-35c3.543-41.027 19.406-78.547 43.871-108.83-42.062 20.16-72.527 60.715-78.539 108.83zm86.746 0V158.8c-28.316 26.59-47.32 62.965-51.59 103.7zm35 0h60.34c-4.7-44.809-27.23-84.332-60.34-111.36zm121.41 0c-5.25-42.062-29.199-78.355-63.262-100.29 20.754 28.684 34.133 63.043 37.344 100.29z"/></svg>
@@ -407,13 +421,7 @@
         <li>
           <a href="/games" class="link">
             <svg aria-hidden="true" viewBox="0 0 640 512"><path d="M480 96H160C71.6 96 0 167.6 0 256s71.6 160 160 160c44.8 0 85.2-18.4 114.2-48h91.5c29 29.6 69.5 48 114.2 48 88.4 0 160-71.6 160-160S568.4 96 480 96zM256 276c0 6.6-5.4 12-12 12h-52v52c0 6.6-5.4 12-12 12h-40c-6.6 0-12-5.4-12-12v-52H76c-6.6 0-12-5.4-12-12v-40c0-6.6 5.4-12 12-12h52v-52c0-6.6 5.4-12 12-12h40c6.6 0 12 5.4 12 12v52h52c6.6 0 12 5.4 12 12v40zm184 68c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48zm80-80c-26.5 0-48-21.5-48-48s21.5-48 48-48 48 21.5 48 48-21.5 48-48 48z"/></svg>
-            <span>Game projects</span>
-          </a>
-        </li>
-        <li>
-          <a href="/resume.pdf" class="link" target="_blank">
-            <svg aria-hidden="true" viewBox="0 0 384 512" style="width: 18px; margin-left: 5px; margin-right: 14px;"><path d="M64 0C28.7 0 0 28.7 0 64v384c0 35.3 28.7 64 64 64h256c35.3 0 64-28.7 64-64V160H256c-17.7 0-32-14.3-32-32V0H64zm192 0v128h128L256 0zM64 224h24c30.9 0 56 25.1 56 56s-25.1 56-56 56h-8v32c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16zm24 80c13.3 0 24-10.7 24-24s-10.7-24-24-24h-8v48h8zm72-64c0-8.8 7.2-16 16-16h24c26.5 0 48 21.5 48 48v64c0 26.5-21.5 48-48 48h-24c-8.8 0-16-7.2-16-16V240zm32 112h8c8.8 0 16-7.2 16-16v-64c0-8.8-7.2-16-16-16h-8v96zm96-128h48c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v32h32c8.8 0 16 7.2 16 16s-7.2 16-16 16h-32v48c0 8.8-7.2 16-16 16s-16-7.2-16-16V240c0-8.8 7.2-16 16-16z"/></svg>
-            <span>Résumé / CV</span>
+            <span>Games</span>
           </a>
         </li>
         <li>
@@ -437,7 +445,7 @@
     <section>
       <h1><a href="/changelog">Colin Bellino</a></h1>
       <a class="hire-me animated" href="mailto:work@colinbellino.com" target="_blank">
-        <span>Hire me</span>
+        <span>Contact me</span>
         <svg viewBox="0 0 45 45">
           <g transform="matrix(1.25 0 0 -1.25 0 45)">
             <path d="M11.626 28.512a1.413 1.413 0 0 1-.268-.395l-.008.008L.134 2.86l.011-.011c-.208-.403.14-1.223.853-1.937S2.53-.148 2.933.06l.01-.01L28.21 11.265l-.008.009c.148.07.282.155.395.268 1.562 1.562-.971 6.627-5.657 11.313s-9.752 7.219-11.314 5.657" fill="#dd2e44"/>
@@ -453,9 +461,22 @@
           </g>
         </svg>
       </a>
-      <h2>I‘m a french freelance programmer and designer who loves creating cool sites, apps and video games.</h2>
-      <p>I‘ve been coding, tinkering and prototyping for more than 20 years with many technology from C to JavaScript, from Jai to Go, from web apps to video games. <br>Over the years, I‘ve developed a taste for rapid prototyping and a good intuition for building good experiences for my users and clients. I speak French, English and <a href="https://www.youtube.com/watch?v=sD3SF6foL00" target="_blank" rel="noopener noreferrer me" class="">Nerd</a>.</p>
-      <p>Currently <b>available for hire</b> and looking for interesting projects to work on. If you‘d be interested in hiring me, <a href="mailto:work@colinbellino.com" target="_blank">let‘s talk</a> ;)</p>
+      <h2>Hey there, I’m Colin. A french engineer who fell in love with programming and creating great applications, tools, sites and video games!</h2>
+      <p>For more than 20 years, I’ve been coding, tinkering and prototyping with many technologies from C to JavaScript, from Jai to Go, from web apps to video games.<br>Over the years, I’ve developed a taste for rapid prototyping and a good intuition for building good experiences for my users and clients.</p>
+      <p>Now, I’m working as a contractor to build robust front-end applications and share all that I learned along the way.<br>Here are some of the services I provide to my clients:
+      </p>
+      <ul class="services">
+        <li>Creation of performant and accessible applications.</li>
+        <li>Writing new functionalities in React, Vue, JavaScript or TypeScript.</li>
+        <li>Technical audit of the front-end architecture (performance, accessiblity, etc).</li>
+        <li>Creation of Progressive Web Apps (PWAs).</li>
+        <li>Strategy for web apps/sites performance.</li>
+        <li>Advice and training in performance optimisations (front-end, tools & back-end).</li>
+        <li>Development of back-end applications and tools (TypeScript, Go, C, etc).</li>
+        <li>Development of video games (C, C#, TypeScript, WebGL, WebGPU, Unity, Godot, etc).</li>
+      </ul>
+      <p>I speak native French, fluent English and <a href="https://www.youtube.com/watch?v=sD3SF6foL00" target="_blank" rel="noopener noreferrer me" class="">Nerd</a>.</p>
+      <p><b>Current status: looking for interesting projects to work on.</b></p>
     </section>
     <footer>
       <p>Where to find me online:</p>

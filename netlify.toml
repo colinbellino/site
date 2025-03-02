@@ -38,13 +38,13 @@
   from = "/resume.pdf"
   to = "/CV - Colin Bellino.pdf"
   force = true
-  status = 200
+  status = 301
 
 [[redirects]]
   from = "/cv"
   to = "/CV - Colin Bellino.pdf"
   force = true
-  status = 200
+  status = 301
 
 [[headers]]
   for = "/*"
