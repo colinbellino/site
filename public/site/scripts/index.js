@@ -5,12 +5,6 @@ let worldmap_game;
     if (can_hover) {
         document.addEventListener("mousemove", flip_avatar);
     }
-
-    const worldmap_start_button = document.querySelector("button#worldmap_start");
-    if (worldmap_start_button && location.search.includes("worldmap")) {
-        worldmap_start_button.classList.add("visible");
-        worldmap_start_button.addEventListener("click", worldmap_start_or_pause);
-    }
 }
 
 function flip_avatar(e) {
@@ -20,54 +14,6 @@ function flip_avatar(e) {
         avatar.classList.add("flipped");
     } else if (e.clientX > rect.x + rect.width) {
         avatar.classList.remove("flipped");
-    }
-}
-
-function worldmap_start_or_pause() {
-    const is_running = document.body.classList.contains("worldmap_running");
-    const is_loading = document.body.classList.contains("worldmap_loading");
-    const is_closing = document.body.classList.contains("worldmap_closing");
-    if (is_running) {
-        if (is_loading || is_closing) { return; }
-
-        document.body.style.background = "";
-        document.body.classList.add("worldmap_closing");
-        setTimeout(() => {
-            document.body.classList.remove("worldmap_running", "worldmap_closing");
-            worldmap_game.pause();
-        }, 1000);
-    } else {
-        if (is_loading || is_closing) { return; }
-
-        if (worldmap_game === undefined) {
-            document.body.classList.add("worldmap_loading");
-            Promise.all([
-                import      ("/worldmap/dist/game.js"),
-                import_style("/worldmap/worldmap.css"),
-                new Promise(resolve => setTimeout(resolve, 300)),
-            ]).then((results) => {
-                worldmap_game = results[0];
-                worldmap_game.start(open_transition);
-            });
-        } else {
-            worldmap_game.resume();
-            open_transition();
-        }
-
-        function open_transition() {
-            document.body.classList.remove("worldmap_loading");
-            document.body.classList.add("worldmap_running");
-            document.activeElement.blur();
-        }
-        function import_style(url) {
-            return new Promise((resolve, reject) => {
-                const link = document.createElement("link");
-                link.setAttribute("href", url);
-                link.setAttribute("rel", "stylesheet");
-                link.onload = resolve;
-                document.body.appendChild(link);
-            });
-        }
     }
 }
 

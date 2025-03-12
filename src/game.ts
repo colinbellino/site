@@ -198,7 +198,8 @@ export function start(loaded_callback: () => void) {
     game.projects = fixed_array_make(MAX_PROJECTS);
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
-    let use_dark_theme = prefers_dark_theme;
+    let use_dark_theme = false;
+    // let use_dark_theme = prefers_dark_theme;
     /* if (!__RELEASE__) */ {
         if      (location.search.includes("dark"))  { use_dark_theme = true; }
         else if (location.search.includes("light")) { use_dark_theme = false; }
@@ -2375,7 +2376,6 @@ function ui_set_element_class(element: HTMLElement, class_name: string, value: b
     }
 }
 function ui_set_theme_color(color: int) {
-    console.trace(color);
     game.clear_color = hex_to_color(color);
     game.renderer.ui_theme_color.setAttribute("content", hex_to_string(color));
     game.renderer.game_root.style.background = hex_to_string(color);
