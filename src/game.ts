@@ -676,7 +676,7 @@ export function update() {
                                     if (project_panel_opened) {
 
                                     } else {
-                                        ui_panel_show(game.renderer.ui_node_project, "Sign", node.tooltip);
+                                        ui_panel_show(game.renderer.ui_node_project, "Sign", node.tooltip, null);
                                         ui_label_hide(game.renderer.ui_node_action);
                                     }
                                 } break;
@@ -701,15 +701,8 @@ export function update() {
                                         for (let i = 0; i < project.description.length; i++) {
                                             content.push(project.description[i]);
                                         }
-                                        if (project.bullet_points.length > 0) {
-                                            content.push(`<ul class="bullet_points">`);
-                                            for (let i = 0; i < project.bullet_points.length; i++) {
-                                                content.push(`<li>${project.bullet_points[i]}</li>`);
-                                            }
-                                            content.push("</ul>");
-                                        }
 
-                                        ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""), true);
+                                        ui_panel_show(game.renderer.ui_node_project, project.name, content.join(""), project.url);
                                         ui_label_hide(game.renderer.ui_node_action);
                                     }
                                 } break;
@@ -2320,12 +2313,16 @@ function ui_label_node_show(button: UI_Label_Node, label: string, project_id: in
     button.element_root.classList.add("thumbnail");
     button.element_image.style.marginTop = `-${project_id*THUMBNAIL_SIZE[1]*0.5}px`;
 }
-function ui_panel_show(button: UI_Panel, title: string, content: string, full_size: boolean = false): void {
-    button.element_title.innerHTML = title;
-    button.element_content.innerHTML = content;
-    button.element_root.classList.remove("hide");
-    if (full_size) { button.element_root.classList.add("full_size"); }
-    else           { button.element_root.classList.remove("full_size"); }
+function ui_panel_show(panel: UI_Panel, title: string, content: string, link: string, full_size: boolean = true): void {
+    if (link) {
+        panel.element_title.innerHTML = `<a href="${link}" target="_blank" rel="noopener">${title}</a>`;
+    } else {
+        panel.element_title.innerHTML = title;
+    }
+    panel.element_content.innerHTML = content;
+    panel.element_root.classList.remove("hide");
+    if (full_size) { panel.element_root.classList.add("full_size"); }
+    else           { panel.element_root.classList.remove("full_size"); }
 }
 function ui_panel_hide(button: UI_Panel): void {
     button.element_root.classList.add("hide");
@@ -2388,17 +2385,15 @@ type Project = {
     name:               string;
     url:                string;
     description:        string[];
-    bullet_points:      string[];
     screenshots_prefix: string;
     screenshots_count:  int;
 }
 const PROJECTS: Project[] = [
     {
         id: 0,
-        name: "Project 0",
+        name: "Secret project",
         url: "",
         description: [],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2407,36 +2402,43 @@ const PROJECTS: Project[] = [
         name: "My résumé",
         url: "",
         description: [
-            "<p>Pariatur cupidatat commodo non irure occaecat. Dolore qui Lorem voluptate quis aliquip quis proident adipisicing aliqua. Officia eu id deserunt officia et culpa. Veniam ex nulla sit elit magna excepteur laborum dolor laboris ad ipsum eiusmod laborum minim. Voluptate ad culpa do id irure anim.</p>",
-            "<p>Lorem anim laborum deserunt in anim qui. Aliquip commodo excepteur ipsum do veniam qui aliquip pariatur occaecat anim. Enim et enim cillum tempor ea dolore anim sint minim eiusmod incididunt u</p>",
+            "<p>FIXME:</p>",
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
     {
         id: 2,
         name: "Monstrum Prison",
-        url: "",
+        url: "https://colinbellino.itch.io/monstrum-prison",
         description: [
-            "<p>Exercitation incididunt commodo Lorem esse qui incididunt sit dolore aliquip commodo eu. Aliquip fugiat cillum do exercitation cupidatat ipsum enim tempor voluptate. Ut laboris ut veniam magna ut anim sit eu exercitation Lorem. Ad cillum amet veniam duis mollit in amet reprehenderit laborum deserunt laborum reprehenderit. Consectetur aliqua aliquip nostrud ea ad ex. Nostrud anim eiusmod ut nulla officia.</p>",
-            "<p>Veniam enim nisi minim labore irure voluptate aliquip eiusmod. Non pariatur ullamco commodo sint et enim laboris quis nisi mollit id ea incididunt. Ut ullamco nisi incididunt proident qui id nisi laborum culpa sint irure mollit non. Id anim commodo do dolore amet dolor esse elit laborum qui. Ullamco adipisicing ad laborum velit deserunt nisi cillum excepteur exercitation. Labore deserunt sunt commodo est u,llamco et. Ut labore consequat pariatur est proide</p>n"
+            `<p>This is a mini 2D first person dungeon crawler where you befriend weird creatures and try to escape the dungeon someone threw you in.</p>`,
+            `<p>The game was created in the span of a week for the 7DFPS game jam. The engine is entirely made from scratch by me and all the art and audio was made by the rest of the team :)</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Custom engine (JAI)</li>`,
+                `<li>Art: <a href="https://beowulfus-universum.itch.io/" target="_blank" rel="noopener">Beowulfus Universum</a></li>`,
+                `<li>Audio: <a href="https://x.com/risu_ika" target="_blank" rel="noopener">Squirrelsquid</a></li>`,
+            `</ul>`,
         ],
-        bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "monstrum",
+        screenshots_count: 6,
     },
     {
         id: 3,
-        name: "Janitor",
-        url: "",
+        name: "The Legend of Ján Ïtor",
+        url: "https://colinbellino.itch.io/the-legend-of-jan-itor",
         description: [
-            "<p>Dolor nisi ea Lorem exercitation nostrud laboris ea est aute. Ullamco commodo quis et esse Lorem sit do consequat. Labore velit ea quis consectetur aute consequat sit tempor pariatur ipsum dolore magna enim pariatur. Deserunt magna ut amet pariatur cillum quis deserunt ea cupidatat. Incididunt culpa sint velit mollit Lorem. Non in ea fugiat ut. Non ad aliqua nisi velit commodo cupidatat excepteur nulla minim veniam ut.</p>",
-            "<p>Reprehenderit minim dolor aliquip fugiat qui pariatur commodo. Aliqua culpa ut irure sint culpa nisi in consectetur eu. Dolore veniam sint pariatur fugiat mollit id nulla fugiat ut. Cillum ad culpa aliqua minim labore cillum magna velit aliquip do esse. Labore id non qui ut dolore laborum sit qui esse nostrud excepteur consectetur d</p>",
+            `<p>A small game where adventurers are spreading a lot of slime and other mess in the dungeon and you are the one tasked to clean it up before it becomes out of hand.</p>`,
+            `<p>The game was created over a period of 2 weeks by a team of 3 people, this is a submission for the Pirate Game Jam 14.</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Custom engine (Odin)</li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/pirate-jam-14" target="_blank" rel="noopener">https://github.com/colinbellino/pirate-jam-14</a></li>`,
+                `<li>Animation & design: <a href="https://tillerqueen.itch.io" target="_blank" rel="noopener">TillerQueen</a></li>`,
+                `<li>Tileset & design: <a href="https://flippixel.itch.io/" target="_blank" rel="noopener">Flip</a></li>`,
+            `</ul>`,
         ],
-        bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "janitor",
+        screenshots_count: 3,
     },
     {
         id: 4,
@@ -2446,7 +2448,6 @@ const PROJECTS: Project[] = [
             "<p>Proident duis eu elit occaecat minim. Et consectetur culpa anim ad id labore sunt. Deserunt et enim proident dolor officia. Adipisicing aute est consequat sunt aliquip nulla.</p>",
             "<p>Minim mollit dolore non nisi laboris aliquip exercitation aliqua id reprehenderit reprehenderit. Mollit laborum laborum duis elit qui amet voluptate cupidatat consequat irure. ,Proident sunt voluptate consequat fugiat duis sit veniam dolore do culpa reprehenderit nisi n</p>o"
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2455,12 +2456,16 @@ const PROJECTS: Project[] = [
         name: "Alteration",
         url: "",
         description: [
-            "<p>Reprehenderit dolor Lorem ipsum ad excepteur labore consectetur aliqua nulla. Cillum deserunt cupidatat nostrud fugiat. Proident voluptate ut in aute veniam. Exercitation fugiat ex nisi enim nulla est ea exercitation magna nisi. Nostrud aliquip dolor magna laborum deserunt et non sunt cupidatat voluptate enim adipisicing.</p>",
-            "<p>Sunt eu pariatur ad irure nostrud ad in non excepteur ad. Duis aliquip excepteur ut est ullamco dolor duis ut excepteur ullamco ipsum. Irure minim et aute eu sunt reprehenderit esse excepteur elit veniam Lorem eu. Cupidatat consectetur culpa veniam adipisicing qui aliquip eu occaecat. Ea cupidatat aliquip in anim aliquip en,im mag</p>n"
+            `<p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.</p>`,
+            `<p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach perfect balance, symbolized by the goal of each level. <br /> But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Unity (C#)</li>`,
+                `<li>Team: </li>`,
+                `<li><a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source code</a></li>`,
+            `</ul>`,
         ],
-        bullet_points: [],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "alteration",
+        screenshots_count: 5,
     },
     {
         id: 6,
@@ -2470,7 +2475,6 @@ const PROJECTS: Project[] = [
             "<p>Ad eu consequat ipsum est velit fugiat id aliquip do. Labore cillum consequat dolor cupidatat pariatur et Lorem mollit et nisi dolore. Officia minim non consequat consequat reprehenderit eu aute. Voluptate officia duis deserunt exercitation quis. Eiusmod ad culpa elit Lorem reprehenderit consectetur dolore do. Sint enim nulla nulla ad dolore et laboris Lorem eu excepteur non.</p>",
             "<p>Voluptate pariatur dolor magna occaecat nostrud dolor qui duis. Occaecat amet nostrud ea ex consectetur ex. Fugiat velit laboris occaecat dolor. Occaecat deserunt proident et velit commodo occaecat fugiat laboris labore. Est labore quis nulla incididunt. Cupidatat exercitation aliqua cillum qui incididunt qui est ullamco commod</p>",
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2482,7 +2486,6 @@ const PROJECTS: Project[] = [
             "<p>Cillum id est consequat Lorem exercitation quis sint enim fugiat velit non anim enim non. Minim ad est eu cupidatat. Enim elit nisi eiusmod veniam esse do labore laborum consectetur reprehenderit. Consequat reprehenderit dolor deserunt ut cupidatat consectetur dolore amet cillum aliqua voluptate exercitation do amet.</p>",
             "<p>Reprehenderit magna enim est elit dolor. Fugiat ut consectetur ut adipisicing pariatur. Nisi incididunt non culpa consequat nisi Lorem excepteur. Magna sit culpa duis et velit nostrud proident qui nulla proident pariatur excepteur fugiat. Nulla aliqua qui ex minim quis duis enim culpa incididunt officia deserunt aliqui,p nisi labore. Consectetur mollit veniam laboris exercitation voluptate officia laborum pariatur ad nostrud pariatur veniam cupidat</p>a"
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2494,7 +2497,6 @@ const PROJECTS: Project[] = [
             "<p>Labore excepteur aliqua ea ullamco do laboris sit aliquip aliquip. Id laborum sit quis officia aliqua eu nostrud nostrud. Ex quis irure ad tempor consectetur Lorem. Id esse officia aute officia sunt. Enim dolor dolor laborum commodo minim tempor non esse ut labore Lorem deserunt eu. Aute officia nulla in nulla.</p>",
             "<p>Magna veniam qui qui proident qui velit in amet sunt nostrud exercitation. Adipisicing consectetur exercitation veniam irure enim culpa eiusmod sunt et commodo laboris fugiat. Anim culpa nisi in ipsum consequat enim sunt id amet fugia</p>",
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2506,7 +2508,6 @@ const PROJECTS: Project[] = [
             "<p>Laborum qui laboris dolor ex id tempor eu ut ullamco ipsum. Ex ad dolor adipisicing occaecat Lorem nulla Lorem in nisi magna incididunt cillum. Et nisi labore ea non qui. Consectetur irure esse eiusmod sint voluptate est. Voluptate aute duis Lorem esse excepteur et minim velit consectetur in. Dolor anim id consectetur reprehenderit occaecat commodo cillum sit. Mollit eiusmod nostrud in fugiat cupidatat aliqua tempor tempor quis irure Lorem eu tempor.</p>",
             "<p>Incididunt anim occaecat enim non aliquip esse. Aute eu Lorem amet id cillum anim nisi laborum do sint. Ex ad duis culpa id labore adipisicing. Dolore aliquip dolore minim laboris occaecat ad incididunt do ea consectetur quis. Nisi cupidatat duis culpa irure fugiat cillum veniam. Duis proident deserunt ipsum laboris duis voluptate nostrud. Et ipsum occaecat eu duis laborum Lorem eiusmod consequat cillum tempor aliquip eni</p>",
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2518,7 +2519,6 @@ const PROJECTS: Project[] = [
             "<p>Commodo eu amet et anim et aute. Ea incididunt occaecat ad laborum aliquip cillum deserunt adipisicing qui excepteur excepteur minim reprehenderit in. Dolor velit pariatur quis qui enim eu. Fugiat do anim ex ut excepteur magna labore aute ullamco. Aliqua amet tempor esse occaecat in ea qui Lorem deserunt nisi nulla. Amet adipisicing aute adipisicing laboris sunt duis commodo labore consequat. Commodo labore ex Lorem cillum voluptate est eiusmod nisi nostrud ea.</p>",
             "<p>In elit reprehenderit incididunt velit exercitation proident minim dolor consectetur eu cillum. Et laborum reprehenderit occaecat eu mollit pariatur officia ullamco irure voluptate nulla fugiat. Aliquip esse incididunt aliqua esse fugiat incididunt occaecat exercitation elit eiusmod anim quis. Nostrud nostrud aliquip occaecat deserunt aliqua non quis officia. Exercitation reprehenderit id esse cillum et aliqua sint dolor ipsum irure. Et id minim minim elit do est,. Magna proident aliqua duis amet veniam nostrud est laborum fugiat ex nul</p>l"
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2530,7 +2530,6 @@ const PROJECTS: Project[] = [
             "<p>Proident eiusmod adipisicing dolore exercitation esse nulla reprehenderit quis occaecat id do. Excepteur cillum occaecat minim voluptate elit adipisicing nisi eiusmod ex duis adipisicing laboris occaecat. Commodo esse et proident est Lorem velit aute magna sunt velit. Elit officia amet nisi eu incididunt ad anim veniam ex culpa qui. Quis sit cillum dolore ut ipsum id id mollit. In anim ut excepteur ullamco pariatur consequat irure occaecat et Lorem tempor culpa.</p>",
             "<p>Ad laborum exercitation labore ad anim officia eiusmod consectetur mollit aute. Dolore qui dolore aliquip esse adipisicing excepteur. Duis enim dolore voluptate voluptate minim et nostrud amet nostrud ullamco. Cillum laborum eiusmod laborum reprehenderit ad. Deserunt ullamco qui tempor eiusmod laborum esse velit. Qui ad esse laboris aliqui</p>",
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
@@ -2542,7 +2541,6 @@ const PROJECTS: Project[] = [
             "<p>Nisi amet irure cillum velit. Sunt exercitation minim amet cillum id. Mollit velit sint magna ut consequat.</p>",
             "<p>Labore duis eiusmod dolor velit esse mollit eiusmod occaecat aliqua cillum culpa consectetur. Ea laboris aute, consequat et sunt est. Eu quis in proident pariatur labore velit. Sunt Lorem exercitation consequat cupidatat ipsum sint duis am</p>e"
         ],
-        bullet_points: [],
         screenshots_prefix: "",
         screenshots_count: 0,
     },
