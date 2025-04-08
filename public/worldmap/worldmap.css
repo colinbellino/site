@@ -119,6 +119,7 @@ body.worldmap_closing #worldmap {
     overflow-y: auto;
     scrollbar-color: rgba(128, 128, 128, 1) transparent;
     scrollbar-width: thin;
+    line-height: 130%;
 }
 .panel .screenshots {
     display: flex;
@@ -154,6 +155,10 @@ body.worldmap_closing #worldmap {
 .panel .content .bullet_points {
     list-style: inside;
 }
+.panel embed {
+    width: 100%;
+    height: calc(100% - 48px);
+}
 .panel p {
     margin-top: 0;
     margin-bottom: 1em;
@@ -168,6 +173,9 @@ body.worldmap_closing #worldmap {
     margin: 0;
     padding: 0;
     list-style-position: inside;
+}
+.panel ul.bullets li::marker {
+    content: "• ";
 }
 @media (min-width: 760px) {
     .panel {

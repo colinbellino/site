@@ -931,7 +931,7 @@ export function update() {
             }
 
             // :render console lines
-            // FIXME: don't do this in __RELEASE__
+            // TODO: don't do this in __RELEASE__
             if (game.draw_console) {
                 ui_push_console_line("fps:                " + game.fps.toFixed(0));
                 ui_push_console_line("world_mode:         " + game.world_mode);
@@ -1139,14 +1139,6 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
 
     const canvas = ui_create_element<HTMLCanvasElement>(game_root, `<canvas id="main"></canvas>`);
-    // canvas.addEventListener("click", (e) => {
-    //     console.log("click", e); // FIXME:
-    //     input_send_key(Keyboard_Key.Escape);
-    // }, false);
-    // canvas.addEventListener("touchstart", (e) => {
-    //     console.log("touchstart", e); // FIXME:
-    //     input_send_key(Keyboard_Key.Escape);
-    // }, false);
     const _gl = canvas.getContext("webgl2");
     if (_gl === null) {
         return [null, false];
@@ -2399,10 +2391,24 @@ const PROJECTS: Project[] = [
     },
     {
         id: 1,
-        name: "My résumé",
+        name: "About me",
         url: "",
         description: [
-            "<p>FIXME:</p>",
+            `<p>Hi there! I’m Colin, a french engineer who fell in love with programming and creating great applications, tools, sites and video games!</p>`,
+            `<p>For more than 20 years, I’ve been coding, tinkering and prototyping with many technologies from C to JavaScript, from Jai to Go, from web apps to video games.<br>Over the years, I’ve developed a taste for rapid prototyping and a good intuition for building good experiences for my users and clients.</p>`,
+            `<p>You can find my résumé <a href="/CV - Colin Bellino.pdf" target="_blank" rel="noopener">here</a>.</p>`,
+            `<p>Now, I’m working as a contractor to build robust front-end applications and share all that I learned along the way.<br>Here are some of the services I provide to my clients:</p>`,
+            `<ul class="services">`,
+                `<li>Creation of performant and accessible applications.</li>`,
+                `<li>Writing new functionalities in React, Vue, JavaScript or TypeScript.</li>`,
+                `<li>Technical audit of the front-end architecture (performance, accessiblity, etc).</li>`,
+                `<li>Creation of Progressive Web Apps (PWAs).</li>`,
+                `<li>Strategy for web apps/sites performance.</li>`,
+                `<li>Advice and training in performance optimisations (front-end, tools & back-end).</li>`,
+                `<li>Development of back-end applications and tools (TypeScript, Go, C, etc).</li>`,
+                `<li>Development of video games (C, C#, TypeScript, WebGL, WebGPU, Unity, Godot, etc).</li>`,
+            `</ul>`,
+            `<p><br /><b>Current status: looking for interesting projects and clients to work with.</b></p>`,
         ],
         screenshots_prefix: "",
         screenshots_count: 0,
@@ -2443,13 +2449,20 @@ const PROJECTS: Project[] = [
     {
         id: 4,
         name: "Feast or Famine",
-        url: "",
+        url: "https://colinbellino.itch.io/feast",
         description: [
-            "<p>Proident duis eu elit occaecat minim. Et consectetur culpa anim ad id labore sunt. Deserunt et enim proident dolor officia. Adipisicing aute est consequat sunt aliquip nulla.</p>",
-            "<p>Minim mollit dolore non nisi laboris aliquip exercitation aliqua id reprehenderit reprehenderit. Mollit laborum laborum duis elit qui amet voluptate cupidatat consequat irure. ,Proident sunt voluptate consequat fugiat duis sit veniam dolore do culpa reprehenderit nisi n</p>o"
+            `<p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>`,
+            `<p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Unity (C#)</li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/ludum-dare-50" target="_blank" rel="noopener">https://github.com/colinbellino/ludum-dare-50</a></li>`,
+                `<li>Art & design: <a href="https://sjpixels.itch.io/" target="_blank" rel="noopener">Scott "SJPixels" Welfare</a></li>`,
+                `<li>Audio & design: <a href="https://itch.io/profile/brandyncampbell" target="_blank" rel="noopener">Brandyn "RandyRude" Campbell</a></li>`,
+                `<li>Code & design: <a href="https://github.com/KyleWelfare" target="_blank" rel="noopener">Kyle  Welfare</a></li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "feast",
+        screenshots_count: 3,
     },
     {
         id: 5,
@@ -2460,8 +2473,9 @@ const PROJECTS: Project[] = [
             `<p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach perfect balance, symbolized by the goal of each level. <br /> But beware as your mind is yet unbalanced your mood will change your form every couple of turns.</p>`,
             `<ul class="bullets">`,
                 `<li>Engine: Unity (C#)</li>`,
-                `<li>Team: </li>`,
-                `<li><a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">Source code</a></li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/ludum-dare-49" target="_blank" rel="noopener">https://github.com/colinbellino/ludum-dare-49</a></li>`,
+                `<li>Art & design: <a href="https://cyangmou.itch.io/" target="_blank" rel="noopener">Thomas "Cyangmou" Feichtmeir</a></li>`,
+                `<li>Audio & design: <a href="https://andrewlivecchi.com/" target="_blank" rel="noopener">Andrew LiVecchi</a></li>`,
             `</ul>`,
         ],
         screenshots_prefix: "alteration",
@@ -2470,78 +2484,127 @@ const PROJECTS: Project[] = [
     {
         id: 6,
         name: "Snowball",
-        url: "",
+        url: "https://colinbellino.itch.io/snowball",
         description: [
-            "<p>Ad eu consequat ipsum est velit fugiat id aliquip do. Labore cillum consequat dolor cupidatat pariatur et Lorem mollit et nisi dolore. Officia minim non consequat consequat reprehenderit eu aute. Voluptate officia duis deserunt exercitation quis. Eiusmod ad culpa elit Lorem reprehenderit consectetur dolore do. Sint enim nulla nulla ad dolore et laboris Lorem eu excepteur non.</p>",
-            "<p>Voluptate pariatur dolor magna occaecat nostrud dolor qui duis. Occaecat amet nostrud ea ex consectetur ex. Fugiat velit laboris occaecat dolor. Occaecat deserunt proident et velit commodo occaecat fugiat laboris labore. Est labore quis nulla incididunt. Cupidatat exercitation aliqua cillum qui incididunt qui est ullamco commod</p>",
+            `<p>A minimalist Tactical RPG game created in about a month as a solo project (art, audio & code) as a small challenge for myself (in a month).</p>`,
+            `<p>I wanted to make a game about kids playing outside and throwing snowballs around and also wondered how a battle system like this would work in a side view game. So, i've combined the two to make Snowball ⛄!</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Unity (C#)</li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/snowball" target="_blank" rel="noopener">https://github.com/colinbellino/snowball</a></li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "snowball",
+        screenshots_count: 4,
     },
     {
         id: 7,
         name: "Flight",
-        url: "",
+        url: "https://colinbellino.itch.io/flight",
         description: [
-            "<p>Cillum id est consequat Lorem exercitation quis sint enim fugiat velit non anim enim non. Minim ad est eu cupidatat. Enim elit nisi eiusmod veniam esse do labore laborum consectetur reprehenderit. Consequat reprehenderit dolor deserunt ut cupidatat consectetur dolore amet cillum aliqua voluptate exercitation do amet.</p>",
-            "<p>Reprehenderit magna enim est elit dolor. Fugiat ut consectetur ut adipisicing pariatur. Nisi incididunt non culpa consequat nisi Lorem excepteur. Magna sit culpa duis et velit nostrud proident qui nulla proident pariatur excepteur fugiat. Nulla aliqua qui ex minim quis duis enim culpa incididunt officia deserunt aliqui,p nisi labore. Consectetur mollit veniam laboris exercitation voluptate officia laborum pariatur ad nostrud pariatur veniam cupidat</p>a"
+            `<p>An unfinished platformer game created in 72 hours with a team of two for the Indie Tales 2021 game jam.</p>`,
+            `<p>Flight is a game about an explorer stranded on an unknown land that needs to fix their ship with the power of other birds.</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Unity (C#)</li>`,
+                `<li>Art & design: <a href="https://www.lauradp.work/" target="_blank" rel="noopener">Laura De Pascale</a></li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/indie-tales-2021" target="_blank" rel="noopener">https://github.com/colinbellino/indie-tales-2021</a></li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "flight",
+        screenshots_count: 2,
     },
     {
         id: 8,
-        name: "Bonbon",
-        url: "",
+        name: "Bonbon and the Deep Below",
+        url: "https://colinbellino.itch.io/bonbon",
         description: [
-            "<p>Labore excepteur aliqua ea ullamco do laboris sit aliquip aliquip. Id laborum sit quis officia aliqua eu nostrud nostrud. Ex quis irure ad tempor consectetur Lorem. Id esse officia aute officia sunt. Enim dolor dolor laborum commodo minim tempor non esse ut labore Lorem deserunt eu. Aute officia nulla in nulla.</p>",
-            "<p>Magna veniam qui qui proident qui velit in amet sunt nostrud exercitation. Adipisicing consectetur exercitation veniam irure enim culpa eiusmod sunt et commodo laboris fugiat. Anim culpa nisi in ipsum consequat enim sunt id amet fugia</p>",
+            `<p>A platformer game created in 72 hours with a team of three for the Ludum Dare 48 game jam.</p>`,
+            `<p>Help Bonbon the hare 🐇 flee this mechanical nightmare! Go deeper and deeper into the ground to escape death from above.</p>`,
+            `<ul class="bullets">`,
+                `<li>Engine: Unity (C#)</li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/ludum-dare-48" target="_blank" rel="noopener">https://github.com/colinbellino/ludum-dare-48</a></li>`,
+                `<li>Art & design: <a href="https://www.lauradp.work/" target="_blank" rel="noopener">Laura De Pascale</a></li>`,
+                `<li>Audio & design: <a href="https://soundcloud.com/calartist" target="_blank" rel="noopener">PronomicalArtist</a></li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "bonbon",
+        screenshots_count: 3,
     },
     {
         id: 9,
-        name: "Chipsmarket",
-        url: "",
+        name: "Chipsmarket (Precogs)",
+        url: "https://www.chipsmarket.com/",
         description: [
-            "<p>Laborum qui laboris dolor ex id tempor eu ut ullamco ipsum. Ex ad dolor adipisicing occaecat Lorem nulla Lorem in nisi magna incididunt cillum. Et nisi labore ea non qui. Consectetur irure esse eiusmod sint voluptate est. Voluptate aute duis Lorem esse excepteur et minim velit consectetur in. Dolor anim id consectetur reprehenderit occaecat commodo cillum sit. Mollit eiusmod nostrud in fugiat cupidatat aliqua tempor tempor quis irure Lorem eu tempor.</p>",
-            "<p>Incididunt anim occaecat enim non aliquip esse. Aute eu Lorem amet id cillum anim nisi laborum do sint. Ex ad duis culpa id labore adipisicing. Dolore aliquip dolore minim laboris occaecat ad incididunt do ea consectetur quis. Nisi cupidatat duis culpa irure fugiat cillum veniam. Duis proident deserunt ipsum laboris duis voluptate nostrud. Et ipsum occaecat eu duis laborum Lorem eiusmod consequat cillum tempor aliquip eni</p>",
+            `<p>A Business-to-Business international marketplace for electronic parts.</p>`,
+            `<p>I was tasked to prepare the new version of the application (the new onboarding screens, improved workflows, etc) in collaboration with the CTO and the rest of the tech team.</p>`,
+            `<p>We started with mockups and discussions with the design team, then i iterated on the new version of the application, making a feedback loop as soon as possible.</p>`,
+            `<p>The team seemed interested in performance aware programming and my input on architecture decisions, so i took the time to share my knowledge on these subjects when that felt appropriate.</p>`,
+            `<p>After a prototyping period and much discussion with the team, we settled on the tech stack below:</p>`,
+            `<ul class="bullets">`,
+                `<li>Frontend: Vue3 / TypeScript / Tailwind</li>`,
+                `<li>Backend: Node / TypeScript / Express / PostgreSQL</li>`,
+                `<li>AWS: cloud functions, pub/sub, etc</li>`,
+                `<li>Testing: Jest / Cypress / Github Actions / Storybook / Chromatic</li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "precogs",
+        screenshots_count: 4,
     },
     {
         id: 10,
-        name: "MyPhotos",
-        url: "",
+        name: "MyPhotos (Hubside)",
+        url: "https://photos.hubside.com",
         description: [
-            "<p>Commodo eu amet et anim et aute. Ea incididunt occaecat ad laborum aliquip cillum deserunt adipisicing qui excepteur excepteur minim reprehenderit in. Dolor velit pariatur quis qui enim eu. Fugiat do anim ex ut excepteur magna labore aute ullamco. Aliqua amet tempor esse occaecat in ea qui Lorem deserunt nisi nulla. Amet adipisicing aute adipisicing laboris sunt duis commodo labore consequat. Commodo labore ex Lorem cillum voluptate est eiusmod nisi nostrud ea.</p>",
-            "<p>In elit reprehenderit incididunt velit exercitation proident minim dolor consectetur eu cillum. Et laborum reprehenderit occaecat eu mollit pariatur officia ullamco irure voluptate nulla fugiat. Aliquip esse incididunt aliqua esse fugiat incididunt occaecat exercitation elit eiusmod anim quis. Nostrud nostrud aliquip occaecat deserunt aliqua non quis officia. Exercitation reprehenderit id esse cillum et aliqua sint dolor ipsum irure. Et id minim minim elit do est,. Magna proident aliqua duis amet veniam nostrud est laborum fugiat ex nul</p>l"
+            `<p>A Web App to regroup all your photos in one place and easily/safely share them online.</p>`,
+            `<p>I was on the project from the first line of code to the MVP release, we worked hand in hand with the product owner, designers and developers to create something we could be proud of. A lot of work went into the architecture of the app, to make sure it runs and scales smoothly on GCP and is easy to maintain.</p>`,
+            `<p>The backend revolves around a GraphQL schema that is shared with the frontend and iOS app to facilitate communications.</p>`,
+            `<p>The frontend is a React app written in TypeScript that uses Apollo to manage data and caching. Components were written in Storybook by following the Atomic Design guidelines as much as possible.</p>`,
+            `<ul class="bullets">`,
+                `<li>React / TypeScript / Apollo client / CSS Modules</li>`,
+                `<li>Node / TypeScript / Apollo server / Express</li>`,
+                `<li>Google Cloud Platform : datastore, storage, app engine, functions, pub/sub</li>`,
+                `<li>Jest / Cypress / Gitlab CI / Storybook / Chromatic</li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "hubside",
+        screenshots_count: 3,
     },
     {
         id: 11,
-        name: "Bi-BOP",
-        url: "",
+        name: "Bi-BOP: Supply chain (Renault)",
+        url: "https://www.linkedin.com/company/renault-digital/",
         description: [
-            "<p>Proident eiusmod adipisicing dolore exercitation esse nulla reprehenderit quis occaecat id do. Excepteur cillum occaecat minim voluptate elit adipisicing nisi eiusmod ex duis adipisicing laboris occaecat. Commodo esse et proident est Lorem velit aute magna sunt velit. Elit officia amet nisi eu incididunt ad anim veniam ex culpa qui. Quis sit cillum dolore ut ipsum id id mollit. In anim ut excepteur ullamco pariatur consequat irure occaecat et Lorem tempor culpa.</p>",
-            "<p>Ad laborum exercitation labore ad anim officia eiusmod consectetur mollit aute. Dolore qui dolore aliquip esse adipisicing excepteur. Duis enim dolore voluptate voluptate minim et nostrud amet nostrud ullamco. Cillum laborum eiusmod laborum reprehenderit ad. Deserunt ullamco qui tempor eiusmod laborum esse velit. Qui ad esse laboris aliqui</p>",
+            `<p>A large single page application used by the supply chain team at Renault.</p>`,
+            `<p>We created the UI components, code the logic to connect them to the backend (a JSON API that we also developed), discuss potential UX problems with the team among other things.</p>`,
+            `<p>I mainly worked on the frontend, i was involved in most technical decisions with the other developers, code review, code quality control and made multiple improvements to our tooling to avoid regressions and quality of our frontend. Formation of the new developers and transfert of knowledge to the new team that will continue the project.</p>`,
+            `<ul class="bullets">`,
+                `<li>React / Redux / Styled components</li>`,
+                `<li>NodeJS / FeathersJS / Docker</li>`,
+                `<li>Jest / Cypress / Storybook</li>`,
+                `<li>Tests (unit and integration) / Performance tuning / Style guide / Docs</li>`,
+            `</ul>`,
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "renault",
+        screenshots_count: 4,
     },
     {
         id: 12,
-        name: "Portfolio",
-        url: "",
+        name: "Worldmap",
+        url: "https://github.com/colinbellino/site",
         description: [
-            "<p>Nisi amet irure cillum velit. Sunt exercitation minim amet cillum id. Mollit velit sint magna ut consequat.</p>",
-            "<p>Labore duis eiusmod dolor velit esse mollit eiusmod occaecat aliqua cillum culpa consectetur. Ea laboris aute, consequat et sunt est. Eu quis in proident pariatur labore velit. Sunt Lorem exercitation consequat cupidatat ipsum sint duis am</p>e"
+            `<p>This is the worldmap mini-game you are actually on :)</p>`,
+            `<p>It was built using web technologies as a little fun side project for me to play around with WebGL and TypeScript in a non-work environment.</p>`,
+            `<p>Explore the world to see the last projects i worked on, find some easter eggs and see my universe a litte!</p>`,
+            `<p>Fun fact: there are two different color schemes/themes for this game, will you find both of them? 👀</p>`,
+            `<ul class="bullets">`,
+                `<li>TypeScript and WebGL2</li>`,
+                `<li>Source code: <a href="https://github.com/colinbellino/site" target="_blank" rel="noopener">https://github.com/colinbellino/site</a></li>`,
+            `</ul>`,
+            // TODO: make better description for this
+            // - screenshots
+            // - explain dark/light
+            // - techno used (js, webgl2, etc)
         ],
-        screenshots_prefix: "",
-        screenshots_count: 0,
+        screenshots_prefix: "worldmap",
+        screenshots_count: 4,
     },
 ];
