@@ -637,15 +637,6 @@ export function update() {
                                     }
                                 }
 
-                                // Simple way to project images while we are moving to the node
-                                const destination_node = game.nodes.data[game.destination_node];
-                                if (destination_node.type === Node_Type.PROJECT) {
-                                    const project = game.projects.data[destination_node.project_id];
-                                    for (let i = 0; i < project.screenshots_count; i++) {
-                                        load_image(project_screenshot_url(project, i)).catch(no_op);
-                                    }
-                                }
-
                                 ui_panel_hide(game.renderer.ui_node_project);
                                 ui_label_hide(game.renderer.ui_node_action);
 
@@ -2505,8 +2496,8 @@ const PROJECTS: Project[] = [
             `<p>Flight is a game about an explorer stranded on an unknown land that needs to fix their ship with the power of other birds.</p>`,
             `<ul class="bullets">`,
                 `<li>Engine: Unity (C#)</li>`,
-                `<li>Art & design: <a href="https://www.lauradp.work/" target="_blank" rel="noopener">Laura De Pascale</a></li>`,
                 `<li><a href="https://github.com/colinbellino/indie-tales-2021" target="_blank" rel="noopener">Source code</a></li>`,
+                `<li>Art & design: <a href="https://www.lauradp.work/" target="_blank" rel="noopener">Laura De Pascale</a></li>`,
             `</ul>`,
         ],
         screenshots_prefix: "flight",
