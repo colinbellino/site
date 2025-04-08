@@ -292,6 +292,20 @@ body.worldmap_closing #worldmap {
     right: 32px;
     bottom: 32px;
 }
+.hud_label.back {
+    font-size: 20px;
+    font-family: "Arial";
+    left: 16px;
+    top: 16px;
+    text-decoration: none;
+}
+.hud_label.contact {
+    font-size: 20px;
+    font-family: "Arial";
+    right: 16px;
+    top: 16px;
+    text-decoration: none;
+}
 
 @media(max-width: 760px) {
     .hud_label.up { display: none !important; }
