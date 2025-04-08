@@ -1143,6 +1143,21 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
 
     const ui_root = ui_create_element<HTMLDivElement>(game_root, `<div id="ui_root"></div>`);
 
+    ui_create_element<HTMLLabelElement>(ui_root, `
+        <a href="/" class="hud_label back">
+            <span class="content">
+                <span class="label">‹ Homepage</span>
+            </span>
+        </a>
+    `);
+    ui_create_element<HTMLLabelElement>(ui_root, `
+        <a href="mailto:work@colinbellino.com" class="hud_label contact">
+            <span class="content">
+                <span class="label">Contact me</span>
+            </span>
+        </a>
+    `);
+
     // const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
     //     <label class="hud_label anchor_left no_label hide up" for="up">
     //         <span class="content">
