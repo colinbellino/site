@@ -176,7 +176,20 @@
       font-weight: normal;
       font-family: inherit;
     }
-
+    .link.worldmap .icon {
+      overflow: hidden;
+      width: 32px;
+      height: 32px;
+      margin-left: -4px;
+      margin-right: 10px;
+    }
+    .link.worldmap:hover .icon > img {
+      animation: me_walk 600ms infinite steps(4, jump-none);
+    }
+    @keyframes me_walk {
+      0%   { margin-left: -0px; }
+      100% { margin-left: -96px; }
+    }
     p {
       display: inline-block;
       margin-top: 0;
@@ -219,9 +232,11 @@
       transition: all linear 0.2s;
     }
     .link > img,
-    .link > svg {
+    .link > svg,
+    .link > div.icon {
       display: inline-block;
       width: 26px;
+      min-height: 26px;
       margin-right: 12px;
     }
     .link:hover {
@@ -355,11 +370,12 @@
             <span>Changelog</span>
           </a>
         </li>
-        <!-- <li>
-          <a href="/worldmap" class="link">
+        <li>
+          <a href="/worldmap" class="link worldmap">
+            <div class="icon"><img src="/worldmap/images/me_walk.png" class="pixel-art" /></div>
             <span>Worldmap</span>
           </a>
-        </li> -->
+        </li>
       </ul>
     </nav>
     <section>
