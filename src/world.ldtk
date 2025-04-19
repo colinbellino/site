@@ -1627,10 +1627,10 @@
 								{ "__identifier": "project_id", "__type": "Int", "__value": 0, "__tile": null, "defUid": 11, "realEditorValues": [] },
 								{ "__identifier": "warp_target", "__type": "EntityRef", "__value": null, "__tile": null, "defUid": 29, "realEditorValues": [] },
 								{ "__identifier": "warp_camera", "__type": "Point", "__value": null, "__tile": null, "defUid": 45, "realEditorValues": [] },
-								{ "__identifier": "tooltip", "__type": "String", "__value": "<p>Welcome to my portfolio mini-world!</p>\n<p>It's still very much a work in progress but you can already explore my latest projects and just hang for a while :)</p>\n<p>Directions:</p>\n<ul class=\"bullets\">\n    <li>West: Games Isle</li>\n    <li>East: Web Island</li>\n    <li>South: About me</li>\n</ul>\n", "__tile": null, "defUid": 47, "realEditorValues": [{
+								{ "__identifier": "tooltip", "__type": "String", "__value": "<p>Welcome to my portfolio mini-world!</p>\n<p>Here you can explore my latest projects and my universe a little. So, stay a while and listen :)</p>\n<ul class=\"bullets\">\n    <li>To the West, you'll find the Games Isle, full of small prototypes and mini game projects.</li>\n    <li>To the East, you'll reach the Web Island, a showcase of some of my latest web projects.</li>\n    <li>To the South, you can read a little more About Me.</li>\n</ul>\n", "__tile": null, "defUid": 47, "realEditorValues": [{
 									"id": "V_String",
 									"params": [
-										"<p>Welcome to my portfolio mini-world!</p>\\n<p>It's still very much a work in progress but you can already explore my latest projects and just hang for a while :)</p>\\n<p>Directions:</p>\\n<ul class=\"bullets\">\\n    <li>West: Games Isle</li>\\n    <li>East: Web Island</li>\\n    <li>South: About me</li>\\n</ul>\\n"
+										"<p>Welcome to my portfolio mini-world!</p>\\n<p>Here you can explore my latest projects and my universe a little. So, stay a while and listen :)</p>\\n<ul class=\"bullets\">\\n    <li>To the West, you'll find the Games Isle, full of small prototypes and mini game projects.</li>\\n    <li>To the East, you'll reach the Web Island, a showcase of some of my latest web projects.</li>\\n    <li>To the South, you can read a little more About Me.</li>\\n</ul>\\n"
 									]
 								}] },
 								{ "__identifier": "path_north", "__type": "Array<Point>", "__value": [], "__tile": null, "defUid": 48, "realEditorValues": [] },
