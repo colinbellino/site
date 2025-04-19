@@ -25,13 +25,13 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --main-color: rgba(72, 91, 201, 0.9);
+        --main-color: rgb(111 128 229 / 90%);
         --main-color-hover: rgba(76, 95, 208, 1);
-        --background-color: rgba(20, 20, 20, 1);
+        --background-color: rgba(10, 10, 10, 1);
         --text-color: rgba(255, 255, 255, 0.9);
         --link-background-color: rgba(255, 255, 255, 0.7);
         --link-background-color-hover: rgba(255, 255, 255, 0.6);
-        --project-background-color: rgba(255, 255, 255, 0.04);
+        --project-background-color: rgba(255, 255, 255, 0.03);
       }
     }
 
@@ -44,6 +44,7 @@
     }
 
     body {
+      padding: 3vh;
       box-sizing: border-box;
       font-family: Arial, Helvetica, sans-serif;
       background: var(--background-color);
@@ -69,13 +70,14 @@
       padding: 0.8rem 0 1rem;
     }
 
+
     main > aside {
       padding: 1.3rem 0 1rem;
-      float: right;
       font-size: 1rem;
     }
     main > aside ul {
       margin: 0;
+      padding: 0;
     }
     main > aside li {
       list-style: none;
@@ -94,11 +96,14 @@
     }
 
     h2 {
-      margin: 0 0 1rem;
+      margin: 0 0 1rem 0;
       font-size: 1.1rem;
       font-weight: bold;
       line-height: 150%;
       color: var(--text-color);
+    }
+    h2:last-child {
+      margin-bottom: 0;
     }
 
     h3 {
@@ -133,6 +138,12 @@
       background: var(--project-background-color);
     }
 
+    ul.bullets {
+      margin: -10px 0 20px 0;
+      line-height: 150%;
+      padding: 0 0 0 24px;
+    }
+
     ul.screenshots {
       padding: 0;
     }
@@ -149,7 +160,6 @@
       display: block;
       outline: 0 solid var(--main-color);
       transition: outline linear 100ms;
-      cursor: zoom-in;
     }
     ul.screenshots a:hover {
       outline-width: 2px;
@@ -160,6 +170,9 @@
     }
     ul.screenshots li:not(:first-of-type) {
       vertical-align: top;
+    }
+    ul.screenshots li:not(:first-of-type) a {
+      cursor: zoom-in;
     }
     ul.screenshots li:not(:first-of-type) img {
       width: 128px;
@@ -209,9 +222,15 @@
       text-decoration: none;
     }
 
+    @media (min-width: 520px) {
+      main > aside {
+        float: right;
+      }
+    }
+
     @media (max-width: 640px) {
       body {
-        padding: 3vh;
+        padding: 1rem;
       }
 
       ul.screenshots li:not(:first-of-type) {
@@ -253,7 +272,7 @@
     <section>
       <ul class="projects">
         <li>
-          <h3><a href="https://www.chipsmarket.com/" target="_blank" rel="noopener">Chipsmarket</a> (Precogs)</h3>
+          <h2><a href="https://www.chipsmarket.com/" target="_blank" rel="noopener">Chipsmarket</a> (Precogs)</h2>
           <p>A Business-to-Business international marketplace for electronic parts.</p>
           <p>I was tasked to prepare the new version of the application (the new onboarding screens, improved workflows, etc) in collaboration with the CTO and the rest of the tech team.</p>
           <p>We started with mockups and discussions with the design team, then i iterated on the new version of the application, making a feedback loop as soon as possible.</p>
@@ -294,7 +313,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://photos.hubside.com" target="_blank" rel="noopener">MyPhotos</a> (Hubside)</h3>
+          <h2><a href="https://photos.hubside.com" target="_blank" rel="noopener">MyPhotos</a> (Hubside)</h2>
           <p>A Web App to regroup all your photos in one place and easily/safely share them online.</p>
           <p>I was on the project from the first line of code to the MVP release, we worked hand in hand with the product owner, designers and developers to create something we could be proud of. A lot of work went into the architecture of the app, to make sure it runs and scales smoothly on GCP and is easy to maintain.</p>
           <p>The backend revolves around a GraphQL schema that is shared with the frontend and iOS app to facilitate communications.</p>
@@ -329,7 +348,7 @@
           </ul>
         </li>
         <li>
-          <h3>Bi-BOP: Supply chain (<a href="https://www.linkedin.com/company/renault-digital/" target="_blank" rel="noopener">Renault Digital</a>)</h3>
+          <h2>Bi-BOP: Supply chain (<a href="https://www.linkedin.com/company/renault-digital/" target="_blank" rel="noopener">Renault Digital</a>)</h2>
           <p>A large single page application used by the supply chain team at Renault.</p>
           <p>We created the UI components, code the logic to connect them to the backend (a JSON API that we also developed), discuss potential UX problems with the team among other things.</p>
           <p>I mainly worked on the frontend, i was involved in most technical decisions with the other developers, code review, code quality control and made multiple improvements to our tooling to avoid regressions and quality of our frontend. Formation of the new developers and transfert of knowledge to the new team that will continue the project.</p>
@@ -369,7 +388,7 @@
         </li>
         </li>
         <li>
-          <h3><a href="https://colinbellino.com" target="_blank" rel="noopener">My portfolio</a></h3>
+          <h2><a href="https://colinbellino.com" target="_blank" rel="noopener">My portfolio</a></h2>
           <p>The site you are currently on. I created it as a portfolio and hub for all my work & contact infos.</p>
           <p>The goal was to keep it simple, accessible and blazingly fast (hence the choice of tech).</p>
           <ul class="bullets">
@@ -381,7 +400,7 @@
           </ul>
         </li>
         <li>
-          <h3>Older projects can be found on my <a href="https://www.linkedin.com/in/colin%E2%80%8F-bellino-b9237473" target="_blank">LinkedIn profile</a>.</h3>
+          <h2>Older projects can be found on my <a href="https://www.linkedin.com/in/colin%E2%80%8F-bellino-b9237473" target="_blank">LinkedIn profile</a>.</h2>
         </li>
       </ul>
     </section>

@@ -25,13 +25,13 @@
 
     @media (prefers-color-scheme: dark) {
       :root {
-        --main-color: rgba(72, 91, 201, 0.9);
+        --main-color: rgb(111 128 229 / 90%);
         --main-color-hover: rgba(76, 95, 208, 1);
-        --background-color: rgba(20, 20, 20, 1);
+        --background-color: rgba(10, 10, 10, 1);
         --text-color: rgba(255, 255, 255, 0.9);
         --link-background-color: rgba(255, 255, 255, 0.7);
         --link-background-color-hover: rgba(255, 255, 255, 0.6);
-        --project-background-color: rgba(255, 255, 255, 0.04);
+        --project-background-color: rgba(255, 255, 255, 0.03);
       }
     }
 
@@ -44,6 +44,7 @@
     }
 
     body {
+      padding: 3vh;
       box-sizing: border-box;
       font-family: Arial, Helvetica, sans-serif;
       background: var(--background-color);
@@ -69,13 +70,14 @@
       padding: 0.8rem 0 1rem;
     }
 
+
     main > aside {
       padding: 1.3rem 0 1rem;
-      float: right;
       font-size: 1rem;
     }
     main > aside ul {
       margin: 0;
+      padding: 0;
     }
     main > aside li {
       list-style: none;
@@ -94,11 +96,14 @@
     }
 
     h2 {
-      margin: 0 0 1rem;
+      margin: 0 0 1rem 0;
       font-size: 1.1rem;
       font-weight: bold;
       line-height: 150%;
       color: var(--text-color);
+    }
+    h2:last-child {
+      margin-bottom: 0;
     }
 
     h3 {
@@ -134,7 +139,9 @@
     }
 
     ul.bullets {
-      margin: 0 0 20px 0;
+      margin: -10px 0 20px 0;
+      line-height: 150%;
+      padding: 0 0 0 24px;
     }
 
     ul.screenshots {
@@ -215,9 +222,15 @@
       text-decoration: none;
     }
 
+    @media (min-width: 520px) {
+      main > aside {
+        float: right;
+      }
+    }
+
     @media (max-width: 640px) {
       body {
-        padding: 3vh;
+        padding: 1rem;
       }
 
       ul.screenshots li:not(:first-of-type) {
@@ -259,7 +272,7 @@
     <section>
       <ul class="projects">
         <li>
-          <h3><a href="https://colinbellino.itch.io/monstrum-prison" target="_blank" rel="noopener">Monstrum Prison</a></h3>
+          <h2><a href="https://colinbellino.itch.io/monstrum-prison" target="_blank" rel="noopener">Monstrum Prison</a></h2>
           <p>This is a mini 2D first person dungeon crawler where you befriend weird creatures and try to escape the dungeon someone threw you in.</p>
           <p>The game was created in the span of a week for the 7DFPS game jam. The engine is entirely made from scratch by me and all the art and audio was made by the rest of the team :)</p>
           <ul class="bullets">
@@ -306,7 +319,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://colinbellino.itch.io/the-legend-of-jan-itor" target="_blank" rel="noopener">The Legend of Ján Ïtor</a></h3>
+          <h2><a href="https://colinbellino.itch.io/the-legend-of-jan-itor" target="_blank" rel="noopener">The Legend of Ján Ïtor</a></h2>
           <p>A small game where adventurers are spreading a lot of slime and other mess in the dungeon and you are the one tasked to clean it up before it becomes out of hand.</p>
           <p>The game was created over a period of 2 weeks by a team of 3 people, this is a submission for the Pirate Game Jam 14.</p>
           <ul class="bullets">
@@ -339,7 +352,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://colinbellino.itch.io/feast" target="_blank" rel="noopener">Feast & Famine</a></h3>
+          <h2><a href="https://colinbellino.itch.io/feast" target="_blank" rel="noopener">Feast & Famine</a></h2>
           <p>A twin stick shooter created in 72 hours with a team of 4 (art, audio & code) for the Ludum Dare 50 game jam.</p>
           <p>Search the rooms of your manor and deal with any enemies you come across. Defeat every enemy to progress to the next level. But be quick because your health is constantly draining!</p>
           <ul class="bullets">
@@ -373,7 +386,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://colinbellino.itch.io/alteration" target="_blank" rel="noopener">Alteration</a></h3>
+          <h2><a href="https://colinbellino.itch.io/alteration" target="_blank" rel="noopener">Alteration</a></h2>
           <p>A puzzle game created in 72 hours with a team of 3 (art, audio & code) for the Ludum Dare 49 game jam.</p>
           <p>You are playing as your astral projection, which is thrown into a surreal maze and your goal is to reach
             perfect balance, symbolized by the goal of each level. <br />
@@ -418,7 +431,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://colinbellino.itch.io/snowball" target="_blank" rel="noopener">Snowball</a></h3>
+          <h2><a href="https://colinbellino.itch.io/snowball" target="_blank" rel="noopener">Snowball</a></h2>
           <p>A minimalist Tactical RPG game created in about a month as a solo project (art, audio & code) as a small challenge for myself (in a month).</p>
           <p>I wanted to make a game about kids playing outside and throwing snowballs around and also wondered how a battle system like this would work in a side view game. So, i've combined the two to make Snowball ⛄!</p>
           <ul class="bullets">
@@ -454,7 +467,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">Flight</a></h3>
+          <h2><a href="https://colinbellino.itch.io/flight" target="_blank" rel="noopener">Flight</a></h2>
           <p>An unfinished platformer game created in 72 hours with a team of two for the Indie Tales 2021 game jam.</p>
           <p>Flight is a game about an explorer stranded on an unknown land that needs to fix their ship with the power of other birds.</p>
           <ul class="bullets">
@@ -481,7 +494,7 @@
           </ul>
         </li>
         <li>
-          <h3><a href="https://colinbellino.itch.io/bonbon" target="_blank" rel="noopener">Bonbon and the Deep Below</a></h3>
+          <h2><a href="https://colinbellino.itch.io/bonbon" target="_blank" rel="noopener">Bonbon and the Deep Below</a></h2>
           <p>A platformer game created in 72 hours with a team of three for the Ludum Dare 48 game jam.</p>
           <p>Help Bonbon the hare 🐇 flee this mechanical nightmare! Go deeper and deeper into the ground to escape death from above.</p>
           <ul class="bullets">
@@ -514,7 +527,7 @@
           </ul>
         </li>
         <li>
-          <h3>More games & prototypes can be found on my <a href="https://colinbellino.itch.io" target="_blank">Itch profile</a>.</h3>
+          <h2>More games & prototypes can be found on my <a href="https://colinbellino.itch.io" target="_blank">Itch profile</a>.</h2>
         </li>
       </ul>
     </section>
