@@ -1,0 +1,730 @@
+<!doctype html>
+<html>
+
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, user-scalable=no, minimal-ui">
+  <title>Colin Bellino</title>
+  <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
+  <style nonce="style">/* Utils */
+/*----- Colors -----*/
+/*----- Fonts -----*/
+/*----- Dimensions and sizes -----*/
+/* Base */
+@font-face {
+  font-family: 'Josefin Sans';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Josefin Sans Light'), local('JosefinSans-Light'),
+    url(https://fonts.gstatic.com/s/josefinsans/v14/Qw3FZQNVED7rKGKxtqIqX5Ecpl5te10k.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Josefin Sans';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Josefin Sans Bold'), local('JosefinSans-Bold'),
+    url(https://fonts.gstatic.com/s/josefinsans/v14/Qw3FZQNVED7rKGKxtqIqX5Ectllte10k.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 300;
+  src: local('Lato Light Italic'), local('Lato-LightItalic'),
+    url(https://fonts.gstatic.com/s/lato/v16/S6u_w4BMUTPHjxsI9w2_Gwfo.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 400;
+  src: local('Lato Italic'), local('Lato-Italic'),
+    url(https://fonts.gstatic.com/s/lato/v16/S6u8w4BMUTPHjxsAXC-v.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: italic;
+  font-weight: 700;
+  src: local('Lato Bold Italic'), local('Lato-BoldItalic'),
+    url(https://fonts.gstatic.com/s/lato/v16/S6u_w4BMUTPHjxsI5wq_Gwfo.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 300;
+  src: local('Lato Light'), local('Lato-Light'),
+    url(https://fonts.gstatic.com/s/lato/v16/S6u9w4BMUTPHh7USSwiPHA.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 400;
+  src: local('Lato Regular'), local('Lato-Regular'),
+    url(https://fonts.gstatic.com/s/lato/v16/S6uyw4BMUTPHjx4wWw.ttf) format('truetype');
+}
+
+@font-face {
+  font-family: 'Lato';
+  font-style: normal;
+  font-weight: 700;
+  src: local('Lato Bold'), local('Lato-Bold'),
+    url(https://fonts.gstatic.com/s/lato/v16/S6u9w4BMUTPHh6UVSwiPHA.ttf) format('truetype');
+}
+
+html {
+  background: white;
+}
+
+body {
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  background: white;
+  margin: 50px 0 100px;
+  letter-spacing: 0.3px;
+  color: #39424b;
+}
+
+h1,
+h2,
+h3,
+h4,
+h5,
+h6 {
+  text-transform: none;
+  margin: 0;
+}
+
+h1 {
+  font-family: 'Josefin Sans', Helvetica, Arial, sans-serif;
+  font-weight: 700;
+  font-size: 40px;
+  letter-spacing: 1px;
+}
+
+h2 {
+  font-family: 'Josefin Sans', Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 16px;
+  letter-spacing: 0.5px;
+}
+
+h3 {
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 14px;
+  letter-spacing: 0.4px;
+}
+
+h3.bold {
+  font-weight: 700;
+}
+
+h4 {
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 12px;
+}
+
+h4.bold {
+  font-weight: 700;
+}
+
+h5 {
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-weight: 300;
+  font-size: 11px;
+}
+
+h5.italic {
+  font-style: italic;
+}
+
+h6 {
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-size: 10px;
+}
+
+a {
+  color: inherit;
+  text-decoration: inherit;
+}
+
+a:hover {
+  color: #2895f1;
+}
+
+a .fa-external-link {
+  font-size: 10px;
+  vertical-align: text-top;
+}
+
+p,
+li {
+  font-size: 11px;
+}
+
+blockquote {
+  font-size: 11px;
+  font-family: 'Lato', Helvetica, Arial, sans-serif;
+  font-weight: 400;
+  font-style: italic;
+  margin: 10px 25px;
+}
+
+em {
+  color: #999;
+}
+
+ul {
+  margin: 10px 0 0;
+  -webkit-padding-start: 25px;
+}
+
+ul li {
+  padding-left: 10px;
+}
+
+ul.minimal {
+  list-style: none;
+  padding: 0;
+}
+
+ul.minimal li {
+  margin-bottom: 3px;
+  padding-left: 0;
+}
+
+ul.two-column {
+  -webkit-column-count: 2;
+  -webkit-column-gap: 28px;
+  column-count: 2;
+  column-gap: 28px;
+}
+
+ul.two-column li {
+  padding-left: 0;
+}
+
+@page {
+  size: A4;
+}
+
+.container {
+  padding-top: 20px;
+}
+
+.keyline {
+  width: 45px;
+  margin: 8px 0 8px;
+  border-top: 1px solid #56817a;
+}
+
+.pull-left {
+  float: left;
+}
+
+.pull-right {
+  float: right;
+}
+
+.clearfix:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.profile-pic {
+  margin-top: -5px;
+  margin-right: 18px;
+}
+
+.profile-pic img {
+  height: 52px;
+  width: 52px;
+  border-radius: 50%;
+  border: 2px solid #56817a;
+}
+
+.summary {
+  margin: 5px 0 5px;
+}
+
+.sublink {
+  font-size: 70%;
+  font-weight: 200;
+  color: dimgray;
+}
+
+.capitalize {
+  text-transform: capitalize;
+}
+
+/* Layouts */
+.page {
+  background: white;
+  width: 612px;
+  min-height: 792px;
+  display: block;
+  margin: 0 auto;
+  border-top: 10px solid #5fcde4;
+  padding: 36px 22px 30px 34px;
+  box-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
+}
+
+.page:after {
+  content: '';
+  display: table;
+  clear: both;
+}
+
+.left-column {
+  float: left;
+  width: 160px;
+  margin-right: 20px;
+  word-wrap: break-word;
+}
+
+.right-column {
+  width: auto;
+  overflow: hidden;
+}
+
+.item {
+  margin-bottom: 15px;
+}
+
+.item:last-child {
+  margin-bottom: 0;
+}
+
+@media print {
+  body {
+    margin: 0;
+  }
+
+  .page {
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 36px 0 30px;
+    box-shadow: none;
+  }
+
+  .page .resume-header,
+  .page .resume-content {
+    padding: 0 22px 0 34px;
+  }
+
+  .container {
+    page-break-inside: avoid;
+  }
+
+  .work-container .item {
+    page-break-inside: avoid;
+  }
+
+  .fa-external-link {
+    display: none;
+  }
+}
+
+/* Components */
+.info-tag-container {
+  margin-bottom: 5px;
+}
+
+.info-tag-container .fa {
+  font-size: 14px;
+  width: 12px;
+  margin-right: 5px;
+  text-align: center;
+  vertical-align: middle;
+}
+
+.info-tag-container .fa.fa-map-marker {
+  font-size: 16px;
+}
+
+.info-tag-container .fa.fa-mobile {
+  font-size: 18px;
+}
+
+.info-tag-container .fa.fa-envelope-o {
+  font-size: 12px;
+}
+
+.info-tag-container .fa.fa-desktop {
+  font-size: 11px;
+}
+
+.info-tag-container .fa.fa-external-link {
+  width: auto;
+  font-size: inherit;
+  vertical-align: text-top;
+}
+
+.info-tag-container .info-text {
+  font-size: 12px;
+  text-transform: none;
+  display: inline-block;
+  vertical-align: middle;
+  width: 139px;
+}
+
+.references-container .fa {
+  font-size: 14px;
+}
+
+.education-container .location {
+  padding-bottom: 6px;
+  font-weight: 400;
+}
+
+.education-container .specialization {
+  text-transform: none;
+  font-style: italic;
+}
+
+.flex-container {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+}
+
+.main-skill {
+  font-size: 80%;
+}
+
+.skill {
+  margin: 0.15em;
+  padding: 0.15em;
+  background: ghostwhite;
+  border-radius: 5px;
+}
+
+.skills-container {
+  padding-top: 20px;
+}
+.skills-container h3 {
+  font-size: 12px;
+}
+.skills-container > .container {
+  padding-top: 0;
+}
+
+.profile-header > img {
+  width: 32px;
+  image-rendering: pixelated;
+  margin-right: 10px;
+}
+.profile-header h1,
+.profile-header h2 {
+  display: inline-block;
+}
+.profile-header h2 {
+  padding-left: 10px;
+}
+
+.work-container .summary {
+  white-space: pre-line;
+}
+</style>
+</head>
+
+<body>
+  <main id="resume" class="page">
+    <header class="resume-header clearfix">
+        <div class="profile-header pull-left">
+            <img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAAXNSR0IArs4c6QAAACRQTFRFX83kW27hMSgyEw8Q7sOa//vw2aBmWVZSN5Ruar4w2Vdj+/I2l3b2CgAAAJNJREFUWIXt1MsOhSAMRVECiq///1/bhJM0DSoMObgnErRr0NzcEP6qxVIyzQT4wW6EAMDHCi2uJmRwwC5QB2IldgDLQ6ukd1nCmRnwy7M/IAVwng3YXMxAcimgA/rMJdzNBDzFCuxSC1IdJgEOaS/ZYfun8oqQAOg02QXae0YAyNkRI6Dh5SV9ndkBfOxrXuJYwA1cajEx/AHqcAAAAABJRU5ErkJggg==" />
+            <h1>Colin Bellino</h1>
+            <h2>Web &amp; games engineer</h2>
+        </div>
+        <div class="profile-pic pull-right">
+        </div>
+    </header>
+    <div class="resume-content">
+      <aside class="left-column">
+        <div class="container about-container">
+
+            <div class="title">
+                <h3>Contact</h3>
+                <div class="keyline"></div>
+            </div>
+
+
+            <div class="info-tag-container">
+                <i class="fa fa-envelope-o"></i>
+
+                <h6 class="info-text">
+                    <a href="mailto:work@colinbellino.com" target="_blank">
+                        work@colinbellino.com
+                    </a>
+                </h6>
+            </div>
+
+            <div class="info-tag-container">
+                <i class="fa fa-globe"></i>
+
+                <h6 class="info-text">
+                    <a href="https://colinbellino.com" target="_blank">
+                        colinbellino.com
+                    </a>
+                </h6>
+            </div>
+                        <div class="info-tag-container">
+                            <i class="fa fa-linkedin-square"></i>
+
+                            <h6 class="info-text">
+                                <a href="https://www.linkedin.com/in/colinbellino/" target="_blank">
+                                    colinbellino
+                                </a>
+                            </h6>
+                        </div>                 <div class="info-tag-container">
+                             <i class="fa fa-twitter"></i>
+
+                             <h6 class="info-text">
+                                 <a href="https://twitter.com/colinbellino" target="_blank">
+                                     colinbellino
+                                 </a>
+                             </h6>
+                         </div></div>            <div class="skills-container">
+                    <section class="container">
+                            <div class="title">
+                                <h3>JavaScript / TypeScript</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>HTML</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>CSS / SASS</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>WebGL / WebGPU</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Progressive Web Applications (PWAs)</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>React</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Vue</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>HTMX</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Svelte</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>GraphQL</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>PostgreSQL</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>AWS / GCP</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Node / Bun</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Go</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>C / C++</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Odin / JAI</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Unit Testing</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Software Testing</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Performance Tuning</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+                    <section class="container">
+                            <div class="title">
+                                <h3>Mockups &amp; prototypes</h3>
+                                <div class="keyline"></div>
+                            </div>            </section>
+            </div>
+        <div class="container languages-container">
+            <div class="title">
+                <h3>Languages</h3>
+                <div class="keyline"></div>
+            </div>
+            <ul class="minimal">
+                <li>
+                    <h6>English <em>(Native Speaker)</em></h6>
+                </li>
+                <li>
+                    <h6>Français <em>(Native Speaker)</em></h6>
+                </li>
+            </ul>
+        </div>
+      </aside>
+      <div class="right-column">
+        <div class="container summary-container">
+            <div class="title">
+                <h3>Summary</h3>
+                <div class="keyline"></div>
+            </div>
+            <p class="summary">
+                Passionate programmer and all around nerd in love with designing and creating cool stuff. I&#x27;m a web programmer by day, game developer by night.
+
+        Currently looking for contract work in web or game/engine programming.
+            </p>
+        </div>
+        <div class="container work-container">
+            <div class="title">
+                <h3>Experience</h3>
+                <div class="keyline"></div>
+            </div>
+            <section class="item">
+                <div class="section-header clearfix">
+                    <h5 class="italic pull-right">
+                            <span class="startDate">05/2020</span>
+                            <span class="endDate"> - Present</span>
+                    </h5>
+                </div>
+
+                <h4>Freelance programmer (web &amp; games)</h4>
+
+
+        <p class="summary">I&#x27;m doing contract work on web projects for my clients (mostly frontend, but also backend/cloud and performance/profiling) and creating game+engine in my spare time.</p>
+
+            </section>
+            <section class="item">
+                <div class="section-header clearfix">
+                    <h5 class="italic pull-right">
+                            <span class="startDate">01/2023</span>
+                            <span class="endDate"> - 10/2023</span>
+                    </h5>
+                </div>
+
+                <h4>Front-end engineer (Precogs)</h4>
+
+
+        <p class="summary">Helped the current team develop new applications and maintain legacy ones, put in place performance improvements and advices to simplify the architecture of the projects. I worked mainly as a lead programmer in an existing team, creating the new version of their marketplace application (front-end and some back-end), i was also consulted related to UX improvements (mainly UI and performance) and overall code architecture.
+        Workflow: I interacted with the product team and gave early feedbacks on the new mockups, integrated those into UI code (TS+Vue), and worked with the backend team to plug in the data coming from AWS (or made it myself it necessary).
+        - Front-end: Vue, TypeScript, GraphGL, Unit and E2E tests, performance profiling and optimisations
+        - Back-end: Node, AWS, PostgreSQL, profiling, architecture.</p>
+
+            </section>
+            <section class="item">
+                <div class="section-header clearfix">
+                    <h5 class="italic pull-right">
+                            <span class="startDate">09/2018</span>
+                            <span class="endDate"> - 03/2020</span>
+                    </h5>
+                </div>
+
+                <h4>Lead engineer &amp; architect (Hubside)</h4>
+
+
+        <p class="summary">Development and architecture of https://photos.hubside.com, a Progressive Web App to regroup all your photos in one place and easily/safely share them online.
+
+        I was on the project from the first line of code to the MVP release, we worked hand in hand with the product owner, designers and developers to create something we could be proud of.
+        A lot of work went into the architecture of the app, to make sure it runs ans scales smoothly on GCP and is easy to maintain. The backend revolves around a GraphQL schema that is shared with the frontend and iOS app to facilitate communications.
+        The frontend is a React app written in TypeScript that uses Apollo to manage data and caching. Components were written in Storybook by following the Atomic Design guidelines as much as possible.</p>
+
+            </section>
+            <section class="item">
+                <div class="section-header clearfix">
+                    <h5 class="italic pull-right">
+                            <span class="startDate">06/2017</span>
+                            <span class="endDate"> - 08/2018</span>
+                    </h5>
+                </div>
+
+                <h4>Front-end engineer (Renault)</h4>
+
+
+        <p class="summary">Development of a large single page application at Renault Digital (team Bi-BOP).
+        Create UI components, code the logic to connect them to the backend (a JSON API that we also developed), discuss potential UX problems with the team among other things.
+        Mainly working on the frontend, i was involved in most technical decisions with the other developers, code review, code quality control and made multiple improvements to our tooling to avoid regressions and quality of our frontend.
+        Formation of the new developers and transfert of knowledge to the new team that will continue the project.</p>
+
+            </section>
+            <section class="item">
+                <div class="section-header clearfix">
+                    <h5 class="italic pull-right">
+                            <span class="startDate">12/2014</span>
+                            <span class="endDate"> - 05/2017</span>
+                    </h5>
+                </div>
+
+                <h4>Front-end engineer (Team Back Office)</h4>
+
+
+        <p class="summary">Conception and development of new UI features on a large data driven web app.
+        Migration of the stack from AngularJS/CoffeeScript to React/ES2015+ and rewrite/optim of our frontend build tasks.</p>
+
+            </section>
+            <section class="item">
+                <div class="section-header clearfix">
+                    <h5 class="italic pull-right">
+                            <span class="startDate">10/2010</span>
+                            <span class="endDate"> - 12/2014</span>
+                    </h5>
+                </div>
+
+                <h4>Fullstack developer (Pixel Cookers)</h4>
+
+
+        <p class="summary">Development of a large number of sites and web apps of varying sizes with the team. At the end, i was the one teaching new developers the skills i aquired during my time at Pixel Cookers.</p>
+
+            </section>
+        </div>
+      </div>
+    </div>
+  </main>
+</body>
+
+</html>

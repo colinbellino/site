@@ -22,30 +22,34 @@
   force = true
   status = 200
 
+[[redirects]]
+  from = "/worldmap"
+  to = "/worldmap.min.html"
+  force = true
+  status = 200
+
+[[redirects]]
+  from = "/resume"
+  to = "/resume.min.html"
+  force = true
+  status = 200
+
+[[redirects]]
+  from = "/resume.pdf"
+  to = "/CV - Colin Bellino.pdf"
+  force = true
+  status = 301
+
+[[redirects]]
+  from = "/cv"
+  to = "/CV - Colin Bellino.pdf"
+  force = true
+  status = 301
+
 [[headers]]
   for = "/*"
   [headers.values]
     X-Frame-Options = "DENY"
     X-XSS-Protection = "1; mode=block"
     X-Content-Type-Options = "nosniff"
-    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' 'nonce-style' fonts.googleapis.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-script'; img-src 'self' *.cloudfront.net; child-src 'none'; font-src 'self' fonts.gstatic.com;"
-
-[[plugins]]
-  package = "netlify-plugin-minify-html"
-
-  [plugins.inputs.minifierOptions]
-    collapseBooleanAttributes = true
-    collapseInlineTagWhitespace = true
-    collapseWhitespace = true
-    conservativeCollapse = true
-    decodeEntities = true
-    preventAttributesEscaping = true
-    processConditionalComments = true
-    removeAttributeQuotes = true
-    removeComments = true
-    removeEmptyAttributes = true
-    removeOptionalTags = true
-    removeRedundantAttributes = true
-
-[build]
-  command = "npm run build"
+    Content-Security-Policy = "default-src 'self'; style-src 'self' 'unsafe-inline' 'nonce-style' maxcdn.bootstrapcdn.com; script-src 'self' 'unsafe-inline' 'unsafe-eval' 'nonce-script'; img-src 'self' data:; child-src 'none'; font-src 'self' fonts.gstatic.com; style-src-attr 'unsafe-inline'; script-src-elem 'self' 'unsafe-inline'"
