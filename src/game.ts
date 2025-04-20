@@ -453,7 +453,6 @@ export function update() {
                         const fade_end = fade_start + 1500;
                         const player_move_start = game.world_mode_timer + 1300;
                         const player_move_end = player_move_start + PLAYER_MOVE_SPEED*2;
-                        // const intro_end = game.world_mode_timer + 3000;
 
                         game.draw_entities = true;
                         game.draw_world_tile = true;
@@ -612,7 +611,6 @@ export function update() {
 
                         if (game.player_path.length > 0) {
                             const next = game.player_path.pop();
-                            // console.log("next", next);
                             const next_node = game.nodes.data[next];
                             for (let direction = 0; direction < current_node.neighbours.length; direction++) {
                                 const neighbour = current_node.neighbours[direction];
@@ -630,10 +628,22 @@ export function update() {
                                 game.destination_node = find_node_at_position(destination.path[destination.path.length-1]);
                                 assert(game.destination_node != -1);
                                 game.destination_path.count = 0;
-                                fixed_array_add(game.destination_path, current_node.grid_position);
                                 if (destination.path.length > 0) {
+                                    const origin_node = game.nodes.data[game.nodes_current];
+                                    const destination_node = game.nodes.data[game.destination_node];
+                                    const is_jumping_off_warp = origin_node.type == Node_Type.WARP && destination_node.type != Node_Type.WARP;
+                                    const is_jumping_on_warp = destination_node.type == Node_Type.WARP;
+                                    if (is_jumping_off_warp) {
+                                        fixed_array_add(game.destination_path, vector2_add(current_node.grid_position, [0, -0.2]));
+                                        fixed_array_add(game.destination_path, current_node.grid_position);
+                                    } else {
+                                        fixed_array_add(game.destination_path, current_node.grid_position);
+                                    }
                                     for (let point_index = 0; point_index < destination.path.length; point_index++) {
                                         fixed_array_add(game.destination_path, destination.path[point_index]);
+                                    }
+                                    if (is_jumping_on_warp) {
+                                        fixed_array_add(game.destination_path, vector2_add(destination_node.grid_position, [0, -0.2]));
                                     }
                                 }
 
@@ -729,7 +739,12 @@ export function update() {
                         const progress = clamp(1.0 - (1.0 / (duration / remaining)), 0, 1);
 
                         const [current, next, step_progress] = lerp_indices(game.destination_path.count-1, progress);
-                        game.player.sprite.position = vector2_lerp(grid_position_center(game.destination_path.data[current]), grid_position_center(game.destination_path.data[next]), step_progress);
+                        const path_current = game.destination_path.data[current];
+                        const path_next = game.destination_path.data[next];
+                        const step_distance = manhathan_distance(path_current, path_next);
+                        // Quick and dirty way to handle the "jump" animation being a way shorter distance
+                        const final_step_progress = clamp(step_progress / step_distance, 0, 1);
+                        game.player.sprite.position = vector2_lerp(grid_position_center(path_current), grid_position_center(path_next), final_step_progress);
 
                         const direction = vector_to_direction(vector2_substract(game.destination_path.data[next], game.destination_path.data[current]));
                         game.player.animation.current_animation = direction;
@@ -1146,7 +1161,7 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     ui_create_element<HTMLLabelElement>(ui_root, `
         <a href="/" class="hud_label back">
             <span class="content">
-                <span class="label">‹ Homepage</span>
+                <span class="label">‹ Main site</span>
             </span>
         </a>
     `);
@@ -1942,6 +1957,12 @@ function vector2_multiply_float(arr1: Vector2, value: float): Vector2 {
     result[1] = arr1[1] * value;
     return result;
 }
+function vector2_add(arr1: Vector2, arr2: Vector2): Vector2 {
+    const result: Vector2 = [0, 0];
+    result[0] = arr1[0] + arr2[0];
+    result[1] = arr1[1] + arr2[1];
+    return result;
+}
 function vector2_substract(arr1: Vector2, arr2: Vector2): Vector2 {
     const result: Vector2 = [0, 0];
     result[0] = arr1[0] - arr2[0];
@@ -2261,9 +2282,9 @@ function grid_position_center(grid_position: Vector2): Vector2 {
     return [grid_position[0]*GRID_SIZE, grid_position[1]*GRID_SIZE];
 }
 function vector_to_direction(vec: Vector2): Direction {
-    if (vector2_equal(vec, DIRECTIONS[Direction.NORTH])) { return Direction.NORTH; }
-    if (vector2_equal(vec, DIRECTIONS[Direction.EAST])) { return Direction.EAST; }
-    if (vector2_equal(vec, DIRECTIONS[Direction.SOUTH])) { return Direction.SOUTH; }
+    if (vec[0] == 0 && vec[1] < 0) { return Direction.NORTH; }
+    if (vec[0] == 0 && vec[1] > 0) { return Direction.SOUTH; }
+    if (vec[0] > 0 && vec[1] == 0) { return Direction.EAST; }
     return Direction.WEST;
 }
 
