@@ -29,10 +29,40 @@
       body {
         background: var(--worldmap-background);
       }
+      noscript {
+        display: block;
+        box-sizing: border-box;
+        padding: 2rem;
+        font-family: Arial, Helvetica, sans-serif;
+        color: #ffffff;
+      }
+      noscript a {
+        color: inherit;
+      }
+      .icon {
+        overflow: hidden;
+        width: 32px;
+        margin-right: 1rem;
+        float: left;
+      }
+      .icon > img {
+        animation: me_walk 600ms infinite steps(4, jump-none);
+        image-rendering: pixelated;
+      }
+      @keyframes me_walk {
+        0%   { margin-left: -0px; }
+        100% { margin-left: -96px; }
+      }
     </style>
 </head>
 
 <body class="worldmap_running skip_animation">
+    <noscript>
+      <p>
+        <div class="icon" aria-hidden="true"><img width="128" height="32" src="data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAIAAAAAgCAMAAADt/IAXAAAAAXNSR0IArs4c6QAAAHVQTFRFAAAAumpgqU5FkVVTpEc+mDMqfTdaejhccjlpcTVHZzZPdC9CYi1OVyQrLSdzDzhSQh8rJyJhNB9IES9IJSFbIh5PFiRDHhtDFxUs/////trM/+oA13u6y4Z7TLyu2WSUAH6eVUawmDMqbjOAFlKILSdzFxUsllx4OAAAABl0Uk5TAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAE9PlT8AAAGrSURBVHjazZXbbsJADEQbYKDc72RLE9I69f7/J9aWsRSiqKsqL3testLssUcRKG9GCIdD7HA4hGCJE17xdLSfRwFAdaL7EyIdASQWjPRzKrDdqqKobiei7Ta1YKyfSwFgOlXlQ+g+p1MgsWCkn08BfTkmVoIN0BcFpBaM9fMpUFWxR1URpReM8/MpsFq5dBd82GqVXjDGz6OAcTrFAU4nS4HlcmgB0WwGpHxgNiMa8pfLXAoA83nbNk1Xbpq2nc8BTYvCBvSpayIg7RPV9ZBPVBR5FNAFzZNPwc96AYJ9RHoLBCsApP26bpq+bx+lPArYApMdv9ApIHRzEiYTCCl/MiHq2zkW0EsW2XgfYK9YUxY8Z2GzsR/ZX77deH9nwXM7k1AUeRSwBcz6VzLaltku2ABgsWB+CMyeM+92agMJX9jtmD33OYsFhDwKAOs1P/kW/Lxe6wXjcmH+Epg9Px61QNq3Asej5z7nctEkhwJ24XqN8SFoqM8Yr1dd4GiuWRR+hBjL8j9+WbpnczTPo4ATQuwRwmu+30fhfL7dPE/4g/ntdj5HYb8PIZMCv8E2bhRVj5wWAAAAAElFTkSuQmCC" class="pixel-art" /></div>
+        This game requires JavaScript, but you can still browse the <a href="/">main site</a> without all that :)
+      </p>
+    </noscript>
     <script type="module">
         const game = await import("/worldmap/dist/game.js");
         game.start();
