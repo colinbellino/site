@@ -26,7 +26,7 @@ type Game = {
     world_mode:             World_Mode;
     world_mode_timer:       int;
     animation_frame:        int;
-    theme:                  Theme;
+    theme:                  int;
     clear_color:            Color;
     player:                 Entity;
     player_path:            int[];
@@ -121,8 +121,10 @@ type Neighbour = {
 }
 
 const THEMES = [
-    { color: 0x076ef0, atlas: "/worldmap/images/atlas.png" },
-    { color: 0x17152c, atlas: "/worldmap/images/atlas_dark.png" },
+    { color: 0x076ef0, atlas: "/worldmap/images/atlas_cyangmou_akjarosz.png" },
+    { color: 0x17152c, atlas: "/worldmap/images/atlas_tillerqueen.png" },
+    { color: 0xa31a10, atlas: "/worldmap/images/atlas_flip.png" },
+    { color: 0x000000, atlas: "/worldmap/images/atlas_beowulf.png" },
 ];
 
 // :constants
@@ -155,7 +157,6 @@ const ICON_KEYBOARD_ENTER = `<svg width="64" height="64"><path d="M40 11h-4q-5 0
 const enum Direction { NORTH, EAST, SOUTH, WEST }
 const enum World_Mode { INTRO, IDLE, MOVING }
 const enum Game_Mode { LOADING, RUNNING }
-const enum Theme { LIGHT, DARK };
 
 function COLOR_TRANSPARENT(): Color { return [0, 0, 0, 0]; }
 function COLOR_WHITE(): Color       { return [1, 1, 1, 1]; }
@@ -197,10 +198,11 @@ export function start(loaded_callback: () => void) {
     game.projects = fixed_array_make(MAX_PROJECTS);
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
-    let use_dark_theme = prefers_dark_theme;
-    if      (location.search.includes("dark"))  { use_dark_theme = true; }
-    else if (location.search.includes("light")) { use_dark_theme = false; }
-    game.theme = use_dark_theme ? Theme.DARK : Theme.LIGHT;
+    if (prefers_dark_theme)                       { game.theme = 1; }
+    if (location.search.includes("light"))        { game.theme = 0; }
+    else if (location.search.includes("dark"))    { game.theme = 1; }
+    else if (location.search.includes("flip"))    { game.theme = 2; }
+    else if (location.search.includes("beowulf")) { game.theme = 3; }
     ui_set_theme_color(THEMES[game.theme].color);
 
     window.addEventListener("resize", window_on_resize, false);
@@ -1771,7 +1773,7 @@ function set_mouse_cursor(cursor: string) {
         document.body.style.cursor = cursor;
     }
 }
-function timer_progress(start: number, end: number, now: number): float {
+    function timer_progress(start: number, end: number, now: number): float {
     const duration = end - start;
     const progress = 1 - ((end - now) / duration);
     return progress;
