@@ -198,12 +198,9 @@ export function start(loaded_callback: () => void) {
     game.projects = fixed_array_make(MAX_PROJECTS);
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
-    let use_dark_theme = false;
-    // let use_dark_theme = prefers_dark_theme;
-    /* if (!__RELEASE__) */ {
-        if      (location.search.includes("dark"))  { use_dark_theme = true; }
-        else if (location.search.includes("light")) { use_dark_theme = false; }
-    }
+    let use_dark_theme = prefers_dark_theme;
+    if      (location.search.includes("dark"))  { use_dark_theme = true; }
+    else if (location.search.includes("light")) { use_dark_theme = false; }
     game.theme = use_dark_theme ? Theme.DARK : Theme.LIGHT;
     ui_set_theme_color(THEMES[game.theme].color);
 
