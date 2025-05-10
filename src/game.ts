@@ -628,23 +628,22 @@ export function update() {
                                 game.destination_node = find_node_at_position(destination.path[destination.path.length-1]);
                                 assert(game.destination_node != -1);
                                 game.destination_path.count = 0;
-                                if (destination.path.length > 0) {
-                                    const origin_node = game.nodes.data[game.nodes_current];
-                                    const destination_node = game.nodes.data[game.destination_node];
-                                    const is_jumping_off_warp = origin_node.type == Node_Type.WARP && destination_node.type != Node_Type.WARP;
-                                    const is_jumping_on_warp = destination_node.type == Node_Type.WARP;
-                                    if (is_jumping_off_warp) {
-                                        fixed_array_add(game.destination_path, vector2_add(current_node.grid_position, [0, -0.2]));
-                                        fixed_array_add(game.destination_path, current_node.grid_position);
-                                    } else {
-                                        fixed_array_add(game.destination_path, current_node.grid_position);
-                                    }
-                                    for (let point_index = 0; point_index < destination.path.length; point_index++) {
-                                        fixed_array_add(game.destination_path, destination.path[point_index]);
-                                    }
-                                    if (is_jumping_on_warp) {
-                                        fixed_array_add(game.destination_path, vector2_add(destination_node.grid_position, [0, -0.2]));
-                                    }
+
+                                const origin_node = game.nodes.data[game.nodes_current];
+                                const destination_node = game.nodes.data[game.destination_node];
+                                const is_jumping_off_warp = origin_node.type == Node_Type.WARP && destination_node.type != Node_Type.WARP;
+                                const is_jumping_on_warp = origin_node.type != Node_Type.WARP && destination_node.type == Node_Type.WARP;
+                                if (is_jumping_off_warp) {
+                                    fixed_array_add(game.destination_path, vector2_add(current_node.grid_position, [0, -0.2]));
+                                    fixed_array_add(game.destination_path, current_node.grid_position);
+                                } else {
+                                    fixed_array_add(game.destination_path, current_node.grid_position);
+                                }
+                                for (let point_index = 0; point_index < destination.path.length; point_index++) {
+                                    fixed_array_add(game.destination_path, destination.path[point_index]);
+                                }
+                                if (is_jumping_on_warp) {
+                                    fixed_array_add(game.destination_path, vector2_add(destination_node.grid_position, [0, -0.2]));
                                 }
 
                                 ui_panel_hide(game.renderer.ui_node_project);
@@ -713,7 +712,7 @@ export function update() {
                                     game.destination_node = node.warp_target;
                                     game.destination_path.count = 0;
                                     fixed_array_add(game.destination_path, current_node.grid_position);
-                                    fixed_array_add(game.destination_path, destination_node.grid_position);
+                                    fixed_array_add(game.destination_path, vector2_add(destination_node.grid_position, [0, -0.2]));
 
                                     game.camera_move_start = game.renderer.camera_main.position;
                                     game.camera_move_end   = vector2_multiply_float(current_node.warp_camera, GRID_SIZE);
@@ -741,7 +740,8 @@ export function update() {
                         const [current, next, step_progress] = lerp_indices(game.destination_path.count-1, progress);
                         const path_current = game.destination_path.data[current];
                         const path_next = game.destination_path.data[next];
-                        const step_distance = manhathan_distance(path_current, path_next);
+                        let step_distance = manhathan_distance(path_current, path_next);
+                        if (is_warp) { step_distance = 1; }
                         // Quick and dirty way to handle the "jump" animation being a way shorter distance
                         const final_step_progress = clamp(step_progress / step_distance, 0, 1);
                         game.player.sprite.position = vector2_lerp(grid_position_center(path_current), grid_position_center(path_next), final_step_progress);
