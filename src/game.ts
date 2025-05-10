@@ -127,7 +127,6 @@ const THEMES = [
 
 // :constants
 const PROJECTS_IMAGE_URL = "/worldmap/images/projects.png";
-const CUSTOM_BACKGROUND = true; // TODO: disable this in release
 const THUMBNAIL_SIZE: Vector2 = [320, 180];
 const THUMBNAIL_MAX: int = 16;
 const CAMERA_START_POSITION: Vector2 = [24, 9];
@@ -212,23 +211,16 @@ export function start(loaded_callback: () => void) {
     window.addEventListener("mousemove", inputs_on_mouse_move, false);
     window.addEventListener("click", inputs_on_mouse_click, false);
 
-    if (!__RELEASE__ && location.search.includes("reload")) {
-        setInterval(function reload_atlas() {
-            load_image(`${THEMES[game.theme].atlas}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
-        }, 1000);
+    if (!__RELEASE__) {
+        if (location.search.includes("reload")) {
+            setInterval(function reload_atlas() {
+                load_image(`${THEMES[game.theme].atlas}?v=${Date.now()}`).then(image => { game.texture0 = renderer_create_texture(image, game.renderer.gl); });
+            }, 1000);
+        }
     }
 
     load_image(THEMES[game.theme].atlas).then(image => {
         game.texture0 = renderer_create_texture(image, game.renderer.gl);
-
-        if (CUSTOM_BACKGROUND) {
-            game.renderer.offscreen.canvas.width = 1;
-            game.renderer.offscreen.canvas.height = 1;
-            game.renderer.offscreen.drawImage(image, 0, 240, 1, 1, 0, 0, 1, 1);
-            const color = game.renderer.offscreen.getImageData(0, 0, 1, 1);
-            THEMES[game.theme].color = color_to_hex(color.data as any);
-            ui_set_theme_color(THEMES[game.theme].color);
-        }
     });
     load_image(PROJECTS_IMAGE_URL).then(image => { game.image_projects = image });
     load_codegen().then((codegen) => {
@@ -773,9 +765,7 @@ export function update() {
 
             renderer_update_camera_matrix_main(game.renderer.camera_main);
 
-            // const node_changed = frame_start_node !== game.nodes_current;
-            // const camera_changed = frame_start_camera_zoom !== game.renderer.camera_main.zoom;
-            /* if (node_changed || game.inputs.window_resized || camera_changed) */ {
+            {
                 const MARGIN = 10;
                 const current_node = game.nodes.data[game.nodes_current];
                 const window_position = world_to_window_position(vector2_multiply_float(current_node.grid_position, GRID_SIZE));
@@ -886,7 +876,6 @@ export function update() {
                     const tile_position = grid_index_to_position(tile_cell_index, tile_grid_width);
 
                     const tile_value = calculate_tile_value(tile_position);
-                    // console.log("tile_position", tile_position, tile_value);
                     if (tile_value === 0) { continue; }
 
                     const tile_index = TILE_VALUES.indexOf(tile_value);
@@ -934,7 +923,6 @@ export function update() {
             }
 
             // :render console lines
-            // TODO: don't do this in __RELEASE__
             if (game.draw_console) {
                 ui_push_console_line("fps:                " + game.fps.toFixed(0));
                 ui_push_console_line("world_mode:         " + game.world_mode);
@@ -985,7 +973,7 @@ export function update() {
                 }
                 game.sorted_sprites.data.sort(sort_by_z_index);
 
-                // TODO: Don't recreate this every frame
+                // TODO(perf): Don't recreate this every frame
                 game.sprite_data = new Float32Array(MAX_SPRITES * SPRITE_PASS_INSTANCE_DATA_SIZE);
                 const pixel_size : Vector2 = [
                     1 / ATLAS_SIZE[0],
@@ -1003,7 +991,6 @@ export function update() {
                     let matrix = matrix4_identity();
                     matrix4_multiply(matrix, matrix4_make_scale(sprite.size[0] * sprite.scale[0], sprite.size[1] * sprite.scale[1], 0));
                     matrix4_multiply(matrix, matrix4_make_translation(sprite.position[0] + sprite.offset[0], sprite.position[1] + sprite.offset[1], 0));
-                    // matrix = matrix4_rotate_z(matrix, sprite.rotation);
                     game.sprite_data.set(matrix, offset);
                     offset += 16;
 
@@ -1041,9 +1028,11 @@ export function update() {
 
         game.animation_frame = requestAnimationFrame(update);
     } catch(error) {
-        if (!__RELEASE__) document.body.style.borderTop = "4px solid red";
         // TODO: better error handling for release
-        console.error(error);
+        if (!__RELEASE__) {
+            document.body.style.borderTop = "4px solid red";
+            console.error(error);
+        }
     }
 }
 
@@ -1135,8 +1124,6 @@ function renderer_resize_canvas() {
     (game.renderer.gl.canvas as HTMLCanvasElement).style.height = `${final_height}px`;
     game.renderer.gl.canvas.width = final_width * game.renderer.pixel_ratio;
     game.renderer.gl.canvas.height = final_height * game.renderer.pixel_ratio;
-
-    // if (!__RELEASE__) console.log("window_size", game.renderer.window_size, "pixel_ratio", game.renderer.pixel_ratio);
 }
 function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, false] {
     const game_root = ui_create_element<HTMLDivElement>(document.body, `<div id="worldmap"></div>`);
@@ -1170,90 +1157,6 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
         </a>
     `);
 
-    // const up_root = ui_create_element<HTMLLabelElement>(ui_root, `
-    //     <label class="hud_label anchor_left no_label hide up" for="up">
-    //         <span class="content">
-    //             <span class="label"></span>
-    //             <button class="hud_icon icon_up" aria-label="Move: up">
-    //                 ${ICON_KEYBOARD_ARROW_UP}
-    //             </button>
-    //         </span>
-    //     </label>
-    // `);
-    // const up_button = up_root.querySelector(".content button") as HTMLButtonElement;
-    // up_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowUp), false);
-    // const ui_up: UI_Label = { element_root: up_root, element_button: up_button, element_label: up_root.querySelector(".content .label") };
-
-    // const right_root = ui_create_element<HTMLLabelElement>(ui_root, `
-    //     <label class="hud_label anchor_left no_label hide right">
-    //         <span class="content">
-    //             <span class="label"></span>
-    //             <button class="hud_icon icon_right" aria-label="Move: right">
-    //                 ${ICON_KEYBOARD_ARROW_UP}
-    //             </button>
-    //         </span>
-    //     </label>
-    // `);
-    // const right_button = right_root.querySelector(".content button") as HTMLButtonElement;
-    // right_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowRight), false);
-    // const ui_right: UI_Label = { element_root: right_root, element_button: right_button, element_label: right_root.querySelector(".content .label") };
-
-    // const down_root = ui_create_element<HTMLLabelElement>(ui_root, `
-    //     <label class="hud_label anchor_left no_label hide down">
-    //         <span class="content">
-    //             <span class="label"></span>
-    //             <button class="hud_icon icon_down" aria-label="Move: down">
-    //                 ${ICON_KEYBOARD_ARROW_UP}
-    //             </button>
-    //         </span>
-    //     </label>
-    // `);
-    // const down_button = down_root.querySelector(".content button") as HTMLButtonElement;
-    // down_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowDown), false);
-    // const ui_down: UI_Label = { element_root: down_root, element_button: down_button, element_label: down_root.querySelector(".content .label") };
-
-    // const left_root = ui_create_element<HTMLLabelElement>(ui_root, `
-    //     <label class="hud_label anchor_left no_label hide left">
-    //         <span class="content">
-    //             <span class="label"></span>
-    //             <button class="hud_icon icon_left" aria-label="Move: left">
-    //                 ${ICON_KEYBOARD_ARROW_UP}
-    //             </button>
-    //         </span>
-    //     </label>
-    // `);
-    // const left_button = left_root.querySelector(".content button") as HTMLButtonElement;
-    // left_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.ArrowLeft), false);
-    // const ui_left: UI_Label = { element_root: left_root, element_button: left_button, element_label: left_root.querySelector(".content .label") };
-
-    // const confirm_root = ui_create_element<HTMLLabelElement>(ui_root, `
-    //     <label class="hud_label hide confirm">
-    //         <span class="content">
-    //             <span class="label"></span>
-    //             <button class="hud_icon icon_confirm" aria-label="Confirm">
-    //                 ${ICON_KEYBOARD_ENTER}
-    //             </button>
-    //         </span>
-    //     </label>
-    // `);
-    // const confirm_button = confirm_root.querySelector(".content button") as HTMLButtonElement;
-    // confirm_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Enter), false);
-    // const ui_confirm: UI_Label = { element_root: confirm_root, element_button: confirm_button, element_label: confirm_root.querySelector(".content .label") };
-
-    // const cancel_root = ui_create_element<HTMLLabelElement>(ui_root, `
-    //     <label class="hud_label hide cancel">
-    //         <span class="content">
-    //             <span class="label"></span>
-    //             <button class="hud_icon icon_cancel" aria-label="Cancel">
-    //                 ${ICON_KEYBOARD_ESCAPE}
-    //             </button>
-    //         </span>
-    //     </label>
-    // `);
-    // const cancel_button = cancel_root.querySelector(".content button") as HTMLButtonElement;
-    // cancel_button.addEventListener("click", input_send_key.bind(null, Keyboard_Key.Escape), false);
-    // const ui_cancel: UI_Label = { element_root: cancel_root, element_button: cancel_button, element_label: cancel_root.querySelector(".content .label") };
-
     const node_action_root = ui_create_element<HTMLLabelElement>(ui_root, `
         <label class="hud_label anchor_bottom node_action hide">
             <span class="image_container"><img width="${THUMBNAIL_SIZE[0]}" height="${THUMBNAIL_SIZE[1]}" src="${PROJECTS_IMAGE_URL}" /></span>
@@ -1276,7 +1179,6 @@ function renderer_init(prefers_dark_theme: boolean): [Renderer, true] | [null, f
     assert(ui_node_action.element_label !== undefined);
     assert(ui_node_action.element_image !== undefined);
 
-    // TODO: disable this in __RELEASE__
     const ui_console = ui_create_element<HTMLPreElement>(ui_root, `<pre class="ui_console"></pre>`);
 
     const ui_node_project = ui_create_panel(ui_root, input_send_key.bind(null, Keyboard_Key.Escape));
@@ -1431,11 +1333,8 @@ function renderer_create_texture(image: HTMLImageElement, gl: WebGL2RenderingCon
     assert(texture !== null, "Couldn't create texture.");
 
     gl.activeTexture(gl.TEXTURE0);
-    // gl.pixelStorei  (gl.UNPACK_FLIP_Y_WEBGL, true);
     gl.bindTexture  (gl.TEXTURE_2D, texture);
     gl.texImage2D   (gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, image);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
-    // gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.NEAREST);
     gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
@@ -1503,7 +1402,6 @@ type Inputs = {
     mouse_wheel:                Vector2;
     mouse_moved:                boolean;
     controller_was_used:        boolean;
-    // controllers:                [MAX_CONTROLLERS]Controller_State;
     touch_start_x:              int;
     touch_start_y:              int;
     touch_end_x:                int;
@@ -1584,7 +1482,6 @@ enum Keyboard_Key {
     "ArrowUp" = "ArrowUp",
 };
 enum Mouse_Key {
-    // NONE,
     LEFT,
     MIDDLE,
     RIGHT,
@@ -1628,7 +1525,6 @@ function window_on_resize(_event: Event) {
     game.inputs.window_resized = true;
 }
 function inputs_on_key(event: KeyboardEvent) {
-    // console.log("inputs_on_key", event.type, event.code);
     if (!game.inputs.keys.hasOwnProperty(event.code)) {
         if (!__RELEASE__) console.warn("Unrecognized key:", event.code);
         return;
@@ -1689,20 +1585,6 @@ function inputs_prepare(inputs: Inputs) {
         }
     }
     inputs.controller_was_used = false;
-    // for controller_state : inputs.controllers {
-    //     for key_state : controller_state.buttons {
-    //         if key_state.pressed || key_state.down || key_state.released {
-    //             inputs.controller_was_used = true;
-    //             break;
-    //         }
-    //     }
-    //     for axis_state : controller_state.axes {
-    //         if abs(axis_state) > CONTROLLER_DEADZONE {
-    //             inputs.controller_was_used = true;
-    //             break;
-    //         }
-    //     }
-    // }
 }
 
 function inputs_reset(inputs: Inputs): void {
@@ -1728,12 +1610,6 @@ function inputs_reset(inputs: Inputs): void {
             key_state.reset_next_frame = false;
         }
     }
-    // for controller_state : inputs.controllers {
-    //     for *key_state : controller_state.buttons {
-    //         key_state.pressed = false;
-    //         key_state.released = false;
-    //     }
-    // }
     if (inputs.touch_released) {
         inputs.touch_start_x = -1;
         inputs.touch_start_y = -1;
@@ -1838,7 +1714,6 @@ function load_image(url: string): Promise<HTMLImageElement> {
     image.src = url;
     return new Promise((resolve, reject) => {
         image.onload = function(_event: Event) {
-            // console.log("Image loaded:", url);
             resolve(image);
         };
         image.onerror = function() {
@@ -1848,7 +1723,7 @@ function load_image(url: string): Promise<HTMLImageElement> {
 }
 function assert(condition: Boolean, message: string | null = ""): asserts condition {
     if (!__RELEASE__ && !condition) {
-        // debugger;
+        debugger;
         if (message) {
             console.error("Assertion failed:");
             throw Error(message);
@@ -1896,27 +1771,11 @@ function set_mouse_cursor(cursor: string) {
         document.body.style.cursor = cursor;
     }
 }
-
-// :debug
-// function log_matrix(matrix: Matrix4) {
-//     let str = "";
-//     for (let i = 0; i < matrix.length; i++) {
-//         if (i > 0 && i % 4 === 0) {
-//             str += "\n";
-//         }
-//         str += `${matrix[i].toString().padStart(4)}, `;
-//     }
-//     console.log(str);
-// }
-// function number_to_binary_string(dec: number, size: number = 4): string {
-//     return (dec >>> 0).toString(2).padStart(size, "0");
-// }
 function timer_progress(start: number, end: number, now: number): float {
     const duration = end - start;
     const progress = 1 - ((end - now) / duration);
     return progress;
 }
-function no_op(): void {}
 
 // :math
 function aabb_collides(a_position: Vector2, a_size: Vector2, b_position: Vector2, b_size: Vector2): boolean {
