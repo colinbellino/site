@@ -185,7 +185,8 @@ export function start(loaded_callback: () => void) {
     game.draw_tiles = false;
     game.player_path = [];
 
-    const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    // const prefers_dark_theme = window.matchMedia("(prefers-color-scheme: dark)").matches;
+    const prefers_dark_theme = false;
     const [renderer, renderer_ok] = renderer_init(prefers_dark_theme);
     if (!renderer_ok) {
         console.error("Couldn't initialize renderer.");
@@ -198,6 +199,7 @@ export function start(loaded_callback: () => void) {
     game.projects = fixed_array_make(MAX_PROJECTS);
     game.nodes = fixed_array_make(MAX_NODES);
     game.loaded_callback = loaded_callback;
+    game.theme = 0;
     if (prefers_dark_theme)                       { game.theme = 1; }
     if (location.search.includes("light"))        { game.theme = 0; }
     else if (location.search.includes("dark"))    { game.theme = 1; }
