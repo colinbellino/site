@@ -46,6 +46,12 @@
   force = true
   status = 301
 
+[[redirects]]
+  from = "/public/stuff/screenshake-controlconf.zip"
+  to = "/stuff/screenshake-controlconf.zip"
+  force = true
+  status = 301
+
 [[headers]]
   for = "/*"
   [headers.values]
