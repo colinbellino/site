@@ -2283,7 +2283,7 @@ const PROJECTS: Project[] = [
         description: [
             `<p>Hi there! I’m Colin, a french engineer who fell in love with programming and creating great applications, tools, sites and video games!</p>`,
             `<p>For more than 20 years, I’ve been coding, tinkering and prototyping with many technologies from C to JavaScript, from Jai to Go, from web apps to video games.<br>Over the years, I’ve developed a taste for rapid prototyping and a good intuition for building good experiences for my users and clients.</p>`,
-            `<p>You can find my résumé <a href="/CV - Colin Bellino.pdf" target="_blank" rel="noopener">here</a>.</p>`,
+            `<p>You can find my résumé <a href="/cv_colin_bellino.pdf" target="_blank" rel="noopener">here</a>.</p>`,
             `<p>Now, I’m working as a contractor to build robust front-end applications and share all that I learned along the way.<br>Here are some of the services I provide to my clients:</p>`,
             `<ul class="services">`,
                 `<li>Creation of performant and accessible applications.</li>`,

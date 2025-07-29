@@ -36,13 +36,13 @@
 
 [[redirects]]
   from = "/resume.pdf"
-  to = "/CV - Colin Bellino.pdf"
+  to = "/cv_colin_bellino.pdf"
   force = true
   status = 301
 
 [[redirects]]
   from = "/cv"
-  to = "/CV - Colin Bellino.pdf"
+  to = "/cv_colin_bellino.pdf"
   force = true
   status = 301
 
