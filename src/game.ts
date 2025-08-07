@@ -131,7 +131,7 @@ const THEMES = [
 const PROJECTS_IMAGE_URL = "/worldmap/images/projects.png";
 const THUMBNAIL_SIZE: Vector2 = [320, 180];
 const THUMBNAIL_MAX: int = 16;
-const CAMERA_START_POSITION: Vector2 = [24, 9];
+const CAMERA_START_POSITION: Vector2 = [20, 11];
 const GRID_SIZE = 48;
 const TILESET_POSITION : Vector2 = [0, 240];
 const MAX_CONSOLE_LINES : number = 128;
@@ -1054,7 +1054,8 @@ function update_zoom(): void {
     assert(game.renderer.window_size[0] > 0 || game.renderer.window_size[1] > 0, "Invalid window size.");
     const smallest = Math.min(game.renderer.window_size[0], game.renderer.window_size[1]);
     const threshold = 360;
-    game.renderer.camera_main.zoom = Math.max(1.0, Math.floor(smallest / threshold));
+    // game.renderer.camera_main.zoom = Math.max(1.0, Math.floor(smallest / threshold));
+    game.renderer.camera_main.zoom = 1;
 }
 
 // :renderer
