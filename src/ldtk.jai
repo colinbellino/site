@@ -151,7 +151,7 @@ ldtk_load :: (path: string, allocator: Allocator, loc := #caller_location) -> re
 }
 
 ldtk_get_node_index :: (object: *JSON_Object, node_uid: LDTK_Entity_Uid, entity_instances: []LDTK_Entity_Instance) -> s32 {
-    entity_iid, entity_iid_success := table_find(object, "entityIid");
+    entity_iid_success, entity_iid := table_find(object, "entityIid");
     assert(entity_iid_success);
     target_entity_iid := entity_iid.str;
     node_index: s32;
@@ -164,9 +164,9 @@ ldtk_get_node_index :: (object: *JSON_Object, node_uid: LDTK_Entity_Uid, entity_
     return -1;
 }
 ldtk_get_grid_position :: (object: *JSON_Object) -> [2]float {
-    cx, cx_success := table_find(object, "cx");
+    cx_success, cx := table_find(object, "cx");
     assert(cx_success);
-    cy, cy_success := table_find(object, "cy");
+    cy_success, cy := table_find(object, "cy");
     assert(cy_success);
     return .[ cast(float)cx.number, cast(float)cy.number ];
 }

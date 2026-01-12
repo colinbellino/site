@@ -28,7 +28,10 @@ LevelData :: struct {
     secret:   bool;
     player:   Entity;
     player2:  *Entity;
-    score:    float;
+    union {
+        score:       float;
+        score_v2:    float;
+    }
     entities: [..] Entity;
 
     floats:   [] float;
@@ -58,7 +61,7 @@ LEVEL_DATA_1_JSON := #string DONE
 DONE;
 
 LEVEL_DATA_2_JSON := #string DONE
-{"kind": 2}
+{"kind": 2, "score_v2": 25.1, "floats": [0.5, null]}
 DONE;
 
 Fixed_Size_Data :: struct {
@@ -73,24 +76,47 @@ DATA_ARRAY_2 := #string DONE
 {"data": [1, 2]}
 DONE;
 
+MessageEntry :: struct {
+    union {
+        player: int;
+        player_v2: int;
+    }
+    union {
+        tag: int;
+        tag_v2: int;
+    }
+    name: string;
+    strict: bool;
+    union {
+        messagemode: string;
+        message_mode: string;
+    }
+    roundtrip: int;
+    identifier: string;
+    message: string;
+};
+
 typed_parsing :: () {
     {
         success, level := json_parse_string(LEVEL_DATA_1_JSON, LevelData, ignore_unknown=false);
         // success, level := json_parse_file("level.json", LevelData, ignore_unknown=false);
         assert(success);
 
-        log("Typed parsing result 1:\n%\n\n", level);
+        log("Typed parsing result 1:\n%\nscore: %\n\n", level, level.score);
         assert(level.floats.count == 6);
         assert(level.floats[1] > 1);  // Regression test, we had a bug here…
     }
     {
-        // Test parsing integers into enum slots
+        // Test parsing integers into enum slots & alternative union fields
         success, level := json_parse_string(LEVEL_DATA_2_JSON, LevelData, ignore_unknown=false);
         assert(success);
 
-        log("Typed parsing result 2:\n%\n\n", level);
+        log("Typed parsing result 2:\n%\nscore: %\n\n", level, level.score);
 
         assert(level.kind == .LEGENDARY);
+        assert(level.score == 25.1);
+        assert(level.floats.count == 2);
+        assert(is_nan(level.floats[1]));
     }
     {
         // Test parsing into fixed-sized arrays
@@ -108,6 +134,11 @@ typed_parsing :: () {
         success, result := json_parse_string(DATA_ARRAY_2, Fixed_Size_Data, ignore_unknown=false);
         assert(!success);
     }
+    {
+        success, result := json_parse_string("{}", MessageEntry, ignore_unknown=false);
+        assert(success);
+        log("Typed parsing result 4:\n%\n\n", result);
+    }
 }
 
 typed_printing :: () {
@@ -120,6 +151,39 @@ typed_printing :: () {
 
     // success := json_write_file("level.json", level, indent_char="");
     // assert(success);
+
+    // Inf/Nan handlig:
+    floats := float.[
+        0.5,
+        0h7FFF_FFFF, // NaN
+        0hFF80_0001, // also NaN
+        0hFF80_0000, // -inf
+        0h7F80_0000, // +inf
+    ];
+
+    json_string = json_write_string(floats, indent_char = "");
+    log("floats:\n%\n\n", json_string);
+    assert(json_string == "[0.5,null,null,null,null]");
+
+    json_string = json_write_string(floats, indent_char = "", float_handling = .SUPPORT_STRINGS);
+    log("floats:\n%\n\n", json_string);
+    assert(json_string == "[0.5,\"NaN\",\"NaN\",\"-Infinity\",\"Infinity\"]");
+
+    float64s := float64.[
+        0.5,
+        0h7FFF_FFFF_FFFF_FFFF, // NaN
+        0hFFF0_0000_0000_0001, // also NaN
+        0hFFF0_0000_0000_0000, // -inf
+        0h7FF0_0000_0000_0000, // +inf
+    ];
+
+    json_string = json_write_string(float64s, indent_char = "");
+    log("float64s:\n%\n\n", json_string);
+    assert(json_string == "[0.5,null,null,null,null]");
+
+    json_string = json_write_string(float64s, indent_char = "", float_handling = .SUPPORT_STRINGS);
+    log("float64s:\n%\n\n", json_string);
+    assert(json_string == "[0.5,\"NaN\",\"NaN\",\"-Infinity\",\"Infinity\"]");
 }
 
 generic_parsing :: () {
@@ -199,7 +263,7 @@ DONE
     get :: (json_val: JSON_Value, key: string, expected_type: JSON_Type) -> JSON_Value {
         assert(json_val.type == .OBJECT);
         table := json_val.object;
-        val, success := Hash_Table.table_find(table, key);
+        success, val := Hash_Table.table_find(table, key);
         assert(success);
         assert(val.type == expected_type);
         return val;
@@ -208,7 +272,7 @@ DONE
     // Check for version number that may or may not exist
     version: float64 = -1;
     assert(root.type == .OBJECT);
-    val, success2 := Hash_Table.table_find(root.object, "version");
+    success2, val := Hash_Table.table_find(root.object, "version");
     if success2 {
         if val.type == .NUMBER {
             version = val.number;
@@ -268,6 +332,19 @@ generic_printing :: () {
     log("Generic_printing result:\n%\n\n", json_string);
 
     //json_write_file("level.json", root);
+
+    // Inf/Nan handling
+	floats: [..] JSON_Value;
+    array_add(*floats, .{type=.NUMBER, number=0.5});
+    array_add(*floats, .{type=.NUMBER, number=0h7FFF_FFFF_FFFF_FFFF}); // NaN
+    array_add(*floats, .{type=.NUMBER, number=0hFFF0_0000_0000_0001}); // also NaN
+    array_add(*floats, .{type=.NUMBER, number=0hFFF0_0000_0000_0000}); // -inf
+    array_add(*floats, .{type=.NUMBER, number=0h7FF0_0000_0000_0000}); // +inf
+    array.array = floats;
+
+    json_string = json_write_string(array, indent_char = "");
+    log("numbers:\n%\n\n", json_string);
+    assert(json_string == "[0.5,null,null,null,null]");
 }
 
 rename_by_note :: () {
@@ -292,7 +369,7 @@ rename_by_note :: () {
     DONE
 
     success, message_decoded := json_parse_string(json, Message, ignore_unknown = false);
-    assert(success);
+    assert(success, "Could not decode message!");
 
     log("Rename_by_note decode result:\n%\n\n", message_decoded);
     assert(message_decoded._context.channel == 1);
@@ -379,6 +456,13 @@ enum_errors :: () {
     }
 }
 
+is_nan :: (value: float) -> bool {
+    v := value;
+    bits := (cast(*s32) *v).*;
+    is_special := (bits & 0x7F80_0000) == 0x7F80_0000;
+    mant := (bits & 0x007F_FFFF);
+    return (is_special && mant);
+}
 
 #import "Basic";
 #import "Hash_Table"; // To be able to iterate over node.object

@@ -7,26 +7,26 @@
 // "rename" is used for renaming certain members.
 //      It gets called with the Type_Info_Struct_Member and must return the new name of the field.
 // 		The default procedure rename members by their @JsonName note. Eg: @JsonName(renamed_member).
-json_write_string :: (value: $T, indent_char := "\t", ignore := ignore_by_note, rename := rename_by_note) -> string {
+json_write_string :: (value: $T, indent_char := "\t", ignore := ignore_by_note, rename := rename_by_note, float_handling := Special_Float_Handling.SUPPORT_NULL) -> string {
 	builder: String_Builder;
 	defer free_buffers(*builder);
-	json_append_value(*builder, value, indent_char, ignore, rename);
+	json_append_value(*builder, value, indent_char, ignore, rename, float_handling);
 	return builder_to_string(*builder);
 }
 
-json_write_file :: (filename: string, value: $T, indent_char := "\t", ignore := ignore_by_note, rename := rename_by_note) -> bool {
+json_write_file :: (filename: string, value: $T, indent_char := "\t", ignore := ignore_by_note, rename := rename_by_note, float_handling := Special_Float_Handling.SUPPORT_NULL) -> bool {
 	builder: String_Builder;
 	defer free_buffers(*builder);
-	json_append_value(*builder, value, indent_char, ignore, rename);
+	json_append_value(*builder, value, indent_char, ignore, rename, float_handling);
 	return write_entire_file(filename, *builder);
 }
 
-json_append_value :: (builder: *String_Builder, val: $T, indent_char := "\t", ignore := ignore_by_note, rename := rename_by_note) {
+json_append_value :: (builder: *String_Builder, val: $T, indent_char := "\t", ignore := ignore_by_note, rename := rename_by_note, float_handling := Special_Float_Handling.SUPPORT_NULL) {
 	#if T == JSON_Value {
-		json_write_json_value(builder, val, indent_char);
+		json_write_json_value(builder, val, indent_char, float_handling=float_handling);
 	} else {
 		info := type_info(T);
-		json_write_native(builder, *val, info, indent_char, ignore, rename);
+		json_write_native(builder, *val, info, indent_char, ignore, rename, float_handling=float_handling);
 	}
 }
 
@@ -59,6 +59,13 @@ json_escape_string :: (str: string) -> string {
 	json_append_escaped(*builder, str);
 	escaped := builder_to_string(*builder);
 	return escaped;
+}
+
+// How shall NaN and Infinity be serialized / deserialized?
+Special_Float_Handling :: enum_flags {
+    SUPPORT_NULL    :: 0x01;
+    SUPPORT_STRINGS :: 0x02;
+    SUPPORT_ALL     :: SUPPORT_NULL | SUPPORT_STRINGS;
 }
 
 Ignore_Proc :: #type (member: *Type_Info_Struct_Member) -> bool;
@@ -142,6 +149,7 @@ expect_and_slice :: (str: string, expected: string) -> remainder: string, succes
 parse_string :: (str: string) -> result: string, remainder: string, success: bool {
 	assert(str[0] == #char "\"", "Invalid string start %", str);
 	inside := advance(str);
+    if !inside return "", "", false;
 	needsUnescape := false;
 	while inside[0] != #char "\"" {
 		if inside.count < 2 	return "", str, false;
@@ -170,15 +178,23 @@ parse_string :: (str: string) -> result: string, remainder: string, success: boo
 unescape :: (str: string) -> result: string, success: bool {
 	result := alloc_string(str.count);
 	rc := 0;
+    success := true;
 	for i: 0..str.count-1 {
 		if str[i] != #char "\\" {
 			// Check for invalid characters for JSON
-			if str[i] < 0x20	return "", false;
+			if str[i] < 0x20	{
+                success = false;
+                break;
+            }
 
 			result[rc] = str[i];
 			rc += 1;
 		} else {
-			if i == str.count - 1	return "", false;
+			if i == str.count - 1	{
+                success = false;
+                break;
+            }
+
 			i += 1;
 			if str[i] == {
 				case #char "\""; #through;
@@ -202,20 +218,59 @@ unescape :: (str: string) -> result: string, success: bool {
 					result[rc] = #char "\t";
 					rc += 1;
 				case #char "u";
-					if i + 4 >= str.count	return "", false;
-					unicode_char, success := parse_unicode(slice(str, i + 1, 4));
-					if !success		return "", false;
+					if i + 4 >= str.count	{
+                        success = false;
+                        break;
+                    }
+					unicode_char, unicode_success := parse_unicode(slice(str, i + 1, 4));
+					if !unicode_success	{
+                        success = false;
+                        break;
+                    }
 					utf8_len := encode_utf8(unicode_char, *(result.data[rc]));
 					rc += utf8_len;
 					i += 4;
 				case;
-					return "", false;
+                    success = false;
+                    break;
 			}
 		}
 	}
+    if !success {
+        free(result);
+        return "", false;
+    }
 	result.count = rc;
 	return result, true;
 }
+
+append_special_float :: (builder: *String_Builder, float_handling: Special_Float_Handling, is_nan: bool, is_negative: bool) {
+    if !(float_handling & .SUPPORT_STRINGS) {
+        append(builder, "null");
+    } else if is_nan {
+        append(builder, "\"NaN\"");
+    } else if is_negative {
+        append(builder, "\"-Infinity\"");
+    } else {
+        append(builder, "\"Infinity\"");
+    }
+}
+
+get_nan_or_infinity :: (value: u32) -> is_nan: bool, is_infinity: bool, is_negative: bool {
+    is_special := (value & 0x7F80_0000) == 0x7F80_0000;
+    mant := (value & 0x007F_FFFF);
+    return (is_special && mant), is_special && !mant, !!(value & 0x8000_0000);
+}
+
+get_nan_or_infinity :: (value: u64) -> is_nan: bool, is_infinity: bool, is_negative: bool {
+    is_special := (value & 0x7FF0_0000_0000_0000) == 0x7FF0_0000_0000_0000;
+    mant := (value & 0xF_FFFF_FFFF_FFF);
+    return (is_special && mant), is_special && !mant, !!(value & 0x8000_0000_0000_0000);
+}
+
+NAN               :: 0h7FFF_FFFF_FFFF_FFFF;
+INFINITY          :: 0h7FF0_0000_0000_0000;
+NEGATIVE_INFINITY :: 0h8FF0_0000_0000_0000;
 
 #import "Basic";
 #import "File";
