@@ -6,7 +6,7 @@
   <meta name="viewport" content="width=device-width, user-scalable=no, minimal-ui">
   <title>Colin Bellino</title>
   <link href="https://maxcdn.bootstrapcdn.com/font-awesome/4.7.0/css/font-awesome.min.css" rel="stylesheet">
-  <style nonce="style">/* Utils */
+  <style>/* Utils */
 /*----- Colors -----*/
 /*----- Fonts -----*/
 /*----- Dimensions and sizes -----*/
@@ -107,16 +107,17 @@ h1 {
 
 h2 {
   font-family: 'Josefin Sans', Helvetica, Arial, sans-serif;
-  font-weight: 300;
+  font-weight: 400;
   font-size: 16px;
   letter-spacing: 0.5px;
 }
 
 h3 {
   font-family: 'Lato', Helvetica, Arial, sans-serif;
-  font-weight: 300;
-  font-size: 14px;
+  font-weight: 400;
+  font-size: 13px;
   letter-spacing: 0.4px;
+  color: rgb(0 0 0 / 70%)
 }
 
 h3.bold {
@@ -165,7 +166,8 @@ a .fa-external-link {
 
 p,
 li {
-  font-size: 11px;
+  font-size: 12px;
+  line-height: 120%;
 }
 
 blockquote {
@@ -215,7 +217,7 @@ ul.two-column li {
 }
 
 .container {
-  padding-top: 20px;
+  padding-top: 10px;
 }
 
 .keyline {
@@ -272,7 +274,8 @@ ul.two-column li {
   display: block;
   margin: 0 auto;
   border-top: 10px solid #5fcde4;
-  padding: 36px 22px 30px 34px;
+  /* padding: 30px 22px 30px 34px; */
+  padding: 10px;
   box-shadow: 0 1px 10px rgba(0, 0, 0, 0.5);
 }
 
@@ -285,7 +288,7 @@ ul.two-column li {
 .left-column {
   float: left;
   width: 160px;
-  margin-right: 20px;
+  margin-right: 15px;
   word-wrap: break-word;
 }
 
@@ -311,13 +314,13 @@ ul.two-column li {
     width: 100%;
     height: 100%;
     margin: 0;
-    padding: 36px 0 30px;
+    padding: 10px 0 0;
     box-shadow: none;
   }
 
   .page .resume-header,
   .page .resume-content {
-    padding: 0 22px 0 34px;
+    padding: 0;
   }
 
   .container {
@@ -407,8 +410,12 @@ ul.two-column li {
   border-radius: 5px;
 }
 
+.languages-container {
+  padding-top: 30px;
+}
+
 .skills-container {
-  padding-top: 20px;
+  padding-top: 10px;
 }
 .skills-container h3 {
   font-size: 12px;
@@ -433,6 +440,10 @@ ul.two-column li {
 .work-container .summary {
   white-space: pre-line;
 }
+
+.section-header {
+  /* float: right; */
+}
 </style>
 </head>
 
@@ -442,7 +453,7 @@ ul.two-column li {
         <div class="profile-header pull-left">
             <img src="data:image/png;base64, iVBORw0KGgoAAAANSUhEUgAAAEAAAABACAMAAACdt4HsAAAAAXNSR0IArs4c6QAAACRQTFRFX83kW27hMSgyEw8Q7sOa//vw2aBmWVZSN5Ruar4w2Vdj+/I2l3b2CgAAAJNJREFUWIXt1MsOhSAMRVECiq///1/bhJM0DSoMObgnErRr0NzcEP6qxVIyzQT4wW6EAMDHCi2uJmRwwC5QB2IldgDLQ6ukd1nCmRnwy7M/IAVwng3YXMxAcimgA/rMJdzNBDzFCuxSC1IdJgEOaS/ZYfun8oqQAOg02QXae0YAyNkRI6Dh5SV9ndkBfOxrXuJYwA1cajEx/AHqcAAAAABJRU5ErkJggg==" />
             <h1>Colin Bellino</h1>
-            <h2>Web &amp; games engineer</h2>
+            <h2>Fullstack web engineer (15 years)</h2>
         </div>
         <div class="profile-pic pull-right">
         </div>
@@ -450,26 +461,27 @@ ul.two-column li {
     <div class="resume-content">
       <aside class="left-column">
         <div class="container about-container">
-
+        
             <div class="title">
                 <h3>Contact</h3>
-                <div class="keyline"></div>
+                  <div class="keyline"></div>
             </div>
-
-
+        
+        
+        
             <div class="info-tag-container">
                 <i class="fa fa-envelope-o"></i>
-
+            
                 <h6 class="info-text">
                     <a href="mailto:work@colinbellino.com" target="_blank">
                         work@colinbellino.com
                     </a>
                 </h6>
             </div>
-
+        
             <div class="info-tag-container">
                 <i class="fa fa-globe"></i>
-
+            
                 <h6 class="info-text">
                     <a href="https://colinbellino.com" target="_blank">
                         colinbellino.com
@@ -478,7 +490,7 @@ ul.two-column li {
             </div>
                         <div class="info-tag-container">
                             <i class="fa fa-linkedin-square"></i>
-
+                        
                             <h6 class="info-text">
                                 <a href="https://www.linkedin.com/in/colinbellino/" target="_blank">
                                     colinbellino
@@ -486,7 +498,7 @@ ul.two-column li {
                             </h6>
                         </div>                 <div class="info-tag-container">
                              <i class="fa fa-twitter"></i>
-
+                         
                              <h6 class="info-text">
                                  <a href="https://twitter.com/colinbellino" target="_blank">
                                      colinbellino
@@ -495,116 +507,122 @@ ul.two-column li {
                          </div></div>            <div class="skills-container">
                     <section class="container">
                             <div class="title">
+                                  <div class="keyline"></div>
                                 <h3>JavaScript / TypeScript</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                            </div>
+                            <h4 class="bold capitalize">15 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>HTML</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>HTML / CSS</h3>
+                            </div>
+                            <h4 class="bold capitalize">15 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>CSS / SASS</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
-                    <section class="container">
-                            <div class="title">
+                                  <div class="keyline"></div>
                                 <h3>WebGL / WebGPU</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                            </div>
+                            <h4 class="bold capitalize">2 year</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Progressive Web Applications (PWAs)</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>PWAs (Progressive Web Applications)</h3>
+                            </div>
+                            <h4 class="bold capitalize">8 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
+                                  <div class="keyline"></div>
                                 <h3>React</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                            </div>
+                            <h4 class="bold capitalize">8 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
+                                  <div class="keyline"></div>
                                 <h3>Vue</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                            </div>
+                            <h4 class="bold capitalize">3 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>HTMX</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>HTMX / Svelte</h3>
+                            </div>
+                            <h4 class="bold capitalize">1 year</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Svelte</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>MySQL / MsSQL / PostgreSQL</h3>
+                            </div>
+                            <h4 class="bold capitalize">15 year</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>GraphQL</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
-                    <section class="container">
-                            <div class="title">
-                                <h3>PostgreSQL</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
-                    <section class="container">
-                            <div class="title">
-                                <h3>AWS / GCP</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
-                    <section class="container">
-                            <div class="title">
+                                  <div class="keyline"></div>
                                 <h3>Node / Bun</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                            </div>
+                            <h4 class="bold capitalize">12 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Go</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>AWS / GCP</h3>
+                            </div>
+                            <h4 class="bold capitalize">5 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>C / C++</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>GraphQL</h3>
+                            </div>
+                            <h4 class="bold capitalize">5 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Odin / JAI</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>C / C++ / Odin / JAI</h3>
+                            </div>
+                            <h4 class="bold capitalize">4 years</h4>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Unit Testing</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                  <div class="keyline"></div>
+                                <h3>Performance optimisations</h3>
+                            </div>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Software Testing</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                <h3>Profiling &amp; debugging</h3>
+                            </div>
+                    </section>
                     <section class="container">
                             <div class="title">
-                                <h3>Performance Tuning</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                                <h3>Software testing (unit, E2E)</h3>
+                            </div>
+                    </section>
                     <section class="container">
                             <div class="title">
                                 <h3>Mockups &amp; prototypes</h3>
-                                <div class="keyline"></div>
-                            </div>            </section>
+                            </div>
+                    </section>
             </div>
         <div class="container languages-container">
             <div class="title">
                 <h3>Languages</h3>
-                <div class="keyline"></div>
+                  <div class="keyline"></div>
             </div>
+        
             <ul class="minimal">
                 <li>
-                    <h6>English <em>(Native Speaker)</em></h6>
+                    <h6>Français <em>(Native Speaker)</em></h6>
                 </li>
                 <li>
-                    <h6>Français <em>(Native Speaker)</em></h6>
+                    <h6>English <em>(Bilingual)</em></h6>
                 </li>
             </ul>
         </div>
@@ -613,113 +631,130 @@ ul.two-column li {
         <div class="container summary-container">
             <div class="title">
                 <h3>Summary</h3>
-                <div class="keyline"></div>
+                  <div class="keyline"></div>
             </div>
+        
             <p class="summary">
-                Passionate programmer and all around nerd in love with designing and creating cool stuff. I&#x27;m a web programmer by day, game developer by night.
-
-        Currently looking for contract work in web or game/engine programming.
+                Passionate engineer and all-around nerd who fell in love with programming and design. Web programmer by day and game developer by night. <br />I worked for more than 15 years in the web industry, creating products from start to end, small and huge, by myself or with teams, always learning!
             </p>
         </div>
         <div class="container work-container">
             <div class="title">
                 <h3>Experience</h3>
-                <div class="keyline"></div>
+                  <div class="keyline"></div>
             </div>
+        
             <section class="item">
                 <div class="section-header clearfix">
-                    <h5 class="italic pull-right">
-                            <span class="startDate">05/2020</span>
-                            <span class="endDate"> - Present</span>
-                    </h5>
+                  <h3 class="bold pull-left">
+                      Front-end engineer (NDA client)
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">06/2025</span>
+                        <span class="endDate"> - 08/2025</span>
+                  </h5>
                 </div>
-
-                <h4>Freelance programmer (web &amp; games)</h4>
-
-
-        <p class="summary">I&#x27;m doing contract work on web projects for my clients (mostly frontend, but also backend/cloud and performance/profiling) and creating game+engine in my spare time.</p>
-
+        
+        
+        
+                  <p class="summary">Conception of a synchronisation engine between the front-end and the back-end for a real-time collaborative application. The system is the central data layer for the application.<br />- Tasks: cache server data on the client, allow the app to work offline and handle optimistic UI updates in a performant way.<br />- Stack: Vue3, TypeScript, IndexedDB, Service Workers, PWA, PHP, Go.</p>
+        
             </section>
             <section class="item">
                 <div class="section-header clearfix">
-                    <h5 class="italic pull-right">
-                            <span class="startDate">01/2023</span>
-                            <span class="endDate"> - 10/2023</span>
-                    </h5>
+                  <h3 class="bold pull-left">
+                      <a href="https://www.linkedin.com/company/precogs-software/" target="_blank">Front-end engineer (Precogs, Chipsmarket)</a>
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">02/2023</span>
+                        <span class="endDate"> - 12/2023</span>
+                  </h5>
                 </div>
-
-                <h4>Front-end engineer (Precogs)</h4>
-
-
-        <p class="summary">Helped the current team develop new applications and maintain legacy ones, put in place performance improvements and advices to simplify the architecture of the projects. I worked mainly as a lead programmer in an existing team, creating the new version of their marketplace application (front-end and some back-end), i was also consulted related to UX improvements (mainly UI and performance) and overall code architecture.
-        Workflow: I interacted with the product team and gave early feedbacks on the new mockups, integrated those into UI code (TS+Vue), and worked with the backend team to plug in the data coming from AWS (or made it myself it necessary).
-        - Front-end: Vue, TypeScript, GraphGL, Unit and E2E tests, performance profiling and optimisations
-        - Back-end: Node, AWS, PostgreSQL, profiling, architecture.</p>
-
+        
+        
+        
+                  <p class="summary">Development of new features in an existing marketplace application. I worked mainly as a front-end engineer, collaborating with the existing team to maintain the legacy application, while boostrapping the new version with a fresh stack. <br />- Tasks: Implement performance improvements (rendering, memory usage, etc), provide advice to simplify the architecture, UX improvements and overall code architecture review.<br />- Stack: Vue, TypeScript, GraphGL, Cypress, Storybook, PWA, Node, AWS (mostly lambda and S3), PostgreSQL.</p>
+        
             </section>
             <section class="item">
                 <div class="section-header clearfix">
-                    <h5 class="italic pull-right">
-                            <span class="startDate">09/2018</span>
-                            <span class="endDate"> - 03/2020</span>
-                    </h5>
+                  <h3 class="bold pull-left">
+                      <a href="https://colinbellino.com/games" target="_blank">Engine &amp; game programming (Self-Employed)</a>
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">05/2020</span>
+                        <span class="endDate"> - Present</span>
+                  </h5>
                 </div>
-
-                <h4>Lead engineer &amp; architect (Hubside)</h4>
-
-
-        <p class="summary">Development and architecture of https://photos.hubside.com, a Progressive Web App to regroup all your photos in one place and easily/safely share them online.
-
-        I was on the project from the first line of code to the MVP release, we worked hand in hand with the product owner, designers and developers to create something we could be proud of.
-        A lot of work went into the architecture of the app, to make sure it runs ans scales smoothly on GCP and is easy to maintain. The backend revolves around a GraphQL schema that is shared with the frontend and iOS app to facilitate communications.
-        The frontend is a React app written in TypeScript that uses Apollo to manage data and caching. Components were written in Storybook by following the Atomic Design guidelines as much as possible.</p>
-
+        
+        
+        
+                  <p class="summary">Creation of multiple video games from scratch and of the engine/tools required (renderer, audio, animation, UI, assets pipeline, etc).<br />- Tasks: design game systems, write the engine code to support new features, playtest with users, profile and optimize code to ensure highly performant code and use of resources (performance-aware programming, CPU caching, memory allocations, GPU buffers, etc).<br />- Stack: C/C++, Odin, JAI, OpenGL, Vulkan, Direct3D12.</p>
+        
             </section>
             <section class="item">
                 <div class="section-header clearfix">
-                    <h5 class="italic pull-right">
-                            <span class="startDate">06/2017</span>
-                            <span class="endDate"> - 08/2018</span>
-                    </h5>
+                  <h3 class="bold pull-left">
+                      <a href="https://www.linkedin.com/company/hubside/" target="_blank">Lead engineer &amp; architect (Hubside, Team Photos)</a>
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">09/2018</span>
+                        <span class="endDate"> - 03/2020</span>
+                  </h5>
                 </div>
-
-                <h4>Front-end engineer (Renault)</h4>
-
-
-        <p class="summary">Development of a large single page application at Renault Digital (team Bi-BOP).
-        Create UI components, code the logic to connect them to the backend (a JSON API that we also developed), discuss potential UX problems with the team among other things.
-        Mainly working on the frontend, i was involved in most technical decisions with the other developers, code review, code quality control and made multiple improvements to our tooling to avoid regressions and quality of our frontend.
-        Formation of the new developers and transfert of knowledge to the new team that will continue the project.</p>
-
+        
+        
+        
+                  <p class="summary">Architecture and development of an application to centralize your photos in one place and easily/safely share them with family or print them in nice physical albums.<br />- Tasks: create the project from the first line of code to the MVP release, architect the application to scale and run smoothly with high volumes of data (large photos), review code, build a solid GraphQL endpoint that can be used by both the Android, iOS and Web clients, work with designers to assure good accessiblity (a11y).<br />- Stack: React, Apollo, Storybook, Cypress, Atomic Design, Node, GCP, TypeScript, GraphQL.</p>
+        
             </section>
             <section class="item">
                 <div class="section-header clearfix">
-                    <h5 class="italic pull-right">
-                            <span class="startDate">12/2014</span>
-                            <span class="endDate"> - 05/2017</span>
-                    </h5>
+                  <h3 class="bold pull-left">
+                      <a href="https://www.linkedin.com/company/renault-digital/" target="_blank">Front-end engineer (Renault, Team Bi-BOP)</a>
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">06/2017</span>
+                        <span class="endDate"> - 08/2018</span>
+                  </h5>
                 </div>
-
-                <h4>Front-end engineer (Team Back Office)</h4>
-
-
-        <p class="summary">Conception and development of new UI features on a large data driven web app.
-        Migration of the stack from AngularJS/CoffeeScript to React/ES2015+ and rewrite/optim of our frontend build tasks.</p>
-
+        
+        
+        
+                  <p class="summary">Development of a large supply chain project for Renault Digital.<br />- Tasks: create UI components, implement the logic to write them to the custom back-end, review code for quality control, improve front-end tooling and CI/CD, and discuss potential UX problems with the team. I also trained new engineers and transferred knowledge to the new team that would continue the project.<br />- Stack: React, TypeScript, Apollo, CSS Modules, Node, Express, GCP (datastore, storage, app engine, functions, pub/sub), Jest, Cypress, Gitlab CI, Storybook, Chromatic.</p>
+        
             </section>
             <section class="item">
                 <div class="section-header clearfix">
-                    <h5 class="italic pull-right">
-                            <span class="startDate">10/2010</span>
-                            <span class="endDate"> - 12/2014</span>
-                    </h5>
+                  <h3 class="bold pull-left">
+                      Front-end engineer (AdYouLike, Team Back Office)
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">12/2014</span>
+                        <span class="endDate"> - 05/2017</span>
+                  </h5>
                 </div>
-
-                <h4>Fullstack developer (Pixel Cookers)</h4>
-
-
-        <p class="summary">Development of a large number of sites and web apps of varying sizes with the team. At the end, i was the one teaching new developers the skills i aquired during my time at Pixel Cookers.</p>
-
+        
+        
+        
+                  <p class="summary">Design and development of new UI features on a large data-driven dashboard.<br />- Tasks: Lead the migration of the stack from AngularJS/CoffeeScript to React/ES2015+ and rewrite/optimise front-end build tasks.<br />- Stack: AngularJS, React, Redux, SASS, ES2015+, CoffeeScript, Go, Grunt, Webpack, Babel, Jest</p>
+        
+            </section>
+            <section class="item">
+                <div class="section-header clearfix">
+                  <h3 class="bold pull-left">
+                      <a href="https://www.linkedin.com/company/pixel-cookers/" target="_blank">Full-stack engineer (Pixel Cookers)</a>
+                  </h3>
+                  <h5 class="italic pull-right" style="padding-top: 3px;">
+                      <span class="startDate">10/2010</span>
+                        <span class="endDate"> - 12/2014</span>
+                  </h5>
+                </div>
+        
+        
+        
+                  <p class="summary">Creation and integration of a more than 40 sites and web apps of varying sizes. <br />- Tasks: discussion with the client to establish a spec, working with the designers/artists and coding the project from start to end. Near the end: train new programmers, share the skills I acquired during my tenure there.<br />- Stack: PHP, Javascript, CSS, HTML, Backbone, AngularJS, Git, SVN, Photoshop, Illustrator.</p>
+        
             </section>
         </div>
       </div>
