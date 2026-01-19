@@ -190,8 +190,11 @@
       margin-left: -4px;
       margin-right: 10px;
     }
-    .link.worldmap:hover .icon > img {
+    .link.worldmap .icon > img {
       animation: me_walk 600ms infinite steps(4, jump-none);
+    }
+    .link.worldmap:hover .icon > img {
+      animation-play-state: paused;
     }
     @keyframes me_walk {
       0%   { margin-left: -0px; }
@@ -363,8 +366,8 @@
 <body>
   <main>
     <aside>
-      <a  href="/worldmap" id="avatar" class="avatar pixel-art">
-        <img src="/site/images/me.gif" aria-hidden="true" width="128" />
+      <a href="/worldmap" id="avatar" class="avatar pixel-art" aria-label="World map: interactive game version of the site">
+        <img src="/site/images/me.gif" aria-hidden="true" width="128" aria-label="An animated pixel art avatar of me, eyes blinking every few seconds." />
       </a>
     </aside>
     <nav>
