@@ -5,17 +5,19 @@ This is the source code for my personal site, portfolio and experiments: https:/
 ## Run the server:
 - Download the latest version: https://github.com/colinbellino/site (as a zip file, or clone it)
 - Open a terminal in the folder where you unpacked the project.
-- On Windows: `build.exe`
+- On Windows: `server.exe`
 - On MacOS:
   - `xattr -dr com.apple.quarantine ./`
-  - `./build`
+  - `./server`
 - Open `http://localhost:8000/worldmap.html?reload`
 
-## Compile the site or server binaries
-- compile in debug and start server: `jai first.jai` ([language](https://www.youtube.com/playlist?list=PLmV5I2fxaiCKfxMBrNsU1kgKJXD3PkyxO) still in private beta)
-- compile in release mode and deploy: `jai first.jai - -release -no-server && netlify deploy --dir public`
-- create server binary: `jai first.jai - -release -build` (not required, but useful for other people on the team who don't have access to the beta)
+## Compile the site
+- Compile in debug and start server: `jai first.jai` ([language](https://www.youtube.com/playlist?list=PLmV5I2fxaiCKfxMBrNsU1kgKJXD3PkyxO) still in private beta)
+- Compile in release mode and deploy: `jai first.jai - -release -no-server && netlify deploy --dir public`
+
+## Create server binary
+- `jai first.jai - -release -build` (not required, but useful for other people on the team who don't have access to the beta)
 
 ## Compile release & deploy
-- `./build.exe -release -no-server`
+- `./server.exe -release -no-server`
 - `netlify deploy --dir public/ --prod`

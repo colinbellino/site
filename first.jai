@@ -10,10 +10,10 @@ Config :: struct {
     root_options := get_build_options();
     args := root_options.compile_time_command_line;
 
-    compile := array_find(args, "-compile");
-    if compile {
+    build_arg := array_find(args, "-build_server");
+    if build_arg {
         w := get_current_workspace();
-        set_build_options_dc(.{ output_executable_name = "build" }, w);
+        set_build_options_dc(.{ output_executable_name = "server" }, w);
     } else {
         set_build_options_dc(.{ do_output = false });
 
@@ -35,8 +35,8 @@ main :: () {
 
 build :: (args: []string) -> bool {
     config.release = array_find(args, "-release");
+    config.no_server = array_find(args, "-no_server");
     log("release:   %", config.release);
-    config.no_server = array_find(args, "-no-server");
     log("no_server: %", config.no_server);
 
     if config.release {
