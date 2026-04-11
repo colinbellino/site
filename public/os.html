@@ -1,0 +1,329 @@
+<!DOCTYPE html>
+<html lang="en-us" translate="no">
+
+<head>
+  <meta charset="utf-8">
+  <title>Colin Bellino</title>
+  <meta http-equiv="Content-Type" content="text/html; charset=utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Hi, I‘m Colin. I‘m a french freelance programmer, designer and all around nerd. I build cool stuff and I stream my work sometimes.">
+  <meta name="theme-color" content="#ffffff" />
+  <meta name="theme-color" content="rgba(20, 20, 20, 1)" media="(prefers-color-scheme: dark)">
+  <link rel="apple-touch-icon" sizes="180x180" href="/site/images/apple-touch-icon.png">
+  <link rel="icon" type="image/png" sizes="32x32" href="/site/images/favicon-32x32.png">
+  <link rel="icon" type="image/png" sizes="16x16" href="/site/images/favicon-16x16.png">
+  <style nonce="style">
+    :root {
+      --main-color: rgba(35, 55, 176, 1);
+      --main-color-hover: rgba(76, 95, 208, 1);
+      --background-color: rgba(255, 255, 255, 1);
+      --text-color: rgba(0, 0, 0, 0.85);
+    }
+
+    html, body {
+      margin: 0;
+      padding: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    body {
+      font-family: Arial, Helvetica, sans-serif;
+      overflow: hidden;
+    }
+
+    .desktop {
+      background: #5fcde4;
+      color: #000;
+      width: 100%;
+      height: 100%;
+    }
+
+    .shortcuts {
+      margin: 0;
+      padding: 0;
+    }
+    .shortcuts-group {
+      margin: 1rem;
+      padding: 0;
+      list-style: none;
+    }
+    .shortcut {
+      display: block;
+      padding: 1rem;
+      color: inherit;
+      background: teal;
+      width: 6rem;
+      height: 3rem;
+      margin: 0 1rem 1rem 0;
+    }
+
+    .taskbar {
+      position: absolute;
+      bottom: 0;
+      width: 100%;
+      padding: 0.5rem;
+      background: teal;
+      display: flex;
+    }
+    .tasks {
+      display: flex;
+      margin: 0;
+      padding: 0;
+      list-style: none;
+    }
+    .task {
+      margin: 0 0.4rem 0 0;
+      padding: 0.5rem;
+    }
+    .task.closed {
+      display: none;
+    }
+    .start {
+      margin: 0 0.4rem 0 0;
+      padding: 0.5rem;
+    }
+
+    .window {
+      position: absolute;
+      width: 700px;
+      padding: 0;
+      border: 0.3rem solid #333;
+      background: #fff;
+      color: #000;
+    }
+    .window.closed {
+      display: none;
+    }
+    .window-header {
+      display: flex;
+      margin: 0;
+      padding: 0.5rem;
+      cursor: move;
+      background: #d95763;
+      color: #333;
+    }
+    .window-title {
+      flex: 1;
+      margin: 0;
+      padding: 0;
+      font-weight: 500;
+    }
+    .window-body {
+      padding: 0.5rem;
+    }
+    .window-button {
+      padding: 0.5rem 0.9rem;
+      border: 0;
+    }
+  </style>
+</head>
+
+<body class="desktop">
+
+  <aside class="shortcuts">
+    <ul class="shortcuts-group">
+      <li><a class="shortcut" href="/worldmap" data-window="0">Worldmap</a></li>
+      <li><a class="shortcut" href="/cv" data-window="1">Résumé</a></li>
+      <li><a class="shortcut" href="/web" data-window="2">Web projects</a></li>
+      <li><a class="shortcut" href="/games" data-window="3">My games</a></li>
+    </ul>
+  </aside>
+
+  <aside class="taskbar">
+    <button class="start">START</button>
+    <ul class="tasks">
+      <li><button class="task closed" href="/worldmap" data-window="0">Worldmap</button></li>
+      <li><button class="task closed" href="/cv" data-window="1">Résumé</button></li>
+      <li><button class="task closed" href="/web" data-window="2">Web projects</button></li>
+      <li><button class="task closed" href="/games" data-window="3">My games</button></li>
+    </ul>
+    <div id="debug"></div>
+  </aside>
+
+  <section class="window closed">
+    <header class="window-header">
+      <h2 class="window-title">Worldmap</h2>
+      <button class="window-button minimize">-</button>
+      <button class="window-button close">✖</button>
+    </header>
+    <main class="window-body">
+      <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sunt nemo animi ea rerum quam et rem earum eius, eos voluptatibus. Provident iusto animi expedita ipsam commodi beatae. Laboriosam, quae sapiente?</p>
+    </main>
+  </section>
+  <section class="window closed">
+    <header class="window-header">
+      <h2 class="window-title">Résumé</h2>
+      <button class="window-button minimize">-</button>
+      <button class="window-button close">✖</button>
+    </header>
+    <main class="window-body">
+      <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sunt nemo animi ea rerum quam et rem earum eius, eos voluptatibus. Provident iusto animi expedita ipsam commodi beatae. Laboriosam, quae sapiente?</p>
+    </main>
+  </section>
+  <section class="window closed">
+    <header class="window-header">
+      <h2 class="window-title">Web projects</h2>
+      <button class="window-button minimize">-</button>
+      <button class="window-button close">✖</button>
+    </header>
+    <main class="window-body">
+      <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sunt nemo animi ea rerum quam et rem earum eius, eos voluptatibus. Provident iusto animi expedita ipsam commodi beatae. Laboriosam, quae sapiente?</p>
+    </main>
+  </section>
+  <section class="window closed">
+    <header class="window-header">
+      <h2 class="window-title">My games</h2>
+      <button class="window-button minimize">-</button>
+      <button class="window-button close">✖</button>
+    </header>
+    <main class="window-body">
+      <p>Lorem ipsum, dolor sit amet consectetur adipisicing elit. Sunt nemo animi ea rerum quam et rem earum eius, eos voluptatibus. Provident iusto animi expedita ipsam commodi beatae. Laboriosam, quae sapiente?</p>
+    </main>
+  </section>
+
+  <script>
+    const empty_image = new Image();
+
+    const window_positions = [
+      { x: 100, y: 50+0*250 },
+      { x: 100, y: 50+1*250 },
+      { x: 100, y: 50+2*250 },
+      { x: 100, y: 50+3*250 },
+    ];
+    const window_elements = Array.from(document.querySelectorAll(".window"));
+    const windows = [];
+    for (let window_id = 0; window_id < window_elements.length; window_id += 1) {
+      const window_element = window_elements[window_id];
+      const header_element = window_element.querySelector(".window-header");
+      const minimize_element = window_element.querySelector(".window-button.minimize");
+      const close_element = window_element.querySelector(".window-button.close");
+      console.assert(header_element, "Header not found in", window_element);
+
+      const window = {
+        root: window_element,
+        header: header_element,
+        minimize: minimize_element,
+        close: close_element,
+        drag_last_x: 0,
+        drag_last_y: 0,
+        drag_start_x: 0,
+        drag_start_y: 0,
+        drag_started: false,
+        dragging: false,
+      };
+      windows.push(window);
+
+      window.root.style.left = `${window_positions[window_id].x}px`;
+      window.root.style.top  = `${window_positions[window_id].y}px`;
+      window.header.addEventListener("mousedown", window_header_on_mousedown.bind(this, window_id));
+      window.close.addEventListener("click", window_close_on_click.bind(this, window_id));
+    }
+
+    const shortcut_elements = Array.from(document.querySelectorAll(".shortcut"));
+    const shortcuts = [];
+    for (let shortcut_id = 0; shortcut_id < shortcut_elements.length; shortcut_id += 1) {
+      const shortcut_element = shortcut_elements[shortcut_id];
+      const window_id = Number(shortcut_element.getAttribute("data-window"));
+      console.assert(Number.isInteger(window_id), "Invalid window_id.");
+      console.assert(windows[window_id], `Window not found for id: ${window_id}.`);
+      const shortcut = {
+        root: shortcut_element,
+        window_id: window_id,
+      };
+      shortcuts.push(shortcut);
+
+      shortcut.root.addEventListener("click", shortcut_on_click.bind(this, shortcut_id));
+    }
+
+    const task_elements = Array.from(document.querySelectorAll(".task"));
+    const tasks = [];
+    for (let task_id = 0; task_id < task_elements.length; task_id += 1) {
+      const task_element = task_elements[task_id];
+      const window_id = Number(task_element.getAttribute("data-window"));
+      console.assert(Number.isInteger(window_id), "Invalid window_id.");
+      console.assert(windows[window_id], `Window not found for id: ${window_id}.`);
+      const task = {
+        root: task_element,
+        window_id: window_id,
+      };
+      tasks.push(task);
+
+      task.root.addEventListener("click", task_on_click.bind(this, task_id));
+    }
+
+    // setInterval(() => {
+    //   document.querySelector("#debug").innerHTML = `mouse: ${mouse_x} x ${mouse_y}`;
+    // }, 100);
+
+    document.addEventListener("mouseup", document_on_mouseup);
+    document.addEventListener("mousemove", document_on_mousemove);
+
+    function document_on_mousemove(event) {
+      for (let window_id = 0; window_id < windows.length; window_id += 1) {
+        const window = windows[window_id];
+        if (window.dragging) {
+          if (!window.drag_started) {
+            window.drag_started = true;
+          }
+
+          window.drag_last_x = event.clientX + window.drag_start_x;
+          window.drag_last_y = event.clientY + window.drag_start_y;
+          // FIXME: bounds checking
+
+          window.root.style.left = `${window.drag_last_x}px`;
+          window.root.style.top  = `${window.drag_last_y}px`;
+        }
+      }
+    }
+    function document_on_mouseup(event) {
+      console.log("end");
+      for (let window_id = 0; window_id < windows.length; window_id += 1) {
+        const window = windows[window_id];
+        window.dragging = false;
+        window.drag_started = false;
+      }
+    }
+
+    function window_header_on_mousedown(window_id, event) {
+      event.stopPropagation();
+      event.preventDefault();
+
+      const window = windows[window_id];
+      window.dragging = true;
+      window.drag_start_x = window.root.offsetLeft - event.clientX;
+      window.drag_start_y = window.root.offsetTop - event.clientY;
+    }
+    function window_close_on_click(window_id, event) {
+      event.preventDefault();
+      window_close(window_id);
+    }
+    function window_close(window_id) {
+      const task = tasks.find((t) => t.window_id === window_id);
+      task.root.classList.toggle("closed", true);
+
+      const window = windows[window_id];
+      window.root.classList.toggle("closed", true);
+    }
+    function window_open(window_id) {
+      const task = tasks.find((t) => t.window_id === window_id);
+      task.root.classList.toggle("closed", false);
+
+      const window = windows[window_id];
+      window.root.classList.toggle("closed", false);
+    }
+
+    function shortcut_on_click(shortcut_id, event) {
+      event.preventDefault();
+      const shortcut = shortcuts[shortcut_id];
+      window_open(shortcut.window_id);
+    }
+
+    function task_on_click(task_id, event) {
+      const task = tasks[task_id];
+      window_open(task.window_id);
+    }
+  </script>
+</body>
+
+</html>
