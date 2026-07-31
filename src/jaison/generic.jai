@@ -97,7 +97,7 @@ print_val :: (using val: JSON_Value) {
 			for array	print_val(it);
 			print("]");
 		case .OBJECT;
-			print("%", (.*)object);
+			print("%", object.*);
 	}
 }
 
@@ -185,7 +185,7 @@ json_write_json_value :: (builder: *String_Builder, using val: JSON_Value, inden
 			keys: [..] string;
 			defer array_free(keys);
 			array_reserve(*keys, obj.count);
-			for v, k: (.*)obj {
+			for v, k: obj.* {
 				array_add(*keys, k);
 			}
 			intro_sort(keys, compare);
@@ -261,10 +261,10 @@ get_as :: (val: JSON_Value, $T: Type) -> T {
 		} else if T == JSON_Object {
 			return #string END
 				assert(val.type == .OBJECT, "Expected a % but got %", T, val.type);
-				return (.*)val.object;
+				return val.object.*;
 			END;
 		} else {
-			compiler_report("Unsupported type");
+            assert(false, "Unsupported type");
 			return "";
 		}
 	}();
@@ -302,7 +302,7 @@ parse_value :: (to_parse: string) -> JSON_Value, remainder: string, success: boo
 			result.array, remainder, success = parse_array(remainder);
 		case #char "{";
 			obj := cast(*JSON_Object) alloc(size_of(JSON_Object));
-			(.*)obj, remainder, success = parse_object(remainder);
+			obj.*, remainder, success = parse_object(remainder);
 			result = json_value(obj);
 		case;
 			result.type = JSON_Type.NUMBER;
@@ -355,7 +355,8 @@ parse_object :: (str: string) -> result: JSON_Object, remainder: string, success
 		return result, remainder, true;
 	}
 
-	init(*result, 32);
+
+	table_resize(*result, 32);
 	while true {
 		if remainder[0] != #char "\""	return result, remainder, false;
 
