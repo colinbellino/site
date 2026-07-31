@@ -13,7 +13,7 @@ This is the source code for my personal site, portfolio and experiments: https:/
 
 ## Compile the site
 - Compile in debug and start server: `jai first.jai` ([language](https://www.youtube.com/playlist?list=PLmV5I2fxaiCKfxMBrNsU1kgKJXD3PkyxO) still in private beta)
-- Compile in release mode and deploy: `jai first.jai - -release -no-server && netlify deploy --dir public`
+- Compile in release mode and deploy: `jai first.jai - -release -no_server && netlify deploy --dir public`
 
 ## Create server binary
 - `jai first.jai - -release -build` (not required, but useful for other people on the team who don't have access to the beta)
