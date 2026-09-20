@@ -18,6 +18,7 @@
       --main-color-hover: rgba(76, 95, 208, 1);
       --background-color: rgba(255, 255, 255, 1);
       --text-color: rgba(0, 0, 0, 0.85);
+      --ui-pixel-scale: 2;
     }
 
     html, body {
@@ -91,34 +92,41 @@
     os-window {
       position: absolute;
       width: 700px;
-      padding: 0;
-      border: 0.3rem solid #333;
-      background: #fff;
+
+      image-rendering: pixelated;
       color: #000;
+      border-style: solid;
+      border-width: calc(4px * var(--ui-pixel-scale));
+      border-image-source: url("/os/ui_nine_slice_shortcut.png");
+      border-image-slice: 4 fill;
+      border-image-repeat: round;
     }
     os-window.closed {
       display: none;
     }
     os-window .window-header {
       display: flex;
+      border: 0;
       margin: 0;
-      padding: 0.5rem;
+      padding: calc(2px * var(--ui-pixel-scale));
       cursor: move;
-      background: #d95763;
+      background: #808080;
       color: #333;
     }
     os-window .window-title {
       flex: 1;
       margin: 0;
-      padding: 0;
+      padding: 0 calc(2px * var(--ui-pixel-scale));
       font-weight: 500;
     }
     os-window .window-body {
-      padding: 0.5rem;
+      padding: calc(2px * var(--ui-pixel-scale));
     }
     os-window .window-button {
-      padding: 0.5rem 0.9rem;
+      display: inline-block;
+      width: calc(16px * var(--ui-pixel-scale));
       border: 0;
+      margin-left: calc(2px * var(--ui-pixel-scale));
     }
   </style>
 </head>
