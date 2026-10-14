@@ -19,5 +19,5 @@ This is the source code for my personal site, portfolio and experiments: https:/
 - `jai first.jai - -release -build` (not required, but useful for other people on the team who don't have access to the beta)
 
 ## Compile release & deploy
-- `./server.exe -release -no-server`
+- `./server.exe -release -no_server`
 - `netlify deploy --dir public/ --prod`
